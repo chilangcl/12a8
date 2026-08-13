@@ -41,12 +41,49 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 .multi-year-badge{font-size:12px;padding:3px 8px;border-radius:999px;background:#eef2ff}
 </style>
 
+
+<style id="bibi-sidebar-auto-hide">
+/* Bi Bi v2: sidebar tự ẩn sau khi chọn trình đơn */
+.sidebar{
+  transition:transform .22s ease, box-shadow .22s ease;
+}
+.sidebar.menu-hidden{
+  transform:translateX(-100%);
+  box-shadow:none;
+}
+.main{
+  transition:margin-left .22s ease;
+}
+.main.sidebar-hidden{
+  margin-left:0;
+}
+.menu-toggle{
+  display:inline-flex !important;
+  align-items:center;
+  justify-content:center;
+  border:0;
+  background:#e2e8f0;
+  color:#0f172a;
+  border-radius:9px;
+  padding:8px 11px;
+  min-width:42px;
+}
+.menu-toggle:hover{background:#cbd5e1}
+@media(max-width:680px){
+  .sidebar{transform:translateX(-100%);transition:transform .22s ease;width:250px}
+  .sidebar.open{transform:none}
+  .sidebar.menu-hidden{transform:translateX(-100%)}
+  .main{margin-left:0}
+  .main.sidebar-hidden{margin-left:0}
+}
+</style>
+
 </head>
 <body>
 
 <div id="loginScreen" class="login">
   <div class="login-card">
-    <div class="logo">NVH</div>
+    <div class="logo">12A8</div>
     <h1>Quản lý lớp 12A8</h1>
     <div class="sub">Năm học 2026–2027 · GVCN: Nguyễn Văn Hoàng</div>
     <div id="cloudNotice" class="notice" style="margin-bottom:14px;background:#f8fafc;border-color:#cbd5e1;color:#334155">
@@ -305,14 +342,33 @@ function visibleStudents(){
  return a;
 }
 function logout(){return window._cloudLogout ? window._cloudLogout() : (async()=>{currentUser=null;document.getElementById('app').classList.add('hidden');document.getElementById('loginScreen').classList.remove('hidden');document.getElementById('loginPass').value=''})()}
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+function setSidebarHidden(hidden){
+ const sidebar=document.getElementById('sidebar');
+ const main=document.querySelector('.main');
+ if(!sidebar||!main)return;
+ if(window.innerWidth<=680){
+   sidebar.classList.toggle('open',!hidden);
+   sidebar.classList.toggle('menu-hidden',hidden);
+   main.classList.remove('sidebar-hidden');
+ }else{
+   sidebar.classList.toggle('menu-hidden',hidden);
+   main.classList.toggle('sidebar-hidden',hidden);
+ }
+}
+function toggleSidebar(){
+ const sidebar=document.getElementById('sidebar');
+ if(!sidebar)return;
+ const hidden=window.innerWidth<=680 ? !sidebar.classList.contains('open') : sidebar.classList.contains('menu-hidden');
+ setSidebarHidden(!hidden);
+}
 const titles={dashboard:'Dashboard',students:'Học sinh',attendance:'Chuyên cần',learning:'Học tập',conduct:'Rèn luyện',competition:'Thi đua',reports:'Báo cáo tổng hợp',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
 function showPage(name){
  if(['excel','users'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');
  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===name));
  document.getElementById('pageTitle').textContent=titles[name]||name;
- if(window.innerWidth<680)document.getElementById('sidebar').classList.remove('open');
+ /* Sau khi chọn một mục, tự ẩn trình đơn trên cả máy tính và điện thoại */
+ setSidebarHidden(true);
  if(name==='dashboard')renderDashboard();if(name==='students')renderStudents();if(name==='attendance')renderAttendance();if(name==='learning')renderLearning();if(name==='conduct')renderConduct();if(name==='competition')renderCompetition();if(name==='reports')renderReports();if(name==='profile')renderProfileSelectors();if(name==='users')renderUsers();
 }
 function renderAll(){renderDashboard();renderStudents();renderAttendance();renderLearning();renderConduct();renderCompetition();renderReports();renderProfileSelectors();renderUsers();}
@@ -657,6 +713,37 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
     }
     myRenderClasses();
   });
+})();
+</script>
+
+
+<script id="bibi-sidebar-init">
+(function(){
+  function initSidebar(){
+    const sidebar=document.getElementById('sidebar');
+    const main=document.querySelector('.main');
+    if(!sidebar||!main)return;
+    if(window.innerWidth>680){
+      sidebar.classList.remove('menu-hidden');
+      main.classList.remove('sidebar-hidden');
+    }else{
+      sidebar.classList.remove('open');
+      sidebar.classList.remove('menu-hidden');
+      main.classList.remove('sidebar-hidden');
+    }
+  }
+  window.addEventListener('resize', function(){
+    const sidebar=document.getElementById('sidebar');
+    const main=document.querySelector('.main');
+    if(!sidebar||!main)return;
+    if(window.innerWidth>680){
+      sidebar.classList.toggle('menu-hidden', false);
+      main.classList.toggle('sidebar-hidden', false);
+    }else{
+      main.classList.remove('sidebar-hidden');
+    }
+  });
+  window.addEventListener('DOMContentLoaded', initSidebar);
 })();
 </script>
 
