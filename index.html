@@ -215,27 +215,45 @@ function saveData(){saveLocal()}
 function roleCanEdit(){return ['admin','loptruong','loppho','to1','to2','to3','to4'].includes(currentUser?.role)}
 function isAdmin(){return currentUser?.role==='admin'}
 function normalizeRole(r){return r||'loppho'}
+function setLoginStatus(message, type='info'){
+  const el=document.getElementById('cloudNotice');
+  if(!el) return;
+  el.textContent=message;
+  el.className='notice '+(type==='ok'?'ok':'');
+}
 async function login(){
   const u=document.getElementById('loginUser').value.trim();
   const p=document.getElementById('loginPass').value;
-  if(!u||!p){alert('Vui lòng nhập tài khoản và mật khẩu.');return}
-  // Username is converted to a private Auth email alias. Password is never stored in the app.
+  if(!u||!p){setLoginStatus('⚠️ Vui lòng nhập tài khoản và mật khẩu.');return}
+  if(!SUPABASE_URL || SUPABASE_URL.includes('YOUR_') || !SUPABASE_KEY || SUPABASE_KEY.includes('YOUR_')){
+    setLoginStatus('❌ Chưa cấu hình Supabase trong index.html.');
+    return;
+  }
   const email = u.includes('@') ? u : `${u}@12a8.local`;
-  const {data,error}=await sb.auth.signInWithPassword({email,password:p});
-  if(error){alert('Đăng nhập thất bại: '+error.message);return}
-  await loadCloudUser(data.user);
-  document.getElementById('loginScreen').classList.add('hidden');
-  document.getElementById('app').classList.remove('hidden');
-  document.getElementById('userName').textContent=currentUser.name||u;
-  document.getElementById('userRole').textContent=(currentUser.roleLabel||currentUser.role)+' · '+(currentUser.scope||'');
-  document.getElementById('avatar').textContent=(currentUser.name||u).charAt(0).toUpperCase();
-  document.querySelectorAll('.admin-only').forEach(x=>x.classList.toggle('hidden',!isAdmin()));
-  document.getElementById('attDate').value=today();document.getElementById('cDate').value=today();
-  renderAll();
+  setLoginStatus('⏳ Đang kiểm tra tài khoản...');
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email,password:p});
+    if(error){
+      setLoginStatus('❌ Đăng nhập thất bại: '+error.message);
+      return;
+    }
+    await loadCloudUser(data.user);
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    document.getElementById('userName').textContent=currentUser.name||u;
+    document.getElementById('userRole').textContent=(currentUser.roleLabel||currentUser.role)+' · '+(currentUser.scope||'');
+    document.getElementById('avatar').textContent=(currentUser.name||u).charAt(0).toUpperCase();
+    document.querySelectorAll('.admin-only').forEach(x=>x.classList.toggle('hidden',!isAdmin()));
+    document.getElementById('attDate').value=today();document.getElementById('cDate').value=today();
+    renderAll();
+  }catch(e){
+    console.error(e);
+    setLoginStatus('❌ Lỗi kết nối: '+(e?.message||String(e)));
+  }
 }
 async function loadCloudUser(user){
   let {data:p,error}=await sb.from('profiles').select('*').eq('id',user.id).single();
-  if(error||!p){alert('Tài khoản chưa được cấp quyền cho lớp 12A8.');await sb.auth.signOut();throw error||new Error('No profile')}
+  if(error||!p){await sb.auth.signOut(); throw new Error('Tài khoản đã đăng nhập nhưng chưa có hồ sơ trong bảng profiles của lớp 12A8. Hãy chạy phần INSERT/UPDATE profiles trong supabase_schema.sql.')}
   currentUser={...p};
   await loadCloudState();
 }
