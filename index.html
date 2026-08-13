@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản lý lớp 12A8 - 2026-2027</title>
+<style>
+:root{--primary:#2563eb;--primary2:#1d4ed8;--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--danger:#dc2626;--success:#16a34a;--warning:#d97706;--border:#e2e8f0}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.hidden{display:none!important}.app{min-height:100vh}.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:linear-gradient(135deg,#dbeafe,#eff6ff 45%,#e0e7ff)}
+.login-card{width:min(440px,100%);background:white;border-radius:24px;padding:30px;box-shadow:0 20px 60px #0f172a22}.logo{width:64px;height:64px;border-radius:18px;background:var(--primary);color:white;display:grid;place-items:center;font-size:25px;font-weight:800;margin-bottom:18px}.login h1{margin:0 0 6px}.sub{color:var(--muted);margin-bottom:24px}
+.field{margin:12px 0}.field label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}.field input,.field select,.field textarea{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:white;outline:none}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px #2563eb18}
+.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--primary);color:#fff;font-weight:700}.btn:hover{background:var(--primary2)}.btn.secondary{background:#e2e8f0;color:#0f172a}.btn.success{background:var(--success)}.btn.danger{background:var(--danger)}.btn.warning{background:var(--warning)}.btn.small{padding:7px 10px;font-size:12px}
+.demo{background:#eff6ff;border:1px solid #bfdbfe;padding:12px;border-radius:10px;font-size:13px;color:#1e40af}
+.layout{display:flex;min-height:100vh}.sidebar{width:250px;background:#0f172a;color:white;padding:18px;position:fixed;inset:0 auto 0 0;z-index:5;overflow:auto}.brand{font-size:18px;font-weight:800;margin:6px 8px 20px}.brand small{display:block;color:#94a3b8;font-weight:500;margin-top:4px}.nav button{width:100%;text-align:left;background:transparent;border:0;color:#cbd5e1;padding:11px 12px;border-radius:9px;margin:2px 0}.nav button:hover,.nav button.active{background:#1e293b;color:white}.nav-title{font-size:11px;text-transform:uppercase;color:#64748b;margin:18px 8px 6px;font-weight:800}
+.main{margin-left:250px;flex:1}.topbar{height:68px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:4}.topbar .title{font-weight:800}.userbox{display:flex;align-items:center;gap:10px}.avatar{width:36px;height:36px;border-radius:50%;background:#dbeafe;color:#1d4ed8;display:grid;place-items:center;font-weight:800}.content{padding:24px;max-width:1500px;margin:auto}.page{display:none}.page.active{display:block}.page-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.page-head h2{margin:0}.muted{color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}
+.grid{display:grid;gap:16px}.cards{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 3px 12px #0f172a08}.stat .label{font-size:13px;color:var(--muted)}.stat .value{font-size:28px;font-weight:800;margin-top:6px}.stat .hint{font-size:12px;color:var(--muted);margin-top:5px}.two{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.table-wrap{overflow:auto;background:white;border:1px solid var(--border);border-radius:14px}.table{width:100%;border-collapse:collapse;min-width:850px}.table th,.table td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px;text-align:left}.table th{background:#f8fafc;position:sticky;top:0;z-index:1}.table tr:hover td{background:#f8fafc}.badge{display:inline-flex;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800}.b-blue{background:#dbeafe;color:#1d4ed8}.b-green{background:#dcfce7;color:#166534}.b-red{background:#fee2e2;color:#991b1b}.b-yellow{background:#fef3c7;color:#92400e}.b-gray{background:#e2e8f0;color:#475569}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.toolbar input,.toolbar select{padding:9px 10px;border:1px solid var(--border);border-radius:9px;background:#fff}
+.notice{padding:12px 14px;border-radius:10px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;margin-bottom:14px}.ok{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+.modal{position:fixed;inset:0;background:#0f172a88;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.show{display:flex}.modal-card{width:min(720px,100%);max-height:90vh;overflow:auto;background:white;border-radius:18px;padding:22px}.modal-head{display:flex;justify-content:space-between;align-items:center}.modal-head h3{margin:0}.x{border:0;background:#f1f5f9;border-radius:50%;width:34px;height:34px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.span2{grid-column:1/-1}.footer-note{font-size:12px;color:var(--muted);margin-top:18px}
+.progress{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden}.progress span{display:block;height:100%;background:var(--primary)}
+.kpi-list{display:grid;gap:10px}.kpi-row{display:flex;justify-content:space-between;align-items:center}.kpi-row strong{font-size:13px}.mini{font-size:12px;color:var(--muted)}
+@media(max-width:850px){.sidebar{width:210px}.main{margin-left:210px}.topbar{padding:0 14px}.content{padding:14px}}
+@media(max-width:680px){.sidebar{position:fixed;transform:translateX(-100%);transition:.2s;width:250px}.sidebar.open{transform:none}.main{margin-left:0}.menu-toggle{display:inline-flex!important}.form-grid{grid-template-columns:1fr}.span2{grid-column:auto}.topbar{gap:8px}.topbar .title{font-size:13px}}
+.menu-toggle{display:none;border:0;background:#e2e8f0;border-radius:9px;padding:8px}
+.empty{text-align:center;padding:35px;color:var(--muted)}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="loginScreen" class="login">
+  <div class="login-card">
+    <div class="logo">12A8</div>
+    <h1>Quản lý lớp 12A8</h1>
+    <div class="sub">Năm học 2026–2027 · GVCN: Nguyễn Văn Hoàng</div>
+    <div id="cloudNotice" class="notice" style="margin-bottom:14px;background:#f8fafc;border-color:#cbd5e1;color:#334155">
+      ☁️ Chế độ online: kết nối cơ sở dữ liệu Supabase.
+    </div>
+    <div class="field"><label>Tài khoản</label><input id="loginUser" placeholder="Nhập tài khoản"></div>
+    <div class="field"><label>Mật khẩu</label><input id="loginPass" type="password" placeholder="Nhập mật khẩu"></div>
+    <button class="btn" style="width:100%;margin-top:6px" onclick="login()">Đăng nhập</button>
+    <div class="footer-note">Bản online: dữ liệu chính lưu trên Supabase; trình duyệt chỉ giữ bản tạm để tăng tốc.</div>
+  </div>
+</div>
+
+<div id="app" class="app hidden">
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">📘 12A8 <small>2026–2027</small></div>
+    <div class="nav">
+      <div class="nav-title">Tổng quan</div>
+      <button data-page="dashboard" onclick="showPage('dashboard')">🏠 Dashboard</button>
+      <button data-page="students" onclick="showPage('students')">👨‍🎓 Học sinh</button>
+      <button data-page="attendance" onclick="showPage('attendance')">📅 Chuyên cần</button>
+      <button data-page="learning" onclick="showPage('learning')">📚 Học tập</button>
+      <button data-page="conduct" onclick="showPage('conduct')">⭐ Rèn luyện</button>
+      <button data-page="competition" onclick="showPage('competition')">🏆 Thi đua</button>
+      <div class="nav-title">Báo cáo</div>
+      <button data-page="reports" onclick="showPage('reports')">📊 Báo cáo tổng hợp</button>
+      <button data-page="profile" onclick="showPage('profile')">👤 Hồ sơ học sinh</button>
+      <div class="nav-title admin-only">Dữ liệu & hệ thống</div>
+      <button class="admin-only" data-page="excel" onclick="showPage('excel')">📥 Excel / Sao lưu</button>
+      <button class="admin-only" data-page="users" onclick="showPage('users')">🔐 Tài khoản & phân quyền</button>
+      <button data-page="settings" onclick="showPage('settings')">⚙️ Cài đặt</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="title" id="pageTitle">Dashboard</div>
+      </div>
+      <div class="userbox">
+        <div>
+          <div id="userName" style="font-weight:700;font-size:13px">Nguyễn Văn Hoàng</div>
+          <div id="userRole" class="mini">GVCN / Admin</div>
+        </div>
+        <div class="avatar" id="avatar">H</div>
+        <button class="btn secondary small" onclick="logout()">Thoát</button>
+      </div>
+    </header>
+    <div class="content">
+
+      <section id="page-dashboard" class="page active">
+        <div class="page-head"><div><h2>Tổng quan lớp 12A8</h2><div class="muted">GVCN: Nguyễn Văn Hoàng · Năm học 2026–2027</div></div><div class="actions"><button class="btn" onclick="showPage('attendance')">+ Điểm danh hôm nay</button><button class="btn secondary" onclick="refreshCloud()">☁️ Đồng bộ</button></div></div>
+        <div class="grid cards" id="dashboardStats"></div>
+        <div class="grid two" style="margin-top:16px">
+          <div class="card"><h3>📅 Chuyên cần tháng này</h3><div id="attendanceSummary"></div></div>
+          <div class="card"><h3>⭐ Rèn luyện</h3><div id="conductSummary"></div></div>
+          <div class="card"><h3>📚 Học tập</h3><div id="learningSummary"></div></div>
+          <div class="card"><h3>🔔 Hoạt động gần đây</h3><div id="recentActivity"></div></div>
+        </div>
+      </section>
+
+      <section id="page-students" class="page">
+        <div class="page-head"><div><h2>Danh sách học sinh</h2><div class="muted">Quản lý hồ sơ học sinh lớp 12A8</div></div><div class="actions"><button class="btn" onclick="openStudent()">+ Thêm học sinh</button><button class="btn secondary admin-only" onclick="showPage('excel')">📥 Nhập Excel</button></div></div>
+        <div class="toolbar"><input id="studentSearch" placeholder="🔎 Tìm theo mã, họ tên..." oninput="renderStudents()"><select id="studentGroup" onchange="renderStudents()"><option value="">Tất cả tổ</option><option>1</option><option>2</option><option>3</option><option>4</option></select><select id="studentGender" onchange="renderStudents()"><option value="">Tất cả giới tính</option><option>Nam</option><option>Nữ</option></select></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Mã HS</th><th>Họ và tên</th><th>Ngày sinh</th><th>GT</th><th>Tổ</th><th>Chức vụ</th><th>SĐT PH</th><th>Thao tác</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
+      </section>
+
+      <section id="page-attendance" class="page">
+        <div class="page-head"><div><h2>Chuyên cần</h2><div class="muted">Theo dõi hằng ngày và tự động tổng hợp</div></div><button class="btn" onclick="saveAttendance()">💾 Lưu điểm danh</button></div>
+        <div class="toolbar"><label style="display:flex;align-items:center;gap:6px">Ngày <input type="date" id="attDate" onchange="renderAttendance()"></label><select id="attStatusFilter" onchange="renderAttendance()"><option value="">Tất cả</option><option value="present">Có mặt</option><option value="late">Đi muộn</option><option value="excused">Nghỉ phép</option><option value="absent">Nghỉ không phép</option></select></div>
+        <div class="notice">Chọn trạng thái cho từng học sinh. Dữ liệu được lưu theo từng ngày và dùng cho báo cáo tuần/tháng/HKI/HKII/cả năm.</div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Mã HS</th><th>Họ tên</th><th>Tổ</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead><tbody id="attendanceBody"></tbody></table></div>
+      </section>
+
+      <section id="page-learning" class="page">
+        <div class="page-head"><div><h2>Học tập</h2><div class="muted">Nhập điểm và theo dõi tiến bộ</div></div><button class="btn" onclick="saveLearning()">💾 Lưu điểm</button></div>
+        <div class="toolbar"><select id="scoreTerm" onchange="renderLearning()"><option value="HKI">Học kỳ I</option><option value="HKII">Học kỳ II</option><option value="CA_NAM">Cả năm</option></select><input id="scoreSearch" placeholder="🔎 Tìm học sinh..." oninput="renderLearning()"></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Mã HS</th><th>Họ tên</th><th>TX1</th><th>TX2</th><th>TX3</th><th>Giữa kỳ</th><th>Cuối kỳ</th><th>TB</th></tr></thead><tbody id="learningBody"></tbody></table></div>
+      </section>
+
+      <section id="page-conduct" class="page">
+        <div class="page-head"><div><h2>Rèn luyện</h2><div class="muted">Điểm cộng, điểm trừ, thành tích và vi phạm</div></div><button class="btn" onclick="openConduct()">+ Ghi nhận</button></div>
+        <div class="toolbar"><input id="conductSearch" placeholder="🔎 Tìm kiếm..." oninput="renderConduct()"><select id="conductStatus" onchange="renderConduct()"><option value="">Tất cả</option><option value="approved">Đã duyệt</option><option value="pending">Chờ duyệt</option></select></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Ngày</th><th>Học sinh</th><th>Loại</th><th>Nội dung</th><th>Điểm</th><th>Người nhập</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="conductBody"></tbody></table></div>
+      </section>
+
+      <section id="page-competition" class="page">
+        <div class="page-head"><div><h2>Thi đua</h2><div class="muted">Tổng hợp điểm rèn luyện và chuyên cần theo học sinh</div></div></div>
+        <div class="toolbar"><select id="compPeriod" onchange="renderCompetition()"><option value="week">Tuần</option><option value="month">Tháng</option><option value="hki">HKI</option><option value="hkii">HKII</option><option value="year">Cả năm</option></select></div>
+        <div class="grid two"><div class="card"><h3>🥇 Xếp hạng học sinh</h3><div id="ranking"></div></div><div class="card"><h3>👥 Xếp hạng tổ</h3><div id="groupRanking"></div></div></div>
+      </section>
+
+      <section id="page-reports" class="page">
+        <div class="page-head"><div><h2>Báo cáo tổng hợp</h2><div class="muted">Ngày → Tuần → Tháng → HKI → HKII → Cả năm</div></div><div class="actions"><button class="btn" onclick="window.print()">🖨 In / PDF</button><button class="btn secondary" onclick="exportBackup()">💾 Sao lưu JSON</button></div></div>
+        <div class="grid cards" id="reportCards"></div>
+        <div class="card" style="margin-top:16px"><h3>📈 Tổng hợp theo học sinh</h3><div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Học sinh</th><th>Có mặt</th><th>Nghỉ phép</th><th>Nghỉ KP</th><th>Đi muộn</th><th>Điểm RL</th><th>TB học tập</th></tr></thead><tbody id="reportBody"></tbody></table></div></div>
+      </section>
+
+      <section id="page-profile" class="page">
+        <div class="page-head"><div><h2>Hồ sơ học sinh</h2><div class="muted">Xem lịch sử học tập, chuyên cần và rèn luyện</div></div></div>
+        <div class="toolbar"><select id="profileStudent" onchange="renderProfile()"><option value="">-- Chọn học sinh --</option></select></div>
+        <div id="profileContent" class="card"><div class="empty">Chọn một học sinh để xem hồ sơ.</div></div>
+      </section>
+
+      <section id="page-excel" class="page">
+        <div class="page-head"><div><h2>Excel / Sao lưu dữ liệu</h2><div class="muted">Excel là đầu vào ban đầu; hoạt động hằng ngày nhập trực tiếp trên web.</div></div></div>
+        <div class="grid two">
+          <div class="card"><h3>📥 Nhập danh sách từ Excel</h3><p class="muted">File Excel có thể có các cột: Mã HS, Họ và tên, Ngày sinh, Giới tính, Dân tộc, Địa chỉ, SĐT học sinh, Email, Họ tên phụ huynh, SĐT phụ huynh, Tổ, Chức vụ.</p><button class="btn" onclick="downloadTemplate()">⬇ Tải Excel mẫu</button><label class="btn secondary" style="display:inline-block;margin-left:6px">📤 Chọn Excel <input id="excelFile" type="file" accept=".xlsx,.xls,.csv" hidden onchange="importExcel(event)"></label><div id="importResult" class="footer-note"></div></div>
+          <div class="card"><h3>💾 Sao lưu / Khôi phục</h3><p class="muted">Nên sao lưu ít nhất mỗi tuần. File JSON chứa dữ liệu ứng dụng trên thiết bị này.</p><button class="btn" onclick="exportBackup()">⬇ Sao lưu dữ liệu</button><label class="btn secondary" style="display:inline-block;margin-left:6px">📂 Khôi phục <input id="backupFile" type="file" accept=".json" hidden onchange="importBackup(event)"></label><div class="footer-note">Khôi phục sẽ thay thế dữ liệu hiện tại trên trình duyệt.</div></div>
+        </div>
+        <div class="card" style="margin-top:16px"><h3>📤 Xuất danh sách học sinh CSV</h3><button class="btn" onclick="exportStudentsCSV()">Xuất CSV</button></div>
+      </section>
+
+      <section id="page-users" class="page">
+        <div class="page-head"><div><h2>Tài khoản & phân quyền</h2><div class="muted">GVCN/Admin, lớp trưởng, lớp phó và tổ trưởng</div></div></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Tài khoản</th><th>Vai trò</th><th>Phạm vi</th><th>Trạng thái</th></tr></thead><tbody id="usersBody"></tbody></table></div>
+        <div class="notice" style="margin-top:14px">Bản Single HTML dùng tài khoản cục bộ để mô phỏng phân quyền. Khi triển khai đa người dùng thực tế, cần chuyển xác thực và dữ liệu sang backend/database.</div>
+      </section>
+
+      <section id="page-settings" class="page">
+        <div class="page-head"><div><h2>Cài đặt</h2><div class="muted">Thông tin lớp và tiện ích</div></div></div>
+        <div class="card">
+          <div class="form-grid">
+            <div class="field"><label>GVCN</label><input id="setTeacher" value="Nguyễn Văn Hoàng"></div>
+            <div class="field"><label>Lớp</label><input id="setClass" value="12A8"></div>
+            <div class="field"><label>Năm học</label><input id="setYear" value="2026-2027"></div>
+            <div class="field"><label>Số tổ</label><input id="setGroups" type="number" value="4" min="1" max="8"></div>
+          </div>
+          <button class="btn" onclick="saveSettings()">💾 Lưu cài đặt</button>
+        </div>
+        <div class="card" style="margin-top:16px"><h3>⚠️ Xóa toàn bộ dữ liệu</h3><p class="muted">Chỉ dùng khi bắt đầu lại. Hãy sao lưu trước.</p><button class="btn danger" onclick="resetAll()">Xóa toàn bộ dữ liệu</button></div>
+      </section>
+
+    </div>
+  </main>
+</div>
+</div>
+
+<div id="studentModal" class="modal"><div class="modal-card">
+  <div class="modal-head"><h3 id="studentModalTitle">Thêm học sinh</h3><button class="x" onclick="closeModal('studentModal')">×</button></div>
+  <div class="form-grid">
+    <div class="field"><label>Mã HS *</label><input id="sCode"></div><div class="field"><label>Họ và tên *</label><input id="sName"></div>
+    <div class="field"><label>Ngày sinh</label><input id="sDob" type="date"></div><div class="field"><label>Giới tính</label><select id="sGender"><option>Nam</option><option>Nữ</option></select></div>
+    <div class="field"><label>Dân tộc</label><input id="sEthnic"></div><div class="field"><label>Tổ</label><select id="sGroup"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+    <div class="field"><label>SĐT học sinh</label><input id="sPhone"></div><div class="field"><label>Email</label><input id="sEmail"></div>
+    <div class="field"><label>Họ tên phụ huynh</label><input id="sParent"></div><div class="field"><label>SĐT phụ huynh</label><input id="sParentPhone"></div>
+    <div class="field"><label>Chức vụ</label><select id="sRole"><option></option><option>Lớp trưởng</option><option>Lớp phó</option><option>Tổ trưởng</option><option>Tổ phó</option></select></div>
+    <div class="field"><label>Địa chỉ</label><input id="sAddress"></div><div class="field span2"><label>Ghi chú</label><textarea id="sNote" rows="3"></textarea></div>
+  </div>
+  <div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="btn secondary" onclick="closeModal('studentModal')">Hủy</button><button class="btn" onclick="saveStudent()">Lưu</button></div>
+</div></div>
+
+<div id="conductModal" class="modal"><div class="modal-card">
+  <div class="modal-head"><h3>Ghi nhận rèn luyện</h3><button class="x" onclick="closeModal('conductModal')">×</button></div>
+  <div class="form-grid">
+    <div class="field"><label>Ngày</label><input id="cDate" type="date"></div><div class="field"><label>Học sinh</label><select id="cStudent"></select></div>
+    <div class="field"><label>Loại</label><select id="cType"><option>Điểm cộng</option><option>Điểm trừ</option><option>Thành tích</option><option>Vi phạm</option><option>Hoạt động</option></select></div>
+    <div class="field"><label>Điểm</label><input id="cPoints" type="number" step="0.5" value="1"></div>
+    <div class="field span2"><label>Nội dung</label><textarea id="cContent" rows="3" placeholder="Mô tả sự việc..."></textarea></div>
+  </div>
+  <div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="btn secondary" onclick="closeModal('conductModal')">Hủy</button><button class="btn" onclick="saveConduct()">Lưu</button></div>
+</div></div>
+
+<script>
+const KEY='QL12A8_V3_DATA';
+const SUPABASE_URL = 'https://ewbrnzgmivkmddkkolwq.supabase.co/rest/v1/';
+const SUPABASE_KEY = 'sb_publishable_BKIdnIoQQl4sovkFiWWMEQ_82Yp3Im-';
+const { createClient } = window.supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+});
+const CLASS_ID='12A8-2026-2027';
+let USERS=[];
+let state=loadLocalFallback(), currentUser=null, editingStudent=null;
+function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4},students:[],attendance:{},scores:{},conduct:[],activity:[]}}
+function loadLocalFallback(){try{return JSON.parse(localStorage.getItem(KEY))||seed()}catch(e){return seed()}}
+function saveLocal(){localStorage.setItem(KEY,JSON.stringify(state))}
+function saveData(){saveLocal()}
+function roleCanEdit(){return ['admin','loptruong','loppho','to1','to2','to3','to4'].includes(currentUser?.role)}
+function isAdmin(){return currentUser?.role==='admin'}
+function normalizeRole(r){return r||'loppho'}
+async function login(){
+  const u=document.getElementById('loginUser').value.trim();
+  const p=document.getElementById('loginPass').value;
+  if(!u||!p){alert('Vui lòng nhập tài khoản và mật khẩu.');return}
+  // Username is converted to a private Auth email alias. Password is never stored in the app.
+  const email = u.includes('@') ? u : `${u}@12a8.local`;
+  const {data,error}=await sb.auth.signInWithPassword({email,password:p});
+  if(error){alert('Đăng nhập thất bại: '+error.message);return}
+  await loadCloudUser(data.user);
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  document.getElementById('userName').textContent=currentUser.name||u;
+  document.getElementById('userRole').textContent=(currentUser.roleLabel||currentUser.role)+' · '+(currentUser.scope||'');
+  document.getElementById('avatar').textContent=(currentUser.name||u).charAt(0).toUpperCase();
+  document.querySelectorAll('.admin-only').forEach(x=>x.classList.toggle('hidden',!isAdmin()));
+  document.getElementById('attDate').value=today();document.getElementById('cDate').value=today();
+  renderAll();
+}
+async function loadCloudUser(user){
+  let {data:p,error}=await sb.from('profiles').select('*').eq('id',user.id).single();
+  if(error||!p){alert('Tài khoản chưa được cấp quyền cho lớp 12A8.');await sb.auth.signOut();throw error||new Error('No profile')}
+  currentUser={...p};
+  await loadCloudState();
+}
+async function loadCloudState(){
+  const {data,error}=await sb.from('class_state').select('data,updated_at').eq('class_id',CLASS_ID).maybeSingle();
+  if(error){console.error(error);document.getElementById('cloudNotice').innerHTML='⚠️ Không đọc được dữ liệu online: '+esc(error.message);return}
+  state=data?.data||seed();saveLocal();
+}
+async function pushCloud(){
+  const {error}=await sb.from('class_state').upsert({class_id:CLASS_ID,data:state,updated_by:currentUser?.id||null,updated_at:new Date().toISOString()},{onConflict:'class_id'});
+  if(error){console.error(error);alert('Không lưu được lên Supabase: '+error.message);return false}
+  saveLocal();return true;
+}
+async function logout(){
+  await sb.auth.signOut();currentUser=null;
+  document.getElementById('app').classList.add('hidden');document.getElementById('loginScreen').classList.remove('hidden');document.getElementById('loginPass').value='';
+}
+sb.auth.onAuthStateChange(async(event,session)=>{
+  if(event==='SIGNED_OUT'){return}
+});
+function today(){return new Date().toISOString().slice(0,10)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function fmtDate(s){if(!s)return ''; const [y,m,d]=s.split('-');return d&&m&&y?`${d}/${m}/${y}`:s}
+function roleCanEdit(){return currentUser?.role==='admin'||currentUser?.u==='loptruong'||currentUser?.u==='loppho'||currentUser?.role?.startsWith('to')}
+function isAdmin(){return currentUser?.role==='admin'}
+function visibleStudents(){
+ let a=state.students||[];
+ if(currentUser?.role?.startsWith('to')){const g=currentUser.role.replace('to','');a=a.filter(s=>String(s.group)==g)}
+ return a;
+}
+function login(){
+ const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value;
+ const found=USERS.find(x=>x.u===u&&x.p===p);
+ if(!found){alert('Sai tài khoản hoặc mật khẩu.');return}
+ currentUser=found; document.getElementById('loginScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');
+ document.getElementById('userName').textContent=found.name;document.getElementById('userRole').textContent=found.role+' · '+found.scope;document.getElementById('avatar').textContent=(found.name||'H').charAt(0);
+ document.querySelectorAll('.admin-only').forEach(x=>x.classList.toggle('hidden',!isAdmin()));
+ document.getElementById('attDate').value=today();document.getElementById('cDate').value=today();
+ renderAll();
+}
+function logout(){currentUser=null;document.getElementById('app').classList.add('hidden');document.getElementById('loginScreen').classList.remove('hidden');document.getElementById('loginPass').value=''}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+const titles={dashboard:'Dashboard',students:'Học sinh',attendance:'Chuyên cần',learning:'Học tập',conduct:'Rèn luyện',competition:'Thi đua',reports:'Báo cáo tổng hợp',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
+function showPage(name){
+ if(['excel','users'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
+ document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===name));
+ document.getElementById('pageTitle').textContent=titles[name]||name;
+ if(window.innerWidth<680)document.getElementById('sidebar').classList.remove('open');
+ if(name==='dashboard')renderDashboard();if(name==='students')renderStudents();if(name==='attendance')renderAttendance();if(name==='learning')renderLearning();if(name==='conduct')renderConduct();if(name==='competition')renderCompetition();if(name==='reports')renderReports();if(name==='profile')renderProfileSelectors();if(name==='users')renderUsers();
+}
+function renderAll(){renderDashboard();renderStudents();renderAttendance();renderLearning();renderConduct();renderCompetition();renderReports();renderProfileSelectors();renderUsers();}
+
+async function refreshCloud(){
+  if(!currentUser)return;
+  const {data,error}=await sb.from('class_state').select('data,updated_at').eq('class_id',CLASS_ID).maybeSingle();
+  if(error){alert('Không đồng bộ được: '+error.message);return}
+  if(data?.data){state=data.data;saveLocal();renderAll();alert('Đã tải dữ liệu mới nhất từ Supabase.')}
+}
+function renderDashboard(){
+ const a=visibleStudents(),att=Object.values(state.attendance||{}).filter(x=>x.date?.slice(0,7)===today().slice(0,7));
+ const present=att.filter(x=>x.status==='present').length, absent=att.filter(x=>x.status==='absent').length;
+ const approved=(state.conduct||[]).filter(x=>x.status==='approved');
+ const pts=approved.reduce((s,x)=>s+Number(x.points||0),0);
+ const scoreVals=a.map(s=>avgScore(s.id)).filter(x=>x!==null);const avg=scoreVals.length?scoreVals.reduce((a,b)=>a+b,0)/scoreVals.length:0;
+ document.getElementById('dashboardStats').innerHTML=[
+  ['👨‍🎓','Sĩ số',a.length,'học sinh'],['📅','Có mặt tháng này',present,'lượt'],['⚠️','Nghỉ không phép',absent,'lượt'],['⭐','Điểm rèn luyện',pts.toFixed(1),'tổng điểm'],['📚','TB học tập',avg.toFixed(2),'điểm']
+ ].map(x=>`<div class="card stat"><div class="label">${x[0]} ${x[1]}</div><div class="value">${x[2]}</div><div class="hint">${x[3]}</div></div>`).join('');
+ document.getElementById('attendanceSummary').innerHTML=`<div class="kpi-list"><div class="kpi-row"><strong>Có mặt</strong><span>${present}</span></div><div class="progress"><span style="width:${Math.min(100,present/(Math.max(1,a.length*22))*100)}%"></span></div><div class="kpi-row"><strong>Nghỉ không phép</strong><span>${absent}</span></div><div class="kpi-row"><strong>Tổng bản ghi tháng</strong><span>${att.length}</span></div></div>`;
+ document.getElementById('conductSummary').innerHTML=`<div class="kpi-list"><div class="kpi-row"><strong>Đã duyệt</strong><span class="badge b-green">${approved.length}</span></div><div class="kpi-row"><strong>Chờ duyệt</strong><span class="badge b-yellow">${(state.conduct||[]).filter(x=>x.status==='pending').length}</span></div><div class="kpi-row"><strong>Tổng điểm</strong><b>${pts.toFixed(1)}</b></div></div>`;
+ document.getElementById('learningSummary').innerHTML=`<div class="kpi-list"><div class="kpi-row"><strong>Học sinh có điểm</strong><span>${scoreVals.length}/${a.length}</span></div><div class="progress"><span style="width:${Math.min(100,avg*10)}%"></span></div><div class="mini">Điểm trung bình hiện có: ${avg?avg.toFixed(2):'chưa có dữ liệu'}</div></div>`;
+ const acts=(state.activity||[]).slice(-5).reverse();document.getElementById('recentActivity').innerHTML=acts.length?acts.map(x=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><b>${esc(x.text)}</b><div class="mini">${esc(x.time||'')}</div></div>`).join(''):'<div class="empty">Chưa có hoạt động.</div>';
+}
+function log(text){state.activity=state.activity||[];state.activity.push({text,time:new Date().toLocaleString('vi-VN')});if(state.activity.length>100)state.activity.shift();saveData()}
+
+function renderStudents(){
+ const q=(document.getElementById('studentSearch')?.value||'').toLowerCase(),g=document.getElementById('studentGroup')?.value||'',sex=document.getElementById('studentGender')?.value||'';
+ let a=visibleStudents().filter(s=>(!q||`${s.code} ${s.name}`.toLowerCase().includes(q))&&(!g||String(s.group)===g)&&(!sex||s.gender===sex));
+ document.getElementById('studentsBody').innerHTML=a.length?a.map((s,i)=>`<tr><td>${i+1}</td><td><b>${esc(s.code)}</b></td><td>${esc(s.name)}</td><td>${fmtDate(s.dob)}</td><td>${esc(s.gender)}</td><td>${esc(s.group)}</td><td>${esc(s.role)}</td><td>${esc(s.parentPhone)}</td><td><button class="btn small" onclick="openStudent('${esc(s.id)}')">Sửa</button> <button class="btn secondary small" onclick="viewStudent('${esc(s.id)}')">Hồ sơ</button></td></tr>`).join(''):`<tr><td colspan="9" class="empty">Chưa có học sinh. Thầy có thể tải mẫu Excel rồi nhập danh sách.</td></tr>`;
+}
+function openStudent(id=''){editingStudent=id||null;const s=state.students.find(x=>x.id===id)||{};document.getElementById('studentModalTitle').textContent=id?'Sửa học sinh':'Thêm học sinh';
+ [['sCode',s.code],['sName',s.name],['sDob',s.dob],['sEthnic',s.ethnic],['sPhone',s.phone],['sEmail',s.email],['sParent',s.parent],['sParentPhone',s.parentPhone],['sAddress',s.address],['sNote',s.note]].forEach(([id,v])=>document.getElementById(id).value=v||'');
+ document.getElementById('sGender').value=s.gender||'Nam';document.getElementById('sGroup').value=s.group||'1';document.getElementById('sRole').value=s.role||'';document.getElementById('studentModal').classList.add('show')}
+async function saveStudent(){
+ const code=document.getElementById('sCode').value.trim(),name=document.getElementById('sName').value.trim();if(!code||!name){alert('Mã HS và họ tên là bắt buộc.');return}
+ const obj={id:editingStudent||crypto.randomUUID(),code,name,dob:document.getElementById('sDob').value,gender:document.getElementById('sGender').value,ethnic:document.getElementById('sEthnic').value,group:document.getElementById('sGroup').value,phone:document.getElementById('sPhone').value,email:document.getElementById('sEmail').value,parent:document.getElementById('sParent').value,parentPhone:document.getElementById('sParentPhone').value,address:document.getElementById('sAddress').value,role:document.getElementById('sRole').value,note:document.getElementById('sNote').value};
+ const idx=state.students.findIndex(x=>x.id===editingStudent);if(idx>=0)state.students[idx]=obj;else{if(state.students.some(x=>x.code===code)){alert('Mã học sinh đã tồn tại.');return}state.students.push(obj)}
+ saveData();await pushCloud();log(`${editingStudent?'Cập nhật':'Thêm'} học sinh ${name}`);closeModal('studentModal');renderAll();
+}
+function viewStudent(id){document.getElementById('profileStudent').value=id;showPage('profile');renderProfile()}
+function renderAttendance(){
+ const date=document.getElementById('attDate').value||today(),filter=document.getElementById('attStatusFilter').value||'',a=visibleStudents();
+ const rows=a.map((s,i)=>{const key=date+'_'+s.id, r=state.attendance[key]||{status:'present',note:''};return {s,i,r}}).filter(x=>!filter||x.r.status===filter);
+ document.getElementById('attendanceBody').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.i+1}</td><td>${esc(x.s.code)}</td><td><b>${esc(x.s.name)}</b></td><td>${x.s.group}</td><td><select data-att="${x.s.id}" class="attSel"><option value="present" ${x.r.status==='present'?'selected':''}>Có mặt</option><option value="late" ${x.r.status==='late'?'selected':''}>Đi muộn</option><option value="excused" ${x.r.status==='excused'?'selected':''}>Nghỉ có phép</option><option value="absent" ${x.r.status==='absent'?'selected':''}>Nghỉ không phép</option></select></td><td><input data-note="${x.s.id}" value="${esc(x.r.note||'')}" placeholder="Ghi chú" style="padding:7px;border:1px solid var(--border);border-radius:8px"></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Không có dữ liệu phù hợp.</td></tr>';
+}
+async function saveAttendance(){
+ const date=document.getElementById('attDate').value||today();document.querySelectorAll('.attSel').forEach(sel=>{const id=sel.dataset.att,note=document.querySelector(`[data-note="${id}"]`)?.value||'';state.attendance[date+'_'+id]={date,id,status:sel.value,note,by:currentUser.username}});saveData();await pushCloud();log(`Lưu điểm danh ngày ${fmtDate(date)}`);alert('Đã lưu điểm danh.');renderAll();
+}
+function scoreObj(id,term){return state.scores[term+'_'+id]||{}}
+function avgScore(id,term=document.getElementById('scoreTerm')?.value||'HKI'){const s=scoreObj(id,term), vals=['tx1','tx2','tx3','mid','final'].map(k=>Number(s[k])).filter(x=>Number.isFinite(x)&&x>=0&&x<=10);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null}
+function renderLearning(){
+ const term=document.getElementById('scoreTerm').value,q=(document.getElementById('scoreSearch').value||'').toLowerCase();const a=visibleStudents().filter(s=>`${s.code} ${s.name}`.toLowerCase().includes(q));
+ document.getElementById('learningBody').innerHTML=a.length?a.map((s,i)=>{const v=scoreObj(s.id,term);return `<tr><td>${i+1}</td><td>${esc(s.code)}</td><td><b>${esc(s.name)}</b></td>${['tx1','tx2','tx3','mid','final'].map(k=>`<td><input class="scoreInp" data-sid="${s.id}" data-key="${k}" type="number" min="0" max="10" step=".1" value="${v[k]??''}" style="width:65px;padding:7px;border:1px solid var(--border);border-radius:7px"></td>`).join('')}<td><b>${avgScore(s.id,term)?.toFixed(2)??'—'}</b></td></tr>`}).join(''):'<tr><td colspan="9" class="empty">Chưa có học sinh.</td></tr>';
+}
+async function saveLearning(){
+ const term=document.getElementById('scoreTerm').value;document.querySelectorAll('.scoreInp').forEach(inp=>{const key=term+'_'+inp.dataset.sid;state.scores[key]=state.scores[key]||{};state.scores[key][inp.dataset.key]=inp.value===''?'':Number(inp.value)});saveData();await pushCloud();log(`Cập nhật điểm học tập ${term}`);alert('Đã lưu điểm.');renderLearning();renderDashboard();
+}
+function openConduct(){document.getElementById('cDate').value=today();document.getElementById('cContent').value='';document.getElementById('cPoints').value=1;document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');document.getElementById('conductModal').classList.add('show')}
+async function saveConduct(){const sid=document.getElementById('cStudent').value;if(!sid){alert('Chưa có học sinh.');return}let type=document.getElementById('cType').value,pts=Number(document.getElementById('cPoints').value||0);if(type==='Điểm trừ'||type==='Vi phạm')pts=-Math.abs(pts);const x={id:crypto.randomUUID(),date:document.getElementById('cDate').value,studentId:sid,type,content:document.getElementById('cContent').value,points:pts,by:currentUser.username,status:isAdmin()?'approved':'pending'};state.conduct.push(x);saveData();await pushCloud();log(`Ghi nhận rèn luyện cho ${state.students.find(s=>s.id===sid)?.name||''}`);closeModal('conductModal');renderAll()}
+function renderConduct(){const q=(document.getElementById('conductSearch').value||'').toLowerCase(),st=document.getElementById('conductStatus').value||'';let a=state.conduct||[];if(currentUser?.role?.startsWith('to'))a=a.filter(x=>state.students.find(s=>s.id===x.studentId)?.group==currentUser.role.replace('to',''));a=a.filter(x=>(!q||`${x.content} ${state.students.find(s=>s.id===x.studentId)?.name||''}`.toLowerCase().includes(q))&&(!st||x.status===st));document.getElementById('conductBody').innerHTML=a.length?a.slice().reverse().map(x=>{const s=state.students.find(s=>s.id===x.studentId)||{};return `<tr><td>${fmtDate(x.date)}</td><td>${esc(s.name||'')}</td><td>${esc(x.type)}</td><td>${esc(x.content)}</td><td><b>${Number(x.points).toFixed(1)}</b></td><td>${esc(x.by)}</td><td><span class="badge ${x.status==='approved'?'b-green':'b-yellow'}">${x.status==='approved'?'Đã duyệt':'Chờ duyệt'}</span></td><td>${isAdmin()&&x.status==='pending'?`<button class="btn small success" onclick="approveConduct('${x.id}')">Duyệt</button>`:''} ${isAdmin()?`<button class="btn small danger" onclick="deleteConduct('${x.id}')">Xóa</button>`:''}</td></tr>`}).join(''):'<tr><td colspan="8" class="empty">Chưa có bản ghi.</td></tr>'}
+async function approveConduct(id){const x=state.conduct.find(x=>x.id===id);if(x){x.status='approved';saveData();await pushCloud();log('GVCN duyệt một bản ghi rèn luyện');renderAll()}}
+async function deleteConduct(id){if(!confirm('Xóa bản ghi này?'))return;state.conduct=state.conduct.filter(x=>x.id!==id);saveData();await pushCloud();renderAll()}
+function conductPoints(sid){return (state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved').reduce((a,x)=>a+Number(x.points||0),0)}
+function attendanceCounts(sid){let o={present:0,late:0,excused:0,absent:0};Object.values(state.attendance||{}).filter(x=>x.id===sid).forEach(x=>o[x.status]=(o[x.status]||0)+1);return o}
+function renderCompetition(){const a=visibleStudents().map(s=>({s,pts:conductPoints(s.id),avg:avgScore(s.id,'HKI')||0,att:attendanceCounts(s.id)})).sort((a,b)=>(b.pts-b.avg)-(a.pts-a.avg));document.getElementById('ranking').innerHTML=a.length?a.map((x,i)=>`<div class="kpi-row" style="padding:8px 0;border-bottom:1px solid var(--border)"><span><b>${i+1}.</b> ${esc(x.s.name)}</span><span class="badge ${i<3?'b-yellow':'b-gray'}">${x.pts.toFixed(1)}đ</span></div>`).join(''):'<div class="empty">Chưa có dữ liệu.</div>';const g={};a.forEach(x=>{g[x.s.group]=g[x.s.group]||{n:0,p:0};g[x.s.group].n++;g[x.s.group].p+=x.pts});const gr=Object.entries(g).sort((a,b)=>b[1].p-a[1].p);document.getElementById('groupRanking').innerHTML=gr.length?gr.map((x,i)=>`<div class="kpi-row" style="padding:8px 0;border-bottom:1px solid var(--border)"><span><b>Tổ ${x[0]}</b> · ${x[1].n} HS</span><b>${x[1].p.toFixed(1)}</b></div>`).join(''):'<div class="empty">Chưa có dữ liệu.</div>'}
+function renderReports(){const a=visibleStudents();let allAtt=Object.values(state.attendance||{});const c={present:0,late:0,excused:0,absent:0};allAtt.forEach(x=>c[x.status]=(c[x.status]||0)+1);const avg=a.map(s=>avgScore(s.id,'HKI')).filter(x=>x!==null);document.getElementById('reportCards').innerHTML=[['Sĩ số',a.length],['Có mặt',c.present],['Đi muộn',c.late],['Nghỉ phép',c.excused],['Nghỉ KP',c.absent],['TB HKI',avg.length?(avg.reduce((a,b)=>a+b,0)/avg.length).toFixed(2):'—']].map(x=>`<div class="card stat"><div class="label">${x[0]}</div><div class="value">${x[1]}</div></div>`).join('');document.getElementById('reportBody').innerHTML=a.map((s,i)=>{const z=attendanceCounts(s.id);return `<tr><td>${i+1}</td><td><b>${esc(s.name)}</b></td><td>${z.present}</td><td>${z.excused}</td><td>${z.absent}</td><td>${z.late}</td><td>${conductPoints(s.id).toFixed(1)}</td><td>${avgScore(s.id,'HKI')?.toFixed(2)??'—'}</td></tr>`}).join('')}
+function renderProfileSelectors(){const el=document.getElementById('profileStudent');const old=el.value;el.innerHTML='<option value="">-- Chọn học sinh --</option>'+visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');el.value=old;if(old)renderProfile()}
+function renderProfile(){const id=document.getElementById('profileStudent').value;if(!id){document.getElementById('profileContent').innerHTML='<div class="empty">Chọn một học sinh để xem hồ sơ.</div>';return}const s=state.students.find(x=>x.id===id);if(!s)return;const z=attendanceCounts(id);const p=conductPoints(id),a1=avgScore(id,'HKI'),a2=avgScore(id,'HKII'),ay=avgScore(id,'CA_NAM');const events=(state.conduct||[]).filter(x=>x.studentId===id).slice().reverse();document.getElementById('profileContent').innerHTML=`<div class="grid two"><div><h2>${esc(s.name)}</h2><p class="muted">${esc(s.code)} · Tổ ${esc(s.group)} · ${esc(s.role)}</p><p>🎂 ${fmtDate(s.dob)} · ${esc(s.gender)}</p><p>👪 ${esc(s.parent)} · ${esc(s.parentPhone)}</p><p>📍 ${esc(s.address)}</p></div><div><h3>📅 Chuyên cần</h3><div class="kpi-list"><div class="kpi-row"><span>Có mặt</span><b>${z.present}</b></div><div class="kpi-row"><span>Đi muộn</span><b>${z.late}</b></div><div class="kpi-row"><span>Nghỉ phép</span><b>${z.excused}</b></div><div class="kpi-row"><span>Nghỉ KP</span><b>${z.absent}</b></div></div></div></div><hr style="border:0;border-top:1px solid var(--border);margin:20px 0"><div class="grid two"><div><h3>📚 Học tập</h3><p>HKI: <b>${a1?.toFixed(2)??'—'}</b></p><p>HKII: <b>${a2?.toFixed(2)??'—'}</b></p><p>Cả năm: <b>${ay?.toFixed(2)??'—'}</b></p></div><div><h3>⭐ Rèn luyện</h3><p>Điểm tổng: <b>${p.toFixed(1)}</b></p></div></div><hr style="border:0;border-top:1px solid var(--border);margin:20px 0"><h3>📝 Lịch sử rèn luyện</h3>${events.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Ngày</th><th>Loại</th><th>Nội dung</th><th>Điểm</th><th>Trạng thái</th></tr></thead><tbody>${events.map(x=>`<tr><td>${fmtDate(x.date)}</td><td>${esc(x.type)}</td><td>${esc(x.content)}</td><td>${x.points}</td><td>${x.status}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Chưa có dữ liệu.</div>'}`}
+function renderUsers(){document.getElementById('usersBody').innerHTML=USERS.map(x=>`<tr><td><b>${x.u}</b></td><td>${x.role}</td><td>${x.scope}</td><td><span class="badge b-green">Hoạt động</span></td></tr>`).join('')}
+function downloadTemplate(){const rows=[['Mã HS','Họ và tên','Ngày sinh','Giới tính','Dân tộc','Địa chỉ','SĐT học sinh','Email','Họ tên phụ huynh','SĐT phụ huynh','Tổ','Chức vụ','Ghi chú'],['HS001','Nguyễn Văn A','2008-01-15','Nam','Tày','','','','','','1','',''],['HS002','Trần Thị B','2008-05-20','Nữ','Nùng','','','','','','1','','']];downloadBlob(rows.map(r=>r.map(csvCell).join(',')).join('\n'),'Mau_Nhap_Hoc_Sinh_12A8.csv','text/csv;charset=utf-8')}
+function csvCell(v){v=String(v??'');return `"${v.replace(/"/g,'""')}"`}
+async function importExcel(e){const file=e.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=ev=>{const text=ev.target.result.replace(/^\uFEFF/,'');let rows=parseCSV(text);if(rows.length<2){alert('Không đọc được dữ liệu CSV. Nếu thầy dùng .xlsx/.xls, hãy mở Excel và lưu thành CSV UTF-8 rồi nhập.');return}const headers=rows[0].map(x=>x.trim());const mapHeader={};headers.forEach((h,i)=>mapHeader[h.toLowerCase()]=i);let count=0;rows.slice(1).forEach(r=>{const get=(...names)=>{for(const n of names){const i=mapHeader[n.toLowerCase()];if(i!==undefined)return r[i]||''}return ''};const code=get('Mã HS','ma hs','mã học sinh'),name=get('Họ và tên','ho va ten','họ tên');if(!code||!name)return;let s={id:crypto.randomUUID(),code,name,dob:get('Ngày sinh','ngay sinh'),gender:get('Giới tính','gioi tinh')||'Nam',ethnic:get('Dân tộc','dan toc'),address:get('Địa chỉ','dia chi'),phone:get('SĐT học sinh','sdt hoc sinh'),email:get('Email'),parent:get('Họ tên phụ huynh','ho ten phu huynh'),parentPhone:get('SĐT phụ huynh','sdt phu huynh'),group:get('Tổ','to')||'1',role:get('Chức vụ','chuc vu'),note:get('Ghi chú','ghi chu')};const idx=state.students.findIndex(x=>x.code===code);if(idx>=0){s.id=state.students[idx].id;state.students[idx]=s}else state.students.push(s);count++});saveData();await pushCloud();log(`Nhập/cập nhật ${count} học sinh từ CSV`);document.getElementById('importResult').textContent=`Đã nhập/cập nhật ${count} học sinh.`;renderAll()};reader.readAsText(file,'utf-8');e.target.value=''}
+function parseCSV(text){const rows=[];let row=[],cell='',q=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(c==='"'&&q&&n==='"'){cell+='"';i++;continue}if(c==='"'){q=!q;continue}if(c===','&&!q){row.push(cell);cell='';continue}if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell);cell='';if(row.some(x=>x!==''))rows.push(row);row=[];continue}cell+=c}if(cell!==''||row.length){row.push(cell);rows.push(row)}return rows}
+function exportStudentsCSV(){const rows=[['Mã HS','Họ và tên','Ngày sinh','Giới tính','Dân tộc','Địa chỉ','SĐT học sinh','Email','Họ tên phụ huynh','SĐT phụ huynh','Tổ','Chức vụ','Ghi chú'],...visibleStudents().map(s=>[s.code,s.name,s.dob,s.gender,s.ethnic,s.address,s.phone,s.email,s.parent,s.parentPhone,s.group,s.role,s.note])];downloadBlob('\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\n'),'Danh_sach_12A8.csv','text/csv;charset=utf-8')}
+function exportBackup(){downloadBlob(JSON.stringify(state,null,2),'Backup_12A8_'+today()+'.json','application/json')}
+async function importBackup(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{const x=JSON.parse(ev.target.result);if(!x.students||!x.settings)throw Error();if(!confirm('Khôi phục sẽ thay thế dữ liệu hiện tại. Tiếp tục?'))return;state=x;saveData();await pushCloud();renderAll();alert('Đã khôi phục dữ liệu.')}catch(err){alert('File sao lưu không hợp lệ.')}};r.readAsText(file);e.target.value=''}
+function downloadBlob(content,name,type){const blob=new Blob([content],{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function closeModal(id){document.getElementById(id).classList.remove('show')}
+async function saveSettings(){state.settings.teacher=document.getElementById('setTeacher').value;state.settings.className=document.getElementById('setClass').value;state.settings.year=document.getElementById('setYear').value;state.settings.groups=Number(document.getElementById('setGroups').value);saveData();await pushCloud();alert('Đã lưu cài đặt.')}
+async function resetAll(){if(!isAdmin())return;if(confirm('XÓA TOÀN BỘ dữ liệu trên trình duyệt?')){localStorage.removeItem(KEY);state=seed();saveData();await pushCloud();renderAll();alert('Đã xóa dữ liệu.')}}
+window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.show').forEach(x=>x.classList.remove('show'))}})
+</script>
+</body>
+</html>
