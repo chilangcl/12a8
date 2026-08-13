@@ -92,13 +92,21 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 #classChooser .modal-card h3{margin:0}
 #userCreateStatus.ok{background:#ecfdf5;color:#166534;border-color:#86efac}
 </style>
+<style id="bibi-v4-2-css">
+#classChooser .form-grid{grid-template-columns:1fr 1fr}
+@media(max-width:650px){#classChooser .form-grid{grid-template-columns:1fr}}
+#loginScreen .login-card h1{font-size:clamp(30px,4vw,46px)}
+</style>
 </head>
 <body>
 
-<div id="classChooser" class="modal" style="z-index:2000"><div class="modal-card" style="max-width:560px">
-  <div class="modal-head"><h3>🏫 Chọn lớp cần vào</h3><button class="x" onclick="cancelClassEntry()">×</button></div>
-  <p class="muted">Tài khoản của thầy/cán bộ lớp có thể được phân quyền cho một hoặc nhiều lớp. Hãy chọn đúng lớp trước khi vào hệ thống.</p>
-  <div class="field"><label>Lớp</label><select id="loginClassSelect"></select></div>
+<div id="classChooser" class="modal" style="z-index:2000"><div class="modal-card" style="max-width:620px">
+  <div class="modal-head"><h3>🏫 Chọn năm học và lớp cần vào</h3><button class="x" onclick="cancelClassEntry()">×</button></div>
+  <p class="muted">Sau khi đăng nhập, hệ thống hiển thị đúng các lớp mà tài khoản được phép truy cập.</p>
+  <div class="form-grid" style="margin-top:12px">
+    <div class="field"><label>Năm học</label><select id="loginYearSelect"></select></div>
+    <div class="field"><label>Lớp</label><select id="loginClassSelect"></select></div>
+  </div>
   <div id="loginClassInfo" class="notice" style="margin-top:12px"></div>
   <div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="btn secondary" onclick="cancelClassEntry()">Hủy</button><button class="btn" onclick="enterSelectedClass()">🚪 Vào lớp</button></div>
 </div></div>
@@ -106,8 +114,11 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 <div id="loginScreen" class="login">
   <div class="login-card">
     <div class="logo">NVH</div>
-    <h1>Quản lý lớp 12A8</h1>
-    <div class="sub">Năm học 2026–2027 · GVCN: Nguyễn Văn Hoàng</div>
+    <h1>Sổ Chủ Nhiệm Điện Tử</h1>
+    <div class="sub">NVH · GVCN: Nguyễn Văn Hoàng</div>
+    <div class="notice" style="margin-bottom:14px;background:#eff6ff;border-color:#bfdbfe;color:#1e40af">
+      🏫 <b>Chọn năm học và lớp:</b> sau khi nhập đúng tài khoản và mật khẩu, hệ thống sẽ hiện cửa sổ để thầy/cán bộ lớp chọn năm học và lớp được phân quyền.
+    </div>
     <div id="cloudNotice" class="notice" style="margin-bottom:14px;background:#f8fafc;border-color:#cbd5e1;color:#334155">
       ☁️ Chế độ online: kết nối cơ sở dữ liệu Supabase.
     </div>
@@ -364,13 +375,26 @@ async function loadAvailableClasses(userId){
   }
 }
 function showClassChooser(){
-  const sel=document.getElementById('loginClassSelect');
-  sel.innerHTML=availableClasses.map(x=>`<option value="${esc(x.id)}">${esc(x.class_name)} · ${esc(x.year)}${x.is_archived||x.is_locked?' · 🔒':''}</option>`).join('');
-  updateClassChooserInfo(); sel.onchange=updateClassChooserInfo;
+  const yearSel=document.getElementById('loginYearSelect');
+  const classSel=document.getElementById('loginClassSelect');
+  const years=[...new Set(availableClasses.map(x=>x.year).filter(Boolean))].sort().reverse();
+  yearSel.innerHTML=years.map(y=>`<option value="${esc(y)}">${esc(y)}</option>`).join('');
+  function renderClassesForYear(){
+    const y=yearSel.value;
+    const list=availableClasses.filter(x=>x.year===y);
+    classSel.innerHTML=list.map(x=>`<option value="${esc(x.id)}">${esc(x.class_name)}${x.is_archived||x.is_locked?' · 🔒':''}</option>`).join('');
+    updateClassChooserInfo();
+  }
+  yearSel.onchange=renderClassesForYear;
+  classSel.onchange=updateClassChooserInfo;
+  renderClassesForYear();
   document.getElementById('classChooser').classList.add('show');
 }
 function updateClassChooserInfo(){
-  const x=availableClasses.find(v=>v.id===document.getElementById('loginClassSelect')?.value);const e=document.getElementById('loginClassInfo');if(!x||!e)return;
+  const id=document.getElementById('loginClassSelect')?.value;
+  const x=availableClasses.find(v=>v.id===id);
+  const e=document.getElementById('loginClassInfo');
+  if(!x||!e)return;
   e.textContent=`${x.class_name} · ${x.year} · Khối ${x.grade||''} · ${x.group_count||4} tổ${x.is_archived||x.is_locked?' · Chế độ chỉ xem':''}`;
 }
 async function enterSelectedClass(){
