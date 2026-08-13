@@ -29,12 +29,24 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style id="multiyear-upgrade-css">
+.multi-year-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px;margin:12px 0}
+.multi-year-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.multi-year-grid input,.multi-year-grid select{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px}
+.multi-year-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.multi-year-list{display:grid;gap:8px;margin-top:12px}
+.multi-year-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border:1px solid #e5e7eb;border-radius:10px}
+.multi-year-item.active{border-color:#2563eb;background:#eff6ff}
+.multi-year-badge{font-size:12px;padding:3px 8px;border-radius:999px;background:#eef2ff}
+</style>
+
 </head>
 <body>
 
 <div id="loginScreen" class="login">
   <div class="login-card">
-    <div class="logo">NVH</div>
+    <div class="logo">12A8</div>
     <h1>Quản lý lớp 12A8</h1>
     <div class="sub">Năm học 2026–2027 · GVCN: Nguyễn Văn Hoàng</div>
     <div id="cloudNotice" class="notice" style="margin-bottom:14px;background:#f8fafc;border-color:#cbd5e1;color:#334155">
@@ -532,5 +544,121 @@ document.getElementById('loginPass')?.addEventListener('keydown',e=>{if(e.key===
 if(window.__supabaseInitError){setLoginStatus('❌ Không tải được Supabase: '+window.__supabaseInitError.message)}
 window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.show').forEach(x=>x.classList.remove('show'))}})
 </script>
+
+<!-- BI BI MULTI-YEAR / MULTI-CLASS MANAGEMENT -->
+<section id="multiYearPanel" class="multi-year-card" style="display:none">
+  <h3>🏫 Quản lý lớp & năm học</h3>
+  <p style="margin-top:4px;color:#6b7280">
+    Một tài khoản GVCN có thể quản lý nhiều lớp và nhiều năm học. Lớp cũ được lưu trữ riêng, không bị mất khi tạo lớp mới.
+  </p>
+  <div class="multi-year-grid">
+    <div><label>Tên lớp</label><input id="myClassName" placeholder="Ví dụ: 10A3"></div>
+    <div><label>Năm học</label><input id="myAcademicYear" placeholder="2027-2028"></div>
+    <div><label>Khối</label><select id="myGrade"><option>10</option><option>11</option><option>12</option></select></div>
+    <div><label>Số tổ</label><select id="myGroupCount"><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
+  </div>
+  <div class="multi-year-actions">
+    <button type="button" onclick="myCreateClass()">➕ Tạo lớp mới</button>
+    <button type="button" onclick="myArchiveCurrentClass()">🔒 Khóa lớp/năm học hiện tại</button>
+    <button type="button" onclick="myRefreshClasses()">🔄 Làm mới</button>
+  </div>
+  <div id="myClassList" class="multi-year-list"></div>
+</section>
+
+
+<script id="multiyear-upgrade-js">
+(function(){
+  const STORAGE_KEY = 'bibi_12a8_classes_v1';
+  function getClasses(){
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+    catch(e){ return []; }
+  }
+  function saveClasses(a){ localStorage.setItem(STORAGE_KEY, JSON.stringify(a)); }
+  function currentClassKey(){
+    return localStorage.getItem('bibi_current_class_key') || '';
+  }
+  function setCurrentClassKey(k){ localStorage.setItem('bibi_current_class_key', k); }
+
+  window.myGetClasses = getClasses;
+
+  window.myCreateClass = function(){
+    const name = (document.getElementById('myClassName')||{}).value?.trim();
+    const year = (document.getElementById('myAcademicYear')||{}).value?.trim();
+    const grade = (document.getElementById('myGrade')||{}).value || '';
+    const groups = Number((document.getElementById('myGroupCount')||{}).value || 4);
+    if(!name || !year){ alert('Thầy hãy nhập Tên lớp và Năm học.'); return; }
+    const arr = getClasses();
+    if(arr.some(x => x.name.toLowerCase()===name.toLowerCase() && x.year===year)){
+      alert('Lớp này đã tồn tại trong năm học này.'); return;
+    }
+    const item = {
+      id: 'class_' + Date.now() + '_' + Math.random().toString(36).slice(2,7),
+      name, year, grade, groups,
+      status:'active',
+      createdAt:new Date().toISOString()
+    };
+    arr.push(item); saveClasses(arr); setCurrentClassKey(item.id);
+    myRenderClasses();
+    alert('Đã tạo lớp ' + name + ' – ' + year + '.');
+  };
+
+  window.mySwitchClass = function(id){
+    const arr=getClasses(); const item=arr.find(x=>x.id===id);
+    if(!item) return;
+    if(item.status==='archived'){
+      if(!confirm('Lớp này đã khóa. Chuyển sang chế độ chỉ xem?')) return;
+    }
+    setCurrentClassKey(id);
+    myRenderClasses();
+    window.dispatchEvent(new CustomEvent('bibi:classChanged',{detail:item}));
+    alert('Đã chuyển sang ' + item.name + ' – ' + item.year + '.');
+  };
+
+  window.myArchiveCurrentClass = function(){
+    const id=currentClassKey(); if(!id){alert('Chưa chọn lớp.');return;}
+    const arr=getClasses(); const item=arr.find(x=>x.id===id); if(!item)return;
+    if(item.status==='archived'){alert('Lớp này đã được khóa.');return;}
+    if(!confirm('Khóa ' + item.name + ' – ' + item.year + '? Dữ liệu cũ vẫn được giữ lại.')) return;
+    item.status='archived'; item.archivedAt=new Date().toISOString();
+    saveClasses(arr); myRenderClasses();
+    alert('Đã khóa lớp/năm học. Dữ liệu vẫn được giữ nguyên để tra cứu.');
+  };
+
+  window.myRefreshClasses = function(){ myRenderClasses(); };
+
+  function myRenderClasses(){
+    const panel=document.getElementById('multiYearPanel');
+    const list=document.getElementById('myClassList');
+    if(!panel||!list)return;
+    const arr=getClasses(); const cur=currentClassKey();
+    list.innerHTML = arr.length ? arr.map(x=>`
+      <div class="multi-year-item ${x.id===cur?'active':''}">
+        <div>
+          <strong>${esc(x.name)}</strong> – ${esc(x.year)}
+          <div style="color:#6b7280;font-size:12px">Khối ${esc(x.grade)} · ${x.groups} tổ · ${x.status==='archived'?'🔒 Đã khóa':'🟢 Đang hoạt động'}</div>
+        </div>
+        <button type="button" onclick="mySwitchClass('${x.id}')">${x.id===cur?'Đang chọn':'Chọn lớp'}</button>
+      </div>`).join('') :
+      '<div style="color:#6b7280">Chưa có lớp mới. Thầy có thể tạo lớp đầu tiên.</div>';
+  }
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+
+  window.addEventListener('DOMContentLoaded',function(){
+    const p=document.getElementById('multiYearPanel');
+    if(p){
+      // Show only after the user is already inside the app.
+      const observer=new MutationObserver(()=>{
+        const login=document.querySelector('#loginScreen, .login-screen, [id*="login"]');
+        const app=document.querySelector('#app, main, .app');
+        if(app && (!login || getComputedStyle(app).display!=='none')) p.style.display='block';
+      });
+      observer.observe(document.body,{subtree:true,attributes:true,attributeFilter:['style','class']});
+      setTimeout(()=>{p.style.display='block'; myRenderClasses();},800);
+    }
+    myRenderClasses();
+  });
+})();
+</script>
+
 </body>
 </html>
