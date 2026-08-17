@@ -1095,11 +1095,43 @@ function aiWeekStart(dateStr){
   const diff=Math.floor((d-start)/86400000); start.setDate(start.getDate()+Math.floor(diff/7)*7); return start.toISOString().slice(0,10);
 }
 function buildAIContext(){
-  const students=Array.isArray(state.students)?state.students:[]; const attendance=state.attendance&&typeof state.attendance==='object'?Object.values(state.attendance):[]; const conduct=Array.isArray(state.conduct)?state.conduct:[];
+  const students=Array.isArray(state.students)?state.students:[];
+  const attendance=state.attendance&&typeof state.attendance==='object'?Object.values(state.attendance):[];
+  const conduct=Array.isArray(state.conduct)?state.conduct:[];
   const byId={}; students.forEach(s=>byId[s.id]=s);
-  const stats=students.map(s=>{const ar=attendance.filter(x=>x.studentId===s.id);const cr=conduct.filter(x=>x.studentId===s.id&&x.status==='approved');const plus=cr.filter(x=>Number(x.points)>0).reduce((a,x)=>a+Number(x.points||0),0);const minus=cr.filter(x=>Number(x.points)<0).reduce((a,x)=>a+Number(x.points||0),0);return {name:s.name,group:s.group,attendance:{present:ar.filter(x=>x.status==='present').length,late:ar.filter(x=>x.status==='late').length,excused:ar.filter(x=>x.status==='excused').length,absent:ar.filter(x=>x.status==='absent').length},conduct:{records:cr.length,plus:Number(plus.toFixed(1)),minus:Number(minus.toFixed(1)),net:Number((plus+minus).toFixed(1))}}});
-  const totalAtt=attendance.length; const approved=conduct.filter(x=>x.status==='approved');
-  return {class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',teacher:state.settings?.teacher||currentUser?.name||''},summary:{students:students.length,attendanceRecords:totalAtt,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),weekStart:aiWeekStart(today())},students:stats,recentConduct:approved.slice(-100).map(x=>({date:x.date,type:x.type,points:Number(x.points||0),student:byId[x.studentId]?.name||'Không rõ',content:x.content||''}))};
+  const stats=students.map(s=>{
+    const ar=attendance.filter(x=>x.studentId===s.id);
+    const cr=conduct.filter(x=>x.studentId===s.id&&x.status==='approved');
+    const plus=cr.filter(x=>Number(x.points)>0).reduce((a,x)=>a+Number(x.points||0),0);
+    const minus=cr.filter(x=>Number(x.points)<0).reduce((a,x)=>a+Number(x.points||0),0);
+    return {
+      code:s.code||'',
+      name:s.name||'',
+      gender:s.gender||'',
+      group:s.group||'',
+      role:s.role||'',
+      attendance:{present:ar.filter(x=>x.status==='present').length,late:ar.filter(x=>x.status==='late').length,excused:ar.filter(x=>x.status==='excused').length,absent:ar.filter(x=>x.status==='absent').length},
+      conduct:{records:cr.length,plus:Number(plus.toFixed(1)),minus:Number(minus.toFixed(1)),net:Number((plus+minus).toFixed(1))}
+    };
+  });
+  const totalAtt=attendance.length;
+  const approved=conduct.filter(x=>x.status==='approved');
+  const genderStats={
+    nam:students.filter(s=>String(s.gender||'').trim().toLowerCase()==='nam').length,
+    nu:students.filter(s=>String(s.gender||'').trim().toLowerCase()==='nữ').length,
+    khac:students.filter(s=>{const g=String(s.gender||'').trim().toLowerCase();return g && g!=='nam' && g!=='nữ'}).length,
+    chuaCo:students.filter(s=>!String(s.gender||'').trim()).length
+  };
+  return {
+    class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',teacher:state.settings?.teacher||currentUser?.name||''},
+    summary:{students:students.length,attendanceRecords:totalAtt,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),weekStart:aiWeekStart(today()),gender:genderStats},
+    students:stats,
+    recentConduct:approved.slice(-100).map(x=>({date:x.date,type:x.type,points:Number(x.points||0),student:byId[x.studentId]?.name||'Không rõ',content:x.content||''}))
+  };
+}
+function buildAIPrompt(question,context){
+  const data=JSON.stringify(context);
+  return `Bạn là Trợ lý AI GVCN của Sổ Chủ Nhiệm Số. Hãy trả lời dựa trên DỮ LIỆU THỰC TẾ được cung cấp bên dưới.\n\nQUY TẮC BẮT BUỘC:\n1. Phải sử dụng các trường dữ liệu đã có, đặc biệt là giới tính (gender), họ tên, mã học sinh, tổ, chức vụ, chuyên cần và rèn luyện.\n2. Không được suy đoán giới tính từ tên. Nếu trường gender có giá trị thì coi đó là dữ liệu chính thức của hệ thống. Nếu gender trống thì mới nói là chưa có dữ liệu giới tính của học sinh đó.\n3. Khi người dùng hỏi số lượng nam/nữ hoặc hỏi giới tính của một học sinh, hãy thống kê/tra cứu trực tiếp từ trường gender trong dữ liệu, không đoán.\n4. Không được nói rằng hệ thống không có trường giới tính nếu dữ liệu JSON bên dưới có trường gender.\n5. Không tự bịa dữ liệu. Nếu dữ liệu không đủ để kết luận, nói rõ phần nào chưa có dữ liệu.\n6. Không sử dụng hoặc nhắc lại số điện thoại, địa chỉ, email, thông tin phụ huynh hay ngày sinh trừ khi câu hỏi thực sự yêu cầu và dữ liệu được phép sử dụng.\n7. Trả lời bằng tiếng Việt, rõ ràng, dễ đọc, ưu tiên bảng/danh sách khi phù hợp.\n\nDỮ LIỆU LỚP:\n${data}\n\nCÂU HỎI CỦA GVCN:\n${question}`;
 }
 function clearAIAnswer(){
   stopAISpeech();
@@ -1154,12 +1186,13 @@ async function askAIQuick(q){document.getElementById('aiQuestion').value=q;await
 async function askAI(){
   if(!isAdmin()){alert('🔒 Chỉ GVCN mới được sử dụng Trợ lý AI.');return}
   const question=document.getElementById('aiQuestion')?.value.trim(); if(!question){alert('Thầy hãy nhập câu hỏi.');return}
-  const btn=document.getElementById('aiAskBtn'), ans=document.getElementById('aiAnswer'), meta=document.getElementById('aiMeta'); btn.classList.add('ai-busy');btn.disabled=true;ans.textContent='⏳ AI đang phân tích dữ liệu lớp...';meta.textContent='AI sẽ đọc dữ liệu lớp đang chọn từ Supabase; không dùng ngày sinh, số điện thoại hoặc thông tin phụ huynh.';
+  const btn=document.getElementById('aiAskBtn'), ans=document.getElementById('aiAnswer'), meta=document.getElementById('aiMeta'); btn.classList.add('ai-busy');btn.disabled=true;ans.textContent='⏳ AI đang phân tích dữ liệu lớp...';meta.textContent='AI sẽ đọc dữ liệu lớp đang chọn, gồm hồ sơ học sinh cần thiết (mã HS, họ tên, giới tính, tổ, chức vụ), chuyên cần và rèn luyện.';
   try{
     const context=buildAIContext();
+    const aiPrompt=buildAIPrompt(question,context);
     const {data:{session}}=await sb.auth.getSession(); if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');
     const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';
-    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question,stateKey:currentStateKey})});
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:aiPrompt,stateKey:currentStateKey,context})});
     const body=await res.json().catch(()=>({})); if(!res.ok)throw new Error(body.error||`AI trả về lỗi HTTP ${res.status}`);
     const fullAnswer = typeof body.answer==='string' ? body.answer : (body.answer?.text || body.answer?.content || JSON.stringify(body.answer));
     ans.textContent=fullAnswer||'AI chưa trả về nội dung.'; ans.scrollTop=0; ans.style.maxHeight='none'; ans.style.height='auto'; ans.style.overflow='visible'; meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`; const st=document.getElementById('aiSpeechStatus'); if(st)st.textContent='';
