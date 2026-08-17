@@ -187,7 +187,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 @media(max-width:680px){.ai-nav-btn{padding:12px!important;font-size:13px}.ai-nav-badge{font-size:8px;padding:3px 5px}}
 </style>
 <style id="bibi-ai-v1">
-.ai-page{display:grid;gap:14px}.ai-quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.ai-quick button{border:1px solid #bfdbfe;background:#eff6ff;color:#1e40af;border-radius:10px;padding:10px;font-weight:700;text-align:left}.ai-quick button:hover{background:#dbeafe}.ai-chat{display:grid;gap:10px}.ai-chat textarea{width:100%;min-height:96px;resize:vertical;border:1px solid var(--border);border-radius:12px;padding:12px;outline:none}.ai-chat textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px #2563eb18}.ai-answer{white-space:pre-wrap;line-height:1.72;background:#f8fafc;border:1px solid var(--border);border-radius:16px;padding:16px;min-height:110px;max-height:58vh;overflow-y:auto;overflow-x:hidden;word-break:break-word;overflow-wrap:anywhere;-webkit-overflow-scrolling:touch;scrollbar-width:thin}.ai-answer:empty{display:none}.ai-meta{font-size:12px;color:var(--muted)}.ai-busy{opacity:.65;pointer-events:none}.ai-badge{display:inline-flex;align-items:center;gap:6px;background:#ecfdf5;color:#166534;border:1px solid #bbf7d0;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}.ai-speech-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ai-speech-actions .btn{min-height:42px}.ai-speech-status{font-size:12px;color:var(--muted);min-height:18px}@media(max-width:600px){.ai-answer{font-size:14px;line-height:1.7;max-height:52vh;padding:14px}.ai-speech-actions{grid-template-columns:1fr 1fr}}
+.ai-page{display:grid;gap:14px}.ai-quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.ai-quick button{border:1px solid #bfdbfe;background:#eff6ff;color:#1e40af;border-radius:10px;padding:10px;font-weight:700;text-align:left}.ai-quick button:hover{background:#dbeafe}.ai-chat{display:grid;gap:10px}.ai-chat textarea{width:100%;min-height:96px;resize:vertical;border:1px solid var(--border);border-radius:12px;padding:12px;outline:none}.ai-chat textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px #2563eb18}.ai-answer{white-space:pre-wrap;line-height:1.72;background:#f8fafc;border:1px solid var(--border);border-radius:16px;padding:16px;min-height:110px;max-height:none!important;height:auto!important;overflow:visible!important;overflow-wrap:anywhere;word-break:break-word;white-space:pre-wrap;-webkit-user-select:text;user-select:text}.ai-answer:empty{display:none}.ai-meta{font-size:12px;color:var(--muted)}.ai-busy{opacity:.65;pointer-events:none}.ai-badge{display:inline-flex;align-items:center;gap:6px;background:#ecfdf5;color:#166534;border:1px solid #bbf7d0;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}.ai-speech-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ai-speech-actions .btn{min-height:42px}.ai-speech-status{font-size:12px;color:var(--muted);min-height:18px}@media(max-width:600px){.ai-answer{font-size:14px;line-height:1.7;max-height:none!important;height:auto!important;overflow:visible!important;padding:14px}.ai-speech-actions{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.ai-quick{grid-template-columns:1fr 1fr}.ai-answer{font-size:14px}}
 </style>
 
@@ -1106,26 +1106,44 @@ function clearAIAnswer(){
   const q=document.getElementById('aiQuestion'), a=document.getElementById('aiAnswer'), m=document.getElementById('aiMeta'), st=document.getElementById('aiSpeechStatus');
   if(q)q.value=''; if(a)a.textContent=''; if(m)m.textContent=''; if(st)st.textContent='';
 }
-function getAIAnswerText(){return (document.getElementById('aiAnswer')?.textContent||'').trim();}
+function getAIAnswerText(){const el=document.getElementById('aiAnswer'); return (el?.innerText||el?.textContent||'').trim();}
 function chooseVietnameseMaleVoice(voices){
   const vi=voices.filter(v=>/^vi(-|_)?VN/i.test(v.lang)||/Vietnam|Tiếng Việt|Viet Nam/i.test(v.name));
   const male=vi.find(v=>/male|nam|minh|an|duy|hoang|hùng|hung/i.test(v.name));
   return male||vi.find(v=>/Google|Microsoft|Natural|Online/i.test(v.name))||vi[0]||voices.find(v=>/^vi/i.test(v.lang))||null;
 }
+function splitSpeechText(text){
+  const clean=String(text||'').replace(/\s+/g,' ').trim();
+  if(!clean)return [];
+  const parts=clean.match(/[^.!?…]+[.!?…]+(?:\s+|$)|[^.!?…]+$/g)||[clean];
+  const chunks=[]; let cur='';
+  parts.forEach(part=>{part=part.trim(); if(!part)return; if((cur+' '+part).length>900){if(cur)chunks.push(cur);cur=part}else cur+=(cur?' ':'')+part;});
+  if(cur)chunks.push(cur);
+  return chunks;
+}
+let aiSpeechQueue=[], aiSpeechIndex=0, aiSpeechStopped=false;
 function speakAIAnswer(){
   const text=getAIAnswerText();
   const status=document.getElementById('aiSpeechStatus');
   if(!text||/^AI sẽ trả lời|^⏳ AI đang|^❌/.test(text)){if(status)status.textContent='⚠️ Chưa có nội dung AI để đọc.';return;}
   if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){if(status)status.textContent='⚠️ Thiết bị/trình duyệt này không hỗ trợ đọc văn bản.';return;}
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang='vi-VN'; u.rate=.92; u.pitch=.9; u.volume=1;
-  const setVoice=()=>{const voice=chooseVietnameseMaleVoice(speechSynthesis.getVoices());if(voice)u.voice=voice;};
-  setVoice();
-  u.onstart=()=>{if(status)status.textContent='🔊 Đang đọc toàn bộ câu trả lời của AI...';};
-  u.onend=()=>{if(status)status.textContent='✅ Đã đọc xong câu trả lời.';};
-  u.onerror=()=>{if(status)status.textContent='⚠️ Không thể phát âm thanh trên thiết bị này.';};
-  speechSynthesis.speak(u);
+  stopAISpeech(false); aiSpeechStopped=false; aiSpeechQueue=splitSpeechText(text); aiSpeechIndex=0;
+  if(status)status.textContent=`🔊 Đang đọc toàn bộ câu trả lời (${aiSpeechQueue.length} đoạn)...`;
+  const speakNext=()=>{
+    if(aiSpeechStopped||aiSpeechIndex>=aiSpeechQueue.length){if(!aiSpeechStopped&&status)status.textContent='✅ Đã đọc xong toàn bộ câu trả lời.';return;}
+    const u=new SpeechSynthesisUtterance(aiSpeechQueue[aiSpeechIndex++]);
+    u.lang='vi-VN'; u.rate=.9; u.pitch=.9; u.volume=1;
+    const voice=chooseVietnameseMaleVoice(speechSynthesis.getVoices()); if(voice)u.voice=voice;
+    u.onend=()=>{if(!aiSpeechStopped){setTimeout(speakNext,60)}};
+    u.onerror=()=>{if(!aiSpeechStopped&&status)status.textContent='⚠️ Trình đọc gặp lỗi ở đoạn '+aiSpeechIndex+'/'+aiSpeechQueue.length+'. Có thể bấm Nghe toàn bộ để thử lại.';};
+    speechSynthesis.speak(u);
+  };
+  if(!speechSynthesis.getVoices().length) setTimeout(speakNext,300); else speakNext();
+}
+function stopAISpeech(showStatus=true){
+  aiSpeechStopped=true; aiSpeechQueue=[]; aiSpeechIndex=0;
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+  if(showStatus){const status=document.getElementById('aiSpeechStatus'); if(status)status.textContent='⏹ Đã dừng đọc.';}
 }
 function stopAISpeech(){
   if('speechSynthesis' in window)speechSynthesis.cancel();
@@ -1143,7 +1161,8 @@ async function askAI(){
     const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';
     const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question,stateKey:currentStateKey})});
     const body=await res.json().catch(()=>({})); if(!res.ok)throw new Error(body.error||`AI trả về lỗi HTTP ${res.status}`);
-    ans.textContent=body.answer||'AI chưa trả về nội dung.'; ans.scrollTop=0; meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`; const st=document.getElementById('aiSpeechStatus'); if(st)st.textContent='';
+    const fullAnswer = typeof body.answer==='string' ? body.answer : (body.answer?.text || body.answer?.content || JSON.stringify(body.answer));
+    ans.textContent=fullAnswer||'AI chưa trả về nội dung.'; ans.scrollTop=0; ans.style.maxHeight='none'; ans.style.height='auto'; ans.style.overflow='visible'; meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`; const st=document.getElementById('aiSpeechStatus'); if(st)st.textContent='';
   }catch(e){console.error(e);ans.textContent='❌ '+(e.message||e);meta.textContent='Kiểm tra Edge Function ai-class-assistant và GEMINI_API_KEY trong Supabase.'}
   finally{btn.classList.remove('ai-busy');btn.disabled=false;}
 }
