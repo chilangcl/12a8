@@ -1129,9 +1129,37 @@ function buildAIContext(){
     recentConduct:approved.slice(-100).map(x=>({date:x.date,type:x.type,points:Number(x.points||0),student:byId[x.studentId]?.name||'Không rõ',content:x.content||''}))
   };
 }
+function buildAIGenderSummary(context){
+  const g=context?.summary?.gender||{};
+  return `TÓM TẮT GIỚI TÍNH: Nam=${Number(g.nam||0)}, Nữ=${Number(g.nu||0)}, Khác=${Number(g.khac||0)}, Chưa có dữ liệu=${Number(g.chuaCo||0)}.`;
+}
 function buildAIPrompt(question,context){
-  const data=JSON.stringify(context);
-  return `Bạn là Trợ lý AI GVCN của Sổ Chủ Nhiệm Số. Hãy trả lời dựa trên DỮ LIỆU THỰC TẾ được cung cấp bên dưới.\n\nQUY TẮC BẮT BUỘC:\n1. Phải sử dụng các trường dữ liệu đã có, đặc biệt là giới tính (gender), họ tên, mã học sinh, tổ, chức vụ, chuyên cần và rèn luyện.\n2. Không được suy đoán giới tính từ tên. Nếu trường gender có giá trị thì coi đó là dữ liệu chính thức của hệ thống. Nếu gender trống thì mới nói là chưa có dữ liệu giới tính của học sinh đó.\n3. Khi người dùng hỏi số lượng nam/nữ hoặc hỏi giới tính của một học sinh, hãy thống kê/tra cứu trực tiếp từ trường gender trong dữ liệu, không đoán.\n4. Không được nói rằng hệ thống không có trường giới tính nếu dữ liệu JSON bên dưới có trường gender.\n5. Không tự bịa dữ liệu. Nếu dữ liệu không đủ để kết luận, nói rõ phần nào chưa có dữ liệu.\n6. Không sử dụng hoặc nhắc lại số điện thoại, địa chỉ, email, thông tin phụ huynh hay ngày sinh trừ khi câu hỏi thực sự yêu cầu và dữ liệu được phép sử dụng.\n7. Trả lời bằng tiếng Việt, rõ ràng, dễ đọc, ưu tiên bảng/danh sách khi phù hợp.\n\nDỮ LIỆU LỚP:\n${data}\n\nCÂU HỎI CỦA GVCN:\n${question}`;
+  /*
+   * FIX 4: Không nhúng toàn bộ JSON lớp vào trường "question".
+   * Bản cũ gửi cùng một dữ liệu hai lần: một lần trong aiPrompt và một lần
+   * ở trường context. Với lớp đông học sinh, Edge Function có thể cắt chuỗi
+   * question ở cuối, làm mất phần câu hỏi thực tế và Gemini hiểu rằng câu hỏi
+   * bị "gián đoạn ở cuối".
+   *
+   * Từ bản này:
+   * - question chỉ chứa hướng dẫn ngắn + câu hỏi thật của GVCN.
+   * - context chứa dữ liệu lớp đúng một lần.
+   */
+  return `Bạn là Trợ lý AI GVCN của Sổ Chủ Nhiệm Số.
+
+QUY TẮC BẮT BUỘC:
+1. Chỉ sử dụng dữ liệu thực tế trong trường "context" được gửi kèm.
+2. Phải sử dụng các trường đã có, đặc biệt: mã HS, họ tên, giới tính (gender), tổ, chức vụ, chuyên cần và rèn luyện.
+3. Không suy đoán giới tính từ tên. Nếu gender có giá trị thì đó là dữ liệu chính thức.
+4. Khi hỏi số lượng nam/nữ hoặc giới tính của học sinh, phải thống kê trực tiếp từ gender.
+5. Không được nói "hệ thống không có thông tin giới tính" nếu context có trường gender.
+6. Không tự bịa dữ liệu. Nếu dữ liệu thực sự thiếu thì nói rõ.
+7. Trả lời bằng tiếng Việt, đầy đủ, rõ ràng và không tự cắt câu trả lời giữa chừng.
+8. Nếu câu hỏi chỉ cần một phép thống kê đơn giản, trả lời kết quả trước rồi nêu cách tính ngắn gọn.
+9. Không lặp lại toàn bộ JSON dữ liệu lớp trong câu trả lời.
+
+CÂU HỎI CỦA GVCN:
+${question}`;
 }
 function clearAIAnswer(){
   stopAISpeech();
@@ -1192,10 +1220,23 @@ async function askAI(){
     const aiPrompt=buildAIPrompt(question,context);
     const {data:{session}}=await sb.auth.getSession(); if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');
     const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';
-    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:aiPrompt,stateKey:currentStateKey,context})});
+
+    /*
+     * FIX 4:
+     * Không gửi context lặp lại bên trong question. Edge Function nhận:
+     *   - question: hướng dẫn ngắn + câu hỏi thật
+     *   - context: dữ liệu lớp đúng một lần
+     * Điều này tránh làm request quá dài và tránh việc câu hỏi bị cắt ở cuối.
+     */
+    const payload={question:aiPrompt,stateKey:currentStateKey,context};
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});
     const body=await res.json().catch(()=>({})); if(!res.ok)throw new Error(body.error||`AI trả về lỗi HTTP ${res.status}`);
     const fullAnswer = typeof body.answer==='string' ? body.answer : (body.answer?.text || body.answer?.content || JSON.stringify(body.answer));
-    ans.textContent=fullAnswer||'AI chưa trả về nội dung.'; ans.scrollTop=0; ans.style.maxHeight='none'; ans.style.height='auto'; ans.style.overflow='visible'; meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`; const st=document.getElementById('aiSpeechStatus'); if(st)st.textContent='';
+    ans.textContent=fullAnswer||'AI chưa trả về nội dung.';
+    ans.scrollTop=0; ans.style.maxHeight='none'; ans.style.height='auto'; ans.style.overflow='visible';
+    const finishReason=body.finishReason||body.finish_reason||body.meta?.finishReason||body.meta?.finish_reason||'';
+    meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}`;
+    const st=document.getElementById('aiSpeechStatus'); if(st)st.textContent='';
   }catch(e){console.error(e);ans.textContent='❌ '+(e.message||e);meta.textContent='Kiểm tra Edge Function ai-class-assistant và GEMINI_API_KEY trong Supabase.'}
   finally{btn.classList.remove('ai-busy');btn.disabled=false;}
 }
