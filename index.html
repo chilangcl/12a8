@@ -1157,6 +1157,7 @@ QUY TẮC BẮT BUỘC:
 7. Trả lời bằng tiếng Việt, đầy đủ, rõ ràng và không tự cắt câu trả lời giữa chừng.
 8. Nếu câu hỏi chỉ cần một phép thống kê đơn giản, trả lời kết quả trước rồi nêu cách tính ngắn gọn.
 9. Không lặp lại toàn bộ JSON dữ liệu lớp trong câu trả lời.
+10. Không dùng Markdown, không dùng dấu **, ##, ###, dấu backtick hoặc bảng Markdown. Viết như một người trợ lý đang nói chuyện tự nhiên với GVCN, câu văn ngắn, dễ đọc và dễ nghe.
 
 CÂU HỎI CỦA GVCN:
 ${question}`;
@@ -1166,14 +1167,43 @@ function clearAIAnswer(){
   const q=document.getElementById('aiQuestion'), a=document.getElementById('aiAnswer'), m=document.getElementById('aiMeta'), st=document.getElementById('aiSpeechStatus');
   if(q)q.value=''; if(a)a.textContent=''; if(m)m.textContent=''; if(st)st.textContent='';
 }
-function getAIAnswerText(){const el=document.getElementById('aiAnswer'); return (el?.innerText||el?.textContent||'').trim();}
+function cleanAIText(text){
+  let t=String(text||'');
+  // Bỏ markdown/formatting để giao diện và giọng đọc nghe tự nhiên hơn.
+  t=t.replace(/```[\s\S]*?```/g, m=>m.replace(/```/g,''));
+  t=t.replace(/\*\*(.*?)\*\*/g,'$1').replace(/__(.*?)__/g,'$1');
+  t=t.replace(/`([^`]+)`/g,'$1');
+  t=t.replace(/^#{1,6}\s*/gm,'');
+  t=t.replace(/^\s*[-*•]\s+/gm,'• ');
+  t=t.replace(/^\s*>\s?/gm,'');
+  t=t.replace(/\[(.*?)\]\([^)]+\)/g,'$1');
+  t=t.replace(/\r/g,'');
+  t=t.replace(/[ \t]+\n/g,'\n');
+  t=t.replace(/\n{3,}/g,'\n\n');
+  return t.trim();
+}
+function renderAIAnswer(text){
+  const el=document.getElementById('aiAnswer');
+  if(!el)return;
+  el.textContent=cleanAIText(text);
+  el.style.whiteSpace='pre-wrap';
+  el.style.wordBreak='break-word';
+  el.style.overflowWrap='anywhere';
+  el.style.maxHeight='none';
+  el.style.height='auto';
+  el.style.overflow='visible';
+}
+function getAIAnswerText(){
+  const el=document.getElementById('aiAnswer');
+  return cleanAIText(el?.innerText||el?.textContent||'');
+}
 function chooseVietnameseMaleVoice(voices){
   const vi=voices.filter(v=>/^vi(-|_)?VN/i.test(v.lang)||/Vietnam|Tiếng Việt|Viet Nam/i.test(v.name));
   const male=vi.find(v=>/male|nam|minh|an|duy|hoang|hùng|hung/i.test(v.name));
   return male||vi.find(v=>/Google|Microsoft|Natural|Online/i.test(v.name))||vi[0]||voices.find(v=>/^vi/i.test(v.lang))||null;
 }
 function splitSpeechText(text){
-  const clean=String(text||'').replace(/\s+/g,' ').trim();
+  const clean=cleanAIText(text).replace(/\s+/g,' ').trim();
   if(!clean)return [];
   const parts=clean.match(/[^.!?…]+[.!?…]+(?:\s+|$)|[^.!?…]+$/g)||[clean];
   const chunks=[]; let cur='';
@@ -1203,43 +1233,116 @@ function speakAIAnswer(){
 function stopAISpeech(showStatus=true){
   aiSpeechStopped=true; aiSpeechQueue=[]; aiSpeechIndex=0;
   if('speechSynthesis' in window)speechSynthesis.cancel();
-  if(showStatus){const status=document.getElementById('aiSpeechStatus'); if(status)status.textContent='⏹ Đã dừng đọc.';}
-}
-function stopAISpeech(){
-  if('speechSynthesis' in window)speechSynthesis.cancel();
-  const status=document.getElementById('aiSpeechStatus'); if(status)status.textContent='⏹ Đã dừng đọc.';
+  if(showStatus){
+    const status=document.getElementById('aiSpeechStatus');
+    if(status)status.textContent='⏹ Đã dừng đọc.';
+  }
 }
 if('speechSynthesis' in window){speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();}
 async function askAIQuick(q){document.getElementById('aiQuestion').value=q;await askAI();}
+function isGenderCountQuestion(q){
+  const t=String(q||'').toLowerCase();
+  return /(bao nhiêu|số lượng|có bao nhiêu).*(nam).*(nữ|nu)/i.test(t) ||
+         /(nam).*(nữ|nu).*(bao nhiêu|số lượng)/i.test(t);
+}
+function buildGenderCountAnswer(context){
+  const g=context?.summary?.gender||{};
+  const total=Number(context?.summary?.students||0);
+  const nam=Number(g.nam||0), nu=Number(g.nu||0), khac=Number(g.khac||0), chua=Number(g.chuaCo||0);
+  const known=nam+nu+khac;
+  const lines=[
+    `Lớp ${context?.class?.name||''} hiện có ${total} học sinh.`,
+    `Trong đó có ${nam} học sinh nam và ${nu} học sinh nữ.`
+  ];
+  if(khac) lines.push(`Có ${khac} học sinh có giới tính khác.`);
+  if(chua) lines.push(`Có ${chua} học sinh chưa cập nhật giới tính.`);
+  if(total!==known+chua) lines.push(`Đối chiếu dữ liệu: ${known+chua} học sinh đã được phân loại giới tính.`);
+  return lines.join('\\n');
+}
+function looksTruncatedAIAnswer(text){
+  const t=cleanAIText(text);
+  if(!t)return true;
+  if(t.length<180 && /tổng hợp|thống kê|dưới đây|thông tin hiện tại/i.test(t))return true;
+  if(/(?:^|\\n)\\s*(?:\\d+\\.|[IVX]+\\.|Phần\\s+\\d+|Thống kê chung)\\s*$/i.test(t))return true;
+  return false;
+}
 async function askAI(){
-  if(!isAdmin()){alert('🔒 Chỉ GVCN mới được sử dụng Trợ lý AI.');return}
-  const question=document.getElementById('aiQuestion')?.value.trim(); if(!question){alert('Thầy hãy nhập câu hỏi.');return}
-  const btn=document.getElementById('aiAskBtn'), ans=document.getElementById('aiAnswer'), meta=document.getElementById('aiMeta'); btn.classList.add('ai-busy');btn.disabled=true;ans.textContent='⏳ AI đang phân tích dữ liệu lớp...';meta.textContent='AI sẽ đọc dữ liệu lớp đang chọn, gồm hồ sơ học sinh cần thiết (mã HS, họ tên, giới tính, tổ, chức vụ), chuyên cần và rèn luyện.';
+  const q=document.getElementById('aiQuestion'), ans=document.getElementById('aiAnswer'), meta=document.getElementById('aiMeta'), btn=document.getElementById('aiAskBtn');
+  const question=(q?.value||'').trim();
+  if(!question){if(ans)renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}
+  stopAISpeech(false);
+  btn.disabled=true; btn.classList.add('ai-busy');
+  renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');
+  if(meta)meta.textContent='AI đang đọc dữ liệu lớp đang chọn...';
+
   try{
     const context=buildAIContext();
-    const aiPrompt=buildAIPrompt(question,context);
-    const {data:{session}}=await sb.auth.getSession(); if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');
-    const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';
 
     /*
-     * FIX 4:
-     * Không gửi context lặp lại bên trong question. Edge Function nhận:
-     *   - question: hướng dẫn ngắn + câu hỏi thật
-     *   - context: dữ liệu lớp đúng một lần
-     * Điều này tránh làm request quá dài và tránh việc câu hỏi bị cắt ở cuối.
+     * Với các phép thống kê cơ bản có thể xác định tuyệt đối từ dữ liệu cục bộ,
+     * hệ thống trả lời trực tiếp từ dữ liệu đã kiểm tra thay vì phụ thuộc vào
+     * giới hạn sinh văn bản của Gemini. Điều này đặc biệt tránh lỗi câu trả lời
+     * bị dừng giữa chừng ở các câu hỏi nam/nữ.
      */
+    if(isGenderCountQuestion(question)){
+      const answer=buildGenderCountAnswer(context);
+      renderAIAnswer(answer);
+      if(meta)meta.textContent=`🤖 Trợ lý AI · Thống kê trực tiếp từ dữ liệu lớp · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;
+      return;
+    }
+
+    const aiPrompt=buildAIPrompt(question,context);
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');
+
+    const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';
     const payload={question:aiPrompt,stateKey:currentStateKey,context};
-    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});
-    const body=await res.json().catch(()=>({})); if(!res.ok)throw new Error(body.error||`AI trả về lỗi HTTP ${res.status}`);
-    const fullAnswer = typeof body.answer==='string' ? body.answer : (body.answer?.text || body.answer?.content || JSON.stringify(body.answer));
-    ans.textContent=fullAnswer||'AI chưa trả về nội dung.';
-    ans.scrollTop=0; ans.style.maxHeight='none'; ans.style.height='auto'; ans.style.overflow='visible';
-    const finishReason=body.finishReason||body.finish_reason||body.meta?.finishReason||body.meta?.finish_reason||'';
-    meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}`;
-    const st=document.getElementById('aiSpeechStatus'); if(st)st.textContent='';
-  }catch(e){console.error(e);ans.textContent='❌ '+(e.message||e);meta.textContent='Kiểm tra Edge Function ai-class-assistant và GEMINI_API_KEY trong Supabase.'}
-  finally{btn.classList.remove('ai-busy');btn.disabled=false;}
+    const res=await fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+      body:JSON.stringify(payload)
+    });
+    const body=await res.json().catch(()=>({}));
+    if(!res.ok)throw new Error(body.error||`AI trả về lỗi HTTP ${res.status}`);
+
+    let fullAnswer=typeof body.answer==='string'
+      ? body.answer
+      : (body.answer?.text || body.answer?.content || JSON.stringify(body.answer));
+
+    /*
+     * Nếu Edge Function/Gemini chỉ trả về phần mở đầu, thử lại một lần bằng
+     * yêu cầu cực ngắn. Nếu vẫn thiếu thì hiển thị phần đã nhận thay vì giả
+     * vờ rằng đó là câu trả lời hoàn chỉnh.
+     */
+    if(looksTruncatedAIAnswer(fullAnswer)){
+      const retryPrompt=`Trả lời trực tiếp câu hỏi sau bằng tiếng Việt, tối đa 8 câu, không dùng Markdown, không dùng dấu *, không mở đầu dài dòng. Chỉ dùng dữ liệu trong context. Nếu là câu hỏi thống kê, nêu con số chính xác trước.\n\nCâu hỏi: ${question}`;
+      const retry=await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
+        body:JSON.stringify({question:retryPrompt,stateKey:currentStateKey,context})
+      });
+      const retryBody=await retry.json().catch(()=>({}));
+      if(retry.ok){
+        const candidate=typeof retryBody.answer==='string'
+          ? retryBody.answer
+          : (retryBody.answer?.text || retryBody.answer?.content || '');
+        if(candidate && !looksTruncatedAIAnswer(candidate)) fullAnswer=candidate;
+      }
+    }
+
+    renderAIAnswer(fullAnswer||'AI chưa trả về nội dung.');
+    const finishReason=body.finishReason||body.finish_reason||body.meta?.finishReason||'';
+    if(meta)meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}`;
+  }catch(e){
+    console.error(e);
+    renderAIAnswer('❌ '+(e.message||e));
+    if(meta)meta.textContent='Kiểm tra Edge Function ai-class-assistant và GEMINI_API_KEY trong Supabase.';
+  }finally{
+    btn.classList.remove('ai-busy');
+    btn.disabled=false;
+  }
 }
+
 document.getElementById('loginPass')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();login()}});
 if(window.__supabaseInitError){setLoginStatus('❌ Không tải được Supabase: '+window.__supabaseInitError.message)}
 window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.show').forEach(x=>x.classList.remove('show'))}})
