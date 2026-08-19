@@ -263,6 +263,28 @@ input,select,textarea,button{max-width:100%;}
   .guest-honor-date{font-size:11px;color:#64748b;font-weight:600;margin-top:4px}
   @media(max-width:680px){.guest-honor-card{padding:13px;border-radius:16px}.guest-honor-grid{grid-template-columns:1fr}.guest-honor-name{min-height:42px;display:flex;align-items:center}.guest-honor-item{grid-template-columns:1fr;gap:5px}}
   @media(max-width:680px){.guest-honor-card{padding:13px;border-radius:16px}.guest-honor-grid{grid-template-columns:1fr}.guest-honor-name{min-height:42px;display:flex;align-items:center}}
+
+<style id="bibi-ai-quota-mobile-fix">
+.ai-error-card{margin-top:8px;padding:14px 15px;border-radius:14px;border:1px solid #fecaca;background:#fff7f7;color:#991b1b;line-height:1.6;overflow-wrap:anywhere;word-break:break-word}.ai-error-card strong{display:block;margin-bottom:4px}.ai-error-card .ai-retry-note{margin-top:7px;color:#7f1d1d;font-size:13px}@media(max-width:680px){.ai-answer{width:100%;min-width:0;max-width:100%;font-size:16px;line-height:1.72;padding:14px;overflow-wrap:anywhere;word-break:break-word}.ai-chat .actions,.ai-speech-actions{grid-template-columns:1fr 1fr;width:100%}.ai-chat .actions .btn,.ai-speech-actions .btn{min-height:48px}}
+</style>
+</style>
+<style id="bibi-modern-polish">
+.brand-logo{display:inline-flex!important;align-items:center;justify-content:center;width:auto!important;min-width:46px;height:38px!important;padding:0 12px!important;border-radius:12px!important;background:linear-gradient(135deg,#0d9488,#14b8a6)!important;color:#fff!important;font-size:14px!important;font-weight:900!important;box-shadow:0 6px 18px rgba(20,184,166,.25);white-space:nowrap}
+.guest-logo{background:linear-gradient(135deg,#0d9488,#14b8a6)!important;box-shadow:0 5px 15px rgba(20,184,166,.25)}
+.logo{background:linear-gradient(135deg,#0d9488,#14b8a6)!important;box-shadow:0 8px 22px rgba(20,184,166,.25)}
+.login-card{border:1px solid rgba(20,184,166,.15)}
+body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),transparent 28%),radial-gradient(circle at 90% 20%,rgba(16,185,129,.07),transparent 25%)}
+.app-copyright{text-align:center;color:#64748b;font-size:12px;line-height:1.6;padding:18px 14px 24px;margin-top:8px}
+.card,.page .notice,.modal-card,.guest-card{box-shadow:0 8px 26px rgba(15,23,42,.06)}
+.card{position:relative;overflow:hidden}
+.card::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:linear-gradient(90deg,#4f46e5,#10b981,#06b6d4);opacity:.75}
+.btn{box-shadow:0 5px 14px rgba(79,70,229,.12);transition:transform .16s ease,box-shadow .16s ease}
+.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(79,70,229,.18)}
+#page-competition .toolbar{background:linear-gradient(135deg,#eef2ff,#ecfeff);padding:12px;border-radius:16px;border:1px solid #c7d2fe}
+#page-competition #compPeriod{min-height:44px;border-radius:12px;font-weight:700}
+#page-competition .kpi-row{background:linear-gradient(90deg,#fff,#f8fafc);border-radius:10px;padding-left:10px!important;padding-right:10px!important;margin-bottom:4px}
+.ai-answer{font-size:16px;max-height:none!important;height:auto!important;overflow:visible!important}
+@media(max-width:680px){.app-copyright{font-size:11px;padding:16px 12px 28px}.brand-logo{font-size:13px!important;padding:0 10px!important}.card{border-radius:18px}.btn{min-height:44px}}
 </style>
 </head>
 <body>
@@ -280,26 +302,19 @@ input,select,textarea,button{max-width:100%;}
 
 <div id="loginScreen" class="login">
   <div class="login-card">
-    <div class="logo">NVH</div>
-    <h1>Sổ Chủ Nhiệm Số</h1>
-    <div class="sub">NVH · GVCN: Nguyễn Văn Hoàng</div>
-    <div class="notice" style="margin-bottom:14px;background:#eff6ff;border-color:#bfdbfe;color:#1e40af">
-      🏫 <b>Chọn năm học và lớp:</b> sau khi nhập đúng tài khoản và mật khẩu, hệ thống sẽ hiện cửa sổ để thầy/cán bộ lớp chọn năm học và lớp được phân quyền.
-    </div>
-    <div id="cloudNotice" class="notice" style="margin-bottom:14px;background:#f8fafc;border-color:#cbd5e1;color:#334155">
-      ☁️ Chế độ online: kết nối cơ sở dữ liệu Supabase.
-    </div>
+    <div class="logo">🎓</div><h1>ClassManager Pro</h1>
+    <div class="sub">Created by Nguyen Van Hoang</div>
     <div class="field"><label>Tài khoản</label><input id="loginUser" placeholder="Nhập tài khoản"></div>
     <div class="field"><label>Mật khẩu</label><input id="loginPass" type="password" placeholder="Nhập mật khẩu"></div>
     <button class="btn" style="width:100%;margin-top:6px" onclick="login()">Đăng nhập</button>
     <button class="guest-btn" type="button" onclick="openGuestMode()">👀 Xem thông tin lớp — Khách (không cần đăng nhập)</button>
-    <div class="footer-note">Bản online: dữ liệu chính lưu trên Supabase; trình duyệt chỉ giữ bản tạm để tăng tốc.</div>
+    <div class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy giáo Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</div>
   </div>
 </div>
 
 <div id="guestScreen" class="guest-screen hidden">
   <div class="guest-top">
-    <div class="guest-brand"><span class="guest-logo">NVH</span><div>Sổ Chủ Nhiệm Số<small style="display:block;color:#94a3b8;font-weight:500">Chế độ Khách · Chỉ xem</small></div></div>
+    <div class="guest-brand"><span class="guest-logo">🎓</span><div>ClassManager Pro<small style="display:block;color:#94a3b8;font-weight:500">Chế độ Khách · Chỉ xem</small></div></div>
     <button class="guest-back" onclick="closeGuestMode()">↩ Quay lại đăng nhập</button>
   </div>
   <div class="guest-wrap">
@@ -313,17 +328,18 @@ input,select,textarea,button{max-width:100%;}
       <div class="guest-note">🔒 Chế độ Khách chỉ hiển thị dữ liệu công khai cần thiết. Riêng mục <b>Vinh danh</b> hiển thị họ tên, nội dung ghi nhận và số điểm cộng/trừ của các trường hợp đã được GVCN duyệt; không hiển thị ngày sinh, số điện thoại, địa chỉ, hồ sơ cá nhân hoặc thông tin phụ huynh.</div>
     </div>
     <div id="guestContent" class="guest-loading">⏳ Đang tải dữ liệu công khai...</div>
+    <div class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy giáo Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</div>
   </div>
 </div>
 
 <div id="app" class="app hidden">
 <div class="layout">
   <aside class="sidebar" id="sidebar">
-    <div class="brand"><span class="brand-logo">NVH</span> Sổ Chủ Nhiệm Số <small id="brandClassYear">12A8 · 2026–2027</small></div>
+    <div class="brand"><span class="brand-logo">🎓 ClassManager Pro</span> <small id="brandClassYear">12A8 · 2026–2027</small></div>
     <div class="nav">
       <div class="nav-title">Tổng quan</div>
       <button data-page="dashboard" onclick="showPage('dashboard')">🏠 Trang chủ</button>
-      <button class="admin-only ai-nav-btn" data-page="ai" onclick="showPage('ai')">🤖 Trợ lý AI GVCN <span class="ai-nav-badge">AI</span></button>
+      <button class="admin-only ai-nav-btn" data-page="ai" onclick="showPage('ai')">🤖 Trợ lý AI <span class="ai-nav-badge">AI</span></button>
        <button class="admin-only" data-page="classes" onclick="showPage('classes')">🏫 Quản lý lớp & năm học</button>
       <button data-page="students" onclick="showPage('students')">👨‍🎓 Học sinh</button>
       <button data-page="attendance" onclick="showPage('attendance')">📅 Chuyên cần</button>
@@ -387,7 +403,7 @@ input,select,textarea,button{max-width:100%;}
       </section>
 
       <section id="page-ai" class="page">
-        <div class="page-head"><div><h2>🤖 Trợ lý AI GVCN</h2><div class="muted">Phân tích dữ liệu lớp và trả lời câu hỏi dựa trên dữ liệu thực tế của lớp đang chọn.</div></div><span class="ai-badge">🔐 Chỉ GVCN</span></div>
+        <div class="page-head"><div><h2>🤖 Trợ lý AI</h2><div class="muted">Phân tích dữ liệu lớp và trả lời câu hỏi dựa trên dữ liệu thực tế của lớp đang chọn.</div></div><span class="ai-badge">🔐 Chỉ GVCN</span></div>
         <div class="notice ok">AI chỉ hỗ trợ phân tích và gợi ý. Điểm danh, điểm rèn luyện, hạnh kiểm và các quyết định giáo dục vẫn do GVCN thực hiện.</div>
         <div class="card ai-page">
           <div><h3 style="margin:0 0 8px">⚡ Gợi ý nhanh</h3><div class="ai-quick">
@@ -492,7 +508,7 @@ input,select,textarea,button{max-width:100%;}
 
       <section id="page-competition" class="page">
         <div class="page-head"><div><h2>Thi đua</h2><div class="muted">Tổng hợp điểm rèn luyện, chuyên cần và Hạnh kiểm theo từng giai đoạn</div></div></div>
-        <div class="toolbar"><select id="compPeriod" onchange="renderCompetition()"><option value="week">Tuần</option><option value="month">Tháng</option><option value="hki">Học kỳ 1</option><option value="hkii">Học kỳ 2</option><option value="year">Cả năm</option></select><select id="compMonth" onchange="renderCompetition()" style="display:none"></select></div>
+        <div class="toolbar"><div class="field" style="min-width:280px"><label>Giai đoạn thi đua</label><select id="compPeriod" onchange="renderCompetition()"></select></div></div>
         <div class="grid two"><div class="card"><h3>🏆 Hạnh kiểm theo học sinh</h3><div id="conductRanking"></div></div><div class="card"><h3>👥 Tổng hợp theo tổ</h3><div id="groupRanking"></div></div></div>
         <div class="card" style="margin-top:16px"><h3>📌 Nguyên tắc xếp Hạnh kiểm</h3><div class="notice ok">Mỗi học sinh có 100 điểm/tuần. Điểm cộng được cộng, điểm trừ bị trừ. <b>Tốt ≥ 96</b>; <b>Khá 90–&lt;96</b>; <b>Đạt 85–&lt;90</b>; <b>Chưa đạt &lt;85</b>. Tháng/HK/Cả năm được tính từ kết quả các tuần tương ứng.</div><div id="conductSummary"></div></div>
       </section>
@@ -551,11 +567,12 @@ input,select,textarea,button{max-width:100%;}
           </div>
           <button class="btn" onclick="saveSettings()">💾 Lưu cài đặt</button>
         </div>
-        <div class="card" style="margin-top:16px;border:1px solid #f59e0b;background:#fffbeb"><h3>🔄 Bắt đầu năm học mới</h3><p class="muted">Xóa riêng toàn bộ dữ liệu <strong>điểm danh</strong> (có mặt, đi muộn, nghỉ có phép, nghỉ không phép) để bắt đầu lại. Danh sách học sinh, tài khoản, sơ đồ chỗ ngồi, rèn luyện, hạnh kiểm và cài đặt lớp vẫn được giữ nguyên.</p><button class="btn" style="background:#f59e0b;color:#fff" onclick="resetAttendanceOnly()">🔄 Reset điểm danh năm học</button></div>
+        <div class="card" style="margin-top:16px;border:1px solid #f59e0b;background:#fffbeb"><h3>🔄 Bắt đầu năm học mới</h3><p class="muted">Xóa riêng toàn bộ dữ liệu <strong>điểm danh</strong> (có mặt, đi muộn, nghỉ có phép, nghỉ không phép) để bắt đầu lại. Danh sách học sinh, tài khoản, rèn luyện, hạnh kiểm và cài đặt lớp vẫn được giữ nguyên.</p><button class="btn" style="background:#f59e0b;color:#fff" onclick="resetAttendanceOnly()">🔄 Reset điểm danh năm học</button></div>
         <div class="card" style="margin-top:16px"><h3>⚠️ Xóa toàn bộ dữ liệu</h3><p class="muted">Chỉ dùng khi thực sự muốn xóa toàn bộ dữ liệu của lớp. Hãy sao lưu trước.</p><button class="btn danger" onclick="resetAll()">Xóa toàn bộ dữ liệu</button></div>
       </section>
 
     </div>
+    <footer class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy giáo Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</footer>
   </main>
 </div>
 </div>
@@ -745,7 +762,7 @@ function toggleSidebar(){
  const hidden=sidebar.classList.contains('menu-hidden');
  setSidebarHidden(!hidden);
 }
-const titles={dashboard:'Trang chủ',ai:'Trợ lý AI GVCN',classes:'Quản lý lớp & năm học',students:'Học sinh',attendance:'Chuyên cần',conduct:'Rèn luyện',competition:'Thi đua',reports:'Báo cáo tổng hợp',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
+const titles={dashboard:'Trang chủ',ai:'Trợ lý AI',classes:'Quản lý lớp & năm học',students:'Học sinh',attendance:'Chuyên cần',conduct:'Rèn luyện',competition:'Thi đua',reports:'Báo cáo tổng hợp',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
 function showPage(name){
  if(['excel','users','ai'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');
@@ -859,9 +876,9 @@ function academicWeekStart(dateStr){
  if(!d||!start||d<start||d>dateObj(BIBI_ACADEMIC_END))return null;
  const diff=Math.floor((d-start)/86400000); return new Date(start.getTime()+Math.floor(diff/7)*7*86400000);
 }
-function academicWeekNumber(dateStr){const ws=academicWeekStart(dateStr);if(!ws)return null;return Math.floor((ws-dateObj(BIBI_ACADEMIC_START))/86400000/7)+1}
+function academicWeekNumber(dateStr){const ws=academicWeekStart(dateStr);if(!ws)return null;return Math.min(35,Math.floor((ws-dateObj(BIBI_ACADEMIC_START))/86400000/7)+1)}
 function academicWeekRange(n){const start=dateObj(BIBI_ACADEMIC_START);if(!start||!n)return null;const s=new Date(start.getTime()+(Number(n)-1)*7*86400000);const e=new Date(s.getTime()+6*86400000);return {start:s,end:e,number:Number(n)}}
-function allAcademicWeeks(){const out=[];for(let n=1;;n++){const r=academicWeekRange(n);if(!r||r.start>dateObj(BIBI_ACADEMIC_END))break;out.push(r)}return out}
+function allAcademicWeeks(){const out=[];for(let n=1;n<=35;n++){const r=academicWeekRange(n);if(!r)break;out.push(r)}return out}
 function conductWeeklyScore(sid,weekStart){
  const ws=isoDate(weekStart), end=new Date(weekStart.getTime()+6*86400000), es=isoDate(end);
  return 100+(state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved'&&x.date>=ws&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0);
@@ -870,9 +887,9 @@ function gradeFromScore(score){score=Number(score||0);if(score>=96)return'Tốt'
 function periodRange(period,detail){
  if(period==='week'){const r=academicWeekRange(Number(detail)||academicWeekNumber(today())||1);return r?{start:isoDate(r.start),end:isoDate(r.end),label:`Tuần ${r.number} (${fmtDate(isoDate(r.start))}–${fmtDate(isoDate(r.end))})`}:null}
  if(period==='month'){const m=String(detail||today().slice(0,7));const [y,mo]=m.split('-').map(Number);if(!y||!mo)return null;const start=new Date(y,mo-1,1),end=new Date(y,mo,0);return{start:isoDate(start),end:isoDate(end),label:`Tháng ${String(mo).padStart(2,'0')}/${y}`}}
- if(period==='hki')return{start:BIBI_ACADEMIC_START,end:'2027-01-31',label:'Học kỳ 1'};
- if(period==='hkii')return{start:'2027-02-01',end:BIBI_ACADEMIC_END,label:'Học kỳ 2'};
- return{start:BIBI_ACADEMIC_START,end:BIBI_ACADEMIC_END,label:'Cả năm'};
+ if(period==='hki'){const r1=academicWeekRange(1),r2=academicWeekRange(19);return{start:isoDate(r1.start),end:isoDate(r2.end),label:'Học kỳ 1 · Tuần 1–19'}}
+ if(period==='hkii'){const r1=academicWeekRange(20),r2=academicWeekRange(35);return{start:isoDate(r1.start),end:isoDate(r2.end),label:'Học kỳ 2 · Tuần 20–35'}}
+ const r1=academicWeekRange(1),r2=academicWeekRange(35);return{start:isoDate(r1.start),end:isoDate(r2.end),label:'Cả năm · Tuần 1–35'};
 }
 function monthConductResult(sid,ym){
  const weeks=allAcademicWeeks().filter(w=>isoDate(w.start).slice(0,7)===ym).slice(0,4);
@@ -880,8 +897,10 @@ function monthConductResult(sid,ym){
  return scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:100;
 }
 function semesterConductResult(sid,semester){
- const months=semester==='hki'?['2026-09','2026-10','2026-11','2026-12','2027-01']:['2027-02','2027-03','2027-04','2027-05','2027-06'];
- const scores=months.map(m=>monthConductResult(sid,m));
+ const start=semester==='hki'?1:20;
+ const end=semester==='hki'?19:35;
+ const weeks=allAcademicWeeks().filter(w=>w.number>=start&&w.number<=end);
+ const scores=weeks.map(w=>conductWeeklyScore(sid,w.start));
  return scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:100;
 }
 function conductResultForPeriod(sid,period,detail){
@@ -912,12 +931,35 @@ function updateReportPeriodUI(){
  const p=document.getElementById('reportPeriod')?.value||'week';document.getElementById('reportWeekBox')?.classList.toggle('show',p==='week');document.getElementById('reportMonthBox')?.classList.toggle('show',p==='month');populateReportSelectors();
 }
 function getReportSelection(){const p=document.getElementById('reportPeriod')?.value||'week';const d=p==='week'?document.getElementById('reportWeek')?.value:p==='month'?document.getElementById('reportMonth')?.value:'';return{period:p,detail:d,range:periodRange(p,d)}}
+function populateCompetitionPeriods(){
+ const el=document.getElementById('compPeriod');
+ if(!el)return;
+ const current=el.value;
+ let html='<optgroup label="Học kỳ 1 · Tuần 1–19">';
+ for(let n=1;n<=19;n++){const r=academicWeekRange(n);html+=`<option value="week:${n}">Tuần ${n} · ${fmtDate(isoDate(r.start))}–${fmtDate(isoDate(r.end))}</option>`;}
+ html+='</optgroup><optgroup label="Học kỳ 2 · Tuần 20–35">';
+ for(let n=20;n<=35;n++){const r=academicWeekRange(n);html+=`<option value="week:${n}">Tuần ${n} · ${fmtDate(isoDate(r.start))}–${fmtDate(isoDate(r.end))}</option>`;}
+ html+='</optgroup><optgroup label="Tổng hợp">';
+ html+='<option value="hki">Học kỳ 1 · Tuần 1–19</option><option value="hkii">Học kỳ 2 · Tuần 20–35</option><option value="year">Cả năm · Tuần 1–35</option></optgroup>';
+ el.innerHTML=html;
+ if(current && el.querySelector(`option[value="${CSS.escape(current)}"]`)) el.value=current;
+ else {const w=academicWeekNumber(today());el.value=w?`week:${w}`:'hki';}
+}
 function renderCompetition(){
- const p=document.getElementById('compPeriod')?.value||'week';const detail=p==='month'?(document.getElementById('compMonth')?.value||today().slice(0,7)):'';if(p==='month'&&document.getElementById('compMonth'))document.getElementById('compMonth').style.display='';else if(document.getElementById('compMonth'))document.getElementById('compMonth').style.display='none';
+ populateCompetitionPeriods();
+ const raw=document.getElementById('compPeriod')?.value||'week:1';
+ let p=raw,detail='';
+ if(raw.startsWith('week:')){p='week';detail=raw.split(':')[1];}
  const a=visibleStudents().map(s=>({s,result:conductResultForPeriod(s.id,p,detail),pts:conductPoints(s.id),att:attendanceCounts(s.id)})).sort((a,b)=>b.result.score-a.result.score);
- const rank=document.getElementById('conductRanking');if(rank)rank.innerHTML=a.length?a.map((x,i)=>`<div class="kpi-row" style="padding:8px 0;border-bottom:1px solid var(--border)"><span><b>${i+1}.</b> ${esc(x.s.name)}</span><span><b>${x.result.score.toFixed(1)}</b> · <span class="badge ${x.result.grade==='Tốt'?'b-green':x.result.grade==='Khá'?'b-blue':x.result.grade==='Đạt'?'b-yellow':'b-red'}">${x.result.grade}</span></span></div>`).join(''):'<div class="empty">Chưa có dữ liệu.</div>';
- const g={};a.forEach(x=>{const k=x.s.group;g[k]=g[k]||{n:0,total:0};g[k].n++;g[k].total+=x.result.score});const gr=Object.entries(g).sort((a,b)=>b[1].total/b[1].n-a[1].total/a[1].n);const ge=document.getElementById('groupRanking');if(ge)ge.innerHTML=gr.length?gr.map((x,i)=>`<div class="kpi-row" style="padding:8px 0;border-bottom:1px solid var(--border)"><span><b>${i+1}. Tổ ${esc(x[0])}</b> · ${x[1].n} HS</span><b>${(x[1].total/x[1].n).toFixed(1)} · ${gradeFromScore(x[1].total/x[1].n)}</b></div>`).join(''):'<div class="empty">Chưa có dữ liệu.</div>';
- const d={Tốt:0,Khá:0,Đạt:0,'Chưa đạt':0};a.forEach(x=>d[x.result.grade]++);const cs=document.getElementById('conductSummary');if(cs)cs.innerHTML=`<div class="kpi-list"><div class="kpi-row"><span>Tốt</span><b>${d['Tốt']}</b></div><div class="kpi-row"><span>Khá</span><b>${d['Khá']}</b></div><div class="kpi-row"><span>Đạt</span><b>${d['Đạt']}</b></div><div class="kpi-row"><span>Chưa đạt</span><b>${d['Chưa đạt']}</b></div></div>`;
+ const rank=document.getElementById('conductRanking');
+ if(rank)rank.innerHTML=a.length?a.map((x,i)=>`<div class="kpi-row" style="padding:8px 0;border-bottom:1px solid var(--border)"><span><b>${i+1}.</b> ${esc(x.s.name)}</span><span><b>${x.result.score.toFixed(1)}</b> · <span class="badge ${x.result.grade==='Tốt'?'b-green':x.result.grade==='Khá'?'b-blue':x.result.grade==='Đạt'?'b-yellow':'b-red'}">${x.result.grade}</span></span></div>`).join(''):'<div class="empty">Chưa có dữ liệu.</div>';
+ const g={};a.forEach(x=>{const k=x.s.group;g[k]=g[k]||{n:0,total:0};g[k].n++;g[k].total+=x.result.score});
+ const gr=Object.entries(g).sort((a,b)=>b[1].total/b[1].n-a[1].total/a[1].n);
+ const ge=document.getElementById('groupRanking');
+ if(ge)ge.innerHTML=gr.length?gr.map((x,i)=>`<div class="kpi-row" style="padding:8px 0;border-bottom:1px solid var(--border)"><span><b>${i+1}. Tổ ${esc(x[0])}</b> · ${x[1].n} HS</span><b>${(x[1].total/x[1].n).toFixed(1)} · ${gradeFromScore(x[1].total/x[1].n)}</b></div>`).join(''):'<div class="empty">Chưa có dữ liệu.</div>';
+ const d={Tốt:0,Khá:0,Đạt:0,'Chưa đạt':0};a.forEach(x=>d[x.result.grade]++);
+ const cs=document.getElementById('conductSummary');
+ if(cs)cs.innerHTML=`<div class="kpi-list"><div class="kpi-row"><span>Tốt</span><b>${d['Tốt']}</b></div><div class="kpi-row"><span>Khá</span><b>${d['Khá']}</b></div><div class="kpi-row"><span>Đạt</span><b>${d['Đạt']}</b></div><div class="kpi-row"><span>Chưa đạt</span><b>${d['Chưa đạt']}</b></div></div>`;
 }
 function renderReports(){
  const sel=getReportSelection(),a=visibleStudents(),range=sel.range||periodRange('week',academicWeekNumber(today()));if(!range)return;
@@ -1098,33 +1140,35 @@ function buildAIContext(){
   const students=Array.isArray(state.students)?state.students:[];
   const attendance=state.attendance&&typeof state.attendance==='object'?Object.values(state.attendance):[];
   const conduct=Array.isArray(state.conduct)?state.conduct:[];
+  const scores=state.scores&&typeof state.scores==='object'?state.scores:{};
   const byId={}; students.forEach(s=>byId[s.id]=s);
   const stats=students.map(s=>{
-    const ar=attendance.filter(x=>x.studentId===s.id);
+    const ar=attendance.filter(x=>x.studentId===s.id||x.id===s.id);
     const cr=conduct.filter(x=>x.studentId===s.id&&x.status==='approved');
     const plus=cr.filter(x=>Number(x.points)>0).reduce((a,x)=>a+Number(x.points||0),0);
     const minus=cr.filter(x=>Number(x.points)<0).reduce((a,x)=>a+Number(x.points||0),0);
+    const studentScores={};
+    Object.entries(scores).forEach(([k,v])=>{if(k.endsWith('_'+s.id)||k===s.id)studentScores[k.replace('_'+s.id,'')]=v;});
     return {
-      code:s.code||'',
-      name:s.name||'',
-      gender:s.gender||'',
-      group:s.group||'',
-      role:s.role||'',
+      code:s.code||'', name:s.name||'', dob:s.dob||'', gender:s.gender||'', ethnic:s.ethnic||'',
+      address:s.address||'', email:s.email||'', group:s.group||'', role:s.role||'', note:s.note||'',
       attendance:{present:ar.filter(x=>x.status==='present').length,late:ar.filter(x=>x.status==='late').length,excused:ar.filter(x=>x.status==='excused').length,absent:ar.filter(x=>x.status==='absent').length},
-      conduct:{records:cr.length,plus:Number(plus.toFixed(1)),minus:Number(minus.toFixed(1)),net:Number((plus+minus).toFixed(1))}
+      conduct:{records:cr.length,plus:Number(plus.toFixed(1)),minus:Number(minus.toFixed(1)),net:Number((plus+minus).toFixed(1)),
+        recent:cr.slice(-20).map(x=>({date:x.date,type:x.type,points:Number(x.points||0),content:x.content||''}))},
+      learning:studentScores
     };
   });
-  const totalAtt=attendance.length;
   const approved=conduct.filter(x=>x.status==='approved');
   const genderStats={
     nam:students.filter(s=>String(s.gender||'').trim().toLowerCase()==='nam').length,
-    nu:students.filter(s=>String(s.gender||'').trim().toLowerCase()==='nữ').length,
-    khac:students.filter(s=>{const g=String(s.gender||'').trim().toLowerCase();return g && g!=='nam' && g!=='nữ'}).length,
+    nu:students.filter(s=>['nữ','nu'].includes(String(s.gender||'').trim().toLowerCase())).length,
+    khac:students.filter(s=>{const g=String(s.gender||'').trim().toLowerCase();return g && g!=='nam' && g!=='nữ' && g!=='nu'}).length,
     chuaCo:students.filter(s=>!String(s.gender||'').trim()).length
   };
+  const groups={}; students.forEach(s=>{const g=String(s.group||'Chưa xếp');groups[g]=(groups[g]||0)+1;});
   return {
-    class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',teacher:state.settings?.teacher||currentUser?.name||''},
-    summary:{students:students.length,attendanceRecords:totalAtt,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),weekStart:aiWeekStart(today()),gender:genderStats},
+    class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',teacher:state.settings?.teacher||currentUser?.name||'',groups:state.settings?.groups||4},
+    summary:{students:students.length,attendanceRecords:attendance.length,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),weekStart:aiWeekStart(today()),gender:genderStats,groups},
     students:stats,
     recentConduct:approved.slice(-100).map(x=>({date:x.date,type:x.type,points:Number(x.points||0),student:byId[x.studentId]?.name||'Không rõ',content:x.content||''}))
   };
@@ -1134,30 +1178,17 @@ function buildAIGenderSummary(context){
   return `TÓM TẮT GIỚI TÍNH: Nam=${Number(g.nam||0)}, Nữ=${Number(g.nu||0)}, Khác=${Number(g.khac||0)}, Chưa có dữ liệu=${Number(g.chuaCo||0)}.`;
 }
 function buildAIPrompt(question,context){
-  /*
-   * FIX 4: Không nhúng toàn bộ JSON lớp vào trường "question".
-   * Bản cũ gửi cùng một dữ liệu hai lần: một lần trong aiPrompt và một lần
-   * ở trường context. Với lớp đông học sinh, Edge Function có thể cắt chuỗi
-   * question ở cuối, làm mất phần câu hỏi thực tế và Gemini hiểu rằng câu hỏi
-   * bị "gián đoạn ở cuối".
-   *
-   * Từ bản này:
-   * - question chỉ chứa hướng dẫn ngắn + câu hỏi thật của GVCN.
-   * - context chứa dữ liệu lớp đúng một lần.
-   */
-  return `Bạn là Trợ lý AI GVCN của Sổ Chủ Nhiệm Số.
+  return `Bạn là Trợ lý AI của GVCN trong hệ thống ClassManager Pro.
 
-QUY TẮC BẮT BUỘC:
-1. Chỉ sử dụng dữ liệu thực tế trong trường "context" được gửi kèm.
-2. Phải sử dụng các trường đã có, đặc biệt: mã HS, họ tên, giới tính (gender), tổ, chức vụ, chuyên cần và rèn luyện.
-3. Không suy đoán giới tính từ tên. Nếu gender có giá trị thì đó là dữ liệu chính thức.
-4. Khi hỏi số lượng nam/nữ hoặc giới tính của học sinh, phải thống kê trực tiếp từ gender.
-5. Không được nói "hệ thống không có thông tin giới tính" nếu context có trường gender.
-6. Không tự bịa dữ liệu. Nếu dữ liệu thực sự thiếu thì nói rõ.
-7. Trả lời bằng tiếng Việt, đầy đủ, rõ ràng và không tự cắt câu trả lời giữa chừng.
-8. Nếu câu hỏi chỉ cần một phép thống kê đơn giản, trả lời kết quả trước rồi nêu cách tính ngắn gọn.
-9. Không lặp lại toàn bộ JSON dữ liệu lớp trong câu trả lời.
-10. Không dùng Markdown, không dùng dấu **, ##, ###, dấu backtick hoặc bảng Markdown. Viết như một người trợ lý đang nói chuyện tự nhiên với GVCN, câu văn ngắn, dễ đọc và dễ nghe.
+Hãy trả lời câu hỏi của GVCN bằng tiếng Việt, dựa hoàn toàn trên dữ liệu lớp trong context.
+Bạn được phép khai thác đầy đủ thông tin lớp và các trường hồ sơ học sinh đã được cung cấp, gồm: mã học sinh, họ tên, ngày sinh, giới tính, dân tộc, địa chỉ, email, tổ, chức vụ, ghi chú, chuyên cần, điểm rèn luyện, nội dung ghi nhận và dữ liệu học tập.
+Tuyệt đối không nhắc lại, suy diễn hoặc tiết lộ các trường nhạy cảm đã bị loại khỏi context, đặc biệt: số điện thoại học sinh, họ tên phụ huynh và số điện thoại phụ huynh.
+Khi hỏi thống kê nam nữ, phải đếm trực tiếp trường gender. Không suy đoán giới tính từ tên.
+Khi câu hỏi cần danh sách học sinh, nêu đúng họ tên và thông tin liên quan có trong context.
+Nếu dữ liệu không đủ, nói rõ dữ liệu nào còn thiếu; không được tự bịa.
+Trả lời đầy đủ, không cắt giữa chừng. Nếu là thống kê đơn giản, nêu kết quả ngay ở câu đầu.
+Không dùng Markdown, không dùng dấu sao, dấu gạch đầu dòng Markdown, dấu thăng, dấu backtick, bảng Markdown hay ký hiệu định dạng. Viết thành câu văn tự nhiên, dễ đọc và dễ nghe bằng giọng nói.
+Không mở đầu dài dòng. Không nhắc lại JSON hoặc context.
 
 CÂU HỎI CỦA GVCN:
 ${question}`;
@@ -1172,6 +1203,7 @@ function cleanAIText(text){
   // Bỏ markdown/formatting để giao diện và giọng đọc nghe tự nhiên hơn.
   t=t.replace(/```[\s\S]*?```/g, m=>m.replace(/```/g,''));
   t=t.replace(/\*\*(.*?)\*\*/g,'$1').replace(/__(.*?)__/g,'$1');
+  t=t.replace(/(^|\s)\*+(?=\s|$)/g,'$1').replace(/\*+/g,'');
   t=t.replace(/`([^`]+)`/g,'$1');
   t=t.replace(/^#{1,6}\s*/gm,'');
   t=t.replace(/^\s*[-*•]\s+/gm,'• ');
@@ -1266,82 +1298,8 @@ function looksTruncatedAIAnswer(text){
   if(/(?:^|\\n)\\s*(?:\\d+\\.|[IVX]+\\.|Phần\\s+\\d+|Thống kê chung)\\s*$/i.test(t))return true;
   return false;
 }
-async function askAI(){
-  const q=document.getElementById('aiQuestion'), ans=document.getElementById('aiAnswer'), meta=document.getElementById('aiMeta'), btn=document.getElementById('aiAskBtn');
-  const question=(q?.value||'').trim();
-  if(!question){if(ans)renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}
-  stopAISpeech(false);
-  btn.disabled=true; btn.classList.add('ai-busy');
-  renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');
-  if(meta)meta.textContent='AI đang đọc dữ liệu lớp đang chọn...';
-
-  try{
-    const context=buildAIContext();
-
-    /*
-     * Với các phép thống kê cơ bản có thể xác định tuyệt đối từ dữ liệu cục bộ,
-     * hệ thống trả lời trực tiếp từ dữ liệu đã kiểm tra thay vì phụ thuộc vào
-     * giới hạn sinh văn bản của Gemini. Điều này đặc biệt tránh lỗi câu trả lời
-     * bị dừng giữa chừng ở các câu hỏi nam/nữ.
-     */
-    if(isGenderCountQuestion(question)){
-      const answer=buildGenderCountAnswer(context);
-      renderAIAnswer(answer);
-      if(meta)meta.textContent=`🤖 Trợ lý AI · Thống kê trực tiếp từ dữ liệu lớp · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;
-      return;
-    }
-
-    const aiPrompt=buildAIPrompt(question,context);
-    const {data:{session}}=await sb.auth.getSession();
-    if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');
-
-    const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';
-    const payload={question:aiPrompt,stateKey:currentStateKey,context};
-    const res=await fetch(url,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-      body:JSON.stringify(payload)
-    });
-    const body=await res.json().catch(()=>({}));
-    if(!res.ok)throw new Error(body.error||`AI trả về lỗi HTTP ${res.status}`);
-
-    let fullAnswer=typeof body.answer==='string'
-      ? body.answer
-      : (body.answer?.text || body.answer?.content || JSON.stringify(body.answer));
-
-    /*
-     * Nếu Edge Function/Gemini chỉ trả về phần mở đầu, thử lại một lần bằng
-     * yêu cầu cực ngắn. Nếu vẫn thiếu thì hiển thị phần đã nhận thay vì giả
-     * vờ rằng đó là câu trả lời hoàn chỉnh.
-     */
-    if(looksTruncatedAIAnswer(fullAnswer)){
-      const retryPrompt=`Trả lời trực tiếp câu hỏi sau bằng tiếng Việt, tối đa 8 câu, không dùng Markdown, không dùng dấu *, không mở đầu dài dòng. Chỉ dùng dữ liệu trong context. Nếu là câu hỏi thống kê, nêu con số chính xác trước.\n\nCâu hỏi: ${question}`;
-      const retry=await fetch(url,{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},
-        body:JSON.stringify({question:retryPrompt,stateKey:currentStateKey,context})
-      });
-      const retryBody=await retry.json().catch(()=>({}));
-      if(retry.ok){
-        const candidate=typeof retryBody.answer==='string'
-          ? retryBody.answer
-          : (retryBody.answer?.text || retryBody.answer?.content || '');
-        if(candidate && !looksTruncatedAIAnswer(candidate)) fullAnswer=candidate;
-      }
-    }
-
-    renderAIAnswer(fullAnswer||'AI chưa trả về nội dung.');
-    const finishReason=body.finishReason||body.finish_reason||body.meta?.finishReason||'';
-    if(meta)meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}`;
-  }catch(e){
-    console.error(e);
-    renderAIAnswer('❌ '+(e.message||e));
-    if(meta)meta.textContent='Kiểm tra Edge Function ai-class-assistant và GEMINI_API_KEY trong Supabase.';
-  }finally{
-    btn.classList.remove('ai-busy');
-    btn.disabled=false;
-  }
-}
+function formatAIErrorMessage(error,httpStatus=''){const raw=String(error||'').trim();const lower=raw.toLowerCase();if(httpStatus==='429'||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota|retry in/i.test(raw)){const m=raw.match(/retry in\s+([0-9]+(?:\.[0-9]+)?)s/i);const wait=m?Math.ceil(Number(m[1])):null;return `<div class="ai-error-card"><strong>⚠️ Gemini đang tạm hết lượt sử dụng</strong><div>Đây là giới hạn quota của API Gemini, không phải lỗi hiển thị trên điện thoại.</div>${wait?`<div class="ai-retry-note">Thầy có thể thử lại sau khoảng ${wait} giây.</div>`:'<div class="ai-retry-note">Thầy hãy thử lại sau một lúc hoặc kiểm tra quota/billing của Gemini.</div>'}</div>`;}if(/failed to fetch|networkerror|load failed/i.test(lower))return `<div class="ai-error-card"><strong>🌐 Không kết nối được Trợ lý AI</strong><div>Thầy kiểm tra Internet rồi bấm Hỏi AI lại.</div></div>`;return `<div class="ai-error-card"><strong>❌ Trợ lý AI chưa thể trả lời</strong><div>${esc(raw||'Đã xảy ra lỗi không xác định.')}</div></div>`;}
+async function askAI(){const q=document.getElementById('aiQuestion'),ans=document.getElementById('aiAnswer'),meta=document.getElementById('aiMeta'),btn=document.getElementById('aiAskBtn');const question=(q?.value||'').trim();if(!question){if(ans)renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}if(!isAdmin()){renderAIAnswer('🔒 Chỉ GVCN/Admin mới được sử dụng Trợ lý AI.');return;}stopAISpeech(false);btn.disabled=true;btn.classList.add('ai-busy');renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');if(meta)meta.textContent='AI đang đọc dữ liệu lớp đang chọn...';try{const context=buildAIContext();if(isGenderCountQuestion(question)){const answer=buildGenderCountAnswer(context);renderAIAnswer(answer);if(meta)meta.textContent=`🤖 Thống kê trực tiếp từ dữ liệu lớp · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}const aiPrompt=buildAIPrompt(question,context);const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';const payload={question:aiPrompt,stateKey:currentStateKey,context};const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});const body=await res.json().catch(()=>({}));if(!res.ok){const errText=body.error||body.message||`AI trả về lỗi HTTP ${res.status}`;const quota=/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(errText))||res.status===429;if(ans)ans.innerHTML=formatAIErrorMessage(errText,String(res.status));if(meta)meta.textContent=quota?'⚠️ Gemini đang giới hạn lượt sử dụng.':'Kiểm tra Edge Function ai-class-assistant và GEMINI_API_KEY trong Supabase.';return;}let fullAnswer=typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||JSON.stringify(body.answer));if(looksTruncatedAIAnswer(fullAnswer)){const retryPrompt=`Trả lời trực tiếp câu hỏi sau bằng tiếng Việt, tối đa 8 câu, không dùng Markdown, không dùng dấu *, không mở đầu dài dòng. Chỉ dùng dữ liệu trong context. Nếu là câu hỏi thống kê, nêu con số chính xác trước.\n\nCâu hỏi: ${question}`;const retry=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:retryPrompt,stateKey:currentStateKey,context})});const retryBody=await retry.json().catch(()=>({}));const retryErr=retryBody.error||retryBody.message||'';if(retry.ok){const candidate=typeof retryBody.answer==='string'?retryBody.answer:(retryBody.answer?.text||retryBody.answer?.content||'');if(candidate&&!looksTruncatedAIAnswer(candidate))fullAnswer=candidate;}else if(retry.status===429||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(retryErr))){if(ans)ans.innerHTML=formatAIErrorMessage(retryErr,String(retry.status));if(meta)meta.textContent='⚠️ Gemini đang giới hạn lượt sử dụng.';return;}}renderAIAnswer(fullAnswer||'AI chưa trả về nội dung.');const finishReason=body.finishReason||body.finish_reason||body.meta?.finishReason||'';if(meta)meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}`;}catch(e){console.error(e);if(ans)ans.innerHTML=formatAIErrorMessage(e?.message||e);if(meta)meta.textContent='Trợ lý AI tạm thời không thể kết nối.';}finally{btn.classList.remove('ai-busy');btn.disabled=false;}}
 
 document.getElementById('loginPass')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();login()}});
 if(window.__supabaseInitError){setLoginStatus('❌ Không tải được Supabase: '+window.__supabaseInitError.message)}
