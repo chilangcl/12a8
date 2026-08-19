@@ -269,7 +269,7 @@ input,select,textarea,button{max-width:100%;}
 </style>
 </style>
 <style id="bibi-modern-polish">
-.brand-logo{display:inline-flex!important;align-items:center;justify-content:center;width:auto!important;min-width:46px;height:38px!important;padding:0 12px!important;border-radius:12px!important;background:linear-gradient(135deg,#0d9488,#14b8a6)!important;color:#fff!important;font-size:14px!important;font-weight:900!important;box-shadow:0 6px 18px rgba(20,184,166,.25);white-space:nowrap}
+.brand-logo{display:inline-flex!important;align-items:center;justify-content:center;gap:7px;width:max-content!important;min-width:0!important;height:38px!important;padding:0 13px!important;border-radius:12px!important;background:linear-gradient(135deg,#0d9488,#14b8a6)!important;color:#fff!important;font-size:14px!important;font-weight:900!important;box-shadow:0 6px 18px rgba(20,184,166,.25);white-space:nowrap;flex:0 0 auto;vertical-align:middle}
 .guest-logo{background:linear-gradient(135deg,#0d9488,#14b8a6)!important;box-shadow:0 5px 15px rgba(20,184,166,.25)}
 .logo{background:linear-gradient(135deg,#0d9488,#14b8a6)!important;box-shadow:0 8px 22px rgba(20,184,166,.25)}
 .login-card{border:1px solid rgba(20,184,166,.15)}
@@ -284,7 +284,7 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
 #page-competition #compPeriod{min-height:44px;border-radius:12px;font-weight:700}
 #page-competition .kpi-row{background:linear-gradient(90deg,#fff,#f8fafc);border-radius:10px;padding-left:10px!important;padding-right:10px!important;margin-bottom:4px}
 .ai-answer{font-size:16px;max-height:none!important;height:auto!important;overflow:visible!important}
-@media(max-width:680px){.app-copyright{font-size:11px;padding:16px 12px 28px}.brand-logo{font-size:13px!important;padding:0 10px!important}.card{border-radius:18px}.btn{min-height:44px}}
+@media(max-width:680px){.app-copyright{font-size:11px;padding:16px 12px 28px}.brand-logo{font-size:13px!important;padding:0 10px!important;gap:6px!important;white-space:nowrap!important}.card{border-radius:18px}.btn{min-height:44px}}
 </style>
 </head>
 <body>
@@ -302,12 +302,13 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
 
 <div id="loginScreen" class="login">
   <div class="login-card">
-    <div class="logo">🎓</div><h1>ClassManager Pro</h1>
+    <div class="logo">🎓</div>
+    <h1>ClassManager Pro</h1>
     <div class="sub">Created by Nguyen Van Hoang</div>
     <div class="field"><label>Tài khoản</label><input id="loginUser" placeholder="Nhập tài khoản"></div>
     <div class="field"><label>Mật khẩu</label><input id="loginPass" type="password" placeholder="Nhập mật khẩu"></div>
     <button class="btn" style="width:100%;margin-top:6px" onclick="login()">Đăng nhập</button>
-    <button class="guest-btn" type="button" onclick="openGuestMode()">👀 Xem thông tin lớp — Khách (không cần đăng nhập)</button>
+    <button class="guest-btn" type="button" onclick="openGuestMode()">👀 Xem thông tin lớp — Khách</button>
     <div class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy giáo Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</div>
   </div>
 </div>
@@ -739,7 +740,7 @@ async function logout(){
 }
 if(sb)sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;currentClass=null;availableClasses=[];document.getElementById('app')?.classList.add('hidden');document.getElementById('loginScreen')?.classList.remove('hidden')}});
 
-function today(){return new Date().toISOString().slice(0,10)}
+function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function fmtDate(s){if(!s)return ''; const [y,m,d]=s.split('-');return d&&m&&y?`${d}/${m}/${y}`:s}
 function visibleStudents(){
@@ -870,7 +871,7 @@ function attendanceCounts(sid){let o={present:0,late:0,excused:0,absent:0};Objec
 const BIBI_ACADEMIC_START='2026-09-07';
 const BIBI_ACADEMIC_END='2027-06-30';
 function dateObj(s){const d=new Date((s||'')+'T00:00:00');return Number.isNaN(d.getTime())?null:d}
-function isoDate(d){return d?d.toISOString().slice(0,10):''}
+function isoDate(d){if(!d)return '';return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function academicWeekStart(dateStr){
  const d=dateObj(dateStr), start=dateObj(BIBI_ACADEMIC_START);
  if(!d||!start||d<start||d>dateObj(BIBI_ACADEMIC_END))return null;
@@ -1133,8 +1134,8 @@ async function resetAttendanceOnly(){
 async function resetAll(){if(!isAdmin())return;if(confirm('XÓA TOÀN BỘ dữ liệu của lớp đang chọn? Hãy sao lưu trước.')){localStorage.removeItem(dataKey());state=seed();state.settings.className=currentClass?.class_name||state.settings.className;state.settings.year=currentClass?.year||state.settings.year;saveData();await pushCloud();renderAll();alert('Đã xóa dữ liệu của lớp đang chọn.')}}
 function aiWeekStart(dateStr){
   const start=new Date('2026-09-07T00:00:00'); const d=new Date((dateStr||today())+'T00:00:00');
-  if(Number.isNaN(d.getTime())||d<start)return start.toISOString().slice(0,10);
-  const diff=Math.floor((d-start)/86400000); start.setDate(start.getDate()+Math.floor(diff/7)*7); return start.toISOString().slice(0,10);
+  if(Number.isNaN(d.getTime())||d<start)return isoDate(start);
+  const diff=Math.floor((d-start)/86400000); start.setDate(start.getDate()+Math.floor(diff/7)*7); return isoDate(start);
 }
 function buildAIContext(){
   const students=Array.isArray(state.students)?state.students:[];
@@ -1406,7 +1407,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
     if(Number.isNaN(d.getTime())||d<start||d>end)return '';
     const diff=Math.floor((d-start)/86400000);
     start.setDate(start.getDate()+Math.floor(diff/7)*7);
-    return start.toISOString().slice(0,10);
+    return isoDate(start);
   }
   function guestWeekNumber(dateStr){
     const wk=guestStartOfWeek(dateStr);if(!wk)return null;
@@ -1438,15 +1439,15 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   function guestConductResult(students, conduct, period){
     const approved=(Array.isArray(conduct)?conduct:[]).filter(x=>x?.status==='approved' && x?.studentId && x?.date);
     const byStudent={};
-    const today=new Date().toISOString().slice(0,10);
-    const currentWeek=guestStartOfWeek(today), currentMonth=today.slice(0,7);
+    const todayKey=today();
+    const currentWeek=guestStartOfWeek(todayKey), currentMonth=todayKey.slice(0,7);
     const weeks=[];
     for(let n=1;n<=43;n++){
       const s=new Date(GUEST_ACADEMIC_START+'T00:00:00');s.setDate(s.getDate()+(n-1)*7);
       if(s>new Date(GUEST_ACADEMIC_END+'T00:00:00'))break;
-      weeks.push({number:n,start:s.toISOString().slice(0,10)});
+      weeks.push({number:n,start:isoDate(s)});
     }
-    const weekScore=(sid,w)=>{const e=new Date(w+'T00:00:00');e.setDate(e.getDate()+6);const es=e.toISOString().slice(0,10);return 100+approved.filter(x=>x.studentId===sid&&x.date>=w&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0)};
+    const weekScore=(sid,w)=>{const e=new Date(w+'T00:00:00');e.setDate(e.getDate()+6);const es=isoDate(e);return 100+approved.filter(x=>x.studentId===sid&&x.date>=w&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0)};
     const monthScore=(sid,ym)=>{const mw=weeks.filter(w=>w.start.slice(0,7)===ym).slice(0,4);const ss=mw.map(w=>weekScore(sid,w.start));return ss.length?ss.reduce((a,b)=>a+b,0)/ss.length:100};
     const semScore=(sid,sem)=>{const ms=sem==='hki'?['2026-09','2026-10','2026-11','2026-12','2027-01']:['2027-02','2027-03','2027-04','2027-05','2027-06'];const ss=ms.map(m=>monthScore(sid,m));return ss.reduce((a,b)=>a+b,0)/ss.length};
     students.forEach(st=>{
@@ -1465,7 +1466,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
     const students=Array.isArray(d.students)?d.students:[];
     const attendance=d.attendance&&typeof d.attendance==='object'?d.attendance:{};
     const conduct=Array.isArray(d.conduct)?d.conduct:[];
-    const todayKey=new Date().toISOString().slice(0,10);
+    const todayKey=today();
     const monthKey=todayKey.slice(0,7);
     const todayRows=Object.values(attendance).filter(x=>x?.date===todayKey);
     const monthRows=Object.values(attendance).filter(x=>String(x?.date||'').slice(0,7)===monthKey);
