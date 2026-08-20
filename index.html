@@ -323,6 +323,10 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
   .login{padding-top:84px}
 }
 </style>
+<style id="bibi-report-rules-v1">
+.report-period-box{align-items:end}.conduct-rules-settings{border:1px solid #c7d2fe;background:linear-gradient(135deg,#ffffff,#eef2ff)}.conduct-rules-settings .field input{font-weight:800}.conduct-rules-settings h3{margin-top:0}
+@media(max-width:680px){.report-period-box{display:grid!important;grid-template-columns:1fr}.report-period-box .field{min-width:0!important;width:100%}.conduct-rules-settings .actions .btn{flex:1 1 180px}}
+</style>
 </head>
 <body>
 
@@ -515,7 +519,7 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
                     <tr><td>Học tập & ý thức lớp</td><td>Không học bài / Không làm bài</td><td><b>-5</b></td></tr>
                     <tr><td>Học tập & ý thức lớp</td><td>Mất trật tự trong giờ học</td><td><b>-3</b></td></tr>
                     <tr><td>Học tập & ý thức lớp</td><td>Sử dụng điện thoại không phép</td><td><b>-5</b></td></tr>
-                    <tr><td>An toàn & pháp luật</td><td>Vi phạm an toàn giao thông</td><td><b>-15 đến -20</b></td></tr>
+                    <tr><td>An toàn & pháp luật</td><td>Vi phạm an toàn giao thông</td><td><b>-20</b></td></tr>
                   </tbody>
                 </table>
               </div>
@@ -527,8 +531,8 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
                 <table class="table guide-table">
                   <thead><tr><th>Nội dung khen thưởng</th><th>Mức cộng</th></tr></thead>
                   <tbody>
-                    <tr><td>Thành tích đột xuất (giải HSG, năng khiếu, thể thao cấp Trường/Tỉnh)</td><td><b>+10 đến +20</b></td></tr>
-                    <tr><td>Làm việc tốt (nhặt được của rơi trả lại, giúp đỡ bạn bè, bảo vệ tài sản chung)</td><td><b>+5 đến +10</b></td></tr>
+                    <tr><td>Thành tích đột xuất (giải HSG, năng khiếu, thể thao cấp Trường/Tỉnh)</td><td><b>+20</b></td></tr>
+                    <tr><td>Làm việc tốt (nhặt được của rơi trả lại, giúp đỡ bạn bè, bảo vệ tài sản chung)</td><td><b>+10</b></td></tr>
                     <tr><td>Tích cực hoạt động tập thể (văn nghệ, thể thao, phong trào Đoàn)</td><td><b>+5 / sự kiện</b></td></tr>
                     <tr><td>Đạt điểm 9, 10 trong giờ học</td><td><b>+2 / điểm tốt</b></td></tr>
                     <tr><td>Tuần học tốt (cá nhân không vi phạm bất kỳ lỗi nào trong tuần)</td><td><b>+5</b></td></tr>
@@ -540,7 +544,6 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
 
           <div class="notice" style="margin-top:12px">
             <b>Nguyên tắc ghi nhận:</b> cán sự lớp chỉ ghi nhận sự việc có căn cứ; nội dung cần mô tả rõ, tránh ghi chung chung.
-            Với mức điểm là một khoảng (ví dụ -15 đến -20 hoặc +10 đến +20), cán sự lớp cần thống nhất mức áp dụng theo quy định của lớp/GVCN trước khi lưu.
             Điểm tuần được tính từ 100 điểm ban đầu, sau đó cộng/trừ các lượt được ghi nhận.
           </div>
         </div>
@@ -556,8 +559,7 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
       <section id="page-reports" class="page">
         <div class="page-head"><div><h2>Báo cáo tổng hợp</h2><div class="muted">Chọn Tuần · Tháng · Học kỳ 1 · Học kỳ 2 · Cả năm để xem và in báo cáo</div></div><div class="actions"><button class="btn" onclick="printSelectedReport()">🖨 In báo cáo / PDF</button><button class="btn secondary admin-only" onclick="exportBackup()">💾 Sao lưu JSON</button></div></div>
         <div class="report-period-box">
-          <div class="field"><label>Loại báo cáo</label><select id="reportPeriod" onchange="updateReportPeriodUI();renderReports()"><option value="week">Tuần</option><option value="month">Tháng</option><option value="hki">Học kỳ 1</option><option value="hkii">Học kỳ 2</option><option value="year">Cả năm</option></select></div>
-          <div class="field period-extra" id="reportWeekBox"><label>Tuần</label><select id="reportWeek" onchange="renderReports()"></select></div>
+          <div class="field" style="min-width:280px;flex:1 1 320px"><label>Loại báo cáo / giai đoạn</label><select id="reportPeriod" onchange="updateReportPeriodUI();renderReports()"></select></div>
           <div class="field period-extra" id="reportMonthBox"><label>Tháng</label><select id="reportMonth" onchange="renderReports()"></select></div>
         </div>
         <div class="report-title-print" id="reportPrintTitle"></div>
@@ -614,6 +616,7 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
           </div>
           <button class="btn" onclick="saveSettings()">💾 Lưu cài đặt</button>
         </div>
+        <div class="card conduct-rules-settings" style="margin-top:16px"><h3>⚙️ Nguyên tắc xếp hạnh kiểm / rèn luyện</h3><p class="muted">GVCN/Admin có thể thay đổi ngưỡng điểm và điểm khởi đầu. Thi đua, Báo cáo tổng hợp và các phần xếp loại sẽ dùng chung các chỉ số này.</p><div class="form-grid"><div class="field"><label>Điểm từ mức Tốt</label><input id="setGoodScore" type="number" step="0.1" value="96"></div><div class="field"><label>Điểm từ mức Khá</label><input id="setFairScore" type="number" step="0.1" value="90"></div><div class="field"><label>Điểm từ mức Đạt</label><input id="setPassScore" type="number" step="0.1" value="85"></div><div class="field"><label>Điểm khởi đầu mỗi tuần</label><input id="setConductBase" type="number" step="0.1" value="100"></div></div><div class="actions" style="margin-top:12px"><button class="btn" type="button" onclick="saveConductRules()">💾 Lưu nguyên tắc</button><button class="btn secondary" type="button" onclick="resetConductRules()">↩ Khôi phục mặc định</button></div><div id="conductRulesStatus" class="notice" style="display:none;margin-top:12px"></div></div>
         <div class="card" style="margin-top:16px;border:1px solid #f59e0b;background:#fffbeb"><h3>🔄 Bắt đầu năm học mới</h3><p class="muted">Xóa riêng toàn bộ dữ liệu <strong>điểm danh</strong> (có mặt, đi muộn, nghỉ có phép, nghỉ không phép) để bắt đầu lại. Danh sách học sinh, tài khoản, rèn luyện, hạnh kiểm và cài đặt lớp vẫn được giữ nguyên.</p><button class="btn" style="background:#f59e0b;color:#fff" onclick="resetAttendanceOnly()">🔄 Reset điểm danh năm học</button></div>
         <div class="card" style="margin-top:16px"><h3>⚠️ Xóa toàn bộ dữ liệu</h3><p class="muted">Chỉ dùng khi thực sự muốn xóa toàn bộ dữ liệu của lớp. Hãy sao lưu trước.</p><button class="btn danger" onclick="resetAll()">Xóa toàn bộ dữ liệu</button></div>
       </section>
@@ -661,7 +664,7 @@ try {
 } catch (e) { console.error(e); window.__supabaseInitError=e; }
 let currentClass=null, currentStateKey='12A8-2026-2027';
 let state=seed(), currentUser=null, editingStudent=null, availableClasses=[];
-function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4},students:[],attendance:{},scores:{},conduct:[],activity:[]}}
+function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4,conductRules:{base:100,good:96,fair:90,pass:85}},students:[],attendance:{},scores:{},conduct:[],activity:[]}}
 function dataKey(){return DATA_PREFIX+(currentStateKey||'12A8-2026-2027')}
 function loadLocalFallback(){try{return JSON.parse(localStorage.getItem(dataKey()))||seed()}catch(e){return seed()}}
 function saveLocal(){localStorage.setItem(dataKey(),JSON.stringify(state))}
@@ -814,7 +817,7 @@ async function loadCloudState(){
     const {data,error}=await sb.from('class_state').select('data,updated_at').eq('class_id',currentStateKey).maybeSingle();
     if(error)throw error;
     state=data?.data||seed();
-    state.settings={...(state.settings||seed().settings),className:currentClass?.class_name||state.settings?.className||'12A8',year:currentClass?.year||state.settings?.year||'2026-2027',groups:currentClass?.group_count||state.settings?.groups||4};
+    state.settings={...seed().settings,...(state.settings||{}),conductRules:{...seed().settings.conductRules,...(state.settings?.conductRules||{})},className:currentClass?.class_name||state.settings?.className||'12A8',year:currentClass?.year||state.settings?.year||'2026-2027',groups:currentClass?.group_count||state.settings?.groups||4};
     saveLocal();
   }catch(e){console.error(e);state=loadLocalFallback();alert('🔒 Không thể tải dữ liệu lớp này: '+(e.message||e));throw e;}
 }
@@ -974,9 +977,10 @@ function academicWeekRange(n){const start=dateObj(BIBI_ACADEMIC_START);if(!start
 function allAcademicWeeks(){const out=[];for(let n=1;n<=35;n++){const r=academicWeekRange(n);if(!r)break;out.push(r)}return out}
 function conductWeeklyScore(sid,weekStart){
  const ws=isoDate(weekStart), end=new Date(weekStart.getTime()+6*86400000), es=isoDate(end);
- return 100+(state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved'&&x.date>=ws&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0);
+ return getConductRules().base+(state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved'&&x.date>=ws&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0);
 }
-function gradeFromScore(score){score=Number(score||0);if(score>=96)return'Tốt';if(score>=90)return'Khá';if(score>=85)return'Đạt';return'Chưa đạt'}
+function getConductRules(){const r=state?.settings?.conductRules||{};let base=Number.isFinite(Number(r.base))?Number(r.base):100;let good=Number.isFinite(Number(r.good))?Number(r.good):96;let fair=Number.isFinite(Number(r.fair))?Number(r.fair):90;let pass=Number.isFinite(Number(r.pass))?Number(r.pass):85;if(good<fair)good=fair;if(fair<pass)fair=pass;return{base,good,fair,pass}}
+function gradeFromScore(score){score=Number(score||0);const r=getConductRules();if(score>=r.good)return'Tốt';if(score>=r.fair)return'Khá';if(score>=r.pass)return'Đạt';return'Chưa đạt'}
 function periodRange(period,detail){
  if(period==='week'){const r=academicWeekRange(Number(detail)||academicWeekNumber(today())||1);return r?{start:isoDate(r.start),end:isoDate(r.end),label:`Tuần ${r.number} (${fmtDate(isoDate(r.start))}–${fmtDate(isoDate(r.end))})`}:null}
  if(period==='month'){const m=String(detail||today().slice(0,7));const [y,mo]=m.split('-').map(Number);if(!y||!mo)return null;const start=new Date(y,mo-1,1),end=new Date(y,mo,0);return{start:isoDate(start),end:isoDate(end),label:`Tháng ${String(mo).padStart(2,'0')}/${y}`}}
@@ -1012,18 +1016,17 @@ function conductResultForPeriod(sid,period,detail){
  const h1=semesterConductResult(sid,'hki'),h2=semesterConductResult(sid,'hkii');const score=(h1+h2)/2;return{score,grade:gradeFromScore(score),weeks:40,weekly:[]};
 }
 function populateReportSelectors(){
- const w=document.getElementById('reportWeek'),m=document.getElementById('reportMonth'),cm=document.getElementById('compMonth');
- if(!w||!m)return;
- const weeks=allAcademicWeeks();w.innerHTML=weeks.map(x=>`<option value="${x.number}">Tuần ${x.number} · ${fmtDate(isoDate(x.start))}–${fmtDate(isoDate(x.end))}</option>`).join('');
- const months=[...new Set(weeks.map(x=>isoDate(x.start).slice(0,7)))];m.innerHTML=months.map(x=>{const [y,mo]=x.split('-');return`<option value="${x}">Tháng ${mo}/${y}</option>`}).join('');
- if(cm)cm.innerHTML=m.innerHTML;
- const cur=academicWeekNumber(today());if(cur&&weeks.some(x=>x.number===cur))w.value=String(cur);else if(weeks.length)w.value=String(weeks[0].number);
- const tm=today().slice(0,7);if(months.includes(tm))m.value=tm;else if(months.length)m.value=months[months.length-1];
+ const pEl=document.getElementById('reportPeriod'),m=document.getElementById('reportMonth');if(!pEl||!m)return;
+ const weeks=allAcademicWeeks();let html='<optgroup label="Học kỳ 1 · Tuần 1–19">';
+ for(let n=1;n<=19;n++){const r=academicWeekRange(n);html+=`<option value="week:${n}">Tuần ${n} · ${fmtDate(isoDate(r.start))}–${fmtDate(isoDate(r.end))}</option>`;}
+ html+='</optgroup><optgroup label="Học kỳ 2 · Tuần 20–35">';
+ for(let n=20;n<=35;n++){const r=academicWeekRange(n);html+=`<option value="week:${n}">Tuần ${n} · ${fmtDate(isoDate(r.start))}–${fmtDate(isoDate(r.end))}</option>`;}
+ html+='</optgroup><optgroup label="Tổng hợp"><option value="hki">Học kỳ 1 · Tuần 1–19</option><option value="hkii">Học kỳ 2 · Tuần 20–35</option><option value="year">Cả năm · Tuần 1–35</option></optgroup><optgroup label="Khác"><option value="month">Theo tháng</option></optgroup>';
+ const old=pEl.value;pEl.innerHTML=html;const cur=academicWeekNumber(today());const preferred=cur?`week:${cur}`:'hki';if(old&&pEl.querySelector(`option[value="${CSS.escape(old)}"]`))pEl.value=old;else pEl.value=preferred;
+ const months=[...new Set(weeks.map(x=>isoDate(x.start).slice(0,7)))];m.innerHTML=months.map(x=>{const[y,mo]=x.split('-');return`<option value="${x}">Tháng ${mo}/${y}</option>`}).join('');const tm=today().slice(0,7);if(months.includes(tm))m.value=tm;else if(months.length)m.value=months[months.length-1];document.getElementById('reportMonthBox')?.classList.toggle('show',pEl.value==='month');
 }
-function updateReportPeriodUI(){
- const p=document.getElementById('reportPeriod')?.value||'week';document.getElementById('reportWeekBox')?.classList.toggle('show',p==='week');document.getElementById('reportMonthBox')?.classList.toggle('show',p==='month');populateReportSelectors();
-}
-function getReportSelection(){const p=document.getElementById('reportPeriod')?.value||'week';const d=p==='week'?document.getElementById('reportWeek')?.value:p==='month'?document.getElementById('reportMonth')?.value:'';return{period:p,detail:d,range:periodRange(p,d)}}
+function updateReportPeriodUI(){const p=document.getElementById('reportPeriod')?.value||`week:${academicWeekNumber(today())||1}`;populateReportSelectors();const el=document.getElementById('reportPeriod');if(el&&p)el.value=p;document.getElementById('reportMonthBox')?.classList.toggle('show',p==='month');}
+function getReportSelection(){const raw=document.getElementById('reportPeriod')?.value||`week:${academicWeekNumber(today())||1}`;let period=raw,detail='';if(raw.startsWith('week:')){period='week';detail=raw.split(':')[1]}else if(raw==='month'){period='month';detail=document.getElementById('reportMonth')?.value||today().slice(0,7)}return{period,detail,range:periodRange(period,detail)}}
 function populateCompetitionPeriods(){
  const el=document.getElementById('compPeriod');
  if(!el)return;
@@ -1204,7 +1207,10 @@ function exportBackup(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được sao
 async function importBackup(e){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được khôi phục dữ liệu.');if(e?.target)e.target.value='';return}const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=async ev=>{try{const x=JSON.parse(ev.target.result);if(!x.students||!x.settings)throw Error();if(!confirm('Khôi phục sẽ thay thế dữ liệu hiện tại. Tiếp tục?'))return;state=x;saveData();await pushCloud();renderAll();alert('Đã khôi phục dữ liệu.')}catch(err){alert('File sao lưu không hợp lệ.')}};r.readAsText(file);e.target.value=''}
 function downloadBlob(content,name,type){const blob=new Blob([content],{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 function closeModal(id){document.getElementById(id).classList.remove('show')}
-async function saveSettings(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được thay đổi cài đặt.');return}state.settings.teacher=document.getElementById('setTeacher').value;state.settings.className=document.getElementById('setClass').value;state.settings.year=document.getElementById('setYear').value;state.settings.groups=Number(document.getElementById('setGroups').value);saveData();await pushCloud();alert('Đã lưu cài đặt.')}
+function renderConductRulesSettings(){const r=getConductRules();[['setGoodScore',r.good],['setFairScore',r.fair],['setPassScore',r.pass],['setConductBase',r.base]].forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v})}
+async function saveConductRules(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được thay đổi nguyên tắc.');return}const good=Number(document.getElementById('setGoodScore')?.value),fair=Number(document.getElementById('setFairScore')?.value),pass=Number(document.getElementById('setPassScore')?.value),base=Number(document.getElementById('setConductBase')?.value);if(![good,fair,pass,base].every(Number.isFinite)){alert('⚠️ Vui lòng nhập đủ các chỉ số hợp lệ.');return}if(!(good>=fair&&fair>=pass)){alert('⚠️ Ngưỡng phải theo thứ tự Tốt ≥ Khá ≥ Đạt.');return}if(base<0){alert('⚠️ Điểm khởi đầu không được âm.');return}state.settings=state.settings||{};state.settings.conductRules={base,good,fair,pass};saveData();const ok=await pushCloud();const st=document.getElementById('conductRulesStatus');if(st){st.style.display='block';st.className='notice '+(ok===false?'':'ok');st.textContent=ok===false?'⚠️ Đã lưu trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã lưu nguyên tắc xếp hạnh kiểm.'}renderAll()}
+async function resetConductRules(){if(!isAdmin())return;if(!confirm('Khôi phục mặc định: Tốt ≥96; Khá ≥90; Đạt ≥85; điểm khởi đầu 100?'))return;state.settings=state.settings||{};state.settings.conductRules={base:100,good:96,fair:90,pass:85};saveData();renderConductRulesSettings();const ok=await pushCloud();const st=document.getElementById('conductRulesStatus');if(st){st.style.display='block';st.className='notice ok';st.textContent=ok===false?'⚠️ Đã khôi phục trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã khôi phục mặc định.'}renderAll()}
+async function saveSettings(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được thay đổi cài đặt.');return}state.settings.teacher=document.getElementById('setTeacher').value;state.settings.className=document.getElementById('setClass').value;state.settings.year=document.getElementById('setYear').value;state.settings.groups=Number(document.getElementById('setGroups').value);state.settings.conductRules=getConductRules();saveData();await pushCloud();renderConductRulesSettings();alert('Đã lưu cài đặt.')}
 async function resetAttendanceOnly(){
   if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được reset điểm danh.');return}
   const className=currentClass?.class_name||state.settings?.className||'lớp đang chọn';
@@ -1539,7 +1545,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       if(s>new Date(GUEST_ACADEMIC_END+'T00:00:00'))break;
       weeks.push({number:n,start:isoDate(s)});
     }
-    const weekScore=(sid,w)=>{const e=new Date(w+'T00:00:00');e.setDate(e.getDate()+6);const es=isoDate(e);return 100+approved.filter(x=>x.studentId===sid&&x.date>=w&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0)};
+    const guestRules=(()=>{const r=d?.settings?.conductRules||{};return{base:Number.isFinite(Number(r.base))?Number(r.base):100,good:Number.isFinite(Number(r.good))?Number(r.good):96,fair:Number.isFinite(Number(r.fair))?Number(r.fair):90,pass:Number.isFinite(Number(r.pass))?Number(r.pass):85}})();const weekScore=(sid,w)=>{const e=new Date(w+'T00:00:00');e.setDate(e.getDate()+6);const es=isoDate(e);return guestRules.base+approved.filter(x=>x.studentId===sid&&x.date>=w&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0)};
     const monthScore=(sid,ym)=>{const mw=weeks.filter(w=>w.start.slice(0,7)===ym).slice(0,4);const ss=mw.map(w=>weekScore(sid,w.start));return ss.length?ss.reduce((a,b)=>a+b,0)/ss.length:100};
     const semScore=(sid,sem)=>{const ms=sem==='hki'?['2026-09','2026-10','2026-11','2026-12','2027-01']:['2027-02','2027-03','2027-04','2027-05','2027-06'];const ss=ms.map(m=>monthScore(sid,m));return ss.reduce((a,b)=>a+b,0)/ss.length};
     students.forEach(st=>{
@@ -1549,7 +1555,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       else if(period==='hki')score=semScore(st.id,'hki');
       else if(period==='hkii')score=semScore(st.id,'hkii');
       else score=(semScore(st.id,'hki')+semScore(st.id,'hkii'))/2;
-      byStudent[st.id]={score,grade:score>=96?'Tốt':score>=90?'Khá':score>=85?'Đạt':'Chưa đạt'};
+      byStudent[st.id]={score,grade:score>=guestRules.good?'Tốt':score>=guestRules.fair?'Khá':score>=guestRules.pass?'Đạt':'Chưa đạt'};
     });
     return byStudent;
   }
@@ -1816,6 +1822,9 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
 <script id="bibi-rbac-v7">
 // Defense-in-depth: giao diện chỉ là lớp thứ nhất; RLS Supabase mới là lớp bảo vệ bắt buộc.
 // Không lưu service_role key trong index.html.
+</script>
+<script id="bibi-conduct-rules-report-init">
+window.addEventListener('load',function(){setTimeout(function(){try{renderConductRulesSettings();populateReportSelectors()}catch(e){console.warn(e)}},200)});
 </script>
 </body>
 </html>
