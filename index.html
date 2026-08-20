@@ -581,17 +581,24 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
       </section>
 
       <section id="page-users" class="page">
-        <div class="page-head"><div><h2>Tài khoản & phân quyền</h2><div class="muted">GVCN/Admin tạo trực tiếp tài khoản lớp trưởng, lớp phó và tổ trưởng.</div></div></div>
-        <div class="card" style="margin-bottom:16px"><h3>➕ Tạo tài khoản cán bộ lớp</h3>
+        <div class="page-head"><div><h2>Tài khoản & phân quyền</h2><div class="muted">GVCN quản lý tài khoản và cấp quyền đúng theo lớp.</div></div></div>
+        <div class="card" style="margin-bottom:16px">
+          <h3>➕ Tạo tài khoản GVCN / cán bộ lớp</h3>
+          <div class="muted" style="margin-bottom:12px">Chỉ tài khoản GVCN mới có thể mở chức năng này. Tài khoản được tạo qua Edge Function và ghi quyền lớp ở phía máy chủ.</div>
           <div class="form-grid">
-            <div class="field"><label>Tài khoản *</label><input id="newUsername" placeholder="loptruong" autocomplete="off"></div>
+            <div class="field"><label>Tài khoản *</label><input id="newUsername" placeholder="gvcn12a8" autocomplete="off"></div>
             <div class="field"><label>Họ và tên *</label><input id="newName" placeholder="Nguyễn Văn A"></div>
             <div class="field"><label>Mật khẩu *</label><input id="newPassword" type="password" placeholder="Tối thiểu 8 ký tự"></div>
-            <div class="field"><label>Vai trò *</label><select id="newRole"><option value="loptruong">Lớp trưởng</option><option value="loppho">Lớp phó</option><option value="to1">Tổ trưởng 1</option><option value="to2">Tổ trưởng 2</option><option value="to3">Tổ trưởng 3</option><option value="to4">Tổ trưởng 4</option></select></div>
+            <div class="field"><label>Vai trò *</label><select id="newRole"><option value="admin">GVCN</option><option value="loptruong">Lớp trưởng</option><option value="loppho">Lớp phó</option><option value="to1">Tổ trưởng 1</option><option value="to2">Tổ trưởng 2</option><option value="to3">Tổ trưởng 3</option><option value="to4">Tổ trưởng 4</option></select></div>
             <div class="field span2"><label>Lớp được phép vào *</label><select id="newClassSelect"></select></div>
           </div>
           <div class="actions" style="margin-top:12px"><button class="btn" onclick="createClassUser()">🔐 Tạo tài khoản</button></div>
           <div id="userCreateStatus" class="notice" style="display:none;margin-top:12px"></div>
+        </div>
+        <div class="card" style="margin-bottom:16px;border:1px solid #a7f3d0;background:#ecfdf5">
+          <h3>🛡️ Bảo vệ dữ liệu theo lớp</h3>
+          <div class="muted">Giao diện chỉ là lớp bảo vệ thứ nhất. Dữ liệu được khóa bằng RLS Supabase: tài khoản chỉ đọc/ghi các dòng thuộc lớp được cấp trong <b>class_user_roles</b>; GVCN/Admin mới có quyền quản trị toàn bộ.</div>
+          <div id="rbacAuditStatus" class="footer-note">Đang kiểm tra quyền của tài khoản...</div>
         </div>
         <div class="table-wrap"><table class="table"><thead><tr><th>Tài khoản</th><th>Họ tên</th><th>Vai trò</th><th>Lớp</th><th>Trạng thái</th></tr></thead><tbody id="usersBody"></tbody></table></div>
       </section>
@@ -661,6 +668,22 @@ function saveLocal(){localStorage.setItem(dataKey(),JSON.stringify(state))}
 function saveData(){saveLocal()}
 function roleCanEdit(){return ['admin','loptruong','loppho','to1','to2','to3','to4'].includes(currentUser?.role)}
 function isAdmin(){return currentUser?.role==='admin'}
+async function assertClassAccess(classId){
+  if(!currentUser||!classId) throw new Error('Không xác định được tài khoản hoặc lớp.');
+  if(isAdmin()) return true;
+  const {data,error}=await sb.from('class_user_roles').select('class_id').eq('user_id',currentUser.id).eq('class_id',classId).maybeSingle();
+  if(error) throw error;
+  if(!data) throw new Error('Tài khoản không được cấp quyền vào lớp này.');
+  return true;
+}
+async function runRBACAudit(){
+  const el=document.getElementById('rbacAuditStatus'); if(!el||!currentUser)return;
+  try{
+    const {data,error}=await sb.from('class_user_roles').select('class_id,role,scope').eq('user_id',currentUser.id);
+    if(error)throw error;
+    el.textContent=isAdmin()?`✅ Vai trò GVCN: quản trị ${availableClasses.length} lớp đang khả dụng.`:`✅ ${currentUser.name||currentUser.username}: được cấp ${data?.length||0} lớp; hệ thống chỉ cho phép truy cập lớp được cấp.`;
+  }catch(e){el.textContent='⚠️ Không kiểm tra được quyền: '+(e.message||e);}
+}
 function isClassOfficer(){return roleCanEdit()&&!isAdmin()}
 function canManageStudents(){return isAdmin()}
 function canEditLearning(){return isAdmin()}
@@ -682,7 +705,7 @@ function getCurrentUserRoleDisplay(){
 }
 function setUserUi(){
   document.getElementById('userName').textContent=currentUser?.name||currentUser?.username||'';
-  const roleText=currentUser?.roleLabel||currentUser?.role||'';
+  const roleText=isAdmin()?'GVCN':(currentUser?.roleLabel||currentUser?.role||'');
   const scopeText=currentUser?.scope||currentClass?.class_name||'';
   document.getElementById('userRole').textContent=roleText+' · '+scopeText;
   document.getElementById('avatar').textContent=(currentUser?.name||currentUser?.username||'N').charAt(0).toUpperCase();
@@ -730,20 +753,17 @@ async function loadCloudUser(user){
   currentUser={...p};
 }
 async function loadAvailableClasses(userId){
-  let q=sb.from('classes').select('id,class_name,grade,group_count,is_archived,state_key,academic_years!inner(id,name,is_locked)').order('created_at',{ascending:false});
+  let q=sb.from('classes').select('id,class_name,grade,group_count,is_archived,state_key,homeroom_teacher_id,academic_years!inner(id,name,is_locked)').order('created_at',{ascending:false});
   if(!isAdmin()){
     const {data:assign,error}=await sb.from('class_user_roles').select('class_id,role,scope').eq('user_id',userId);
     if(error)throw error;
-    const ids=(assign||[]).map(x=>x.class_id);
+    const ids=[...new Set((assign||[]).map(x=>x.class_id).filter(Boolean))];
     if(!ids.length){availableClasses=[];return}
     q=q.in('id',ids);
   }
   const {data,error}=await q;if(error)throw error;
   availableClasses=(data||[]).map(x=>({...x,year:x.academic_years?.name||'',is_locked:x.academic_years?.is_locked||false}));
-  if(!availableClasses.length && isAdmin()){
-    const {data:legacy}=await sb.from('classes').select('id,class_name,grade,group_count,is_archived,state_key,academic_years!inner(id,name,is_locked)').eq('state_key','12A8-2026-2027').maybeSingle();
-    if(legacy)availableClasses=[{...legacy,year:legacy.academic_years?.name||'2026-2027',is_locked:legacy.academic_years?.is_locked||false}];
-  }
+  if(isAdmin()) await runRBACAudit();
 }
 function showClassChooser(){
   const yearSel=document.getElementById('loginYearSelect');
@@ -773,6 +793,7 @@ async function enterSelectedClass(){
   currentClass=x; currentStateKey=x.state_key;
   localStorage.setItem('bibi_current_class_db_id',x.id);localStorage.setItem('bibi_current_class_key',x.id);
   await loadCloudState();
+  await runRBACAudit();
   document.getElementById('classChooser').classList.remove('show');
   document.getElementById('loginScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');
   setUserUi();
@@ -788,17 +809,22 @@ function cancelClassEntry(){
   setLoginStatus('Bạn đã hủy chọn lớp.');
 }
 async function loadCloudState(){
-  const {data,error}=await sb.from('class_state').select('data,updated_at').eq('class_id',currentStateKey).maybeSingle();
-  if(error){console.error(error);state=loadLocalFallback();return}
-  state=data?.data||seed();
-  state.settings={...(state.settings||seed().settings),className:currentClass?.class_name||state.settings?.className||'12A8',year:currentClass?.year||state.settings?.year||'2026-2027',groups:currentClass?.group_count||state.settings?.groups||4};
-  saveLocal();
+  try{
+    if(currentClass?.id)await assertClassAccess(currentClass.id);
+    const {data,error}=await sb.from('class_state').select('data,updated_at').eq('class_id',currentStateKey).maybeSingle();
+    if(error)throw error;
+    state=data?.data||seed();
+    state.settings={...(state.settings||seed().settings),className:currentClass?.class_name||state.settings?.className||'12A8',year:currentClass?.year||state.settings?.year||'2026-2027',groups:currentClass?.group_count||state.settings?.groups||4};
+    saveLocal();
+  }catch(e){console.error(e);state=loadLocalFallback();alert('🔒 Không thể tải dữ liệu lớp này: '+(e.message||e));throw e;}
 }
 async function pushCloud(){
   if(!currentStateKey||!currentUser)return false;
-  const {error}=await sb.from('class_state').upsert({class_id:currentStateKey,data:state,updated_by:currentUser.id,updated_at:new Date().toISOString()},{onConflict:'class_id'});
-  if(error){console.error(error);alert('Không lưu được lên Supabase: '+error.message);return false}
-  saveLocal();return true;
+  try{
+    if(currentClass?.id)await assertClassAccess(currentClass.id);
+    const {error}=await sb.from('class_state').upsert({class_id:currentStateKey,data:state,updated_by:currentUser.id,updated_at:new Date().toISOString()},{onConflict:'class_id'});
+    if(error)throw error; saveLocal(); return true;
+  }catch(e){console.error(e);alert('🔒 Không được phép lưu dữ liệu lớp này: '+(e.message||e));return false;}
 }
 async function logout(){
   const finish=()=>{currentUser=null;currentClass=null;availableClasses=[];currentStateKey='12A8-2026-2027';try{localStorage.removeItem('bibi_current_class_db_id');localStorage.removeItem('bibi_current_class_key')}catch(e){};document.getElementById('app')?.classList.add('hidden');document.getElementById('classChooser')?.classList.remove('show');document.getElementById('loginScreen')?.classList.remove('hidden');document.getElementById('appClassContext')?.classList.remove('show');const p=document.getElementById('loginPass');if(p)p.value='';try{setSidebarHidden(false)}catch(e){};setLoginStatus('✅ Đã đăng xuất. Vui lòng đăng nhập lại.','ok')};
@@ -831,7 +857,7 @@ function toggleSidebar(){
 }
 const titles={dashboard:'Trang chủ',ai:'Trợ lý AI',classes:'Quản lý lớp & năm học',students:'Học sinh',attendance:'Chuyên cần',conduct:'Rèn luyện',competition:'Thi đua',reports:'Báo cáo tổng hợp',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
 function showPage(name){
- if(['excel','users','ai'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
+ if(['excel','users','ai','classes','profile','settings'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');
  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===name));
  document.getElementById('pageTitle').textContent=titles[name]||name;
@@ -1059,20 +1085,20 @@ async function populateNewClassSelect(){
 }
 function userCreateNotice(msg,bad=false){const e=document.getElementById('userCreateStatus');if(!e)return;e.style.display='block';e.className='notice '+(bad?'danger':'ok');e.textContent=msg}
 async function createClassUser(){
- if(!isAdmin()){alert('Chỉ GVCN/Admin được tạo tài khoản.');return}
+ if(!isAdmin()){alert('🔒 Chỉ GVCN mới được tạo tài khoản.');return}
  const username=document.getElementById('newUsername').value.trim().toLowerCase().replace(/\s+/g,''),name=document.getElementById('newName').value.trim(),password=document.getElementById('newPassword').value,role=document.getElementById('newRole').value,classId=document.getElementById('newClassSelect').value;
  if(!username||!name||!password||!classId){userCreateNotice('❌ Vui lòng nhập đủ thông tin.',true);return}
+ if(!/^[a-z0-9._-]{3,40}$/.test(username)){userCreateNotice('❌ Tài khoản chỉ gồm chữ thường, số, dấu chấm, gạch ngang hoặc gạch dưới.',true);return}
  if(password.length<8){userCreateNotice('❌ Mật khẩu phải có ít nhất 8 ký tự.',true);return}
- userCreateNotice('⏳ Đang tạo tài khoản...');
+ const targetClass=availableClasses.find(x=>x.id===classId);if(!targetClass){userCreateNotice('❌ Lớp không nằm trong danh sách được phép.',true);return}
+ userCreateNotice('⏳ Đang tạo tài khoản ở phía máy chủ và gắn quyền lớp...');
  try{
-   const {data,error}=await sb.functions.invoke('create-class-user',{body:{username,name,password,role,class_id:classId}});
+   const {data,error}=await sb.functions.invoke('create-class-user',{body:{username,name,password,role,class_id:classId,scope:'Toàn lớp',created_by:currentUser.id}});
    if(error)throw error;if(!data?.ok)throw new Error(data?.error||'Không tạo được tài khoản');
-   userCreateNotice(`✅ Đã tạo tài khoản ${username}. Email đăng nhập: ${data.email}`);
-   document.getElementById('newUsername').value='';document.getElementById('newName').value='';document.getElementById('newPassword').value='';
-   await renderUsers();
- }catch(e){console.error(e);userCreateNotice('❌ '+(e.message||String(e))+' — Nếu đây là lần đầu, hãy deploy Edge Function create-class-user.',true)}
+   userCreateNotice(`✅ Đã tạo ${role==='admin'?'tài khoản GVCN':'tài khoản cán bộ lớp'} ${username} cho ${targetClass.class_name}.`);
+   document.getElementById('newUsername').value='';document.getElementById('newName').value='';document.getElementById('newPassword').value='';await renderUsers();
+ }catch(e){console.error(e);userCreateNotice('❌ '+(e.message||String(e)),true)}
 }
-
 function csvCell(v){v=String(v??'');return `"${v.replace(/"/g,'""')}"`}
 function downloadTemplate(){
   if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được tải mẫu Excel.');return}
@@ -1785,6 +1811,11 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   window.closeGuestMode=closeGuestMode;
   window.loadGuestDashboard=loadGuestDashboard;
 })();
+</script>
+
+<script id="bibi-rbac-v7">
+// Defense-in-depth: giao diện chỉ là lớp thứ nhất; RLS Supabase mới là lớp bảo vệ bắt buộc.
+// Không lưu service_role key trong index.html.
 </script>
 </body>
 </html>
