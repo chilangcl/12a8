@@ -452,7 +452,7 @@ select option{background:#fff!important;color:#202124!important}
 <div id="guestScreen" class="guest-screen hidden">
   <div class="guest-top">
     <div class="guest-brand"><span class="guest-logo">🎓</span><div>ClassManager Pro<small style="display:block;color:#94a3b8;font-weight:500">Chế độ Khách · Chỉ xem</small></div></div>
-    <button class="guest-back" onclick="closeGuestMode()">↩ Quay lại đăng nhập</button>
+    <button class="guest-back" onclick="closeGuestMode()">↩ Đăng nhập</button>
   </div>
   <div class="guest-wrap">
     <div class="card">
@@ -975,13 +975,13 @@ function showPage(name){updateProfile360Access();
  document.getElementById('pageTitle').textContent=titles[name]||name;
  /* Sau khi chọn một mục, tự ẩn trình đơn trên cả máy tính và điện thoại */
  setSidebarHidden(true);
- if(name==='dashboard')renderDashboard();if(name==='students')renderStudents();if(name==='attendance')renderAttendance();if(name==='conduct')renderConduct();if(name==='competition')renderCompetition();if(name==='reports')renderReports();if(name==='profile')renderProfileSelectors();if(name==='users')renderUsers();
+ if(name==='dashboard')renderDashboard();if(name==='students')renderStudents();if(name==='attendance')renderAttendance();if(name==='conduct')renderConduct();if(name==='competition')renderCompetition();if(name==='reports')renderReports();if(name==='profile'){renderProfileSelectors();setTimeout(renderProfile,0)}if(name==='users')renderUsers();
 }
 function updateProfile360Access(){
   const canSee=!!currentUser;
   document.querySelectorAll('.member-only').forEach(el=>el.style.display=canSee?'':'none');
 }
-function renderAll(){updateProfile360Access();renderDashboard();renderStudents();renderAttendance();renderConduct();populateReportSelectors();updateReportPeriodUI();renderCompetition();renderReports();if(isAdmin()){renderProfileSelectors();renderUsers();}}
+function renderAll(){updateProfile360Access();renderDashboard();renderStudents();renderAttendance();renderConduct();populateReportSelectors();updateReportPeriodUI();renderCompetition();renderReports();if(currentUser)renderProfileSelectors();if(isAdmin())renderUsers();}
 
 async function refreshCloud(){if(!currentUser||!currentStateKey)return;const {data,error}=await sb.from('class_state').select('data,updated_at').eq('class_id',currentStateKey).maybeSingle();if(error){alert('Không đồng bộ được: '+error.message);return}if(data?.data){state=data.data;state.settings={...(state.settings||{}),className:currentClass?.class_name||state.settings?.className,year:currentClass?.year||state.settings?.year,groups:currentClass?.group_count||state.settings?.groups};saveLocal();renderAll();alert('Đã tải dữ liệu mới nhất từ Supabase.')}}
 
@@ -1110,9 +1110,7 @@ async function saveStudent(){
 function viewStudent(id){
   if(!currentUser){alert('Vui lòng đăng nhập để xem Hồ sơ học sinh 360°.');return}
   showPage('profile');
-  renderProfileSelectors();
-  const el=document.getElementById('profileStudent');
-  if(el){el.value=id;renderProfile();}
+  renderProfileSelectors(id);
 }
 async function deleteStudent(id){
   if(!isAdmin()){alert('Chỉ GVCN/Admin được phép xóa học sinh.');return}
@@ -1323,15 +1321,118 @@ function renderReports(){
 }
 function attendanceCountsInRange(sid,range){const o={present:0,late:0,excused:0,absent:0};Object.values(state.attendance||{}).filter(x=>x.id===sid&&x.date>=range.start&&x.date<=range.end).forEach(x=>o[x.status]=(o[x.status]||0)+1);return o}
 function printSelectedReport(){renderReports();setTimeout(()=>window.print(),50)}
-function renderProfileSelectors(){
-  const el=document.getElementById('profileStudent'); if(!el)return;
-  const old=el.value;
-  const students=visibleStudents().slice().sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''),undefined,{numeric:true,sensitivity:'base'}));
-  el.innerHTML='<option value="">-- Chọn học sinh --</option>'+students.map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');
-  if(old && students.some(s=>s.id===old)){el.value=old;renderProfile();}
-}
-function renderProfile(){const id=document.getElementById('profileStudent').value;if(!id){document.getElementById('profileContent').innerHTML='<div class="empty">Chọn một học sinh để xem hồ sơ 360°.</div>';return}const s=state.students.find(x=>x.id===id);if(!s)return;const z=attendanceCounts(id),p=conductPoints(id),a1=avgScore(id,'HKI'),a2=avgScore(id,'HKII'),ay=avgScore(id,'CA_NAM'), rules=getConductRules(), cur=studentPeriodConduct(id,'week'), events=(state.conduct||[]).filter(x=>x.studentId===id).slice().reverse();const alert=getStudentAlerts().find(x=>x.s.id===id);document.getElementById('profileContent').innerHTML=`<div class="grid two"><div><h2>${esc(s.name)}</h2><p class="muted">${esc(s.code)} · Tổ ${esc(s.group)} · ${esc(s.role||'Học sinh')}</p><p>🎂 ${fmtDate(s.dob)} · ${esc(s.gender)}</p><p>👪 ${esc(s.parent)} · ${esc(s.parentPhone)}</p></div><div><h3>📌 Trạng thái 360°</h3><div class="kpi-list"><div class="kpi-row"><span>Hạnh kiểm hiện tại</span><b>${cur.score.toFixed(1)} · ${esc(cur.label)}</b></div><div class="kpi-row"><span>Rèn luyện tích lũy</span><b>${p.toFixed(1)}</b></div><div class="kpi-row"><span>Cần quan tâm</span><b>${alert?esc(alert.reasons.join('; ')):'Không có cảnh báo'}</b></div></div></div></div><hr style="border:0;border-top:1px solid var(--border);margin:20px 0"><div class="grid two"><div><h3>📅 Chuyên cần</h3><div class="kpi-list"><div class="kpi-row"><span>Có mặt</span><b>${z.present}</b></div><div class="kpi-row"><span>Đi muộn</span><b>${z.late}</b></div><div class="kpi-row"><span>Nghỉ có phép</span><b>${z.excused}</b></div><div class="kpi-row"><span>Nghỉ không phép</span><b>${z.absent}</b></div></div></div><div><h3>📈 Kết quả theo giai đoạn</h3><div class="kpi-list"><div class="kpi-row"><span>HK I</span><b>${a1===null?'Chưa có':a1.toFixed(2)}</b></div><div class="kpi-row"><span>HK II</span><b>${a2===null?'Chưa có':a2.toFixed(2)}</b></div><div class="kpi-row"><span>Cả năm</span><b>${ay===null?'Chưa có':ay.toFixed(2)}</b></div><div class="mini">Ngưỡng hạnh kiểm: Tốt ≥ ${rules.good}, Khá ≥ ${rules.fair}, Đạt ≥ ${rules.pass}</div></div></div></div><hr style="border:0;border-top:1px solid var(--border);margin:20px 0"><h3>📝 Lịch sử rèn luyện</h3>${events.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Ngày</th><th>Loại</th><th>Nội dung</th><th>Điểm</th><th>Trạng thái</th></tr></thead><tbody>${events.map(x=>`<tr><td>${fmtDate(x.date)}</td><td>${esc(x.type)}</td><td>${esc(x.content)}</td><td>${x.points}</td><td>${x.status}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Chưa có dữ liệu.</div>'}`}
+function renderProfileSelectors(selectedId=''){
+  const el=document.getElementById('profileStudent');
+  if(!el)return;
 
+  const old=selectedId || el.value || '';
+  const students=visibleStudents()
+    .slice()
+    .sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''),undefined,{numeric:true,sensitivity:'base'}));
+
+  el.innerHTML='<option value="">-- Chọn học sinh --</option>'+
+    students.map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');
+
+  let target='';
+  if(old && students.some(s=>String(s.id)===String(old))) target=old;
+  else if(students.length) target=students[0].id;
+
+  el.value=target;
+  renderProfile();
+}
+function renderProfile(){
+  const el=document.getElementById('profileStudent');
+  const box=document.getElementById('profileContent');
+  if(!el||!box)return;
+
+  const id=el.value;
+  if(!id){
+    box.innerHTML='<div class="empty">Chưa có học sinh để hiển thị hồ sơ 360°.</div>';
+    return;
+  }
+
+  try{
+    const s=(state.students||[]).find(x=>String(x.id)===String(id));
+    if(!s){
+      box.innerHTML='<div class="empty">Không tìm thấy dữ liệu học sinh đã chọn.</div>';
+      return;
+    }
+
+    const z=attendanceCounts(id)||{present:0,late:0,excused:0,absent:0};
+    const p=Number(conductPoints(id)||0);
+    const a1=avgScore(id,'HKI');
+    const a2=avgScore(id,'HKII');
+    const ay=avgScore(id,'CA_NAM');
+    const rules=getConductRules()||{good:96,fair:90,pass:85};
+    const cur=studentPeriodConduct(id,'week')||{score:0,label:'Chưa xếp loại'};
+    const events=(state.conduct||[]).filter(x=>String(x.studentId)===String(id)).slice().reverse();
+    const alerts=(typeof getStudentAlerts==='function'?getStudentAlerts():[])||[];
+    const studentAlert=alerts.find(x=>x&&x.s&&String(x.s.id)===String(id));
+
+    box.innerHTML=`
+      <div class="grid two">
+        <div>
+          <h2>${esc(s.name||'Chưa có tên')}</h2>
+          <p class="muted">${esc(s.code||'')} · Tổ ${esc(s.group||'Chưa phân tổ')} · ${esc(s.role||'Học sinh')}</p>
+          <p>🎂 ${fmtDate(s.dob||'')||'Chưa cập nhật ngày sinh'} · ${esc(s.gender||'Chưa cập nhật')}</p>
+          <p>👪 ${esc(s.parent||'Chưa cập nhật phụ huynh')} · ${esc(s.parentPhone||'')}</p>
+        </div>
+        <div>
+          <h3>📌 Trạng thái 360°</h3>
+          <div class="kpi-list">
+            <div class="kpi-row"><span>Hạnh kiểm hiện tại</span><b>${Number(cur.score||0).toFixed(1)} · ${esc(cur.label||'Chưa xếp loại')}</b></div>
+            <div class="kpi-row"><span>Rèn luyện tích lũy</span><b>${p.toFixed(1)}</b></div>
+            <div class="kpi-row"><span>Cần quan tâm</span><b>${studentAlert&&studentAlert.reasons&&studentAlert.reasons.length?esc(studentAlert.reasons.join('; ')):'Không có cảnh báo'}</b></div>
+          </div>
+        </div>
+      </div>
+
+      <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+      <div class="grid two">
+        <div>
+          <h3>📅 Chuyên cần</h3>
+          <div class="kpi-list">
+            <div class="kpi-row"><span>Có mặt</span><b>${Number(z.present||0)}</b></div>
+            <div class="kpi-row"><span>Đi muộn</span><b>${Number(z.late||0)}</b></div>
+            <div class="kpi-row"><span>Nghỉ có phép</span><b>${Number(z.excused||0)}</b></div>
+            <div class="kpi-row"><span>Nghỉ không phép</span><b>${Number(z.absent||0)}</b></div>
+          </div>
+        </div>
+        <div>
+          <h3>📈 Kết quả theo giai đoạn</h3>
+          <div class="kpi-list">
+            <div class="kpi-row"><span>Học kì 1</span><b>${a1===null||a1===undefined?'Chưa có':Number(a1).toFixed(2)}</b></div>
+            <div class="kpi-row"><span>Học kì 2</span><b>${a2===null||a2===undefined?'Chưa có':Number(a2).toFixed(2)}</b></div>
+            <div class="kpi-row"><span>Cả năm</span><b>${ay===null||ay===undefined?'Chưa có':Number(ay).toFixed(2)}</b></div>
+            <div class="mini">Ngưỡng hạnh kiểm: Tốt ≥ ${Number(rules.good)}, Khá ≥ ${Number(rules.fair)}, Đạt ≥ ${Number(rules.pass)}</div>
+          </div>
+        </div>
+      </div>
+
+      <hr style="border:0;border-top:1px solid var(--border);margin:20px 0">
+
+      <h3>📝 Lịch sử rèn luyện</h3>
+      ${events.length?`
+        <div class="table-wrap">
+          <table class="table">
+            <thead><tr><th>Ngày</th><th>Loại</th><th>Nội dung</th><th>Điểm</th><th>Trạng thái</th></tr></thead>
+            <tbody>${events.map(x=>`<tr>
+              <td>${fmtDate(x.date||'')}</td>
+              <td>${esc(x.type||'')}</td>
+              <td>${esc(x.content||'')}</td>
+              <td>${Number(x.points||0)>=0?'+':''}${Number(x.points||0)}</td>
+              <td>${esc(x.status||'')}</td>
+            </tr>`).join('')}</tbody>
+          </table>
+        </div>`
+        :'<div class="empty">Chưa có dữ liệu rèn luyện.</div>'}
+    `;
+  }catch(err){
+    console.error('Lỗi hiển thị Hồ sơ 360°:',err);
+    box.innerHTML='<div class="empty">Không thể hiển thị hồ sơ 360°. Vui lòng tải lại dữ liệu hoặc chọn lại học sinh.</div>';
+  }
+}
 async function saveConductRules(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được thay đổi nguyên tắc.');return}const good=Number(document.getElementById('setGoodScore')?.value),fair=Number(document.getElementById('setFairScore')?.value),pass=Number(document.getElementById('setPassScore')?.value),base=Number(document.getElementById('setConductBase')?.value);if(![good,fair,pass,base].every(Number.isFinite)){alert('⚠️ Vui lòng nhập đủ các chỉ số hợp lệ.');return}if(!(good>=fair&&fair>=pass)){alert('⚠️ Ngưỡng phải theo thứ tự Tốt ≥ Khá ≥ Đạt.');return}if(base<0){alert('⚠️ Điểm khởi đầu không được âm.');return}state.settings=state.settings||{};state.settings.conductRules={base,good,fair,pass};saveData();const ok=await pushCloud();const st=document.getElementById('conductRulesStatus');if(st){st.style.display='block';st.className='notice '+(ok===false?'':'ok');st.textContent=ok===false?'⚠️ Đã lưu trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã lưu nguyên tắc xếp hạnh kiểm.'}renderAll()}
 async function resetConductRules(){if(!isAdmin())return;if(!confirm('Khôi phục mặc định: Tốt ≥96; Khá ≥90; Đạt ≥85; điểm khởi đầu 100?'))return;state.settings=state.settings||{};state.settings.conductRules={base:100,good:96,fair:90,pass:85};saveData();renderConductRulesSettings();const ok=await pushCloud();const st=document.getElementById('conductRulesStatus');if(st){st.style.display='block';st.className='notice ok';st.textContent=ok===false?'⚠️ Đã khôi phục trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã khôi phục mặc định.'}renderAll()}
 async function saveSettings(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được thay đổi cài đặt.');return}state.settings.teacher=document.getElementById('setTeacher').value;state.settings.className=document.getElementById('setClass').value;state.settings.year=document.getElementById('setYear').value;state.settings.groups=Number(document.getElementById('setGroups').value);state.settings.conductRules=getConductRules();saveData();await pushCloud();renderConductRulesSettings();alert('Đã lưu cài đặt.')}
