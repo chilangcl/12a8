@@ -392,6 +392,38 @@ select option{background:#fff!important;color:#202124!important}
 .sidebar .nav button:hover,
 .sidebar .nav button.active{color:#111827!important;}
 </style>
+
+<style id="profile360-fix-style">
+.member-only{display:none}
+</style>
+
+
+<style id="competition-alerts-advanced-style">
+.competition-period-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.competition-period-tabs .btn.active{outline:2px solid var(--primary);font-weight:900}
+.competition-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(280px,.9fr);gap:16px;margin-top:16px}
+.group-ranking-list{display:grid;gap:10px}
+.group-rank-item{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff}
+.group-rank-no{font-size:20px;min-width:34px;text-align:center}
+.group-rank-main{flex:1}
+.group-rank-score{font-size:18px;font-weight:900;color:#0f3d7a}
+.alert-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}
+.alert-column{border:1px solid var(--border);border-radius:14px;background:#fff;padding:12px;min-width:0}
+.alert-column h3{margin:0 0 10px;font-size:16px}
+.alert-student{padding:10px 0;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.alert-student:first-of-type{border-top:0}
+.alert-student .mini{margin-top:3px}
+.alert-student-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.alert-settings{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-top:12px}
+.alert-settings label{display:grid;gap:4px;font-size:12px;font-weight:700}
+.alert-settings input{width:92px}
+.history-score{font-size:28px;font-weight:900;color:#0f3d7a;margin:8px 0 14px}
+.score-link{cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+.positive-row{background:#f0fdf4}.negative-row{background:#fef2f2}
+@media(max-width:900px){.competition-grid{grid-template-columns:1fr}.alert-board{grid-template-columns:1fr}}
+@media(max-width:560px){.competition-period-tabs .btn{flex:1 1 calc(50% - 8px)}.alert-settings input{width:76px}}
+</style>
+
 </head>
 <body>
 
@@ -456,7 +488,7 @@ select option{background:#fff!important;color:#202124!important}
       <button data-page="competition" onclick="showPage('competition')">🏆 Thi đua</button>
       <div class="nav-title">Báo cáo</div>
       <button data-page="reports" onclick="showPage('reports')">📊 Báo cáo tổng hợp</button>
-      <button class="admin-only" data-page="profile" onclick="showPage('profile')">👤 Hồ sơ học sinh</button>
+      <button class="member-only" data-page="profile" onclick="showPage('profile')">👤 Hồ sơ học sinh 360°</button>
       <div class="nav-title admin-only">Dữ liệu & hệ thống</div>
       <button class="admin-only" data-page="excel" onclick="showPage('excel')">📥 Excel / Sao lưu</button>
       <button class="admin-only" data-page="users" onclick="showPage('users')">🔐 Tài khoản & phân quyền</button>
@@ -617,11 +649,8 @@ select option{background:#fff!important;color:#202124!important}
       </section>
 
       <section id="page-competition" class="page">
-        <div class="page-head"><div><h2>Thi đua</h2><div class="muted">Tổng hợp điểm rèn luyện, chuyên cần và Hạnh kiểm theo từng giai đoạn</div></div></div>
-        <div class="toolbar"><div class="field" style="min-width:280px"><label>Giai đoạn thi đua</label><select id="compPeriod" onchange="renderCompetition()"></select></div></div>
-        <div class="grid two"><div class="card"><h3>🏆 Hạnh kiểm theo học sinh</h3><div id="conductRanking"></div></div><div class="card"><h3>👥 Tổng hợp theo tổ</h3><div id="groupRanking"></div></div></div>
-        <div class="card" style="margin-top:16px"><h3>📌 Nguyên tắc xếp Hạnh kiểm</h3><div id="conductRulesDisplay" class="notice ok"></div><div id="conductSummary"></div></div>
-      </section>
+<div id="competitionContent"></div>
+</section>
 
       <section id="page-reports" class="page">
         <div class="page-head"><div><h2>Báo cáo tổng hợp</h2><div class="muted">Chọn Tuần · Tháng · Học kỳ 1 · Học kỳ 2 · Cả năm để xem và in báo cáo</div></div><div class="actions"><button class="btn" onclick="printSelectedReport()">🖨 In báo cáo / PDF</button><button class="btn secondary admin-only" onclick="exportBackup()">💾 Sao lưu JSON</button></div></div>
@@ -635,7 +664,7 @@ select option{background:#fff!important;color:#202124!important}
       </section>
 
       <section id="page-profile" class="page">
-        <div class="page-head"><div><h2>Hồ sơ học sinh</h2><div class="muted">Xem lịch sử học tập, chuyên cần và rèn luyện</div></div></div>
+        <div class="page-head"><div><h2>Hồ sơ học sinh 360°</h2><div class="muted">Tổng hợp thông tin, chuyên cần, rèn luyện, hạnh kiểm và cảnh báo cần quan tâm</div></div></div>
         <div class="toolbar"><select id="profileStudent" onchange="renderProfile()"><option value="">-- Chọn học sinh --</option></select></div>
         <div id="profileContent" class="card"><div class="empty">Chọn một học sinh để xem hồ sơ 360°.</div></div>
       </section>
@@ -692,6 +721,18 @@ select option{background:#fff!important;color:#202124!important}
     <footer class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy giáo Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</footer>
   </main>
 </div>
+</div>
+
+
+<!-- Advanced competition point-history modal -->
+<div id="competitionHistoryModal" class="modal">
+  <div class="modal-box" style="max-width:760px">
+    <div class="modal-head">
+      <h3 id="competitionHistoryTitle">Lịch sử biến động điểm</h3>
+      <button class="icon-btn" onclick="closeModal('competitionHistoryModal')">✕</button>
+    </div>
+    <div id="competitionHistoryContent"></div>
+  </div>
 </div>
 
 <div id="studentModal" class="modal"><div class="modal-card">
@@ -925,9 +966,10 @@ function toggleSidebar(){
  const hidden=sidebar.classList.contains('menu-hidden');
  setSidebarHidden(!hidden);
 }
-const titles={dashboard:'Trang chủ',ai:'Trợ lý AI',classes:'Quản lý lớp & năm học',students:'Học sinh',attendance:'Chuyên cần',conduct:'Rèn luyện',competition:'Thi đua',reports:'Báo cáo tổng hợp',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
-function showPage(name){
- if(['excel','users','ai','classes','profile','settings'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
+const titles={dashboard:'Trang chủ',ai:'Trợ lý AI',classes:'Quản lý lớp & năm học',students:'Học sinh',attendance:'Chuyên cần',conduct:'Rèn luyện',competition:'Thi đua & Theo dõi',reports:'Báo cáo tổng hợp',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
+function showPage(name){updateProfile360Access();
+ if(['excel','users','ai','classes','settings'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
+  if(name==='profile'&&!currentUser){alert('Vui lòng đăng nhập để xem Hồ sơ học sinh 360°.');return}
  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');
  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===name));
  document.getElementById('pageTitle').textContent=titles[name]||name;
@@ -935,18 +977,106 @@ function showPage(name){
  setSidebarHidden(true);
  if(name==='dashboard')renderDashboard();if(name==='students')renderStudents();if(name==='attendance')renderAttendance();if(name==='conduct')renderConduct();if(name==='competition')renderCompetition();if(name==='reports')renderReports();if(name==='profile')renderProfileSelectors();if(name==='users')renderUsers();
 }
-function renderAll(){renderDashboard();renderStudents();renderAttendance();renderConduct();populateReportSelectors();updateReportPeriodUI();renderCompetition();renderReports();if(isAdmin()){renderProfileSelectors();renderUsers();}}
+function updateProfile360Access(){
+  const canSee=!!currentUser;
+  document.querySelectorAll('.member-only').forEach(el=>el.style.display=canSee?'':'none');
+}
+function renderAll(){updateProfile360Access();renderDashboard();renderStudents();renderAttendance();renderConduct();populateReportSelectors();updateReportPeriodUI();renderCompetition();renderReports();if(isAdmin()){renderProfileSelectors();renderUsers();}}
 
 async function refreshCloud(){if(!currentUser||!currentStateKey)return;const {data,error}=await sb.from('class_state').select('data,updated_at').eq('class_id',currentStateKey).maybeSingle();if(error){alert('Không đồng bộ được: '+error.message);return}if(data?.data){state=data.data;state.settings={...(state.settings||{}),className:currentClass?.class_name||state.settings?.className,year:currentClass?.year||state.settings?.year,groups:currentClass?.group_count||state.settings?.groups};saveLocal();renderAll();alert('Đã tải dữ liệu mới nhất từ Supabase.')}}
+
+function getAttentionRules(){
+  const d={absent:2,late:3,lowConduct:85,violations:3,decline:2};
+  const r=(state.settings&&state.settings.attentionRules)||{};
+  return {...d,...r};
+}
+function saveAttentionRules(){
+  if(!isAdmin()){alert('Chỉ GVCN/Admin được thay đổi ngưỡng cảnh báo.');return}
+  const rules={
+    absent:Number(document.getElementById('alertAbsentThreshold')?.value),
+    late:Number(document.getElementById('alertLateThreshold')?.value),
+    lowConduct:Number(document.getElementById('alertLowConductThreshold')?.value),
+    violations:Number(document.getElementById('alertViolationThreshold')?.value),
+    decline:Number(document.getElementById('alertDeclineThreshold')?.value)
+  };
+  if(Object.values(rules).some(v=>!Number.isFinite(v)||v<0)){alert('Vui lòng nhập các ngưỡng hợp lệ.');return}
+  state.settings=state.settings||{};state.settings.attentionRules=rules;saveData();pushCloud();renderAll();
+}
+function competitionRangeDates(mode){
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth();
+  const end=new Date(now); end.setHours(23,59,59,999);
+  if(mode==='week'){const start=new Date(now);start.setDate(now.getDate()-6);return {start,end};}
+  if(mode==='month'){const start=new Date(y,m,1);return {start,end};}
+  if(mode==='semester'){return {start:new Date(y,7,1),end};}
+  return {start:new Date(y,0,1),end};
+}
+function conductEventsForPeriod(studentId,mode){
+  const r=competitionRangeDates(mode);
+  return (state.conduct||[]).filter(x=>x.studentId===studentId&&x.status==='approved'&&x.date&&new Date(x.date)>=r.start&&new Date(x.date)<=r.end);
+}
+function competitionStudentScore(studentId,mode){
+  const rules=getConductRules();
+  const events=conductEventsForPeriod(studentId,mode);
+  return {score:rules.base+events.reduce((sum,x)=>sum+Number(x.points||0),0),events};
+}
+function competitionGroupRanking(mode){
+  const students=visibleStudents(), groups={};
+  students.forEach(s=>{
+    const g=String(s.group||'Chưa phân tổ');
+    if(!groups[g])groups[g]=[];
+    groups[g].push(competitionStudentScore(s.id,mode).score);
+  });
+  return Object.entries(groups).map(([group,scores])=>({group,score:scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:0,count:scores.length}))
+    .sort((a,b)=>b.score-a.score||String(a.group).localeCompare(String(b.group),undefined,{numeric:true}));
+}
+function competitionPeriodLabel(mode){return ({week:'Tuần',month:'Tháng',semester:'Học kì',year:'Cả năm'})[mode]||'Tuần'}
+function openCompetitionHistory(studentId,mode){
+  const s=state.students.find(x=>x.id===studentId); if(!s)return;
+  const result=competitionStudentScore(studentId,mode);
+  document.getElementById('competitionHistoryTitle').textContent=`${s.code||''} – ${s.name||''}`;
+  const rows=result.events.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  document.getElementById('competitionHistoryContent').innerHTML=
+    `<div class="muted">Biến động điểm · ${competitionPeriodLabel(mode)}</div>
+     <div class="history-score">Điểm hiện tại: ${result.score.toFixed(1)} · ${conductLabel(result.score)}</div>
+     ${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Điểm</th></tr></thead><tbody>${rows.map(x=>`<tr class="${Number(x.points)>=0?'positive-row':'negative-row'}"><td>${fmtDate(x.date)}</td><td>${esc(x.content||x.type||'')}</td><td><b>${Number(x.points)>=0?'+':''}${Number(x.points).toFixed(1)}</b></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">Chưa có biến động điểm trong giai đoạn này.</div>`}`;
+  document.getElementById('competitionHistoryModal').classList.add('show');
+}
+function recentScoreTrend(studentId){
+  const events=(state.conduct||[]).filter(x=>x.studentId===studentId&&x.status==='approved'&&x.date).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  const recent=events.slice(-3);
+  if(recent.length<2)return {decline:false,delta:0};
+  const delta=recent.reduce((s,x)=>s+Number(x.points||0),0);
+  return {decline:delta<0,delta};
+}
+function classifyStudentAttention(s){
+  const r=getAttentionRules(), z=attendanceCounts(s.id), allScore=competitionStudentScore(s.id,'year').score;
+  const events=(state.conduct||[]).filter(x=>x.studentId===s.id&&x.status==='approved');
+  const violations=events.filter(x=>Number(x.points||0)<0).length;
+  const trend=recentScoreTrend(s.id);
+  const reasons=[], positives=[];
+  if(z.absent>=r.absent)reasons.push(`Nghỉ không phép ${z.absent} lần`);
+  if(z.late>=r.late)reasons.push(`Đi muộn ${z.late} lần`);
+  if(allScore<r.lowConduct)reasons.push(`Hạnh kiểm ${allScore.toFixed(1)} dưới ${r.lowConduct}`);
+  if(trend.decline)reasons.push(`Điểm gần đây giảm ${Math.abs(trend.delta).toFixed(1)}`);
+  if(violations>=r.violations)reasons.push(`${violations} ghi nhận điểm trừ`);
+  if(!reasons.length && z.absent===0 && z.late===0 && allScore>=getConductRules().good && events.some(x=>Number(x.points)>0))positives.push('Duy trì chuyên cần và hạnh kiểm tốt');
+  if(reasons.length>=3)return {level:'high',reasons,positives,z,score:allScore};
+  if(reasons.length>=1)return {level:'watch',reasons,positives,z,score:allScore};
+  if(positives.length)return {level:'positive',reasons,positives,z,score:allScore};
+  return {level:'normal',reasons,positives,z,score:allScore};
+}
+function getAttentionBoard(){
+  const out={high:[],watch:[],positive:[]};
+  visibleStudents().forEach(s=>{const x=classifyStudentAttention(s);if(out[x.level])out[x.level].push({s,...x})});
+  out.high.sort((a,b)=>b.reasons.length-a.reasons.length||a.score-b.score);
+  out.watch.sort((a,b)=>b.reasons.length-a.reasons.length||a.score-b.score);
+  out.positive.sort((a,b)=>b.score-a.score);
+  return out;
+}
+
 function getStudentAlerts(){
- const rules=getConductRules(), a=visibleStudents(), alerts=[];
- a.forEach(s=>{const z=attendanceCounts(s.id), pts=conductPoints(s.id), reasons=[];
-  if(z.absent>=2)reasons.push(`Nghỉ không phép ${z.absent} lần`);
-  if(z.late>=3)reasons.push(`Đi muộn ${z.late} lần`);
-  if(pts<=-10)reasons.push(`Điểm rèn luyện biến động ${pts.toFixed(1)}`);
-  const wk=studentPeriodConduct(s.id,'week'); if(wk&&wk.score<rules.pass)reasons.push(`Hạnh kiểm hiện tại ${wk.score.toFixed(1)} (${conductLabel(wk.score)})`);
-  if(reasons.length)alerts.push({s,z,pts,reasons,severity:(z.absent>=3||pts<=-20||(wk&&wk.score<rules.pass-5))?'high':'medium'});
- }); return alerts.sort((x,y)=>(y.z.absent*10+Math.max(0,-y.pts))-(x.z.absent*10+Math.max(0,-x.pts)));
+  const board=getAttentionBoard();
+  return [...board.high,...board.watch].map(x=>({s:x.s,reasons:x.reasons,severity:x.level==='high'?'high':'medium'}));
 }
 function studentPeriodConduct(id,mode){const rules=getConductRules();const rows=(state.conduct||[]).filter(x=>x.studentId===id&&x.status==='approved');let filtered=rows;if(mode==='week'){const d=new Date(), from=new Date(d);from.setDate(d.getDate()-6);filtered=rows.filter(x=>new Date(x.date)>=from)}const score=rules.base+filtered.reduce((t,x)=>t+Number(x.points||0),0);return {score,label:conductLabel(score)}}
 function renderDashboard(){
@@ -966,7 +1096,7 @@ function log(text){state.activity=state.activity||[];state.activity.push({text,t
 function renderStudents(){
  const q=(document.getElementById('studentSearch')?.value||'').toLowerCase(),g=document.getElementById('studentGroup')?.value||'',sex=document.getElementById('studentGender')?.value||'';
  let a=visibleStudents().filter(s=>(!q||`${s.code} ${s.name}`.toLowerCase().includes(q))&&(!g||String(s.group)===g)&&(!sex||s.gender===sex));
- document.getElementById('studentsBody').innerHTML=a.length?a.map((s,i)=>`<tr><td>${i+1}</td><td><b>${esc(s.code)}</b></td><td>${esc(s.name)}</td><td>${fmtDate(s.dob)}</td><td>${esc(s.gender)}</td><td>${esc(s.group)}</td><td>${esc(s.role)}</td><td>${esc(s.parentPhone)}</td><td>${isAdmin()?`<button class="btn small" onclick="openStudent('${esc(s.id)}')">Sửa</button> <button class="btn secondary small" onclick="viewStudent('${esc(s.id)}')">Hồ sơ</button> <button class="btn danger small" onclick="deleteStudent('${esc(s.id)}')">Xóa</button>`:`<span class="badge b-gray">Chỉ xem</span>`}</td></tr>`).join(''):`<tr><td colspan="9" class="empty">Chưa có học sinh. Thầy có thể tải mẫu Excel rồi nhập danh sách.</td></tr>`;
+ document.getElementById('studentsBody').innerHTML=a.length?a.map((s,i)=>`<tr><td>${i+1}</td><td><b>${esc(s.code)}</b></td><td>${esc(s.name)}</td><td>${fmtDate(s.dob)}</td><td>${esc(s.gender)}</td><td>${esc(s.group)}</td><td>${esc(s.role)}</td><td>${esc(s.parentPhone)}</td><td>${isAdmin()?`<button class="btn small" onclick="openStudent('${esc(s.id)}')">Sửa</button> <button class="btn secondary small" onclick="viewStudent('${esc(s.id)}')">Hồ sơ 360°</button> <button class="btn danger small" onclick="deleteStudent('${esc(s.id)}')">Xóa</button>`:`<button class="btn secondary small" onclick="viewStudent('${esc(s.id)}')">Hồ sơ 360°</button>`}</td></tr>`).join(''):`<tr><td colspan="9" class="empty">Chưa có học sinh. Thầy có thể tải mẫu Excel rồi nhập danh sách.</td></tr>`;
 }
 function openStudent(id=''){if(!canManageStudents()){alert('🔒 Chỉ GVCN/Admin được thêm hoặc sửa hồ sơ học sinh.');return}editingStudent=id||null;const s=state.students.find(x=>x.id===id)||{};document.getElementById('studentModalTitle').textContent=id?'Sửa học sinh':'Thêm học sinh';
  [['sCode',s.code],['sName',s.name],['sDob',s.dob],['sEthnic',s.ethnic],['sPhone',s.phone],['sEmail',s.email],['sParent',s.parent],['sParentPhone',s.parentPhone],['sAddress',s.address],['sNote',s.note]].forEach(([id,v])=>document.getElementById(id).value=v||'');
@@ -977,7 +1107,13 @@ async function saveStudent(){
  const idx=state.students.findIndex(x=>x.id===editingStudent);if(idx>=0)state.students[idx]=obj;else{if(state.students.some(x=>x.code===code)){alert('Mã học sinh đã tồn tại.');return}state.students.push(obj)}
  saveData();await pushCloud();log(`${editingStudent?'Cập nhật':'Thêm'} học sinh ${name}`);closeModal('studentModal');renderAll();
 }
-function viewStudent(id){document.getElementById('profileStudent').value=id;showPage('profile');renderProfile()}
+function viewStudent(id){
+  if(!currentUser){alert('Vui lòng đăng nhập để xem Hồ sơ học sinh 360°.');return}
+  showPage('profile');
+  renderProfileSelectors();
+  const el=document.getElementById('profileStudent');
+  if(el){el.value=id;renderProfile();}
+}
 async function deleteStudent(id){
   if(!isAdmin()){alert('Chỉ GVCN/Admin được phép xóa học sinh.');return}
   const s=state.students.find(x=>x.id===id);
@@ -1038,7 +1174,7 @@ function renderConduct(){const q=(document.getElementById('conductSearch').value
 async function approveConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được duyệt rèn luyện.');return}const x=state.conduct.find(x=>x.id===id);if(x){x.status='approved';saveData();await pushCloud();log('GVCN duyệt một bản ghi rèn luyện');renderAll()}}
 async function deleteConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được xóa bản ghi rèn luyện.');return}if(!confirm('Xóa bản ghi này?'))return;state.conduct=state.conduct.filter(x=>x.id!==id);saveData();await pushCloud();renderAll()}
 function conductPoints(sid){return (state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved').reduce((a,x)=>a+Number(x.points||0),0)}
-function attendanceCounts(sid){let o={present:0,late:0,excused:0,absent:0};Object.values(state.attendance||{}).filter(x=>x.id===sid).forEach(x=>o[x.status]=(o[x.status]||0)+1);return o}
+function attendanceCounts(sid){let o={present:0,late:0,excused:0,absent:0};Object.values(state.attendance||{}).filter(x=>(x.studentId||x.id)===sid).forEach(x=>{const k=x.status;if(Object.prototype.hasOwnProperty.call(o,k))o[k]++});return o}
 const BIBI_ACADEMIC_START='2026-09-07';
 const BIBI_ACADEMIC_END='2027-06-30';
 function dateObj(s){const d=new Date((s||'')+'T00:00:00');return Number.isNaN(d.getTime())?null:d}
@@ -1117,24 +1253,63 @@ function populateCompetitionPeriods(){
  if(current && el.querySelector(`option[value="${CSS.escape(current)}"]`)) el.value=current;
  else {const w=academicWeekNumber(today());el.value=w?`week:${w}`:'hki';}
 }
+let competitionViewMode='week';
+function setCompetitionView(mode){competitionViewMode=mode;renderCompetition();}
 function renderCompetition(){
- populateCompetitionPeriods();
- const rules=getConductRules();
- const rulesBox=document.getElementById('conductRulesDisplay');
- if(rulesBox)rulesBox.innerHTML=`Mỗi học sinh bắt đầu <b>${rules.base}</b> điểm/tuần. Điểm cộng được cộng, điểm trừ bị trừ. <b>Tốt ≥ ${rules.good}</b>; <b>Khá ${rules.fair}–&lt;${rules.good}</b>; <b>Đạt ${rules.pass}–&lt;${rules.fair}</b>; <b>Chưa đạt &lt;${rules.pass}</b>. Tháng/HK/Cả năm được tính từ kết quả các tuần tương ứng.`;
- const raw=document.getElementById('compPeriod')?.value||'week:1';
- let p=raw,detail='';
- if(raw.startsWith('week:')){p='week';detail=raw.split(':')[1];}
- const a=visibleStudents().map(s=>({s,result:conductResultForPeriod(s.id,p,detail),pts:conductPoints(s.id),att:attendanceCounts(s.id)})).sort((a,b)=>b.result.score-a.result.score);
- const rank=document.getElementById('conductRanking');
- if(rank)rank.innerHTML=a.length?a.map((x,i)=>`<div class="kpi-row" style="padding:8px 0;border-bottom:1px solid var(--border)"><span><b>${i+1}.</b> ${esc(x.s.name)}</span><span><b>${x.result.score.toFixed(1)}</b> · <span class="badge ${x.result.grade==='Tốt'?'b-green':x.result.grade==='Khá'?'b-blue':x.result.grade==='Đạt'?'b-yellow':'b-red'}">${x.result.grade}</span></span></div>`).join(''):'<div class="empty">Chưa có dữ liệu.</div>';
- const g={};a.forEach(x=>{const k=x.s.group;g[k]=g[k]||{n:0,total:0};g[k].n++;g[k].total+=x.result.score});
- const gr=Object.entries(g).sort((a,b)=>b[1].total/b[1].n-a[1].total/a[1].n);
- const ge=document.getElementById('groupRanking');
- if(ge)ge.innerHTML=gr.length?gr.map((x,i)=>`<div class="kpi-row" style="padding:8px 0;border-bottom:1px solid var(--border)"><span><b>${i+1}. Tổ ${esc(x[0])}</b> · ${x[1].n} HS</span><b>${(x[1].total/x[1].n).toFixed(1)} · ${gradeFromScore(x[1].total/x[1].n)}</b></div>`).join(''):'<div class="empty">Chưa có dữ liệu.</div>';
- const d={Tốt:0,Khá:0,Đạt:0,'Chưa đạt':0};a.forEach(x=>d[x.result.grade]++);
- const cs=document.getElementById('conductSummary');
- if(cs)cs.innerHTML=`<div class="kpi-list"><div class="kpi-row"><span>Tốt</span><b>${d['Tốt']}</b></div><div class="kpi-row"><span>Khá</span><b>${d['Khá']}</b></div><div class="kpi-row"><span>Đạt</span><b>${d['Đạt']}</b></div><div class="kpi-row"><span>Chưa đạt</span><b>${d['Chưa đạt']}</b></div></div>`;
+  const students=visibleStudents().slice().sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''),undefined,{numeric:true,sensitivity:'base'}));
+  const rules=getConductRules(), mode=competitionViewMode||'week';
+  const results=students.map(s=>{const x=competitionStudentScore(s.id,mode);return {s,score:x.score,label:conductLabel(x.score),events:x.events};});
+  const summary={good:0,fair:0,pass:0,other:0};
+  results.forEach(x=>{if(x.score>=rules.good)summary.good++;else if(x.score>=rules.fair)summary.fair++;else if(x.score>=rules.pass)summary.pass++;else summary.other++;});
+  const ranking=competitionGroupRanking(mode);
+  const medals=['🥇','🥈','🥉'];
+  const board=getAttentionBoard(), ar=getAttentionRules();
+
+  const host=document.getElementById('competitionContent')||document.getElementById('competitionBody')?.parentElement?.parentElement;
+  if(!host)return;
+
+  host.innerHTML=`
+    <div class="page-head"><div><h2>Thi đua</h2><div class="muted">Theo dõi điểm, hạnh kiểm, biến động điểm và xếp hạng tổ</div></div></div>
+    <div class="competition-period-tabs">
+      ${[['week','Tuần'],['month','Tháng'],['semester','Học kì'],['year','Cả năm']].map(([k,l])=>`<button class="btn ${mode===k?'active':'secondary'}" onclick="setCompetitionView('${k}')">${l}</button>`).join('')}
+    </div>
+    <div class="grid cards">
+      <div class="card stat"><div class="label">Tốt</div><div class="value">${summary.good}</div><div class="hint">Học sinh</div></div>
+      <div class="card stat"><div class="label">Khá</div><div class="value">${summary.fair}</div><div class="hint">Học sinh</div></div>
+      <div class="card stat"><div class="label">Đạt</div><div class="value">${summary.pass}</div><div class="hint">Học sinh</div></div>
+      <div class="card stat"><div class="label">Chưa đạt</div><div class="value">${summary.other}</div><div class="hint">Học sinh</div></div>
+    </div>
+    <div class="competition-grid">
+      <div class="card">
+        <h3>🏆 Hạnh kiểm theo học sinh</h3>
+        <div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Mã HS</th><th>Họ và tên</th><th>Điểm</th><th>Hạnh kiểm</th><th>Biến động</th></tr></thead>
+        <tbody>${results.map((x,i)=>`<tr><td>${i+1}</td><td><b>${esc(x.s.code)}</b></td><td>${esc(x.s.name)}</td><td><button class="btn secondary small score-link" onclick="openCompetitionHistory('${esc(x.s.id)}','${mode}')">${x.score.toFixed(1)}</button></td><td><span class="badge ${x.label==='Tốt'?'b-green':x.label==='Khá'?'b-blue':x.label==='Đạt'?'b-yellow':'b-red'}">${x.label}</span></td><td>${x.events.length} lần <button class="btn secondary small" onclick="openCompetitionHistory('${esc(x.s.id)}','${mode}')">Xem</button></td></tr>`).join('')}</tbody></table></div>
+      </div>
+      <div class="card">
+        <h3>📊 Bảng xếp hạng tổ</h3>
+        <div class="muted">Theo ${competitionPeriodLabel(mode)}</div>
+        <div class="group-ranking-list">${ranking.length?ranking.map((x,i)=>`<div class="group-rank-item"><div class="group-rank-no">${medals[i]||`${i+1}️⃣`}</div><div class="group-rank-main"><b>Tổ ${esc(x.group)}</b><div class="mini">${x.count} học sinh</div></div><div class="group-rank-score">${x.score.toFixed(1)}</div></div>`).join(''):'<div class="empty">Chưa có dữ liệu tổ.</div>'}</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <h3>🔔 Theo dõi học sinh cần quan tâm</h3>
+      <div class="muted">Tự động phân loại từ chuyên cần, hạnh kiểm, xu hướng điểm và số lần vi phạm.</div>
+      ${isAdmin()?`<div class="alert-settings">
+        <label>Nghỉ KP từ<input id="alertAbsentThreshold" type="number" min="0" value="${ar.absent}"></label>
+        <label>Đi muộn từ<input id="alertLateThreshold" type="number" min="0" value="${ar.late}"></label>
+        <label>Điểm HK dưới<input id="alertLowConductThreshold" type="number" min="0" value="${ar.lowConduct}"></label>
+        <label>Vi phạm từ<input id="alertViolationThreshold" type="number" min="0" value="${ar.violations}"></label>
+        <label>Giảm điểm gần đây<input id="alertDeclineThreshold" type="number" min="0" value="${ar.decline}"></label>
+        <button class="btn" onclick="saveAttentionRules()">Lưu ngưỡng</button>
+      </div>`:''}
+      <div class="alert-board">
+        <div class="alert-column"><h3>🔴 Cần quan tâm (${board.high.length})</h3>${board.high.length?board.high.map(x=>`<div class="alert-student"><div><b>${esc(x.s.code)} · ${esc(x.s.name)}</b><div class="mini">${esc(x.reasons.join(' · '))}</div></div><div class="alert-student-actions"><button class="btn secondary small" onclick="viewStudent('${esc(x.s.id)}')">Hồ sơ 360°</button></div></div>`).join(''):'<div class="empty">Chưa có học sinh.</div>'}</div>
+        <div class="alert-column"><h3>🟠 Cần theo dõi (${board.watch.length})</h3>${board.watch.length?board.watch.map(x=>`<div class="alert-student"><div><b>${esc(x.s.code)} · ${esc(x.s.name)}</b><div class="mini">${esc(x.reasons.join(' · '))}</div></div><div class="alert-student-actions"><button class="btn secondary small" onclick="viewStudent('${esc(x.s.id)}')">Hồ sơ 360°</button></div></div>`).join(''):'<div class="empty">Chưa có học sinh.</div>'}</div>
+        <div class="alert-column"><h3>🟢 Tiến bộ tích cực (${board.positive.length})</h3>${board.positive.length?board.positive.map(x=>`<div class="alert-student"><div><b>${esc(x.s.code)} · ${esc(x.s.name)}</b><div class="mini">${esc(x.positives.join(' · '))}</div></div><div class="alert-student-actions"><button class="btn secondary small" onclick="viewStudent('${esc(x.s.id)}')">Hồ sơ 360°</button></div></div>`).join(''):'<div class="empty">Chưa có học sinh nổi bật theo tiêu chí hiện tại.</div>'}</div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px"><h3>Nguyên tắc xếp hạnh kiểm</h3><div class="muted">Tốt ≥ ${rules.good} · Khá ≥ ${rules.fair} · Đạt ≥ ${rules.pass} · Dưới ${rules.pass}: Chưa đạt · Điểm khởi đầu: ${rules.base}</div></div>
+  `;
 }
 function renderReports(){
  const sel=getReportSelection(),a=visibleStudents(),range=sel.range||periodRange('week',academicWeekNumber(today()));if(!range)return;
@@ -1148,7 +1323,13 @@ function renderReports(){
 }
 function attendanceCountsInRange(sid,range){const o={present:0,late:0,excused:0,absent:0};Object.values(state.attendance||{}).filter(x=>x.id===sid&&x.date>=range.start&&x.date<=range.end).forEach(x=>o[x.status]=(o[x.status]||0)+1);return o}
 function printSelectedReport(){renderReports();setTimeout(()=>window.print(),50)}
-function renderProfileSelectors(){const el=document.getElementById('profileStudent');const old=el.value;el.innerHTML='<option value="">-- Chọn học sinh --</option>'+visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');el.value=old;if(old)renderProfile()}
+function renderProfileSelectors(){
+  const el=document.getElementById('profileStudent'); if(!el)return;
+  const old=el.value;
+  const students=visibleStudents().slice().sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''),undefined,{numeric:true,sensitivity:'base'}));
+  el.innerHTML='<option value="">-- Chọn học sinh --</option>'+students.map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');
+  if(old && students.some(s=>s.id===old)){el.value=old;renderProfile();}
+}
 function renderProfile(){const id=document.getElementById('profileStudent').value;if(!id){document.getElementById('profileContent').innerHTML='<div class="empty">Chọn một học sinh để xem hồ sơ 360°.</div>';return}const s=state.students.find(x=>x.id===id);if(!s)return;const z=attendanceCounts(id),p=conductPoints(id),a1=avgScore(id,'HKI'),a2=avgScore(id,'HKII'),ay=avgScore(id,'CA_NAM'), rules=getConductRules(), cur=studentPeriodConduct(id,'week'), events=(state.conduct||[]).filter(x=>x.studentId===id).slice().reverse();const alert=getStudentAlerts().find(x=>x.s.id===id);document.getElementById('profileContent').innerHTML=`<div class="grid two"><div><h2>${esc(s.name)}</h2><p class="muted">${esc(s.code)} · Tổ ${esc(s.group)} · ${esc(s.role||'Học sinh')}</p><p>🎂 ${fmtDate(s.dob)} · ${esc(s.gender)}</p><p>👪 ${esc(s.parent)} · ${esc(s.parentPhone)}</p></div><div><h3>📌 Trạng thái 360°</h3><div class="kpi-list"><div class="kpi-row"><span>Hạnh kiểm hiện tại</span><b>${cur.score.toFixed(1)} · ${esc(cur.label)}</b></div><div class="kpi-row"><span>Rèn luyện tích lũy</span><b>${p.toFixed(1)}</b></div><div class="kpi-row"><span>Cần quan tâm</span><b>${alert?esc(alert.reasons.join('; ')):'Không có cảnh báo'}</b></div></div></div></div><hr style="border:0;border-top:1px solid var(--border);margin:20px 0"><div class="grid two"><div><h3>📅 Chuyên cần</h3><div class="kpi-list"><div class="kpi-row"><span>Có mặt</span><b>${z.present}</b></div><div class="kpi-row"><span>Đi muộn</span><b>${z.late}</b></div><div class="kpi-row"><span>Nghỉ có phép</span><b>${z.excused}</b></div><div class="kpi-row"><span>Nghỉ không phép</span><b>${z.absent}</b></div></div></div><div><h3>📈 Kết quả theo giai đoạn</h3><div class="kpi-list"><div class="kpi-row"><span>HK I</span><b>${a1===null?'Chưa có':a1.toFixed(2)}</b></div><div class="kpi-row"><span>HK II</span><b>${a2===null?'Chưa có':a2.toFixed(2)}</b></div><div class="kpi-row"><span>Cả năm</span><b>${ay===null?'Chưa có':ay.toFixed(2)}</b></div><div class="mini">Ngưỡng hạnh kiểm: Tốt ≥ ${rules.good}, Khá ≥ ${rules.fair}, Đạt ≥ ${rules.pass}</div></div></div></div><hr style="border:0;border-top:1px solid var(--border);margin:20px 0"><h3>📝 Lịch sử rèn luyện</h3>${events.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Ngày</th><th>Loại</th><th>Nội dung</th><th>Điểm</th><th>Trạng thái</th></tr></thead><tbody>${events.map(x=>`<tr><td>${fmtDate(x.date)}</td><td>${esc(x.type)}</td><td>${esc(x.content)}</td><td>${x.points}</td><td>${x.status}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Chưa có dữ liệu.</div>'}`}
 
 async function saveConductRules(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được thay đổi nguyên tắc.');return}const good=Number(document.getElementById('setGoodScore')?.value),fair=Number(document.getElementById('setFairScore')?.value),pass=Number(document.getElementById('setPassScore')?.value),base=Number(document.getElementById('setConductBase')?.value);if(![good,fair,pass,base].every(Number.isFinite)){alert('⚠️ Vui lòng nhập đủ các chỉ số hợp lệ.');return}if(!(good>=fair&&fair>=pass)){alert('⚠️ Ngưỡng phải theo thứ tự Tốt ≥ Khá ≥ Đạt.');return}if(base<0){alert('⚠️ Điểm khởi đầu không được âm.');return}state.settings=state.settings||{};state.settings.conductRules={base,good,fair,pass};saveData();const ok=await pushCloud();const st=document.getElementById('conductRulesStatus');if(st){st.style.display='block';st.className='notice '+(ok===false?'':'ok');st.textContent=ok===false?'⚠️ Đã lưu trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã lưu nguyên tắc xếp hạnh kiểm.'}renderAll()}
