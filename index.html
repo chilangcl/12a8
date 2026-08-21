@@ -327,6 +327,32 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
 .report-period-box{align-items:end}.conduct-rules-settings{border:1px solid #c7d2fe;background:linear-gradient(135deg,#ffffff,#eef2ff)}.conduct-rules-settings .field input{font-weight:800}.conduct-rules-settings h3{margin-top:0}
 @media(max-width:680px){.report-period-box{display:grid!important;grid-template-columns:1fr}.report-period-box .field{min-width:0!important;width:100%}.conduct-rules-settings .actions .btn{flex:1 1 180px}}
 </style>
+
+<style id="interactive-immersive-webgl-upgrade">
+:root{--primary:#38bdf8;--primary2:#6366f1;--bg:#07111f;--card:rgba(12,24,42,.72);--text:#eaf4ff;--muted:#9fb3c8;--border:rgba(148,163,184,.22)}
+html,body{background:#07111f;color:var(--text)}
+body{background:
+radial-gradient(circle at 12% 8%,rgba(56,189,248,.18),transparent 24%),
+radial-gradient(circle at 88% 16%,rgba(99,102,241,.16),transparent 28%),
+radial-gradient(circle at 50% 100%,rgba(20,184,166,.12),transparent 32%),#07111f;background-attachment:fixed}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(ellipse at center,black,transparent 80%)}
+.card,.guest-card,.modal-card{background:linear-gradient(135deg,rgba(18,34,58,.88),rgba(9,20,36,.72));backdrop-filter:blur(18px);border-color:rgba(125,211,252,.18);box-shadow:0 22px 60px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.05)}
+.card:hover,.guest-card:hover{transform:translateY(-2px);transition:.25s ease;box-shadow:0 28px 70px rgba(0,0,0,.36),0 0 32px rgba(56,189,248,.07)}
+.topbar{background:rgba(7,17,31,.76);backdrop-filter:blur(18px);border-color:rgba(148,163,184,.16)}
+.sidebar{background:linear-gradient(180deg,#081425,#0a1728 60%,#06101d);border-right:1px solid rgba(125,211,252,.12)}
+.nav button:hover,.nav button.active{background:linear-gradient(90deg,rgba(56,189,248,.18),rgba(99,102,241,.13));box-shadow:inset 2px 0 #38bdf8}
+.app-brand-banner,.guest-top,.login-brand-banner{background:linear-gradient(110deg,#0f766e,#0ea5e9 48%,#4f46e5);background-size:180% 180%;animation:auroraShift 10s ease infinite}
+.btn{background:linear-gradient(135deg,#0284c7,#4f46e5);border:1px solid rgba(255,255,255,.14)}
+.btn.secondary{background:rgba(148,163,184,.12);color:#eaf4ff;border-color:rgba(148,163,184,.22)}
+.table-wrap{background:rgba(6,16,29,.5);border-color:rgba(125,211,252,.14)}
+.table th,.guest-table th{background:rgba(56,189,248,.09);color:#dff5ff}.table td,.guest-table td{border-color:rgba(148,163,184,.12)}
+input,select,textarea,.field input,.field select,.field textarea,.toolbar input,.toolbar select,.guest-controls select{background:rgba(4,14,27,.72)!important;color:#eaf4ff!important;border-color:rgba(125,211,252,.2)!important}
+select option{background:#0b1626;color:#eaf4ff}
+.notice{background:rgba(120,53,15,.2);color:#fde68a;border-color:rgba(250,204,21,.28)}
+@keyframes auroraShift{50%{background-position:100% 50%}}
+.guest-student-conduct .table-wrap{margin-top:12px}
+</style>
+
 </head>
 <body>
 
@@ -519,7 +545,7 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
                     <tr><td>Học tập & ý thức lớp</td><td>Không học bài / Không làm bài</td><td><b>-5</b></td></tr>
                     <tr><td>Học tập & ý thức lớp</td><td>Mất trật tự trong giờ học</td><td><b>-3</b></td></tr>
                     <tr><td>Học tập & ý thức lớp</td><td>Sử dụng điện thoại không phép</td><td><b>-5</b></td></tr>
-                    <tr><td>An toàn & pháp luật</td><td>Vi phạm an toàn giao thông</td><td><b>-20</b></td></tr>
+                    <tr><td>An toàn & pháp luật</td><td>Vi phạm an toàn giao thông</td><td><b>-15 đến -20</b></td></tr>
                   </tbody>
                 </table>
               </div>
@@ -531,8 +557,8 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
                 <table class="table guide-table">
                   <thead><tr><th>Nội dung khen thưởng</th><th>Mức cộng</th></tr></thead>
                   <tbody>
-                    <tr><td>Thành tích đột xuất (giải HSG, năng khiếu, thể thao cấp Trường/Tỉnh)</td><td><b>+20</b></td></tr>
-                    <tr><td>Làm việc tốt (nhặt được của rơi trả lại, giúp đỡ bạn bè, bảo vệ tài sản chung)</td><td><b>+10</b></td></tr>
+                    <tr><td>Thành tích đột xuất (giải HSG, năng khiếu, thể thao cấp Trường/Tỉnh)</td><td><b>+10 đến +20</b></td></tr>
+                    <tr><td>Làm việc tốt (nhặt được của rơi trả lại, giúp đỡ bạn bè, bảo vệ tài sản chung)</td><td><b>+5 đến +10</b></td></tr>
                     <tr><td>Tích cực hoạt động tập thể (văn nghệ, thể thao, phong trào Đoàn)</td><td><b>+5 / sự kiện</b></td></tr>
                     <tr><td>Đạt điểm 9, 10 trong giờ học</td><td><b>+2 / điểm tốt</b></td></tr>
                     <tr><td>Tuần học tốt (cá nhân không vi phạm bất kỳ lỗi nào trong tuần)</td><td><b>+5</b></td></tr>
@@ -544,6 +570,7 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
 
           <div class="notice" style="margin-top:12px">
             <b>Nguyên tắc ghi nhận:</b> cán sự lớp chỉ ghi nhận sự việc có căn cứ; nội dung cần mô tả rõ, tránh ghi chung chung.
+            Với mức điểm là một khoảng (ví dụ -15 đến -20 hoặc +10 đến +20), cán sự lớp cần thống nhất mức áp dụng theo quy định của lớp/GVCN trước khi lưu.
             Điểm tuần được tính từ 100 điểm ban đầu, sau đó cộng/trừ các lượt được ghi nhận.
           </div>
         </div>
@@ -1534,7 +1561,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   // - Cộng/trừ toàn bộ điểm rèn luyện đã duyệt trong tuần.
   // - Xếp loại: >=96 Tốt; >=90 Khá; >=85 Đạt; <85 Chưa đạt.
   // - Tháng/HK/Cả năm: lấy trung bình các tuần có dữ liệu trong giai đoạn.
-  function guestConductResult(students, conduct, period){
+  function guestConductResult(students, conduct, period, rulesSource){
     const approved=(Array.isArray(conduct)?conduct:[]).filter(x=>x?.status==='approved' && x?.studentId && x?.date);
     const byStudent={};
     const todayKey=today();
@@ -1545,12 +1572,12 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       if(s>new Date(GUEST_ACADEMIC_END+'T00:00:00'))break;
       weeks.push({number:n,start:isoDate(s)});
     }
-    const guestRules=(()=>{const r=d?.settings?.conductRules||{};return{base:Number.isFinite(Number(r.base))?Number(r.base):100,good:Number.isFinite(Number(r.good))?Number(r.good):96,fair:Number.isFinite(Number(r.fair))?Number(r.fair):90,pass:Number.isFinite(Number(r.pass))?Number(r.pass):85}})();const weekScore=(sid,w)=>{const e=new Date(w+'T00:00:00');e.setDate(e.getDate()+6);const es=isoDate(e);return guestRules.base+approved.filter(x=>x.studentId===sid&&x.date>=w&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0)};
-    const monthScore=(sid,ym)=>{const mw=weeks.filter(w=>w.start.slice(0,7)===ym).slice(0,4);const ss=mw.map(w=>weekScore(sid,w.start));return ss.length?ss.reduce((a,b)=>a+b,0)/ss.length:100};
+    const guestRules=(()=>{const r=rulesSource?.conductRules||{};return{base:Number.isFinite(Number(r.base))?Number(r.base):100,good:Number.isFinite(Number(r.good))?Number(r.good):96,fair:Number.isFinite(Number(r.fair))?Number(r.fair):90,pass:Number.isFinite(Number(r.pass))?Number(r.pass):85}})();const weekScore=(sid,w)=>{const e=new Date(w+'T00:00:00');e.setDate(e.getDate()+6);const es=isoDate(e);return guestRules.base+approved.filter(x=>x.studentId===sid&&x.date>=w&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0)};
+    const monthScore=(sid,ym)=>{const mw=weeks.filter(w=>w.start.slice(0,7)===ym).slice(0,4);const ss=mw.map(w=>weekScore(sid,w.start));return ss.length?ss.reduce((a,b)=>a+b,0)/ss.length:guestRules.base};
     const semScore=(sid,sem)=>{const ms=sem==='hki'?['2026-09','2026-10','2026-11','2026-12','2027-01']:['2027-02','2027-03','2027-04','2027-05','2027-06'];const ss=ms.map(m=>monthScore(sid,m));return ss.reduce((a,b)=>a+b,0)/ss.length};
     students.forEach(st=>{
-      let score=100;
-      if(period==='week')score=currentWeek?weekScore(st.id,currentWeek):100;
+      let score=guestRules.base;
+      if(period==='week')score=currentWeek?weekScore(st.id,currentWeek):guestRules.base;
       else if(period==='month')score=monthScore(st.id,currentMonth);
       else if(period==='hki')score=semScore(st.id,'hki');
       else if(period==='hkii')score=semScore(st.id,'hkii');
@@ -1660,11 +1687,11 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       };
 
       const att=sum.counts;
-      const hWeek=guestConductResult(students,conduct,'week');
-      const hMonth=guestConductResult(students,conduct,'month');
-      const hHki=guestConductResult(students,conduct,'hki');
-      const hHkii=guestConductResult(students,conduct,'hkii');
-      const hYear=guestConductResult(students,conduct,'year');
+      const hWeek=guestConductResult(students,conduct,'week',settings);
+      const hMonth=guestConductResult(students,conduct,'month',settings);
+      const hHki=guestConductResult(students,conduct,'hki',settings);
+      const hHkii=guestConductResult(students,conduct,'hkii',settings);
+      const hYear=guestConductResult(students,conduct,'year',settings);
 
       function distribution(map){
         const out={'Tốt':0,'Khá':0,'Đạt':0,'Chưa đạt':0};
@@ -1758,7 +1785,18 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
             </tbody>
           </table>
         </div>
-        <div class="footer-note">Quy tắc: mỗi học sinh có 100 điểm/tuần; điểm cộng được cộng, điểm trừ bị trừ. Tốt ≥96; Khá 90–&lt;96; Đạt 85–&lt;90; Chưa đạt &lt;85.</div>
+        <div class="footer-note">Quy tắc hiện hành: mỗi học sinh bắt đầu <b>${guestRules.base}</b> điểm/tuần; Tốt ≥ <b>${guestRules.good}</b>; Khá ${guestRules.fair}–&lt;${guestRules.good}; Đạt ${guestRules.pass}–&lt;${guestRules.fair}; Chưa đạt &lt;${guestRules.pass}. Các ngưỡng này đồng bộ từ phần Cài đặt của GVCN.</div>
+      </div>
+
+      <div class="guest-card guest-student-conduct">
+        <h3>👨‍🎓 Hạnh kiểm theo học sinh</h3>
+        <div class="guest-muted">Phụ huynh và học sinh có thể xem bảng xếp loại theo từng học sinh giống dữ liệu tổng hợp Thi đua.</div>
+        <div class="table-wrap">
+          <table class="guest-table">
+            <thead><tr><th>STT</th><th>Học sinh</th><th>Tổ</th><th>Điểm tuần</th><th>Hạnh kiểm</th><th>Điểm tháng</th><th>Hạnh kiểm</th><th>Điểm cả năm</th><th>Hạnh kiểm</th></tr></thead>
+            <tbody>${students.slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'vi')).map((st,i)=>`<tr><td>${i+1}</td><td><b>${guestEsc(st.name||'')}</b></td><td>${guestEsc(st.group||'')}</td><td>${hWeek[st.id]?.score?.toFixed?.(1)||guestRules.base.toFixed(1)}</td><td>${guestEsc(hWeek[st.id]?.grade||'')}</td><td>${hMonth[st.id]?.score?.toFixed?.(1)||guestRules.base.toFixed(1)}</td><td>${guestEsc(hMonth[st.id]?.grade||'')}</td><td>${hYear[st.id]?.score?.toFixed?.(1)||guestRules.base.toFixed(1)}</td><td>${guestEsc(hYear[st.id]?.grade||'')}</td></tr>`).join('')||'<tr><td colspan="9" class="empty">Chưa có học sinh.</td></tr>'}</tbody>
+          </table>
+        </div>
       </div>
 
       <div class="guest-honor-card">
