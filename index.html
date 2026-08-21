@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sổ Chủ Nhiệm Số</title>
+<title>Sổ Chủ Nhiệm Số — Bản sửa lỗi Hồ sơ 360° & Thi đua</title>
 <style>
 :root{--primary:#2563eb;--primary2:#1d4ed8;--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--danger:#dc2626;--success:#16a34a;--warning:#d97706;--border:#e2e8f0}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -975,13 +975,33 @@ function showPage(name){updateProfile360Access();
  document.getElementById('pageTitle').textContent=titles[name]||name;
  /* Sau khi chọn một mục, tự ẩn trình đơn trên cả máy tính và điện thoại */
  setSidebarHidden(true);
- if(name==='dashboard')renderDashboard();if(name==='students')renderStudents();if(name==='attendance')renderAttendance();if(name==='conduct')renderConduct();if(name==='competition')renderCompetition();if(name==='reports')renderReports();if(name==='profile'){renderProfileSelectors();setTimeout(renderProfile,0)}if(name==='users')renderUsers();
+ if(name==='dashboard')renderDashboard();if(name==='students')renderStudents();if(name==='attendance')renderAttendance();if(name==='conduct')renderConduct();if(name==='competition'){
+   try{renderCompetition()}catch(err){
+     console.error('Lỗi hiển thị Thi đua:',err);
+     const host=document.getElementById('competitionContent');
+     if(host)host.innerHTML='<div class="card"><h3>Thi đua</h3><div class="empty">Không thể hiển thị dữ liệu Thi đua. Hệ thống đang bảo toàn dữ liệu hiện có.</div></div>';
+   }
+ }if(name==='reports')renderReports();if(name==='profile'){
+   try{renderProfileSelectors();setTimeout(()=>{try{renderProfile()}catch(err){console.error('Lỗi Hồ sơ 360°:',err)}},0)}
+   catch(err){console.error('Lỗi khởi tạo Hồ sơ 360°:',err);const box=document.getElementById('profileContent');if(box)box.innerHTML='<div class="empty">Không thể khởi tạo Hồ sơ 360°. Vui lòng chọn lại học sinh.</div>';}
+ }if(name==='users')renderUsers();
 }
 function updateProfile360Access(){
   const canSee=!!currentUser;
   document.querySelectorAll('.member-only').forEach(el=>el.style.display=canSee?'':'none');
 }
-function renderAll(){updateProfile360Access();renderDashboard();renderStudents();renderAttendance();renderConduct();populateReportSelectors();updateReportPeriodUI();renderCompetition();renderReports();if(currentUser)renderProfileSelectors();if(isAdmin())renderUsers();}
+function renderAll(){
+  updateProfile360Access();
+  try{renderDashboard()}catch(e){console.error(e)}
+  try{renderStudents()}catch(e){console.error(e)}
+  try{renderAttendance()}catch(e){console.error(e)}
+  try{renderConduct()}catch(e){console.error(e)}
+  try{populateReportSelectors();updateReportPeriodUI()}catch(e){console.error(e)}
+  try{renderCompetition()}catch(e){console.error('Thi đua:',e)}
+  try{renderReports()}catch(e){console.error(e)}
+  if(currentUser)try{renderProfileSelectors()}catch(e){console.error('Hồ sơ 360°:',e)}
+  if(isAdmin())try{renderUsers()}catch(e){console.error(e)}
+}
 
 async function refreshCloud(){if(!currentUser||!currentStateKey)return;const {data,error}=await sb.from('class_state').select('data,updated_at').eq('class_id',currentStateKey).maybeSingle();if(error){alert('Không đồng bộ được: '+error.message);return}if(data?.data){state=data.data;state.settings={...(state.settings||{}),className:currentClass?.class_name||state.settings?.className,year:currentClass?.year||state.settings?.year,groups:currentClass?.group_count||state.settings?.groups};saveLocal();renderAll();alert('Đã tải dữ liệu mới nhất từ Supabase.')}}
 
@@ -1190,6 +1210,7 @@ function conductWeeklyScore(sid,weekStart){
  return getConductRules().base+(state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved'&&x.date>=ws&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0);
 }
 function getConductRules(){const r=state?.settings?.conductRules||{};let base=Number.isFinite(Number(r.base))?Number(r.base):100;let good=Number.isFinite(Number(r.good))?Number(r.good):96;let fair=Number.isFinite(Number(r.fair))?Number(r.fair):90;let pass=Number.isFinite(Number(r.pass))?Number(r.pass):85;if(good<fair)good=fair;if(fair<pass)fair=pass;return{base,good,fair,pass}}
+function conductLabel(score){return gradeFromScore(score)}
 function gradeFromScore(score){score=Number(score||0);const r=getConductRules();if(score>=r.good)return'Tốt';if(score>=r.fair)return'Khá';if(score>=r.pass)return'Đạt';return'Chưa đạt'}
 function periodRange(period,detail){
  if(period==='week'){const r=academicWeekRange(Number(detail)||academicWeekNumber(today())||1);return r?{start:isoDate(r.start),end:isoDate(r.end),label:`Tuần ${r.number} (${fmtDate(isoDate(r.start))}–${fmtDate(isoDate(r.end))})`}:null}
