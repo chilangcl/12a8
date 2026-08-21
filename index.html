@@ -37,16 +37,21 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
   .sidebar.open{transform:none !important;}
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* Global modal controls: kept in a normal script block so inline onclick handlers can access them. */
 function closeModal(id){
   const modal=document.getElementById(id);
-  if(!modal)return;
+  if(!modal)return false;
   modal.classList.remove('show');
-  modal.style.display='';
+  modal.style.display='none';
+  modal.setAttribute('aria-hidden','true');
   document.body.style.overflow='';
+  return false;
 }
 function closeAllModals(){
   document.querySelectorAll('.modal.show').forEach(m=>closeModal(m.id));
+  document.body.style.overflow='';
 }
 document.addEventListener('keydown',function(e){
   if(e.key==='Escape') closeAllModals();
@@ -56,7 +61,6 @@ document.addEventListener('click',function(e){
     closeModal(e.target.id);
   }
 });
-
 </script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -445,6 +449,29 @@ select option{background:#fff!important;color:#202124!important}
 </style>
 
 
+<style id="bibi-competition-history-modal-fix">
+/* Lịch sử biến động: nền trắng-sữa, chữ đen, nút đóng hoạt động trên mọi thiết bị. */
+#competitionHistoryModal{z-index:5000;background:rgba(15,23,42,.55)!important;align-items:center!important;justify-content:center!important;}
+#competitionHistoryModal .competition-history-card{background:#fffdf7!important;color:#202124!important;border:1px solid #d9d9d6!important;border-radius:18px!important;box-shadow:0 20px 60px rgba(32,33,36,.22)!important;opacity:1!important;backdrop-filter:none!important;}
+#competitionHistoryModal .competition-history-card h3,
+#competitionHistoryModal .competition-history-card p,
+#competitionHistoryModal .competition-history-card div,
+#competitionHistoryModal .competition-history-card td,
+#competitionHistoryModal .competition-history-card th,
+#competitionHistoryModal .competition-history-card span{color:#202124;}
+#competitionHistoryModal .modal-head{position:sticky;top:0;z-index:2;background:#fffdf7;padding-bottom:10px;}
+#competitionHistoryModal .icon-btn{border:1px solid #d9d9d6!important;background:#f1f3f4!important;color:#202124!important;border-radius:50%!important;width:38px;height:38px;display:inline-grid;place-items:center;font-size:18px;font-weight:800;cursor:pointer;}
+#competitionHistoryModal .icon-btn:hover{background:#e8eaed!important;}
+#competitionHistoryModal .table-wrap{background:#fff!important;}
+#competitionHistoryModal .table th{background:#f2f4f5!important;color:#202124!important;}
+#competitionHistoryModal .table td{background:#fff!important;color:#202124!important;}
+#competitionHistoryModal .positive-row td{background:#f0fdf4!important;color:#166534!important;}
+#competitionHistoryModal .negative-row td{background:#fef2f2!important;color:#991b1b!important;}
+#competitionHistoryModal.show{display:flex!important;}
+#competitionHistoryModal:not(.show){display:none!important;}
+@media(max-width:680px){#competitionHistoryModal{padding:10px!important;}#competitionHistoryModal .competition-history-card{width:100%!important;max-width:none!important;max-height:94vh!important;padding:14px!important;overflow:auto!important;}}
+</style>
+
 <style id="modal-close-fix-style">
 #competitionHistoryModal{z-index:5000}
 #competitionHistoryModal.show{display:flex}
@@ -751,15 +778,15 @@ select option{background:#fff!important;color:#202124!important}
 
 
 <!-- Advanced competition point-history modal -->
-<div id="competitionHistoryModal" class="modal">
-  <div class="modal-box" style="max-width:760px">
+<div id="competitionHistoryModal" class="modal" aria-hidden="true">
+  <div class="modal-card competition-history-card" style="max-width:760px">
     <div class="modal-head">
       <h3 id="competitionHistoryTitle">Lịch sử biến động điểm</h3>
-      <button type="button" class="icon-btn" aria-label="Đóng" onclick="closeModal('competitionHistoryModal');return false;">✕</button>
+      <button type="button" class="icon-btn" aria-label="Đóng" onclick="return closeModal('competitionHistoryModal');">✕</button>
     </div>
     <div id="competitionHistoryContent"></div>
     <div class="actions" style="justify-content:flex-end;margin-top:16px">
-      <button type="button" class="btn secondary" onclick="closeModal('competitionHistoryModal');return false;">Đóng</button>
+      <button type="button" class="btn secondary" onclick="return closeModal('competitionHistoryModal');">Đóng</button>
     </div>
   </div>
 </div>
@@ -793,7 +820,7 @@ select option{background:#fff!important;color:#202124!important}
 const DATA_PREFIX='QL12A8_DATA_';
 const SUPABASE_URL = 'https://ewbrnzgmivkmddkkolwq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_BKIdnIoQQl4sovkFiWWMEQ_82Yp3Im-';
-const { createClient } = window.supabase;
+const createClient = window.supabase?.createClient;
 let sb=null;
 try {
   if (!window.supabase || typeof window.supabase.createClient !== 'function') throw new Error('Không tải được thư viện Supabase. Hãy kiểm tra kết nối Internet hoặc CDN.');
@@ -1371,6 +1398,142 @@ function renderReports(){
 }
 function attendanceCountsInRange(sid,range){const o={present:0,late:0,excused:0,absent:0};Object.values(state.attendance||{}).filter(x=>x.id===sid&&x.date>=range.start&&x.date<=range.end).forEach(x=>o[x.status]=(o[x.status]||0)+1);return o}
 function printSelectedReport(){renderReports();setTimeout(()=>window.print(),50)}
+async function renderUsers(){
+ const el=document.getElementById('usersBody');if(!el)return;
+ try{
+  const {data,error}=await sb.from('profiles').select('id,username,name,role,role_label,scope').order('username');
+  if(error)throw error;
+  const {data:assign}=await sb.from('class_user_roles').select('user_id,class_id,role,scope,classes(class_name,state_key,academic_years(name))');
+  const rows=(data||[]).map(u=>{const a=(assign||[]).filter(x=>x.user_id===u.id);return a.length?a.map(x=>({u,x})): [{u,x:null}]});
+  el.innerHTML=rows.flat().map(o=>`<tr><td><b>${esc(o.u.username||'')}</b></td><td>${esc(o.u.name||'')}</td><td>${esc(o.x?.role_label||o.u.role_label||o.x?.role||o.u.role||'')}</td><td>${esc(o.x?.classes?.class_name||o.u.scope||'')}</td><td><span class="badge b-green">Hoạt động</span></td></tr>`).join('')||'<tr><td colspan="5">Chưa có tài khoản.</td></tr>';
+  populateNewClassSelect();
+ }catch(e){el.innerHTML=`<tr><td colspan="5">Không tải được danh sách tài khoản: ${esc(e.message||e)}</td></tr>`}
+}
+async function populateNewClassSelect(){
+ const el=document.getElementById('newClassSelect');if(!el)return;
+ try{await loadAvailableClasses(currentUser.id);el.innerHTML=availableClasses.map(x=>`<option value="${esc(x.id)}">${esc(x.class_name)} · ${esc(x.year)}</option>`).join('')}catch(e){el.innerHTML='<option value="">Không tải được lớp</option>'}
+}
+function userCreateNotice(msg,bad=false){const e=document.getElementById('userCreateStatus');if(!e)return;e.style.display='block';e.className='notice '+(bad?'danger':'ok');e.textContent=msg}
+async function createClassUser(){
+ if(!isAdmin()){alert('🔒 Chỉ GVCN mới được tạo tài khoản.');return}
+ const username=document.getElementById('newUsername').value.trim().toLowerCase().replace(/\s+/g,''),name=document.getElementById('newName').value.trim(),password=document.getElementById('newPassword').value,role=document.getElementById('newRole').value,classId=document.getElementById('newClassSelect').value;
+ if(!username||!name||!password||!classId){userCreateNotice('❌ Vui lòng nhập đủ thông tin.',true);return}
+ if(!/^[a-z0-9._-]{3,40}$/.test(username)){userCreateNotice('❌ Tài khoản chỉ gồm chữ thường, số, dấu chấm, gạch ngang hoặc gạch dưới.',true);return}
+ if(password.length<8){userCreateNotice('❌ Mật khẩu phải có ít nhất 8 ký tự.',true);return}
+ const targetClass=availableClasses.find(x=>x.id===classId);if(!targetClass){userCreateNotice('❌ Lớp không nằm trong danh sách được phép.',true);return}
+ userCreateNotice('⏳ Đang tạo tài khoản ở phía máy chủ và gắn quyền lớp...');
+ try{
+   const {data,error}=await sb.functions.invoke('create-class-user',{body:{username,name,password,role,class_id:classId,scope:'Toàn lớp',created_by:currentUser.id}});
+   if(error)throw error;if(!data?.ok)throw new Error(data?.error||'Không tạo được tài khoản');
+   userCreateNotice(`✅ Đã tạo ${role==='admin'?'tài khoản GVCN':'tài khoản cán bộ lớp'} ${username} cho ${targetClass.class_name}.`);
+   document.getElementById('newUsername').value='';document.getElementById('newName').value='';document.getElementById('newPassword').value='';await renderUsers();
+ }catch(e){console.error(e);userCreateNotice('❌ '+(e.message||String(e)),true)}
+}
+function csvCell(v){v=String(v??'');return `"${v.replace(/"/g,'""')}"`}
+function downloadTemplate(){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được tải mẫu Excel.');return}
+  if(!window.XLSX){alert('Thư viện Excel chưa tải được. Hãy kiểm tra Internet và tải lại trang.');return}
+  const headers=[['STT','Mã HS','Họ và tên','Ngày sinh','Giới tính','Dân tộc','Địa chỉ','SĐT học sinh','Email','Họ tên phụ huynh','SĐT phụ huynh','Tổ','Chức vụ','Ghi chú']];
+  const ws=XLSX.utils.aoa_to_sheet(headers);
+  ws['!cols']=[{wch:7},{wch:12},{wch:28},{wch:14},{wch:12},{wch:14},{wch:30},{wch:16},{wch:28},{wch:28},{wch:18},{wch:8},{wch:16},{wch:30}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'DanhSachHocSinh');
+  XLSX.writeFile(wb,'Mau_Danh_Sach_Hoc_Sinh_12A8.xlsx');
+}
+async function importExcel(e){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được nhập Excel.');if(e?.target)e.target.value='';return}
+  const file=e.target.files[0];
+  if(!file)return;
+  const resultEl=document.getElementById('importResult');
+  resultEl.textContent='Đang đọc file...';
+  try{
+    if(!window.XLSX) throw new Error('Thư viện Excel chưa tải được. Hãy kiểm tra Internet và tải lại trang.');
+    const ext=(file.name.split('.').pop()||'').toLowerCase();
+    let rows=[];
+    if(ext==='xlsx'||ext==='xls'){
+      const buf=await file.arrayBuffer();
+      const wb=XLSX.read(buf,{type:'array',cellDates:true});
+      const sheetName=wb.SheetNames.find(n=>/danh|hoc sinh|học sinh|mẫu|data|sheet/i.test(n))||wb.SheetNames[0];
+      if(!sheetName) throw new Error('File Excel không có trang tính.');
+      const ws=wb.Sheets[sheetName];
+      rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false,blankrows:false});
+    }else if(ext==='csv'){
+      const text=await file.text();
+      rows=parseCSV(text.replace(/^\uFEFF/,''));
+    }else{
+      throw new Error('Định dạng không hỗ trợ. Hãy chọn file .xlsx, .xls hoặc .csv.');
+    }
+    if(!rows.length||rows.length<2) throw new Error('Không tìm thấy dữ liệu học sinh trong file.');
+
+    const clean=v=>String(v??'').replace(/\u00a0/g,' ').trim();
+    const norm=s=>clean(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9]+/g,' ' ).trim();
+    const headers=rows[0].map(clean);
+    const mapHeader={};
+    headers.forEach((h,i)=>{if(h)mapHeader[norm(h)]=i});
+    const findCol=(...names)=>{for(const n of names){const i=mapHeader[norm(n)];if(i!==undefined)return i}return -1};
+    const cSTT=findCol('STT','Số thứ tự','So thu tu');
+    const cCode=findCol('Mã HS','Mã học sinh','Ma HS','Ma hoc sinh','Mã số học sinh');
+    const cName=findCol('Họ và tên','Họ tên','Họ tên học sinh','Ho va ten','Ho ten','Ho ten hoc sinh');
+    const cDob=findCol('Ngày sinh','Ngay sinh');
+    const cGender=findCol('Giới tính','Gioi tinh');
+    const cEthnic=findCol('Dân tộc','Dan toc');
+    const cAddress=findCol('Địa chỉ','Dia chi');
+    const cPhone=findCol('Số điện thoại','SĐT','SĐT học sinh','So dien thoai','SDT','SDT hoc sinh');
+    const cEmail=findCol('Email');
+    const cParent=findCol('Họ tên phụ huynh','Họ và tên phụ huynh','Ho ten phu huynh','Ho va ten phu huynh');
+    const cParentPhone=findCol('Số ĐT phụ huynh','SĐT phụ huynh','Số điện thoại phụ huynh','So DT phu huynh','SDT phu huynh');
+    const cGroup=findCol('Tổ','To','Tổ học sinh','To hoc sinh');
+    const cRole=findCol('Chức vụ','Chuc vu');
+    const cNote=findCol('Ghi chú','Ghi chu');
+
+    if(cName<0) throw new Error('Không tìm thấy cột "Họ và tên". Hãy dùng file mẫu của phần mềm hoặc đặt đúng tên cột.');
+
+    const cell=(r,c)=>c>=0?clean(r[c]):'';
+    const excelDate=v=>{
+      if(!v)return '';
+      if(v instanceof Date&&!isNaN(v)) return `${String(v.getDate()).padStart(2,'0')}/${String(v.getMonth()+1).padStart(2,'0')}/${v.getFullYear()}`;
+      const s=clean(v);
+      if(/^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}$/.test(s)){const [y,m,d]=s.split(/[-\/]/);return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`}
+      if(/^\d{1,2}[\/-]\d{1,2}[\/-]\d{4}$/.test(s)){const [d,m,y]=s.split(/[\/-]/);return `${d.padStart(2,'0')}/${m.padStart(2,'0')}/${y}`}
+      return s;
+    };
+    const normalizePhone=v=>{const s=clean(v);return s.replace(/\.0$/,'')};
+    let count=0, errors=[], seenCodes=new Set();
+    rows.slice(1).forEach((r,idx)=>{
+      const rowNo=idx+2;
+      const name=cell(r,cName);
+      if(!name)return;
+      let code=cell(r,cCode);
+      const stt=cell(r,cSTT);
+      if(!code) code=stt?`HS${String(stt).replace(/\D/g,'').padStart(3,'0')}`:`HS${String(state.students.length+count+1).padStart(3,'0')}`;
+      code=code.toUpperCase().replace(/\s+/g,'');
+      if(seenCodes.has(code)){errors.push(`Dòng ${rowNo}: trùng Mã HS ${code}.`);return}
+      seenCodes.add(code);
+      const group=cell(r,cGroup)||'1';
+      if(!['1','2','3','4'].includes(group)) errors.push(`Dòng ${rowNo}: Tổ "${group}" không hợp lệ (chỉ 1-4).`);
+      const s={id:crypto.randomUUID(),code,name,dob:excelDate(cell(r,cDob)),gender:cell(r,cGender)||'Nam',ethnic:cell(r,cEthnic),address:cell(r,cAddress),phone:normalizePhone(cell(r,cPhone)),email:cell(r,cEmail),parent:cell(r,cParent),parentPhone:normalizePhone(cell(r,cParentPhone)),group:['1','2','3','4'].includes(group)?group:'1',role:cell(r,cRole),note:cell(r,cNote)};
+      const idxExisting=state.students.findIndex(x=>String(x.code||'').toUpperCase()===code);
+      if(idxExisting>=0){s.id=state.students[idxExisting].id;state.students[idxExisting]=s}else state.students.push(s);
+      count++;
+    });
+    saveData();
+    const cloudResult=await pushCloud();
+    log(`Nhập/cập nhật ${count} học sinh từ ${file.name}`);
+    let msg=`✅ Đã nhập/cập nhật ${count} học sinh từ ${file.name}.`;
+    if(errors.length)msg+=` ⚠️ ${errors.length} cảnh báo: ${errors.slice(0,5).join(' | ')}${errors.length>5?' ...':''}`;
+    if(cloudResult===false)msg+=' Dữ liệu đã lưu trên trình duyệt nhưng chưa đồng bộ được Supabase.';
+    resultEl.textContent=msg;
+    renderAll();
+  }catch(err){
+    console.error(err);
+    resultEl.textContent=`❌ Không nhận được file: ${err.message||err}`;
+  }finally{e.target.value=''}
+}
+function parseCSV(text){const rows=[];let row=[],cell='',q=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(c==='"'&&q&&n==='"'){cell+='"';i++;continue}if(c==='"'){q=!q;continue}if(c===','&&!q){row.push(cell);cell='';continue}if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell);cell='';if(row.some(x=>x!==''))rows.push(row);row=[];continue}cell+=c}if(cell!==''||row.length){row.push(cell);rows.push(row)}return rows}
+function exportStudentsCSV(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được xuất danh sách học sinh.');return}const rows=[['Mã HS','Họ và tên','Ngày sinh','Giới tính','Dân tộc','Địa chỉ','SĐT học sinh','Email','Họ tên phụ huynh','SĐT phụ huynh','Tổ','Chức vụ','Ghi chú'],...visibleStudents().map(s=>[s.code,s.name,s.dob,s.gender,s.ethnic,s.address,s.phone,s.email,s.parent,s.parentPhone,s.group,s.role,s.note])];downloadBlob('\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\n'),'Danh_sach_12A8.csv','text/csv;charset=utf-8')}
+function exportBackup(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được sao lưu dữ liệu.');return}downloadBlob(JSON.stringify(state,null,2),'Backup_12A8_'+today()+'.json','application/json')}
+async function importBackup(e){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được khôi phục dữ liệu.');if(e?.target)e.target.value='';return}const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=async ev=>{try{const x=JSON.parse(ev.target.result);if(!x.students||!x.settings)throw Error();if(!confirm('Khôi phục sẽ thay thế dữ liệu hiện tại. Tiếp tục?'))return;state=x;saveData();await pushCloud();renderAll();alert('Đã khôi phục dữ liệu.')}catch(err){alert('File sao lưu không hợp lệ.')}};r.readAsText(file);e.target.value=''}
+function downloadBlob(content,name,type){const blob=new Blob([content],{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+
 function renderProfileSelectors(selectedId=''){
   const el=document.getElementById('profileStudent');
   if(!el)return;
