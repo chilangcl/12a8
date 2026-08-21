@@ -350,7 +350,7 @@ input,select,textarea,.field input,.field select,.field textarea,.toolbar input,
 select option{background:#0b1626;color:#eaf4ff}
 .notice{background:rgba(120,53,15,.2);color:#fde68a;border-color:rgba(250,204,21,.28)}
 @keyframes auroraShift{50%{background-position:100% 50%}}
-.guest-student-conduct .table-wrap{margin-top:12px}
+.guest-student-conduct .table-wrap{margin-top:12px}.guest-period-menu{position:relative}.guest-period-submenu{position:absolute;z-index:20;top:calc(100% + 6px);left:0;min-width:150px;max-height:280px;overflow:auto;padding:8px;border:1px solid rgba(125,211,252,.28);border-radius:12px;background:#07111f;box-shadow:0 14px 32px rgba(0,0,0,.35);display:grid;gap:6px}.guest-period-submenu.hidden{display:none}.guest-period-submenu .btn{justify-content:flex-start;text-align:left}
 
 /* Accessibility and mobile contrast upgrade */
 .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:#081421!important;border:1px solid #3b82f6!important}
@@ -386,7 +386,7 @@ select option{background:#0b1626;color:#eaf4ff}
     <div class="field"><label>Tài khoản</label><input id="loginUser" placeholder="Nhập tài khoản"></div>
     <div class="field"><label>Mật khẩu</label><input id="loginPass" type="password" placeholder="Nhập mật khẩu"></div>
     <button class="btn" style="width:100%;margin-top:6px" onclick="login()">Đăng nhập</button>
-    <button class="guest-btn" type="button" onclick="openGuestMode()">👀 Xem thông tin lớp - Khách</button>
+    <button class="guest-btn" type="button" onclick="openGuestMode()">👀 Xem thông tin lớp (Khách)</button>
     <div class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy giáo Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</div>
   </div>
 </div>
@@ -404,7 +404,6 @@ select option{background:#0b1626;color:#eaf4ff}
         <div class="field"><label>Lớp</label><select id="guestClassSelect"></select></div>
         <button class="btn" onclick="loadGuestDashboard()">🔄 Cập nhật</button>
       </div>
-      <div class="guest-note">🔒 Chế độ Khách chỉ hiển thị dữ liệu công khai cần thiết. Riêng mục <b>Vinh danh</b> hiển thị họ tên, nội dung ghi nhận và số điểm cộng/trừ của các trường hợp đã được GVCN duyệt; không hiển thị ngày sinh, số điện thoại, địa chỉ, hồ sơ cá nhân hoặc thông tin phụ huynh.</div>
     </div>
     <div id="guestContent" class="guest-loading">⏳ Đang tải dữ liệu công khai...</div>
     <div class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy giáo Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</div>
@@ -1577,7 +1576,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   // - Cộng/trừ toàn bộ điểm rèn luyện đã duyệt trong tuần.
   // - Xếp loại: >=96 Tốt; >=90 Khá; >=85 Đạt; <85 Chưa đạt.
   // - Tháng/HK/Cả năm: lấy trung bình các tuần có dữ liệu trong giai đoạn.
-  function guestConductResult(students, conduct, period, rulesSource){
+  function guestConductResult(students, conduct, period, rulesSource, detail=''){
     const approved=(Array.isArray(conduct)?conduct:[]).filter(x=>x?.status==='approved' && x?.studentId && x?.date);
     const byStudent={};
     const todayKey=today();
@@ -1593,8 +1592,8 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
     const semScore=(sid,sem)=>{const ms=sem==='hki'?['2026-09','2026-10','2026-11','2026-12','2027-01']:['2027-02','2027-03','2027-04','2027-05','2027-06'];const ss=ms.map(m=>monthScore(sid,m));return ss.reduce((a,b)=>a+b,0)/ss.length};
     students.forEach(st=>{
       let score=guestRules.base;
-      if(period==='week')score=currentWeek?weekScore(st.id,currentWeek):guestRules.base;
-      else if(period==='month')score=monthScore(st.id,currentMonth);
+      if(period==='week'){const target=detail?weeks.find(w=>String(w.number)===String(detail))?.start:currentWeek;score=target?weekScore(st.id,target):guestRules.base;}
+      else if(period==='month')score=monthScore(st.id,detail||currentMonth);
       else if(period==='hki')score=semScore(st.id,'hki');
       else if(period==='hkii')score=semScore(st.id,'hkii');
       else score=(semScore(st.id,'hki')+semScore(st.id,'hkii'))/2;
@@ -1787,10 +1786,16 @@ function guestGradeFromScore(score,r){return score>=r.good?'Tốt':score>=r.fair
 
       <div class="guest-card guest-student-conduct">
         <h3>🏆 Thi đua — Hạnh kiểm theo học sinh</h3>
-        <div class="guest-period-tabs" id="guestPeriodTabs"><button class="btn active" type="button" data-period="week" onclick="guestSetConductPeriod('week')">Tuần</button><button class="btn secondary" type="button" data-period="month" onclick="guestSetConductPeriod('month')">Tháng</button><button class="btn secondary" type="button" data-period="hki" onclick="guestSetConductPeriod('hki')">Học kỳ I</button><button class="btn secondary" type="button" data-period="hkii" onclick="guestSetConductPeriod('hkii')">Học kỳ II</button><button class="btn secondary" type="button" data-period="year" onclick="guestSetConductPeriod('year')">Cả năm</button></div>
+        <div class="guest-period-tabs" id="guestPeriodTabs">
+          <div class="guest-period-menu"><button class="btn active" type="button" data-period="week" onclick="guestTogglePeriodMenu('week')">Tuần</button><div class="guest-period-submenu hidden" id="guestSub-week"></div></div>
+          <div class="guest-period-menu"><button class="btn secondary" type="button" data-period="month" onclick="guestTogglePeriodMenu('month')">Tháng</button><div class="guest-period-submenu hidden" id="guestSub-month"></div></div>
+          <div class="guest-period-menu"><button class="btn secondary" type="button" data-period="hki" onclick="guestTogglePeriodMenu('hki')">Học kì 1</button><div class="guest-period-submenu hidden" id="guestSub-hki"></div></div>
+          <div class="guest-period-menu"><button class="btn secondary" type="button" data-period="hkii" onclick="guestTogglePeriodMenu('hkii')">Học kì 2</button><div class="guest-period-submenu hidden" id="guestSub-hkii"></div></div>
+          <div class="guest-period-menu"><button class="btn secondary" type="button" data-period="year" onclick="guestTogglePeriodMenu('year')">Cả năm</button><div class="guest-period-submenu hidden" id="guestSub-year"></div></div>
+        </div>
         <div id="guestCompetitionRanking" class="kpi-list"></div>
         <h3 style="margin-top:16px">👥 Tổng hợp theo tổ</h3><div id="guestGroupRanking" class="kpi-list"></div>
-        <div class="notice ok" style="margin-top:16px">Mỗi học sinh bắt đầu <b>${guestRules.base}</b> điểm/tuần. <b>Tốt ≥ ${guestRules.good}</b>; <b>Khá ${guestRules.fair}–&lt;${guestRules.good}</b>; <b>Đạt ${guestRules.pass}–&lt;${guestRules.fair}</b>; <b>Chưa đạt &lt;${guestRules.pass}</b>. Tháng/HK/Cả năm được tính từ kết quả các tuần tương ứng.</div>
+        <div class="notice ok" style="margin-top:16px">Mỗi học sinh bắt đầu <b>${guestRules.base}</b> điểm/tuần. <b>Tốt ≥ ${guestRules.good}</b>; <b>Khá ${guestRules.fair}–&lt;${guestRules.good}</b>; <b>Đạt ${guestRules.pass}–&lt;${guestRules.fair}</b>; <b>Chưa đạt &lt;${guestRules.pass}</b>.</div>
         <div id="guestConductSummary" class="kpi-list" style="margin-top:12px"></div>
       </div>
 
@@ -1800,10 +1805,17 @@ function guestGradeFromScore(score,r){return score>=r.good?'Tốt':score>=r.fair
       <div class="guest-card"><h3>📊 Tổng hợp nền nếp tháng này</h3><table class="guest-table"><thead><tr><th>Trạng thái</th><th>Số lượt</th></tr></thead><tbody><tr><td>Có mặt</td><td>${att.month_present}</td></tr><tr><td>Đi muộn</td><td>${att.month_late}</td></tr><tr><td>Nghỉ có phép</td><td>${att.month_excused}</td></tr><tr><td>Nghỉ không phép</td><td>${att.month_absent}</td></tr></tbody></table></div>
       <div class="footer-note">Cập nhật: ${guestEsc(new Date().toLocaleString('vi-VN'))} · Đã tải ${students.length} học sinh, ${Object.keys(attendance).length} lượt điểm danh, ${conduct.length} bản ghi rèn luyện.</div>`;
 
-      const sortedStudents=students.slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'vi'));
-      const periodMaps={week:hWeek,month:hMonth,hki:hHki,hkii:hHkii,year:hYear}; let guestPeriod='week';
-      function renderGuestCompetition(){const map=periodMaps[guestPeriod]||hWeek;const arr=sortedStudents.map(st=>({s:st,r:map[st.id]||{score:guestRules.base,grade:'Chưa đạt'}})).sort((a,b)=>Number(b.r.score)-Number(a.r.score)); const rank=document.getElementById('guestCompetitionRanking'); if(rank)rank.innerHTML=arr.length?arr.map((x,i)=>`<div class="kpi-row"><span><b>${i+1}.</b> ${guestEsc(x.s.name||'')}</span><span><b>${Number(x.r.score).toFixed(1)}</b> · <span class="badge ${x.r.grade==='Tốt'?'b-green':x.r.grade==='Khá'?'b-blue':x.r.grade==='Đạt'?'b-yellow':'b-red'}">${guestEsc(x.r.grade||'')}</span></span></div>`).join(''):'<div class="empty">Chưa có dữ liệu.</div>'; const g={};arr.forEach(x=>{const k=x.s.group||'Chưa phân tổ';g[k]=g[k]||{n:0,total:0};g[k].n++;g[k].total+=Number(x.r.score)||0});const gr=document.getElementById('guestGroupRanking');if(gr)gr.innerHTML=Object.entries(g).sort((a,b)=>b[1].total/b[1].n-a[1].total/a[1].n).map((x,i)=>`<div class="kpi-row"><span><b>${i+1}. Tổ ${guestEsc(x[0])}</b> · ${x[1].n} HS</span><b>${(x[1].total/x[1].n).toFixed(1)} · ${guestEsc(guestGradeFromScore(x[1].total/x[1].n,guestRules))}</b></div>`).join('')||'<div class="empty">Chưa có dữ liệu.</div>';const d=distribution(map),cs=document.getElementById('guestConductSummary');if(cs)cs.innerHTML=`<div class="kpi-row"><span>Tốt</span><b>${d['Tốt']}</b></div><div class="kpi-row"><span>Khá</span><b>${d['Khá']}</b></div><div class="kpi-row"><span>Đạt</span><b>${d['Đạt']}</b></div><div class="kpi-row"><span>Chưa đạt</span><b>${d['Chưa đạt']}</b></div>`;document.querySelectorAll('#guestPeriodTabs [data-period]').forEach(btn=>btn.className='btn '+(btn.dataset.period===guestPeriod?'active':'secondary'));}
-      window.guestSetConductPeriod=function(period){if(!periodMaps[period])return;guestPeriod=period;renderGuestCompetition();}; renderGuestCompetition();
+      const sortedStudents=students.slice().sort((a,b)=>String(a.code||a.studentCode||a.id||'').localeCompare(String(b.code||b.studentCode||b.id||''),'en',{numeric:true}));
+      let guestPeriod='week',guestDetail='';
+      const guestMenus={
+        week:Array.from({length:35},(_,i)=>({v:String(i+1),t:`Tuần ${i+1}`})),
+        month:['2026-09','2026-10','2026-11','2026-12','2027-01','2027-02','2027-03','2027-04','2027-05','2027-06'].map(v=>({v,t:'Tháng '+v.slice(5)+'/'+v.slice(0,4)})),
+        hki:[{v:'',t:'Học kì 1'}],hkii:[{v:'',t:'Học kì 2'}],year:[{v:'',t:'Cả năm'}]
+      };
+      function guestMap(period,detail){return guestConductResult(students,conduct,period,settings,detail)}
+      function renderGuestCompetition(){const map=guestMap(guestPeriod,guestDetail);const arr=sortedStudents.map(st=>({s:st,r:map[st.id]||{score:guestRules.base,grade:'Chưa đạt'}})); const rank=document.getElementById('guestCompetitionRanking'); if(rank)rank.innerHTML=arr.length?arr.map((x,i)=>`<div class="kpi-row"><span><b>${i+1}.</b> ${guestEsc(x.s.name||'')}</span><span><b>${Number(x.r.score).toFixed(1)}</b> · <span class="badge ${x.r.grade==='Tốt'?'b-green':x.r.grade==='Khá'?'b-blue':x.r.grade==='Đạt'?'b-yellow':'b-red'}">${guestEsc(x.r.grade||'')}</span></span></div>`).join(''):'<div class="empty">Chưa có dữ liệu.</div>'; const g={};arr.forEach(x=>{const k=x.s.group||'Chưa phân tổ';g[k]=g[k]||{n:0,total:0};g[k].n++;g[k].total+=Number(x.r.score)||0});const gr=document.getElementById('guestGroupRanking');if(gr)gr.innerHTML=Object.entries(g).sort((a,b)=>b[1].total/b[1].n-a[1].total/a[1].n).map((x,i)=>`<div class="kpi-row"><span><b>${i+1}. Tổ ${guestEsc(x[0])}</b> · ${x[1].n} HS</span><b>${(x[1].total/x[1].n).toFixed(1)} · ${guestEsc(guestGradeFromScore(x[1].total/x[1].n,guestRules))}</b></div>`).join('')||'<div class="empty">Chưa có dữ liệu.</div>';const d=distribution(map),cs=document.getElementById('guestConductSummary');if(cs)cs.innerHTML=`<div class="kpi-row"><span>Tốt</span><b>${d['Tốt']}</b></div><div class="kpi-row"><span>Khá</span><b>${d['Khá']}</b></div><div class="kpi-row"><span>Đạt</span><b>${d['Đạt']}</b></div><div class="kpi-row"><span>Chưa đạt</span><b>${d['Chưa đạt']}</b></div>`;document.querySelectorAll('#guestPeriodTabs [data-period]').forEach(btn=>btn.className='btn '+(btn.dataset.period===guestPeriod?'active':'secondary'));}
+      window.guestTogglePeriodMenu=function(period){document.querySelectorAll('.guest-period-submenu').forEach(x=>x.classList.add('hidden'));const sub=document.getElementById('guestSub-'+period);if(!sub)return;sub.innerHTML=guestMenus[period].map(o=>`<button type="button" class="btn secondary" onclick="guestChooseConductPeriod('${period}','${o.v}')">${o.t}</button>`).join('');sub.classList.remove('hidden');};
+      window.guestChooseConductPeriod=function(period,detail){guestPeriod=period;guestDetail=detail;document.querySelectorAll('.guest-period-submenu').forEach(x=>x.classList.add('hidden'));renderGuestCompetition();}; renderGuestCompetition();
     }catch(e){
       console.error(e);
       box.innerHTML=`<div class="guest-card"><div class="notice danger">❌ Không tải được dữ liệu: ${guestEsc(e.message||e)}</div></div>`;
