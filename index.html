@@ -1687,6 +1687,13 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       };
 
       const att=sum.counts;
+      // Đồng bộ quy tắc xếp hạnh kiểm từ Cài đặt của lớp cho toàn bộ giao diện Guest.
+      const guestRules=(()=>{const r=settings?.conductRules||{};return {
+        base:Number.isFinite(Number(r.base))?Number(r.base):100,
+        good:Number.isFinite(Number(r.good))?Number(r.good):96,
+        fair:Number.isFinite(Number(r.fair))?Number(r.fair):90,
+        pass:Number.isFinite(Number(r.pass))?Number(r.pass):85
+      };})();
       const hWeek=guestConductResult(students,conduct,'week',settings);
       const hMonth=guestConductResult(students,conduct,'month',settings);
       const hHki=guestConductResult(students,conduct,'hki',settings);
