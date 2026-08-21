@@ -37,7 +37,27 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
   .sidebar.open{transform:none !important;}
 }
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+function closeModal(id){
+  const modal=document.getElementById(id);
+  if(!modal)return;
+  modal.classList.remove('show');
+  modal.style.display='';
+  document.body.style.overflow='';
+}
+function closeAllModals(){
+  document.querySelectorAll('.modal.show').forEach(m=>closeModal(m.id));
+}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape') closeAllModals();
+});
+document.addEventListener('click',function(e){
+  if(e.target && e.target.classList && e.target.classList.contains('modal') && e.target.id!=='classChooser'){
+    closeModal(e.target.id);
+  }
+});
+
+</script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <style id="multiyear-upgrade-css">
@@ -424,6 +444,12 @@ select option{background:#fff!important;color:#202124!important}
 @media(max-width:560px){.competition-period-tabs .btn{flex:1 1 calc(50% - 8px)}.alert-settings input{width:76px}}
 </style>
 
+
+<style id="modal-close-fix-style">
+#competitionHistoryModal{z-index:5000}
+#competitionHistoryModal.show{display:flex}
+</style>
+
 </head>
 <body>
 
@@ -729,9 +755,12 @@ select option{background:#fff!important;color:#202124!important}
   <div class="modal-box" style="max-width:760px">
     <div class="modal-head">
       <h3 id="competitionHistoryTitle">Lịch sử biến động điểm</h3>
-      <button class="icon-btn" onclick="closeModal('competitionHistoryModal')">✕</button>
+      <button type="button" class="icon-btn" aria-label="Đóng" onclick="closeModal('competitionHistoryModal');return false;">✕</button>
     </div>
     <div id="competitionHistoryContent"></div>
+    <div class="actions" style="justify-content:flex-end;margin-top:16px">
+      <button type="button" class="btn secondary" onclick="closeModal('competitionHistoryModal');return false;">Đóng</button>
+    </div>
   </div>
 </div>
 
