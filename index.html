@@ -1671,6 +1671,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
     document.getElementById('loginScreen')?.classList.remove('hidden');
   }
 
+function guestGradeFromScore(score,r){return score>=r.good?'Tốt':score>=r.fair?'Khá':score>=r.pass?'Đạt':'Chưa đạt'}
   async function loadGuestDashboard(){
     const key=document.getElementById('guestClassSelect')?.value;
     const box=document.getElementById('guestContent');
@@ -1764,35 +1765,45 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
         <div class="badge b-green">🟢 Dữ liệu trực tuyến</div>
       </div>
 
-      <div class="guest-card guest-student-conduct">
-        <h3>👨‍🎓 Hạnh kiểm theo học sinh</h3>
-        <div class="guest-period-tabs" id="guestPeriodTabs">
-          <button class="btn active" type="button" data-period="week" onclick="guestSetConductPeriod('week')">Tuần</button>
-          <button class="btn secondary" type="button" data-period="month" onclick="guestSetConductPeriod('month')">Tháng</button>
-          <button class="btn secondary" type="button" data-period="semester" onclick="guestSetConductPeriod('semester')">Học kỳ</button>
-          <button class="btn secondary" type="button" data-period="year" onclick="guestSetConductPeriod('year')">Cả năm</button>
-        </div>
-        <div class="table-wrap">
-          <table class="guest-table">
-            <thead><tr><th>STT</th><th>Họ và tên học sinh</th><th>Điểm</th><th>Hạnh kiểm</th></tr></thead>
-            <tbody id="guestConductRows"></tbody>
-          </table>
-        </div>
+      <div class="guest-grid">
+        <div class="guest-stat"><div class="guest-muted">👨‍🎓 Sĩ số</div><div class="n">${students.length}</div></div>
+        <div class="guest-stat"><div class="guest-muted">📅 Có mặt hôm nay</div><div class="n">${att.today_present}</div></div>
+        <div class="guest-stat"><div class="guest-muted">⚠️ Nghỉ không phép hôm nay</div><div class="n">${att.today_absent}</div></div>
+        <div class="guest-stat"><div class="guest-muted">⭐ Điểm rèn luyện cộng/trừ</div><div class="n">${Number(sum.totalPoints).toFixed(1)}</div></div>
       </div>
-      <div class="footer-note">Dữ liệu được hiển thị theo danh sách lớp và giai đoạn đã chọn.</div>`;
+
+      <div class="grid two">
+        <div class="guest-card"><h3>📅 Nền nếp & chuyên cần</h3><div class="kpi-list">
+          <div class="kpi-row"><span>Hôm nay có mặt</span><b>${att.today_present}</b></div><div class="kpi-row"><span>Đi muộn hôm nay</span><b>${att.today_late}</b></div><div class="kpi-row"><span>Nghỉ có phép hôm nay</span><b>${att.today_excused}</b></div><div class="kpi-row"><span>Nghỉ không phép hôm nay</span><b>${att.today_absent}</b></div><div class="kpi-row"><span>Có mặt trong tháng</span><b>${att.month_present}</b></div><div class="kpi-row"><span>Đi muộn trong tháng</span><b>${att.month_late}</b></div>
+        </div></div>
+        <div class="guest-card"><h3>🏆 Hạnh kiểm</h3><div class="kpi-list">
+          <div class="kpi-row"><span>Tuần này</span><b>Tốt ${wd['Tốt']} · Khá ${wd['Khá']} · Đạt ${wd['Đạt']} · Chưa đạt ${wd['Chưa đạt']}</b></div><div class="kpi-row"><span>Tháng này</span><b>Tốt ${md['Tốt']} · Khá ${md['Khá']} · Đạt ${md['Đạt']} · Chưa đạt ${md['Chưa đạt']}</b></div><div class="kpi-row"><span>Cả năm</span><b>Tốt ${hd['Tốt']} · Khá ${hd['Khá']} · Đạt ${hd['Đạt']} · Chưa đạt ${hd['Chưa đạt']}</b></div>
+        </div></div>
+      </div>
+
+      <div class="guest-card"><h3>🏆 Hạnh kiểm theo giai đoạn</h3><div class="table-wrap"><table class="guest-table"><thead><tr><th>Giai đoạn</th><th>Tốt</th><th>Khá</th><th>Đạt</th><th>Chưa đạt</th></tr></thead><tbody>
+      <tr><td>Tuần này</td><td>${wd['Tốt']}</td><td>${wd['Khá']}</td><td>${wd['Đạt']}</td><td>${wd['Chưa đạt']}</td></tr><tr><td>Tháng này</td><td>${md['Tốt']}</td><td>${md['Khá']}</td><td>${md['Đạt']}</td><td>${md['Chưa đạt']}</td></tr><tr><td>Học kỳ I</td><td>${distribution(hHki)['Tốt']}</td><td>${distribution(hHki)['Khá']}</td><td>${distribution(hHki)['Đạt']}</td><td>${distribution(hHki)['Chưa đạt']}</td></tr><tr><td>Học kỳ II</td><td>${distribution(hHkii)['Tốt']}</td><td>${distribution(hHkii)['Khá']}</td><td>${distribution(hHkii)['Đạt']}</td><td>${distribution(hHkii)['Chưa đạt']}</td></tr><tr><td>Cả năm</td><td>${hd['Tốt']}</td><td>${hd['Khá']}</td><td>${hd['Đạt']}</td><td>${hd['Chưa đạt']}</td></tr>
+      </tbody></table></div></div>
+
+      <div class="guest-card guest-student-conduct">
+        <h3>🏆 Thi đua — Hạnh kiểm theo học sinh</h3>
+        <div class="guest-period-tabs" id="guestPeriodTabs"><button class="btn active" type="button" data-period="week" onclick="guestSetConductPeriod('week')">Tuần</button><button class="btn secondary" type="button" data-period="month" onclick="guestSetConductPeriod('month')">Tháng</button><button class="btn secondary" type="button" data-period="hki" onclick="guestSetConductPeriod('hki')">Học kỳ I</button><button class="btn secondary" type="button" data-period="hkii" onclick="guestSetConductPeriod('hkii')">Học kỳ II</button><button class="btn secondary" type="button" data-period="year" onclick="guestSetConductPeriod('year')">Cả năm</button></div>
+        <div id="guestCompetitionRanking" class="kpi-list"></div>
+        <h3 style="margin-top:16px">👥 Tổng hợp theo tổ</h3><div id="guestGroupRanking" class="kpi-list"></div>
+        <div class="notice ok" style="margin-top:16px">Mỗi học sinh bắt đầu <b>${guestRules.base}</b> điểm/tuần. <b>Tốt ≥ ${guestRules.good}</b>; <b>Khá ${guestRules.fair}–&lt;${guestRules.good}</b>; <b>Đạt ${guestRules.pass}–&lt;${guestRules.fair}</b>; <b>Chưa đạt &lt;${guestRules.pass}</b>. Tháng/HK/Cả năm được tính từ kết quả các tuần tương ứng.</div>
+        <div id="guestConductSummary" class="kpi-list" style="margin-top:12px"></div>
+      </div>
+
+      <div class="guest-honor-card"><div class="guest-honor-head"><div><h3>🏅 Vinh danh</h3></div></div><div class="guest-honor-grid"><div class="guest-honor-panel good"><div class="guest-honor-title">🌟 Học sinh được khen thưởng</div><div class="guest-honor-names">${praisedRecords.length?praisedRecords.map(honorItem).join(''):'<div class="empty">Chưa có học sinh được ghi nhận khen thưởng.</div>'}</div></div><div class="guest-honor-panel warn"><div class="guest-honor-title">⚠️ Học sinh bị phê bình</div><div class="guest-honor-names">${criticizedRecords.length?criticizedRecords.map(honorItem).join(''):'<div class="empty">Chưa có học sinh bị phê bình.</div>'}</div></div></div></div>
+
+      <div class="guest-card"><h3>⭐ Rèn luyện gần đây</h3>${recent.length?`<table class="guest-table"><thead><tr><th>Ngày</th><th>Loại</th><th>Điểm</th></tr></thead><tbody>${recent.map(x=>`<tr><td>${guestEsc(x.date||'')}</td><td>${guestEsc(x.type||'')}</td><td><b>${Number(x.points||0).toFixed(1)}</b></td></tr>`).join('')}</tbody></table>`:'<div class="empty">Chưa có ghi nhận rèn luyện được duyệt.</div>'}</div>
+      <div class="guest-card"><h3>📊 Tổng hợp nền nếp tháng này</h3><table class="guest-table"><thead><tr><th>Trạng thái</th><th>Số lượt</th></tr></thead><tbody><tr><td>Có mặt</td><td>${att.month_present}</td></tr><tr><td>Đi muộn</td><td>${att.month_late}</td></tr><tr><td>Nghỉ có phép</td><td>${att.month_excused}</td></tr><tr><td>Nghỉ không phép</td><td>${att.month_absent}</td></tr></tbody></table></div>
+      <div class="footer-note">Cập nhật: ${guestEsc(new Date().toLocaleString('vi-VN'))} · Đã tải ${students.length} học sinh, ${Object.keys(attendance).length} lượt điểm danh, ${conduct.length} bản ghi rèn luyện.</div>`;
 
       const sortedStudents=students.slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'vi'));
-      const periodMaps={week:hWeek,month:hMonth,semester:hHki,year:hYear};
-      let guestPeriod='week';
-      function renderGuestConductTable(){
-        const rows=document.getElementById('guestConductRows');
-        if(!rows)return;
-        const map=periodMaps[guestPeriod]||hWeek;
-        rows.innerHTML=sortedStudents.map((st,i)=>{const r=map[st.id]||{score:guestRules.base,grade:''};return `<tr><td>${i+1}</td><td><b>${guestEsc(st.name||'')}</b></td><td>${Number(r.score??guestRules.base).toFixed(1)}</td><td>${guestEsc(r.grade||'')}</td></tr>`}).join('')||'<tr><td colspan="4" class="empty">Chưa có học sinh.</td></tr>';
-        document.querySelectorAll('#guestPeriodTabs [data-period]').forEach(btn=>{const active=btn.dataset.period===guestPeriod;btn.className='btn '+(active?'active':'secondary');});
-      }
-      window.guestSetConductPeriod=function(period){if(!periodMaps[period])return;guestPeriod=period;renderGuestConductTable();};
-      renderGuestConductTable();
+      const periodMaps={week:hWeek,month:hMonth,hki:hHki,hkii:hHkii,year:hYear}; let guestPeriod='week';
+      function renderGuestCompetition(){const map=periodMaps[guestPeriod]||hWeek;const arr=sortedStudents.map(st=>({s:st,r:map[st.id]||{score:guestRules.base,grade:'Chưa đạt'}})).sort((a,b)=>Number(b.r.score)-Number(a.r.score)); const rank=document.getElementById('guestCompetitionRanking'); if(rank)rank.innerHTML=arr.length?arr.map((x,i)=>`<div class="kpi-row"><span><b>${i+1}.</b> ${guestEsc(x.s.name||'')}</span><span><b>${Number(x.r.score).toFixed(1)}</b> · <span class="badge ${x.r.grade==='Tốt'?'b-green':x.r.grade==='Khá'?'b-blue':x.r.grade==='Đạt'?'b-yellow':'b-red'}">${guestEsc(x.r.grade||'')}</span></span></div>`).join(''):'<div class="empty">Chưa có dữ liệu.</div>'; const g={};arr.forEach(x=>{const k=x.s.group||'Chưa phân tổ';g[k]=g[k]||{n:0,total:0};g[k].n++;g[k].total+=Number(x.r.score)||0});const gr=document.getElementById('guestGroupRanking');if(gr)gr.innerHTML=Object.entries(g).sort((a,b)=>b[1].total/b[1].n-a[1].total/a[1].n).map((x,i)=>`<div class="kpi-row"><span><b>${i+1}. Tổ ${guestEsc(x[0])}</b> · ${x[1].n} HS</span><b>${(x[1].total/x[1].n).toFixed(1)} · ${guestEsc(guestGradeFromScore(x[1].total/x[1].n,guestRules))}</b></div>`).join('')||'<div class="empty">Chưa có dữ liệu.</div>';const d=distribution(map),cs=document.getElementById('guestConductSummary');if(cs)cs.innerHTML=`<div class="kpi-row"><span>Tốt</span><b>${d['Tốt']}</b></div><div class="kpi-row"><span>Khá</span><b>${d['Khá']}</b></div><div class="kpi-row"><span>Đạt</span><b>${d['Đạt']}</b></div><div class="kpi-row"><span>Chưa đạt</span><b>${d['Chưa đạt']}</b></div>`;document.querySelectorAll('#guestPeriodTabs [data-period]').forEach(btn=>btn.className='btn '+(btn.dataset.period===guestPeriod?'active':'secondary'));}
+      window.guestSetConductPeriod=function(period){if(!periodMaps[period])return;guestPeriod=period;renderGuestCompetition();}; renderGuestCompetition();
     }catch(e){
       console.error(e);
       box.innerHTML=`<div class="guest-card"><div class="notice danger">❌ Không tải được dữ liệu: ${guestEsc(e.message||e)}</div></div>`;
