@@ -1705,7 +1705,7 @@ function buildAIContext(){
     return {...cloneSafe(s),attendance:{present:ar.filter(x=>x.status==='present').length,late:ar.filter(x=>x.status==='late').length,excused:ar.filter(x=>x.status==='excused').length,absent:ar.filter(x=>x.status==='absent').length,total:ar.length},conduct:{records:cr.length,plus:Number(plus.toFixed(1)),minus:Number(minus.toFixed(1)),net:Number((plus+minus).toFixed(1)),recent:cloneSafe(cr.slice(-20))||[]},learning:cloneSafe(studentScores)||{}};
   });
   const approved=conduct.filter(x=>x.status==='approved');
-  const genderStats={nam:students.filter(s=>String(s.gender||'').trim().toLowerCase()==='nam').length,nu:students.filter(s=>['nữ','nu'].includes(String(s.gender||'').trim().toLowerCase())).length,khac:students.filter(s=>{const g=String(s.gender||'').trim().toLowerCase();return g&&g!=='nam'&&g!=='nữ'&&g!=='nu'}).length,chuaCo:students.filter(s=>!String(s.gender||'').trim()).length};
+  const genderStats=getGenderStatsFromStudents(students);
   const groups={}; students.forEach(s=>{const g=String(s.group||'Chưa xếp');groups[g]=(groups[g]||0)+1;});
   return {class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',teacher:state.settings?.teacher||currentUser?.name||'',groups:state.settings?.groups||4},summary:{students:students.length,attendanceRecords:attendance.length,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),weekStart:aiWeekStart(today()),gender:genderStats,groups},students:stats,fullStudentRecords:cloneSafe(students)||[],fullAttendanceRecords:cloneSafe(attendance)||[],fullConductRecords:cloneSafe(conduct)||[],fullScores:cloneSafe(scores)||{},recentConduct:cloneSafe(approved.slice(-100))||[]};
 }
@@ -1722,6 +1722,7 @@ QUYỀN KHAI THÁC DỮ LIỆU:
 - Được phép đọc và đối chiếu đầy đủ hồ sơ học sinh có trong context, bao gồm mọi trường dữ liệu hiện có của học sinh, cùng dữ liệu chuyên cần, rèn luyện, thi đua và học tập.
 - Không tự suy đoán dữ liệu còn thiếu. Không bịa tên, điểm, ngày tháng, sự kiện hoặc nguyên nhân.
 - Khi GVCN hỏi thống kê, phải tính từ dữ liệu thực tế trong context; ưu tiên con số chính xác trước.
+- Đặc biệt với câu hỏi số học sinh nam/nữ: phải sử dụng trường gender trong fullStudentRecords, tự đếm từng học sinh và trả lời con số nam/nữ trước; tuyệt đối không được nói rằng dữ liệu không có giới tính nếu context có trường gender.
 - Khi GVCN hỏi về một học sinh, phải đối chiếu đúng mã học sinh và họ tên trước khi kết luận.
 - Khi GVCN hỏi so sánh tổ, phải tính theo dữ liệu thực tế và nêu căn cứ.
 - Khi GVCN hỏi biến động, phải so sánh theo thời gian nếu dữ liệu có đủ mốc.
@@ -1824,23 +1825,51 @@ function stopAISpeech(showStatus=true){
 }
 if('speechSynthesis' in window){speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();}
 async function askAIQuick(q){document.getElementById('aiQuestion').value=q;await askAI();}
+function normalizeGenderValue(value){
+  return String(value??'')
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase();
+}
+function getGenderStatsFromStudents(students){
+  const list=Array.isArray(students)?students:[];
+  let nam=0,nu=0,khac=0,chuaCo=0;
+  list.forEach(s=>{
+    const g=normalizeGenderValue(s?.gender);
+    if(g==='nam') nam++;
+    else if(g==='nu'||g==='female'||g==='f') nu++;
+    else if(!g) chuaCo++;
+    else khac++;
+  });
+  return {nam,nu,khac,chuaCo,total:list.length};
+}
 function isGenderCountQuestion(q){
-  const t=String(q||'').toLowerCase();
-  return /(bao nhiêu|số lượng|có bao nhiêu).*(nam).*(nữ|nu)/i.test(t) ||
-         /(nam).*(nữ|nu).*(bao nhiêu|số lượng)/i.test(t);
+  const t=String(q||'')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase();
+  const asksCount=/(bao nhieu|so luong|thong ke|dem|tong so)/i.test(t);
+  const asksNam=/(\bnam\b|hoc sinh nam|ban nam)/i.test(t);
+  const asksNu=/(\bnu\b|hoc sinh nu|ban nu)/i.test(t);
+  return asksCount && asksNam && asksNu;
 }
 function buildGenderCountAnswer(context){
-  const g=context?.summary?.gender||{};
-  const total=Number(context?.summary?.students||0);
-  const nam=Number(g.nam||0), nu=Number(g.nu||0), khac=Number(g.khac||0), chua=Number(g.chuaCo||0);
-  const known=nam+nu+khac;
+  // Tính trực tiếp từ danh sách học sinh, không phụ thuộc vào việc Gemini có nhận diện gender hay không.
+  const students=Array.isArray(context?.fullStudentRecords)?context.fullStudentRecords:(Array.isArray(context?.students)?context.students:[]);
+  const calculated=getGenderStatsFromStudents(students);
+  const fallback=context?.summary?.gender||{};
+  const nam=calculated.total?calculated.nam:Number(fallback.nam||0);
+  const nu=calculated.total?calculated.nu:Number(fallback.nu||0);
+  const khac=calculated.total?calculated.khac:Number(fallback.khac||0);
+  const chua=calculated.total?calculated.chuaCo:Number(fallback.chuaCo||0);
+  const total=calculated.total||Number(context?.summary?.students||0);
   const lines=[
     `Lớp ${context?.class?.name||''} hiện có ${total} học sinh.`,
-    `Trong đó có ${nam} học sinh nam và ${nu} học sinh nữ.`
+    `Có ${nu} học sinh nữ và ${nam} học sinh nam.`
   ];
   if(khac) lines.push(`Có ${khac} học sinh có giới tính khác.`);
   if(chua) lines.push(`Có ${chua} học sinh chưa cập nhật giới tính.`);
-  if(total!==known+chua) lines.push(`Đối chiếu dữ liệu: ${known+chua} học sinh đã được phân loại giới tính.`);
+  if(total!==nam+nu+khac+chua) lines.push(`Dữ liệu giới tính đã phân loại được ${nam+nu+khac+chua} trên tổng số ${total} học sinh.`);
   return lines.join('\\n');
 }
 function looksTruncatedAIAnswer(text){
@@ -1851,7 +1880,7 @@ function looksTruncatedAIAnswer(text){
   return false;
 }
 function formatAIErrorMessage(error,httpStatus=''){const raw=String(error||'').trim();const lower=raw.toLowerCase();if(httpStatus==='429'||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota|retry in/i.test(raw)){const m=raw.match(/retry in\s+([0-9]+(?:\.[0-9]+)?)s/i);const wait=m?Math.ceil(Number(m[1])):null;return `<div class="ai-error-card"><strong>⚠️ Gemini đang tạm hết lượt sử dụng</strong><div>Đây là giới hạn quota của API Gemini, không phải lỗi hiển thị trên điện thoại.</div>${wait?`<div class="ai-retry-note">Thầy có thể thử lại sau khoảng ${wait} giây.</div>`:'<div class="ai-retry-note">Thầy hãy thử lại sau một lúc hoặc kiểm tra quota/billing của Gemini.</div>'}</div>`;}if(/failed to fetch|networkerror|load failed/i.test(lower))return `<div class="ai-error-card"><strong>🌐 Không kết nối được Trợ lý AI</strong><div>Thầy kiểm tra Internet rồi bấm Hỏi AI lại.</div></div>`;return `<div class="ai-error-card"><strong>❌ Trợ lý AI chưa thể trả lời</strong><div>${esc(raw||'Đã xảy ra lỗi không xác định.')}</div></div>`;}
-async function askAI(){const q=document.getElementById('aiQuestion'),ans=document.getElementById('aiAnswer'),meta=document.getElementById('aiMeta'),btn=document.getElementById('aiAskBtn');const question=(q?.value||'').trim();if(!question){if(ans)renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}if(!isAdmin()){renderAIAnswer('🔒 Chỉ GVCN/Admin mới được sử dụng Trợ lý AI.');return;}stopAISpeech(false);btn.disabled=true;btn.classList.add('ai-busy');renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');if(meta)meta.textContent='AI đang đọc dữ liệu lớp đang chọn...';try{const context=buildAIContext();if(isGenderCountQuestion(question)){const answer=buildGenderCountAnswer(context);renderAIAnswer(answer);if(meta)meta.textContent=`🤖 Thống kê trực tiếp từ dữ liệu lớp · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}const aiPrompt=buildAIPrompt(question,context);const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';const payload={question:aiPrompt,stateKey:currentStateKey,context};const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});const body=await res.json().catch(()=>({}));if(!res.ok){const errText=body.error||body.message||`AI trả về lỗi HTTP ${res.status}`;const quota=/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(errText))||res.status===429;if(ans)ans.innerHTML=formatAIErrorMessage(errText,String(res.status));if(meta)meta.textContent=quota?'⚠️ Gemini đang giới hạn lượt sử dụng.':'Kiểm tra Edge Function ai-class-assistant và GEMINI_API_KEY trong Supabase.';return;}let fullAnswer=typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||JSON.stringify(body.answer));if(looksTruncatedAIAnswer(fullAnswer) && String(fullAnswer||'').length>40){const retryPrompt=`Trả lời trực tiếp câu hỏi sau bằng tiếng Việt, tối đa 8 câu, không dùng Markdown, không dùng dấu *, không mở đầu dài dòng. Chỉ dùng dữ liệu trong context. Nếu là câu hỏi thống kê, nêu con số chính xác trước.\n\nCâu hỏi: ${question}`;const retry=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:retryPrompt,stateKey:currentStateKey,context})});const retryBody=await retry.json().catch(()=>({}));const retryErr=retryBody.error||retryBody.message||'';if(retry.ok){const candidate=typeof retryBody.answer==='string'?retryBody.answer:(retryBody.answer?.text||retryBody.answer?.content||'');if(candidate&&!looksTruncatedAIAnswer(candidate))fullAnswer=candidate;}else if(retry.status===429||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(retryErr))){if(ans)ans.innerHTML=formatAIErrorMessage(retryErr,String(retry.status));if(meta)meta.textContent='⚠️ Gemini đang giới hạn lượt sử dụng.';return;}}renderAIAnswer(fullAnswer||'AI chưa trả về nội dung.');const finishReason=body.finishReason||body.finish_reason||body.meta?.finishReason||'';if(meta)meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}`;}catch(e){console.error(e);if(ans)ans.innerHTML=formatAIErrorMessage(e?.message||e);if(meta)meta.textContent='Trợ lý AI tạm thời không thể kết nối.';}finally{btn.classList.remove('ai-busy');btn.disabled=false;}}
+async function askAI(){const q=document.getElementById('aiQuestion'),ans=document.getElementById('aiAnswer'),meta=document.getElementById('aiMeta'),btn=document.getElementById('aiAskBtn');const question=(q?.value||'').trim();if(!question){if(ans)renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}if(!isAdmin()){renderAIAnswer('🔒 Chỉ GVCN/Admin mới được sử dụng Trợ lý AI.');return;}stopAISpeech(false);btn.disabled=true;btn.classList.add('ai-busy');renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');if(meta)meta.textContent='AI đang đọc dữ liệu lớp đang chọn...';try{const context=buildAIContext();if(isGenderCountQuestion(question)){const answer=buildGenderCountAnswer(context);renderAIAnswer(answer);if(meta)meta.textContent=`🤖 Thống kê trực tiếp từ danh sách học sinh · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}const aiPrompt=buildAIPrompt(question,context);const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';const payload={question:aiPrompt,stateKey:currentStateKey,context};const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});const body=await res.json().catch(()=>({}));if(!res.ok){const errText=body.error||body.message||`AI trả về lỗi HTTP ${res.status}`;const quota=/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(errText))||res.status===429;if(ans)ans.innerHTML=formatAIErrorMessage(errText,String(res.status));if(meta)meta.textContent=quota?'⚠️ Gemini đang giới hạn lượt sử dụng.':'Kiểm tra Edge Function ai-class-assistant và GEMINI_API_KEY trong Supabase.';return;}let fullAnswer=typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||JSON.stringify(body.answer));if(looksTruncatedAIAnswer(fullAnswer) && String(fullAnswer||'').length>40){const retryPrompt=`Trả lời trực tiếp câu hỏi sau bằng tiếng Việt, tối đa 8 câu, không dùng Markdown, không dùng dấu *, không mở đầu dài dòng. Chỉ dùng dữ liệu trong context. Nếu là câu hỏi thống kê, nêu con số chính xác trước.\n\nCâu hỏi: ${question}`;const retry=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:retryPrompt,stateKey:currentStateKey,context})});const retryBody=await retry.json().catch(()=>({}));const retryErr=retryBody.error||retryBody.message||'';if(retry.ok){const candidate=typeof retryBody.answer==='string'?retryBody.answer:(retryBody.answer?.text||retryBody.answer?.content||'');if(candidate&&!looksTruncatedAIAnswer(candidate))fullAnswer=candidate;}else if(retry.status===429||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(retryErr))){if(ans)ans.innerHTML=formatAIErrorMessage(retryErr,String(retry.status));if(meta)meta.textContent='⚠️ Gemini đang giới hạn lượt sử dụng.';return;}}renderAIAnswer(fullAnswer||'AI chưa trả về nội dung.');const finishReason=body.finishReason||body.finish_reason||body.meta?.finishReason||'';if(meta)meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}`;}catch(e){console.error(e);if(ans)ans.innerHTML=formatAIErrorMessage(e?.message||e);if(meta)meta.textContent='Trợ lý AI tạm thời không thể kết nối.';}finally{btn.classList.remove('ai-busy');btn.disabled=false;}}
 
 document.getElementById('loginPass')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();login()}});
 if(window.__supabaseInitError){setLoginStatus('❌ Không tải được Supabase: '+window.__supabaseInitError.message)}
