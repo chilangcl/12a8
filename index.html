@@ -212,8 +212,7 @@ document.addEventListener('click',function(e){
 @media(max-width:680px){.ai-nav-btn{padding:12px!important;font-size:13px}.ai-nav-badge{font-size:8px;padding:3px 5px}}
 </style>
 <style id="bibi-ai-v1">
-.ai-page{display:grid;gap:14px}.ai-quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.ai-quick button{border:1px solid #bfdbfe;background:#eff6ff;color:#1e40af;border-radius:10px;padding:10px;font-weight:700;text-align:left}.ai-quick button:hover{background:#dbeafe}.ai-chat{display:grid;gap:10px}.ai-chat textarea{width:100%;min-height:96px;resize:vertical;border:1px solid var(--border);border-radius:12px;padding:12px;outline:none}.ai-chat textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px #2563eb18}.ai-answer{white-space:pre-wrap;line-height:1.72;background:#f8fafc;border:1px solid var(--border);border-radius:16px;padding:16px;min-height:110px;max-height:none!important;height:auto!important;overflow:visible!important;overflow-wrap:anywhere;word-break:break-word;white-space:pre-wrap;-webkit-user-select:text;user-select:text}.ai-answer:empty{display:none}.ai-meta{font-size:12px;color:var(--muted)}.ai-busy{opacity:.65;pointer-events:none}.ai-badge{display:inline-flex;align-items:center;gap:6px;background:#ecfdf5;color:#166534;border:1px solid #bbf7d0;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}.ai-speech-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ai-speech-actions .btn{min-height:42px}.ai-speech-status{font-size:12px;color:var(--muted);min-height:18px}@media(max-width:600px){.ai-answer{font-size:14px;line-height:1.7;max-height:none!important;height:auto!important;overflow:visible!important;padding:14px}.ai-speech-actions{grid-template-columns:1fr 1fr}}
-@media(max-width:600px){.ai-quick{grid-template-columns:1fr 1fr}.ai-answer{font-size:14px}}
+.ai-page{display:grid;gap:14px}.ai-quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.ai-quick button{border:1px solid #bfdbfe;background:#eff6ff;color:#1e40af;border-radius:10px;padding:10px;font-weight:700;text-align:left;transition:.18s ease}.ai-quick button:hover{background:#dbeafe;transform:translateY(-1px)}.ai-chat{display:grid;gap:10px}.ai-chat textarea{width:100%;min-height:96px;resize:vertical;border:1px solid var(--border);border-radius:12px;padding:12px;outline:none}.ai-chat textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px #2563eb18}.ai-answer{white-space:pre-wrap;line-height:1.72;background:#f8fafc;border:1px solid var(--border);border-radius:16px;padding:16px;min-height:110px;max-height:none!important;height:auto!important;overflow:visible!important;overflow-wrap:anywhere;word-break:break-word;-webkit-user-select:text;user-select:text}.ai-answer:empty{display:none}.ai-meta{font-size:12px;color:var(--muted)}.ai-busy{opacity:.65;pointer-events:none}.ai-badge{display:inline-flex;align-items:center;gap:6px;background:#ecfdf5;color:#166534;border:1px solid #bbf7d0;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:800}.ai-speech-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.ai-speech-actions .btn{min-height:42px}.ai-speech-status{font-size:12px;color:var(--muted);min-height:18px}.ai-data-note{font-size:12px;line-height:1.55;background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;border-radius:12px;padding:10px 12px}.ai-floating-btn{position:fixed;right:22px;bottom:24px;z-index:1200;width:58px;height:58px;border:0;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:27px;box-shadow:0 10px 28px rgba(37,99,235,.35),0 4px 12px rgba(0,0,0,.18);cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}.ai-floating-btn:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 14px 34px rgba(37,99,235,.42),0 5px 14px rgba(0,0,0,.2)}.ai-floating-btn:active{transform:scale(.96)}.ai-floating-btn.hidden{display:none!important}.ai-floating-label{position:absolute;right:68px;white-space:nowrap;background:#111827;color:#fff;font-size:12px;font-weight:800;border-radius:999px;padding:7px 10px;opacity:0;pointer-events:none;transform:translateX(5px);transition:.18s ease}.ai-floating-btn:hover .ai-floating-label{opacity:1;transform:none}@media(max-width:600px){.ai-answer{font-size:14px;line-height:1.7;max-height:none!important;height:auto!important;overflow:visible!important;padding:14px}.ai-speech-actions{grid-template-columns:1fr 1fr}.ai-quick{grid-template-columns:1fr 1fr}.ai-floating-btn{right:14px;bottom:74px;width:54px;height:54px;font-size:25px}.ai-floating-label{display:none}}
 </style>
 
 
@@ -526,6 +525,7 @@ select option{background:#fff!important;color:#202124!important}
     <div class="app-brand-title"><span class="cap">🎓</span><span>ClassManager Pro</span></div>
     <div id="appClassContext" class="app-class-context"></div>
   </div>
+  <button id="aiFloatingBtn" class="ai-floating-btn hidden" type="button" onclick="openAIFloating()" aria-label="Mở Trợ lý AI" title="Mở Trợ lý AI">🤖<span class="ai-floating-label">Trợ lý AI</span></button>
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="brand"></div>
@@ -608,12 +608,18 @@ select option{background:#fff!important;color:#202124!important}
             <button onclick="askAIQuick('So sánh kết quả rèn luyện giữa các tổ và chỉ ra tổ/học sinh có điểm đáng chú ý.')">👥 So sánh các tổ</button>
             <button onclick="askAIQuick('Cho biết những học sinh có dấu hiệu cần GVCN quan tâm dựa trên chuyên cần và rèn luyện. Không phán đoán nguyên nhân khi dữ liệu không đủ.')">⚠️ Học sinh cần quan tâm</button>
             <button onclick="askAIQuick('Tóm tắt lớp trong khoảng 10 dòng để GVCN dùng khi họp lớp.')">📝 Tóm tắt lớp</button>
+            <button onclick="askAIQuick('Liệt kê những học sinh có biến động rèn luyện đáng chú ý trong thời gian gần đây và giải thích dựa trên dữ liệu cụ thể.')">📉 Biến động rèn luyện</button>
+            <button onclick="askAIQuick('Phân tích chuyên cần kết hợp rèn luyện để xác định học sinh cần GVCN quan tâm nhất. Nêu rõ dữ liệu làm căn cứ.')">🎯 Cần quan tâm</button>
+            <button onclick="askAIQuick('Đề xuất 5 việc GVCN nên ưu tiên thực hiện trong tuần này dựa trên dữ liệu lớp hiện tại.')">💡 Việc nên làm</button>
+            <button onclick="askAIQuick('Tìm các học sinh có thành tích hoặc hành vi tích cực nổi bật để GVCN xem xét tuyên dương.')">🌟 Gợi ý vinh danh</button>
+            <button onclick="askAIQuick('Phân tích sự khác biệt giữa các tổ về sĩ số, chuyên cần và rèn luyện; nêu tổ nổi bật và tổ cần hỗ trợ.')">📊 Phân tích tổ</button>
           </div></div>
           <div class="ai-chat">
             <label style="font-weight:800">💬 Câu hỏi của thầy</label>
             <textarea id="aiQuestion" placeholder="Ví dụ: Học sinh nào có điểm rèn luyện giảm? Tổ nào có nền nếp tốt nhất? Hãy phân tích lớp tuần này..."></textarea>
             <div class="actions"><button class="btn" id="aiAskBtn" onclick="askAI()">🤖 Hỏi AI</button><button class="btn secondary" onclick="clearAIAnswer()">Xóa</button></div>
             <div id="aiMeta" class="ai-meta"></div>
+            <div class="ai-data-note">🔐 Dữ liệu Trợ lý AI được giới hạn theo phiên GVCN đang đăng nhập và lớp đang chọn. AI có thể phân tích đầy đủ hồ sơ, chuyên cần, rèn luyện, thi đua và dữ liệu học tập đã có trong hệ thống; không tự ý chia sẻ dữ liệu ra giao diện công khai.</div>
             <div id="aiAnswer" class="ai-answer" tabindex="0" aria-label="Nội dung trả lời của Trợ lý AI">AI sẽ trả lời dựa trên dữ liệu lớp đang chọn.</div>
             <div class="ai-speech-actions">
               <button class="btn secondary" id="aiSpeakBtn" onclick="speakAIAnswer()">🔊 Nghe toàn bộ</button>
@@ -870,6 +876,11 @@ function getCurrentUserRoleDisplay(){
   if(currentUser?.roleLabel) return `${currentUser.roleLabel}: ${name}`;
   return name;
 }
+function openAIFloating(){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN mới được sử dụng Trợ lý AI.');return;}
+  showPage('ai');
+  setTimeout(()=>document.getElementById('aiQuestion')?.focus(),80);
+}
 function setUserUi(){
   document.getElementById('userName').textContent=currentUser?.name||currentUser?.username||'';
   const roleText=isAdmin()?'GVCN':(currentUser?.roleLabel||currentUser?.role||'');
@@ -879,6 +890,8 @@ function setUserUi(){
   document.querySelectorAll('.admin-only').forEach(x=>x.classList.toggle('hidden',!isAdmin()));
   // AI là chức năng tuyệt đối chỉ dành cho GVCN/Admin.
   document.querySelectorAll('.ai-nav-btn').forEach(x=>x.classList.toggle('hidden',!isAdmin()));
+  const aiFloating=document.getElementById('aiFloatingBtn');
+  if(aiFloating) aiFloating.classList.toggle('hidden',!isAdmin());
   document.getElementById('studentRoleNote')?.classList.toggle('hidden',isAdmin());
   document.getElementById('learningRoleNote')?.classList.toggle('hidden',isAdmin());
   const aiPage=document.getElementById('page-ai');
@@ -997,7 +1010,7 @@ async function logout(){
   const finish=()=>{currentUser=null;currentClass=null;availableClasses=[];currentStateKey='12A8-2026-2027';try{localStorage.removeItem('bibi_current_class_db_id');localStorage.removeItem('bibi_current_class_key')}catch(e){};document.getElementById('app')?.classList.add('hidden');document.getElementById('classChooser')?.classList.remove('show');document.getElementById('loginScreen')?.classList.remove('hidden');document.getElementById('appClassContext')?.classList.remove('show');const p=document.getElementById('loginPass');if(p)p.value='';try{setSidebarHidden(false)}catch(e){};setLoginStatus('✅ Đã đăng xuất. Vui lòng đăng nhập lại.','ok')};
   try{if(sb?.auth)await Promise.race([sb.auth.signOut({scope:'local'}),new Promise(r=>setTimeout(r,2500))])}catch(e){console.warn(e)}finally{finish()}
 }
-if(sb)sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;currentClass=null;availableClasses=[];document.getElementById('app')?.classList.add('hidden');document.getElementById('loginScreen')?.classList.remove('hidden');document.getElementById('appClassContext')?.classList.remove('show')}});
+if(sb)sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;currentClass=null;availableClasses=[];document.getElementById('aiFloatingBtn')?.classList.add('hidden');document.getElementById('app')?.classList.add('hidden');document.getElementById('loginScreen')?.classList.remove('hidden');document.getElementById('appClassContext')?.classList.remove('show')}});
 
 function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -1673,6 +1686,9 @@ function aiWeekStart(dateStr){
   if(Number.isNaN(d.getTime())||d<start)return isoDate(start);
   const diff=Math.floor((d-start)/86400000); start.setDate(start.getDate()+Math.floor(diff/7)*7); return isoDate(start);
 }
+function cloneSafe(value){
+  try{return JSON.parse(JSON.stringify(value??null));}catch(e){return null;}
+}
 function buildAIContext(){
   const students=Array.isArray(state.students)?state.students:[];
   const attendance=state.attendance&&typeof state.attendance==='object'?Object.values(state.attendance):[];
@@ -1686,46 +1702,45 @@ function buildAIContext(){
     const minus=cr.filter(x=>Number(x.points)<0).reduce((a,x)=>a+Number(x.points||0),0);
     const studentScores={};
     Object.entries(scores).forEach(([k,v])=>{if(k.endsWith('_'+s.id)||k===s.id)studentScores[k.replace('_'+s.id,'')]=v;});
-    return {
-      code:s.code||'', name:s.name||'', dob:s.dob||'', gender:s.gender||'', ethnic:s.ethnic||'',
-      address:s.address||'', email:s.email||'', group:s.group||'', role:s.role||'', note:s.note||'',
-      attendance:{present:ar.filter(x=>x.status==='present').length,late:ar.filter(x=>x.status==='late').length,excused:ar.filter(x=>x.status==='excused').length,absent:ar.filter(x=>x.status==='absent').length},
-      conduct:{records:cr.length,plus:Number(plus.toFixed(1)),minus:Number(minus.toFixed(1)),net:Number((plus+minus).toFixed(1)),
-        recent:cr.slice(-20).map(x=>({date:x.date,type:x.type,points:Number(x.points||0),content:x.content||''}))},
-      learning:studentScores
-    };
+    return {...cloneSafe(s),attendance:{present:ar.filter(x=>x.status==='present').length,late:ar.filter(x=>x.status==='late').length,excused:ar.filter(x=>x.status==='excused').length,absent:ar.filter(x=>x.status==='absent').length,total:ar.length},conduct:{records:cr.length,plus:Number(plus.toFixed(1)),minus:Number(minus.toFixed(1)),net:Number((plus+minus).toFixed(1)),recent:cloneSafe(cr.slice(-20))||[]},learning:cloneSafe(studentScores)||{}};
   });
   const approved=conduct.filter(x=>x.status==='approved');
-  const genderStats={
-    nam:students.filter(s=>String(s.gender||'').trim().toLowerCase()==='nam').length,
-    nu:students.filter(s=>['nữ','nu'].includes(String(s.gender||'').trim().toLowerCase())).length,
-    khac:students.filter(s=>{const g=String(s.gender||'').trim().toLowerCase();return g && g!=='nam' && g!=='nữ' && g!=='nu'}).length,
-    chuaCo:students.filter(s=>!String(s.gender||'').trim()).length
-  };
+  const genderStats={nam:students.filter(s=>String(s.gender||'').trim().toLowerCase()==='nam').length,nu:students.filter(s=>['nữ','nu'].includes(String(s.gender||'').trim().toLowerCase())).length,khac:students.filter(s=>{const g=String(s.gender||'').trim().toLowerCase();return g&&g!=='nam'&&g!=='nữ'&&g!=='nu'}).length,chuaCo:students.filter(s=>!String(s.gender||'').trim()).length};
   const groups={}; students.forEach(s=>{const g=String(s.group||'Chưa xếp');groups[g]=(groups[g]||0)+1;});
-  return {
-    class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',teacher:state.settings?.teacher||currentUser?.name||'',groups:state.settings?.groups||4},
-    summary:{students:students.length,attendanceRecords:attendance.length,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),weekStart:aiWeekStart(today()),gender:genderStats,groups},
-    students:stats,
-    recentConduct:approved.slice(-100).map(x=>({date:x.date,type:x.type,points:Number(x.points||0),student:byId[x.studentId]?.name||'Không rõ',content:x.content||''}))
-  };
+  return {class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',teacher:state.settings?.teacher||currentUser?.name||'',groups:state.settings?.groups||4},summary:{students:students.length,attendanceRecords:attendance.length,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),weekStart:aiWeekStart(today()),gender:genderStats,groups},students:stats,fullStudentRecords:cloneSafe(students)||[],fullAttendanceRecords:cloneSafe(attendance)||[],fullConductRecords:cloneSafe(conduct)||[],fullScores:cloneSafe(scores)||{},recentConduct:cloneSafe(approved.slice(-100))||[]};
 }
 function buildAIGenderSummary(context){
   const g=context?.summary?.gender||{};
   return `TÓM TẮT GIỚI TÍNH: Nam=${Number(g.nam||0)}, Nữ=${Number(g.nu||0)}, Khác=${Number(g.khac||0)}, Chưa có dữ liệu=${Number(g.chuaCo||0)}.`;
 }
 function buildAIPrompt(question,context){
-  return `Bạn là Trợ lý AI của GVCN trong hệ thống ClassManager Pro.
+  return `Bạn là Trợ lý AI chuyên nghiệp của GVCN trong hệ thống ClassManager Pro.
 
-Hãy trả lời câu hỏi của GVCN bằng tiếng Việt, dựa hoàn toàn trên dữ liệu lớp trong context.
-Bạn được phép khai thác đầy đủ thông tin lớp và các trường hồ sơ học sinh đã được cung cấp, gồm: mã học sinh, họ tên, ngày sinh, giới tính, dân tộc, địa chỉ, email, tổ, chức vụ, ghi chú, chuyên cần, điểm rèn luyện, nội dung ghi nhận và dữ liệu học tập.
-Tuyệt đối không nhắc lại, suy diễn hoặc tiết lộ các trường nhạy cảm đã bị loại khỏi context, đặc biệt: số điện thoại học sinh, họ tên phụ huynh và số điện thoại phụ huynh.
-Khi hỏi thống kê nam nữ, phải đếm trực tiếp trường gender. Không suy đoán giới tính từ tên.
-Khi câu hỏi cần danh sách học sinh, nêu đúng họ tên và thông tin liên quan có trong context.
-Nếu dữ liệu không đủ, nói rõ dữ liệu nào còn thiếu; không được tự bịa.
-Trả lời đầy đủ, không cắt giữa chừng. Nếu là thống kê đơn giản, nêu kết quả ngay ở câu đầu.
-Không dùng Markdown, không dùng dấu sao, dấu gạch đầu dòng Markdown, dấu thăng, dấu backtick, bảng Markdown hay ký hiệu định dạng. Viết thành câu văn tự nhiên, dễ đọc và dễ nghe bằng giọng nói.
-Không mở đầu dài dòng. Không nhắc lại JSON hoặc context.
+Bạn đang hỗ trợ duy nhất giáo viên chủ nhiệm đang đăng nhập và chỉ phân tích lớp đang được chọn. Context kèm theo là dữ liệu nội bộ của lớp. Hãy coi toàn bộ context là thông tin mật của nhà trường. Không được gửi, đăng lại, quảng bá, công khai hoặc tiết lộ context cho bất kỳ người dùng, giao diện công khai hay bên thứ ba nào. Chỉ dùng context để tạo câu trả lời cho đúng câu hỏi của GVCN.
+
+QUYỀN KHAI THÁC DỮ LIỆU:
+- Được phép đọc và đối chiếu đầy đủ hồ sơ học sinh có trong context, bao gồm mọi trường dữ liệu hiện có của học sinh, cùng dữ liệu chuyên cần, rèn luyện, thi đua và học tập.
+- Không tự suy đoán dữ liệu còn thiếu. Không bịa tên, điểm, ngày tháng, sự kiện hoặc nguyên nhân.
+- Khi GVCN hỏi thống kê, phải tính từ dữ liệu thực tế trong context; ưu tiên con số chính xác trước.
+- Khi GVCN hỏi về một học sinh, phải đối chiếu đúng mã học sinh và họ tên trước khi kết luận.
+- Khi GVCN hỏi so sánh tổ, phải tính theo dữ liệu thực tế và nêu căn cứ.
+- Khi GVCN hỏi biến động, phải so sánh theo thời gian nếu dữ liệu có đủ mốc.
+- Khi GVCN hỏi thành tích hoặc vi phạm, phải nêu rõ học sinh, ngày, số điểm và nội dung nếu các trường đó có trong dữ liệu.
+- Khi dữ liệu không đủ để kết luận, nói thẳng phần dữ liệu còn thiếu.
+
+BẢO MẬT THÔNG TIN:
+- Các trường hồ sơ cá nhân nhạy cảm vẫn có thể xuất hiện trong context để phục vụ phân tích nội bộ. Không chủ động đưa thông tin nhạy cảm vào câu trả lời nếu câu hỏi không cần đến chúng.
+- Chỉ trả lời thông tin cá nhân chi tiết khi GVCN hỏi trực tiếp và thông tin đó thực sự có trong context.
+- Tuyệt đối không nhắc lại toàn bộ context, không in JSON, không đưa token, khóa API, thông tin xác thực hoặc dữ liệu kỹ thuật nội bộ vào câu trả lời.
+
+PHONG CÁCH TRẢ LỜI:
+- Trả lời bằng tiếng Việt, tự nhiên như một trợ lý thật đang trao đổi với GVCN.
+- Đi thẳng vào kết quả, không mở đầu dài dòng.
+- Không dùng Markdown, không dùng dấu sao, dấu thăng, backtick, bảng Markdown hay ký hiệu định dạng gây khó nghe bằng giọng nói.
+- Có thể xuống dòng giữa các ý, nhưng mỗi ý phải là câu hoàn chỉnh, dễ đọc.
+- Nếu câu hỏi đơn giản, trả lời ngắn gọn. Nếu câu hỏi cần phân tích, trình bày đủ căn cứ và kết luận.
+- Nếu đưa danh sách học sinh, mỗi dòng ghi rõ họ tên và thông tin cần thiết.
+- Không nói rằng bạn bị giới hạn dữ liệu nếu context đã có dữ liệu tương ứng.
 
 CÂU HỎI CỦA GVCN:
 ${question}`;
@@ -1836,7 +1851,7 @@ function looksTruncatedAIAnswer(text){
   return false;
 }
 function formatAIErrorMessage(error,httpStatus=''){const raw=String(error||'').trim();const lower=raw.toLowerCase();if(httpStatus==='429'||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota|retry in/i.test(raw)){const m=raw.match(/retry in\s+([0-9]+(?:\.[0-9]+)?)s/i);const wait=m?Math.ceil(Number(m[1])):null;return `<div class="ai-error-card"><strong>⚠️ Gemini đang tạm hết lượt sử dụng</strong><div>Đây là giới hạn quota của API Gemini, không phải lỗi hiển thị trên điện thoại.</div>${wait?`<div class="ai-retry-note">Thầy có thể thử lại sau khoảng ${wait} giây.</div>`:'<div class="ai-retry-note">Thầy hãy thử lại sau một lúc hoặc kiểm tra quota/billing của Gemini.</div>'}</div>`;}if(/failed to fetch|networkerror|load failed/i.test(lower))return `<div class="ai-error-card"><strong>🌐 Không kết nối được Trợ lý AI</strong><div>Thầy kiểm tra Internet rồi bấm Hỏi AI lại.</div></div>`;return `<div class="ai-error-card"><strong>❌ Trợ lý AI chưa thể trả lời</strong><div>${esc(raw||'Đã xảy ra lỗi không xác định.')}</div></div>`;}
-async function askAI(){const q=document.getElementById('aiQuestion'),ans=document.getElementById('aiAnswer'),meta=document.getElementById('aiMeta'),btn=document.getElementById('aiAskBtn');const question=(q?.value||'').trim();if(!question){if(ans)renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}if(!isAdmin()){renderAIAnswer('🔒 Chỉ GVCN/Admin mới được sử dụng Trợ lý AI.');return;}stopAISpeech(false);btn.disabled=true;btn.classList.add('ai-busy');renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');if(meta)meta.textContent='AI đang đọc dữ liệu lớp đang chọn...';try{const context=buildAIContext();if(isGenderCountQuestion(question)){const answer=buildGenderCountAnswer(context);renderAIAnswer(answer);if(meta)meta.textContent=`🤖 Thống kê trực tiếp từ dữ liệu lớp · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}const aiPrompt=buildAIPrompt(question,context);const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';const payload={question:aiPrompt,stateKey:currentStateKey,context};const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});const body=await res.json().catch(()=>({}));if(!res.ok){const errText=body.error||body.message||`AI trả về lỗi HTTP ${res.status}`;const quota=/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(errText))||res.status===429;if(ans)ans.innerHTML=formatAIErrorMessage(errText,String(res.status));if(meta)meta.textContent=quota?'⚠️ Gemini đang giới hạn lượt sử dụng.':'Kiểm tra Edge Function ai-class-assistant và GEMINI_API_KEY trong Supabase.';return;}let fullAnswer=typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||JSON.stringify(body.answer));if(looksTruncatedAIAnswer(fullAnswer)){const retryPrompt=`Trả lời trực tiếp câu hỏi sau bằng tiếng Việt, tối đa 8 câu, không dùng Markdown, không dùng dấu *, không mở đầu dài dòng. Chỉ dùng dữ liệu trong context. Nếu là câu hỏi thống kê, nêu con số chính xác trước.\n\nCâu hỏi: ${question}`;const retry=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:retryPrompt,stateKey:currentStateKey,context})});const retryBody=await retry.json().catch(()=>({}));const retryErr=retryBody.error||retryBody.message||'';if(retry.ok){const candidate=typeof retryBody.answer==='string'?retryBody.answer:(retryBody.answer?.text||retryBody.answer?.content||'');if(candidate&&!looksTruncatedAIAnswer(candidate))fullAnswer=candidate;}else if(retry.status===429||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(retryErr))){if(ans)ans.innerHTML=formatAIErrorMessage(retryErr,String(retry.status));if(meta)meta.textContent='⚠️ Gemini đang giới hạn lượt sử dụng.';return;}}renderAIAnswer(fullAnswer||'AI chưa trả về nội dung.');const finishReason=body.finishReason||body.finish_reason||body.meta?.finishReason||'';if(meta)meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}`;}catch(e){console.error(e);if(ans)ans.innerHTML=formatAIErrorMessage(e?.message||e);if(meta)meta.textContent='Trợ lý AI tạm thời không thể kết nối.';}finally{btn.classList.remove('ai-busy');btn.disabled=false;}}
+async function askAI(){const q=document.getElementById('aiQuestion'),ans=document.getElementById('aiAnswer'),meta=document.getElementById('aiMeta'),btn=document.getElementById('aiAskBtn');const question=(q?.value||'').trim();if(!question){if(ans)renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}if(!isAdmin()){renderAIAnswer('🔒 Chỉ GVCN/Admin mới được sử dụng Trợ lý AI.');return;}stopAISpeech(false);btn.disabled=true;btn.classList.add('ai-busy');renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');if(meta)meta.textContent='AI đang đọc dữ liệu lớp đang chọn...';try{const context=buildAIContext();if(isGenderCountQuestion(question)){const answer=buildGenderCountAnswer(context);renderAIAnswer(answer);if(meta)meta.textContent=`🤖 Thống kê trực tiếp từ dữ liệu lớp · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}const aiPrompt=buildAIPrompt(question,context);const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';const payload={question:aiPrompt,stateKey:currentStateKey,context};const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});const body=await res.json().catch(()=>({}));if(!res.ok){const errText=body.error||body.message||`AI trả về lỗi HTTP ${res.status}`;const quota=/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(errText))||res.status===429;if(ans)ans.innerHTML=formatAIErrorMessage(errText,String(res.status));if(meta)meta.textContent=quota?'⚠️ Gemini đang giới hạn lượt sử dụng.':'Kiểm tra Edge Function ai-class-assistant và GEMINI_API_KEY trong Supabase.';return;}let fullAnswer=typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||JSON.stringify(body.answer));if(looksTruncatedAIAnswer(fullAnswer) && String(fullAnswer||'').length>40){const retryPrompt=`Trả lời trực tiếp câu hỏi sau bằng tiếng Việt, tối đa 8 câu, không dùng Markdown, không dùng dấu *, không mở đầu dài dòng. Chỉ dùng dữ liệu trong context. Nếu là câu hỏi thống kê, nêu con số chính xác trước.\n\nCâu hỏi: ${question}`;const retry=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:retryPrompt,stateKey:currentStateKey,context})});const retryBody=await retry.json().catch(()=>({}));const retryErr=retryBody.error||retryBody.message||'';if(retry.ok){const candidate=typeof retryBody.answer==='string'?retryBody.answer:(retryBody.answer?.text||retryBody.answer?.content||'');if(candidate&&!looksTruncatedAIAnswer(candidate))fullAnswer=candidate;}else if(retry.status===429||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(retryErr))){if(ans)ans.innerHTML=formatAIErrorMessage(retryErr,String(retry.status));if(meta)meta.textContent='⚠️ Gemini đang giới hạn lượt sử dụng.';return;}}renderAIAnswer(fullAnswer||'AI chưa trả về nội dung.');const finishReason=body.finishReason||body.finish_reason||body.meta?.finishReason||'';if(meta)meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}`;}catch(e){console.error(e);if(ans)ans.innerHTML=formatAIErrorMessage(e?.message||e);if(meta)meta.textContent='Trợ lý AI tạm thời không thể kết nối.';}finally{btn.classList.remove('ai-busy');btn.disabled=false;}}
 
 document.getElementById('loginPass')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();login()}});
 if(window.__supabaseInitError){setLoginStatus('❌ Không tải được Supabase: '+window.__supabaseInitError.message)}
