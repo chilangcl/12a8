@@ -533,6 +533,14 @@ select option{background:#fff!important;color:#202124!important}
 <style id="bibi-notification-pwa-v1">
 .notification-admin-list{display:grid;gap:10px;margin-top:14px}.notification-admin-item{background:#fff;border:1px solid #d9d9d6;border-left:5px solid #10b981;border-radius:14px;padding:12px;box-shadow:0 6px 18px rgba(32,33,36,.07)}.notification-admin-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.guest-notification-card{display:none;margin:14px 0;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#ecfeff,#f0fdf4);border:2px solid #14b8a6;box-shadow:0 8px 24px rgba(13,148,136,.14)}.guest-notification-card .notif-title{font-weight:900;color:#0f766e;margin-bottom:8px}.guest-notification-item{padding:10px 0;border-top:1px solid #99f6e4}.guest-notification-item:first-child{border-top:0}.guest-notification-item strong{display:block;color:#202124}.guest-notification-item small{color:#5f6368}.cm-pwa-install{position:fixed;right:14px;bottom:18px;z-index:99999;display:none;align-items:center;justify-content:center;text-align:center;line-height:1.15;min-width:118px;max-width:145px;padding:8px 10px;border-radius:14px;border:1px solid #0f766e;background:#10b981;color:#fff;font-weight:900;font-size:11px;box-shadow:0 9px 24px rgba(16,185,129,.28);white-space:normal}.cm-pwa-install.show{display:flex!important}.cm-pwa-install span{display:block}.cm-pwa-install b{display:block;font-size:10px;margin-top:2px}@media(max-width:680px){.cm-pwa-install{right:8px;bottom:12px;min-width:105px;max-width:118px;font-size:10px;padding:7px 8px}.cm-pwa-install b{font-size:9px}.guest-notification-card{margin:10px 0;padding:12px}}
 </style>
+<style id="class-notification-display-fix">
+.dashboard-notification-card{grid-column:1/-1}
+.dashboard-notification-list{display:grid;gap:10px}
+.dashboard-notification-item{padding:12px 14px;border:1px solid #d9d9d6;border-left:4px solid #1769aa;border-radius:12px;background:#fff}
+.dashboard-notification-item strong{display:block;color:#202124;font-size:15px;line-height:1.45}
+.dashboard-notification-meta{margin-top:5px;color:#5f6368;font-size:12px}
+.dashboard-notification-empty{padding:12px;border:1px dashed #c7c7c4;border-radius:12px;color:#5f6368;background:#fafafa}
+</style>
 </head>
 <body>
 
@@ -653,6 +661,7 @@ select option{background:#fff!important;color:#202124!important}
           
           <div class="card"><h3>⚠️ Học sinh cần quan tâm</h3><div id="studentAlerts"></div></div>
           <div class="card"><h3>📈 Xu hướng lớp</h3><div id="classTrend"></div></div>
+          <div class="card dashboard-notification-card"><h3>🔔 Thông báo của lớp</h3><div id="dashboardNotifications"></div></div>
           <div class="card"><h3>🔔 Hoạt động gần đây</h3><div id="recentActivity"></div></div>
         </div>
       </section>
@@ -1082,9 +1091,15 @@ function cancelClassEntry(){
 async function loadCloudState(){
   try{
     if(currentClass?.id)await assertClassAccess(currentClass.id);
+    const localBefore=loadLocalFallback();
     const {data,error}=await sb.from('class_state').select('data,updated_at').eq('class_id',currentStateKey).maybeSingle();
     if(error)throw error;
     state=data?.data||seed();
+    if(!(Array.isArray(state.notifications)&&state.notifications.length) && Array.isArray(localBefore.notifications)&&localBefore.notifications.length){
+      state.notifications=localBefore.notifications;
+      saveLocal();
+      await pushCloud();
+    }
     state.settings={...seed().settings,...(state.settings||{}),conductRules:{...seed().settings.conductRules,...(state.settings?.conductRules||{})},className:currentClass?.class_name||state.settings?.className||'12A8',year:currentClass?.year||state.settings?.year||'2026-2027',groups:currentClass?.group_count||state.settings?.groups||4};
     saveLocal();
   }catch(e){console.error(e);state=loadLocalFallback();alert('🔒 Không thể tải dữ liệu lớp này: '+(e.message||e));throw e;}
@@ -1261,6 +1276,12 @@ function getStudentAlerts(){
   return [...board.high,...board.watch].map(x=>({s:x.s,reasons:x.reasons,severity:x.level==='high'?'high':'medium'}));
 }
 function studentPeriodConduct(id,mode){const rules=getConductRules();const rows=(state.conduct||[]).filter(x=>x.studentId===id&&x.status==='approved');let filtered=rows;if(mode==='week'){const d=new Date(), from=new Date(d);from.setDate(d.getDate()-6);filtered=rows.filter(x=>new Date(x.date)>=from)}const score=rules.base+filtered.reduce((t,x)=>t+Number(x.points||0),0);return {score,label:conductLabel(score)}}
+function renderUserNotifications(){
+  const el=document.getElementById('dashboardNotifications'); if(!el)return;
+  const rows=Array.isArray(state.notifications)?state.notifications.slice():[];
+  rows.sort((a,b)=>(Date.parse(b.createdAt||b.time||b.created_at||'')||0)-(Date.parse(a.createdAt||a.time||a.created_at||'')||0));
+  el.innerHTML=rows.length?`<div class="dashboard-notification-list">${rows.slice(0,20).map(n=>`<div class="dashboard-notification-item"><strong>🔔 ${esc(n.text||n.title||n.content||n.message||n.body||'')}</strong><div class="dashboard-notification-meta">${esc(n.by||n.author||'GVCN')}${n.time||n.createdAt||n.created_at?' · '+esc(n.time||n.createdAt||n.created_at):''}</div></div>`).join('')}</div>`:'<div class="dashboard-notification-empty">Hiện chưa có thông báo mới.</div>';
+}
 function renderDashboard(){
  const a=visibleStudents(),att=Object.values(state.attendance||{}).filter(x=>x.date?.slice(0,7)===today().slice(0,7));
  const present=att.filter(x=>x.status==='present').length, absent=att.filter(x=>x.status==='absent').length;
@@ -1272,6 +1293,7 @@ function renderDashboard(){
  const ae=document.getElementById('studentAlerts'); if(ae)ae.innerHTML=alerts.length?alerts.slice(0,8).map((x,i)=>`<div class="kpi-row"><span><b>${esc(x.s.name)}</b><div class="mini">${esc(x.reasons.join(' · '))}</div></span><button class="btn small ${x.severity==='high'?'danger':'secondary'}" onclick="viewStudent('${esc(x.s.id)}')">Xem</button></div>`).join(''):'<div class="empty">Không có cảnh báo theo các ngưỡng hiện tại.</div>';
  const te=document.getElementById('classTrend'); if(te){const scores=a.map(x=>studentPeriodConduct(x.id,'week').score);const avg=scores.length?scores.reduce((x,y)=>x+y,0)/scores.length:0;const good=scores.filter(x=>x>=rules.good).length;te.innerHTML=`<div class="kpi-list"><div class="kpi-row"><strong>Điểm TB hiện tại</strong><b>${avg.toFixed(1)}</b></div><div class="progress"><span style="width:${Math.max(0,Math.min(100,avg))}%"></span></div><div class="kpi-row"><strong>Mức Tốt</strong><span>${good}/${a.length} học sinh</span></div><div class="kpi-row"><strong>Xu hướng</strong><span>${alerts.length?'Cần theo dõi '+alerts.length+' học sinh':'Ổn định'}</span></div></div>`}
  const acts=(state.activity||[]).slice(-5).reverse();document.getElementById('recentActivity').innerHTML=acts.length?acts.map(x=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><b>${esc(x.text)}</b><div class="mini">${esc(x.time||'')}</div></div>`).join(''):'<div class="empty">Chưa có hoạt động.</div>';
+  renderUserNotifications();
 }
 function log(text){
  state.activity=Array.isArray(state.activity)?state.activity:[]; state.auditLog=Array.isArray(state.auditLog)?state.auditLog:[];
@@ -2228,7 +2250,7 @@ function guestGradeFromScore(score,r){return score>=r.good?'Tốt':score>=r.fair
       const attendance=d.attendance||{};
       const conduct=Array.isArray(d.conduct)?d.conduct:[];
       const activity=Array.isArray(d.activity)?d.activity:[];
-      const notifications=Array.isArray(d.notifications)?d.notifications:[];
+      const notifications=Array.isArray(d.notifications)?d.notifications:(Array.isArray(d?.class_state?.data?.notifications)?d.class_state.data.notifications:[]);
       const guestNoticeBox=document.getElementById('guestNotifications');
       if(guestNoticeBox){
         const visibleNotices=notifications.slice().sort((a,b)=>String(b.time||b.created_at||'').localeCompare(String(a.time||a.created_at||''))).slice(0,10);
@@ -2409,9 +2431,9 @@ function guestGradeFromScore(score,r){return score>=r.good?'Tốt':score>=r.fair
   window.renderDigitalModule=function(){if(!isAdmin())return;renderAuditLog();renderNotifications();renderActivityCalendar();const p=document.getElementById('activityDate');if(p&&!p.value)p.value=today();initPWA();};
   window.renderAuditLog=function(){const el=document.getElementById('auditLogList');if(!el)return;const rows=Array.isArray(state.auditLog)?state.auditLog.slice().reverse():[];el.innerHTML=rows.length?rows.slice(0,100).map(x=>`<div class="audit-item"><b>${esc(x.action||'Thao tác')}</b><span>${esc(x.actor||'')} · ${esc(x.role||'')} · ${esc(x.time||'')}</span><div class="mini">Lớp: ${esc(x.className||'')}</div></div>`).join(''):'<div class="empty">Chưa có audit log.</div>';};
   window.exportAuditLog=function(){const rows=[['Thời gian','Người thực hiện','Vai trò','Lớp','Hành động'],...(state.auditLog||[]).map(x=>[x.time,x.actor,x.role,x.className,x.action])];downloadBlob('\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\n'),'AuditLog_'+today()+'.csv','text/csv;charset=utf-8');};
-  window.addClassNotification=function(){if(!isAdmin())return;const input=document.getElementById('notificationText'),text=(input?.value||'').trim();if(!text){alert('Vui lòng nhập nội dung thông báo.');return}state.notifications=Array.isArray(state.notifications)?state.notifications:[];state.notifications.unshift({id:crypto.randomUUID(),text,time:new Date().toLocaleString('vi-VN'),by:currentUser?.name||'GVCN'});if(state.notifications.length>100)state.notifications.pop();saveData();log('Tạo thông báo lớp');if(input)input.value='';renderNotifications();if('Notification' in window&&Notification.permission==='granted')new Notification('ClassManager Pro',{body:text});};
-  window.editClassNotification=function(id){if(!isAdmin())return;const item=(state.notifications||[]).find(x=>x.id===id);if(!item)return;const next=prompt('Chỉnh sửa nội dung thông báo:',item.text||'');if(next===null)return;const text=next.trim();if(!text){alert('Nội dung thông báo không được để trống.');return}item.text=text;item.updatedAt=new Date().toLocaleString('vi-VN');item.updatedBy=currentUser?.name||'GVCN';saveData();log('Chỉnh sửa thông báo lớp');renderNotifications();};
-   window.deleteClassNotification=function(id){if(!isAdmin())return;const item=(state.notifications||[]).find(x=>x.id===id);if(!item)return;if(!confirm('Xóa thông báo này?'))return;state.notifications=(state.notifications||[]).filter(x=>x.id!==id);saveData();log('Xóa thông báo lớp');renderNotifications();};
+  window.addClassNotification=async function(){if(!isAdmin())return;const input=document.getElementById('notificationText'),text=(input?.value||'').trim();if(!text){alert('Vui lòng nhập nội dung thông báo.');return}state.notifications=Array.isArray(state.notifications)?state.notifications:[];state.notifications.unshift({id:crypto.randomUUID(),text,time:new Date().toLocaleString('vi-VN'),by:currentUser?.name||'GVCN'});if(state.notifications.length>100)state.notifications.pop();saveData();const ok=await pushCloud();if(!ok)alert('⚠️ Thông báo chưa đồng bộ lên hệ thống.');log('Tạo thông báo lớp');if(input)input.value='';renderNotifications();renderUserNotifications();if('Notification' in window&&Notification.permission==='granted')new Notification('ClassManager Pro',{body:text});};
+  window.editClassNotification=async function(id){if(!isAdmin())return;const item=(state.notifications||[]).find(x=>x.id===id);if(!item)return;const next=prompt('Chỉnh sửa nội dung thông báo:',item.text||'');if(next===null)return;const text=next.trim();if(!text){alert('Nội dung thông báo không được để trống.');return}item.text=text;item.updatedAt=new Date().toLocaleString('vi-VN');item.updatedBy=currentUser?.name||'GVCN';saveData();await pushCloud();log('Chỉnh sửa thông báo lớp');renderUserNotifications();renderNotifications();};
+   window.deleteClassNotification=async function(id){if(!isAdmin())return;const item=(state.notifications||[]).find(x=>x.id===id);if(!item)return;if(!confirm('Xóa thông báo này?'))return;state.notifications=(state.notifications||[]).filter(x=>x.id!==id);saveData();await pushCloud();log('Xóa thông báo lớp');renderUserNotifications();renderNotifications();};
    window.renderNotifications=function(){const el=document.getElementById('notificationList');if(!el)return;const rows=state.notifications||[];el.innerHTML=rows.length?'<div class="notification-admin-list">'+rows.slice(0,20).map(x=>`<div class="notification-admin-item"><b>🔔 ${esc(x.text)}</b><div class="mini">${esc(x.by||'')} · ${esc(x.time||'')}</div><div class="notification-admin-actions"><button class="btn secondary small" type="button" onclick="editClassNotification('${esc(x.id)}')">✏️ Chỉnh sửa</button><button class="btn danger small" type="button" onclick="deleteClassNotification('${esc(x.id)}')">🗑️ Xóa</button></div></div>`).join('')+'</div>':'<div class="empty">Chưa có thông báo.</div>';};
   window.requestBrowserNotification=async function(){if(!('Notification' in window)){alert('Trình duyệt không hỗ trợ thông báo.');return}const p=await Notification.requestPermission();document.getElementById('pwaStatus')?.replaceChildren();alert(p==='granted'?'✅ Đã cho phép thông báo.':'⚠️ Chưa cấp quyền thông báo.');};
   window.renderActivityCalendar=function(){const el=document.getElementById('activityCalendar'),date=document.getElementById('activityDate')?.value||today();if(!el)return;const rows=(state.activity||[]).filter(x=>x.date===date);el.innerHTML=rows.length?rows.slice().reverse().map(x=>`<div class="calendar-item"><b>${esc(x.text)}</b><span>${esc(x.time||'')} · ${esc(x.actor||'')}</span></div>`).join(''):'<div class="empty">Không có hoạt động trong ngày này.</div>';};
@@ -2536,8 +2558,8 @@ window.addEventListener('load',function(){setTimeout(function(){try{renderConduc
     if(!arr.length){box.style.display='none';body.innerHTML='';return;}
     body.innerHTML=arr.slice(0,10).map(n=>{
       const title=String(n.title||n.name||'Thông báo').replace(/[<>]/g,'');
-      const content=String(n.content||n.message||n.body||'').replace(/[<>]/g,'');
-      const created=String(n.created_at||n.createdAt||n.date||'');
+      const content=String(n.content||n.message||n.body||n.text||'').replace(/[<>]/g,'');
+      const created=String(n.created_at||n.createdAt||n.date||n.time||'');
       return '<div class="guest-notification-item"><strong>'+title+'</strong><div>'+content+'</div>'+(created?'<small>'+created+'</small>':'')+'</div>';
     }).join('');
     box.style.display='block';
