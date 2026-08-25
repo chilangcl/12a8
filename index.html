@@ -530,6 +530,9 @@ select option{background:#fff!important;color:#202124!important}
 }
 </style>
 
+<style id="bibi-notification-pwa-v1">
+.notification-admin-list{display:grid;gap:10px;margin-top:14px}.notification-admin-item{background:#fff;border:1px solid #d9d9d6;border-left:5px solid #10b981;border-radius:14px;padding:12px;box-shadow:0 6px 18px rgba(32,33,36,.07)}.notification-admin-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.guest-notification-card{display:none;margin:14px 0;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#ecfeff,#f0fdf4);border:2px solid #14b8a6;box-shadow:0 8px 24px rgba(13,148,136,.14)}.guest-notification-card .notif-title{font-weight:900;color:#0f766e;margin-bottom:8px}.guest-notification-item{padding:10px 0;border-top:1px solid #99f6e4}.guest-notification-item:first-child{border-top:0}.guest-notification-item strong{display:block;color:#202124}.guest-notification-item small{color:#5f6368}.cm-pwa-install{position:fixed;right:14px;bottom:18px;z-index:99999;display:none;align-items:center;justify-content:center;text-align:center;line-height:1.15;min-width:118px;max-width:145px;padding:8px 10px;border-radius:14px;border:1px solid #0f766e;background:#10b981;color:#fff;font-weight:900;font-size:11px;box-shadow:0 9px 24px rgba(16,185,129,.28);white-space:normal}.cm-pwa-install.show{display:flex!important}.cm-pwa-install span{display:block}.cm-pwa-install b{display:block;font-size:10px;margin-top:2px}@media(max-width:680px){.cm-pwa-install{right:8px;bottom:12px;min-width:105px;max-width:118px;font-size:10px;padding:7px 8px}.cm-pwa-install b{font-size:9px}.guest-notification-card{margin:10px 0;padding:12px}}
+</style>
 </head>
 <body>
 
@@ -569,7 +572,7 @@ select option{background:#fff!important;color:#202124!important}
         <button class="btn" onclick="loadGuestDashboard()">🔄 Cập nhật</button>
       </div>
     </div>
-    <div id="guestNotifications" class="guest-notification-card" style="display:none" aria-live="polite"></div>
+    <div id="guestNotifications" class="guest-notification-card" aria-live="polite"><div class="notif-title">🔔 Thông báo của lớp</div><div id="guestNotificationsBody"></div></div>
     <div id="guestContent" class="guest-loading">⏳ Đang tải dữ liệu công khai...</div>
     <div class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</div>
   </div>
@@ -2407,7 +2410,9 @@ function guestGradeFromScore(score,r){return score>=r.good?'Tốt':score>=r.fair
   window.renderAuditLog=function(){const el=document.getElementById('auditLogList');if(!el)return;const rows=Array.isArray(state.auditLog)?state.auditLog.slice().reverse():[];el.innerHTML=rows.length?rows.slice(0,100).map(x=>`<div class="audit-item"><b>${esc(x.action||'Thao tác')}</b><span>${esc(x.actor||'')} · ${esc(x.role||'')} · ${esc(x.time||'')}</span><div class="mini">Lớp: ${esc(x.className||'')}</div></div>`).join(''):'<div class="empty">Chưa có audit log.</div>';};
   window.exportAuditLog=function(){const rows=[['Thời gian','Người thực hiện','Vai trò','Lớp','Hành động'],...(state.auditLog||[]).map(x=>[x.time,x.actor,x.role,x.className,x.action])];downloadBlob('\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\n'),'AuditLog_'+today()+'.csv','text/csv;charset=utf-8');};
   window.addClassNotification=function(){if(!isAdmin())return;const input=document.getElementById('notificationText'),text=(input?.value||'').trim();if(!text){alert('Vui lòng nhập nội dung thông báo.');return}state.notifications=Array.isArray(state.notifications)?state.notifications:[];state.notifications.unshift({id:crypto.randomUUID(),text,time:new Date().toLocaleString('vi-VN'),by:currentUser?.name||'GVCN'});if(state.notifications.length>100)state.notifications.pop();saveData();log('Tạo thông báo lớp');if(input)input.value='';renderNotifications();if('Notification' in window&&Notification.permission==='granted')new Notification('ClassManager Pro',{body:text});};
-  window.renderNotifications=function(){const el=document.getElementById('notificationList');if(!el)return;const rows=state.notifications||[];el.innerHTML=rows.length?rows.slice(0,10).map(x=>`<div class="audit-item"><b>🔔 ${esc(x.text)}</b><span>${esc(x.by||'')} · ${esc(x.time||'')}</span></div>`).join(''):'<div class="empty">Chưa có thông báo.</div>';};
+  window.editClassNotification=function(id){if(!isAdmin())return;const item=(state.notifications||[]).find(x=>x.id===id);if(!item)return;const next=prompt('Chỉnh sửa nội dung thông báo:',item.text||'');if(next===null)return;const text=next.trim();if(!text){alert('Nội dung thông báo không được để trống.');return}item.text=text;item.updatedAt=new Date().toLocaleString('vi-VN');item.updatedBy=currentUser?.name||'GVCN';saveData();log('Chỉnh sửa thông báo lớp');renderNotifications();};
+   window.deleteClassNotification=function(id){if(!isAdmin())return;const item=(state.notifications||[]).find(x=>x.id===id);if(!item)return;if(!confirm('Xóa thông báo này?'))return;state.notifications=(state.notifications||[]).filter(x=>x.id!==id);saveData();log('Xóa thông báo lớp');renderNotifications();};
+   window.renderNotifications=function(){const el=document.getElementById('notificationList');if(!el)return;const rows=state.notifications||[];el.innerHTML=rows.length?'<div class="notification-admin-list">'+rows.slice(0,20).map(x=>`<div class="notification-admin-item"><b>🔔 ${esc(x.text)}</b><div class="mini">${esc(x.by||'')} · ${esc(x.time||'')}</div><div class="notification-admin-actions"><button class="btn secondary small" type="button" onclick="editClassNotification('${esc(x.id)}')">✏️ Chỉnh sửa</button><button class="btn danger small" type="button" onclick="deleteClassNotification('${esc(x.id)}')">🗑️ Xóa</button></div></div>`).join('')+'</div>':'<div class="empty">Chưa có thông báo.</div>';};
   window.requestBrowserNotification=async function(){if(!('Notification' in window)){alert('Trình duyệt không hỗ trợ thông báo.');return}const p=await Notification.requestPermission();document.getElementById('pwaStatus')?.replaceChildren();alert(p==='granted'?'✅ Đã cho phép thông báo.':'⚠️ Chưa cấp quyền thông báo.');};
   window.renderActivityCalendar=function(){const el=document.getElementById('activityCalendar'),date=document.getElementById('activityDate')?.value||today();if(!el)return;const rows=(state.activity||[]).filter(x=>x.date===date);el.innerHTML=rows.length?rows.slice().reverse().map(x=>`<div class="calendar-item"><b>${esc(x.text)}</b><span>${esc(x.time||'')} · ${esc(x.actor||'')}</span></div>`).join(''):'<div class="empty">Không có hoạt động trong ngày này.</div>';};
   window.importDigitalBackup=function(ev){const f=ev.target.files?.[0];if(!f)return;const reader=new FileReader();reader.onload=()=>{try{const obj=JSON.parse(reader.result);if(!obj||typeof obj!=='object'||!Array.isArray(obj.students))throw new Error('File sao lưu không hợp lệ.');if(!confirm('Khôi phục sẽ thay thế dữ liệu lớp hiện tại. Tiếp tục?'))return;state=obj;state.auditLog=Array.isArray(state.auditLog)?state.auditLog:[];state.activity=Array.isArray(state.activity)?state.activity:[];saveData();pushCloud();log('Khôi phục dữ liệu từ bản sao lưu');renderAll();renderDigitalModule();document.getElementById('backupStatus').textContent='✅ Đã khôi phục dữ liệu.';}catch(e){document.getElementById('backupStatus').textContent='❌ '+e.message}};reader.readAsText(f);ev.target.value='';};
@@ -2508,5 +2513,36 @@ window.addEventListener('load',function(){setTimeout(function(){try{renderConduc
 })();
 </script>
 
+<button id="cmPwaInstallButton" class="cm-pwa-install" type="button" aria-label="Cài đặt ứng dụng"><span>📲 Cài đặt ứng dụng</span><b>Thêm ClassManager Pro vào màn hình chính</b></button>
+<script id="bibi-notification-pwa-v1-js">
+(function(){
+  // --- PWA install suggestion: visible on Guest and student/cadre accounts; hidden after install ---
+  let cmDeferredPrompt=null;
+  const getPwaBtn=()=>document.getElementById('cmPwaInstallButton');
+  function standalone(){return !!((window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true);}
+  function syncPwaButton(){const b=getPwaBtn();if(!b)return;if(standalone()){b.classList.remove('show');}else{b.classList.add('show');}}
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();cmDeferredPrompt=e;syncPwaButton();});
+  window.addEventListener('appinstalled',()=>{cmDeferredPrompt=null;syncPwaButton();});
+  document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('#cmPwaInstallButton');if(!b)return;if(cmDeferredPrompt){try{cmDeferredPrompt.prompt();await cmDeferredPrompt.userChoice;}catch(_){}cmDeferredPrompt=null;syncPwaButton();}else{alert('Để cài ứng dụng, hãy mở ClassManager Pro bằng Chrome/Edge trên HTTPS rồi chọn “Cài đặt ứng dụng” hoặc “Thêm vào màn hình chính”.');}});
+  window.addEventListener('load',()=>{setTimeout(syncPwaButton,300);setTimeout(syncPwaButton,1200);});
+  window.addEventListener('pageshow',syncPwaButton);
+  window.addEventListener('resize',syncPwaButton);
+
+  // --- Guest notifications: render safely from the dashboard payload when available ---
+  window.renderGuestNotifications=function(list){
+    const box=document.getElementById('guestNotifications'), body=document.getElementById('guestNotificationsBody');
+    if(!box||!body)return;
+    const arr=Array.isArray(list)?list.filter(Boolean):[];
+    if(!arr.length){box.style.display='none';body.innerHTML='';return;}
+    body.innerHTML=arr.slice(0,10).map(n=>{
+      const title=String(n.title||n.name||'Thông báo').replace(/[<>]/g,'');
+      const content=String(n.content||n.message||n.body||'').replace(/[<>]/g,'');
+      const created=String(n.created_at||n.createdAt||n.date||'');
+      return '<div class="guest-notification-item"><strong>'+title+'</strong><div>'+content+'</div>'+(created?'<small>'+created+'</small>':'')+'</div>';
+    }).join('');
+    box.style.display='block';
+  };
+})();
+</script>
 </body>
 </html>
