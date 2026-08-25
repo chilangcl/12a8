@@ -541,6 +541,38 @@ select option{background:#fff!important;color:#202124!important}
 .dashboard-notification-meta{margin-top:5px;color:#5f6368;font-size:12px}
 .dashboard-notification-empty{padding:12px;border:1px dashed #c7c7c4;border-radius:12px;color:#5f6368;background:#fafafa}
 </style>
+
+<style id="notifications-top-layout-fix">
+.dashboard-notification-card{
+  grid-column:1/-1 !important;
+  order:-999 !important;
+  margin-bottom:18px;
+}
+.dashboard-notification-card h3{margin-bottom:12px}
+.guest-notification-card{
+  padding:14px 16px;
+  margin-bottom:10px;
+  border:1px solid #d9d9d6;
+  border-left:4px solid #1769aa;
+  border-radius:12px;
+  background:#fff;
+  color:#202124;
+}
+.guest-notification-card strong{display:block;font-size:16px;margin-bottom:6px}
+.guest-notification-card small{display:block;margin-top:7px;color:#5f6368}
+.guest-notification-empty{
+  padding:14px;
+  border:1px dashed #c7c7c4;
+  border-radius:12px;
+  color:#5f6368;
+  background:#fafafa;
+}
+@media(max-width:700px){
+  .dashboard-notification-card{margin-top:0}
+  .guest-notification-card{font-size:14px}
+}
+</style>
+
 </head>
 <body>
 
@@ -653,6 +685,10 @@ select option{background:#fff!important;color:#202124!important}
       </section>
 
       <section id="page-dashboard" class="page active">
+<div class="card dashboard-notification-card"><h3>🔔 Thông báo của lớp</h3><div id="dashboardNotifications"></div></div>
+
+
+
         <div class="page-head"><div><h2>Tổng quan lớp 12A8</h2><div class="muted">GVCN: Nguyễn Văn Hoàng · Năm học 2026–2027</div></div><div class="actions"><button class="btn" onclick="showPage('attendance')">+ Điểm danh hôm nay</button><button class="btn secondary" onclick="refreshCloud()">☁️ Đồng bộ</button></div></div>
         <div class="grid cards" id="dashboardStats"></div>
         <div class="grid two" style="margin-top:16px">
@@ -661,7 +697,7 @@ select option{background:#fff!important;color:#202124!important}
           
           <div class="card"><h3>⚠️ Học sinh cần quan tâm</h3><div id="studentAlerts"></div></div>
           <div class="card"><h3>📈 Xu hướng lớp</h3><div id="classTrend"></div></div>
-          <div class="card dashboard-notification-card"><h3>🔔 Thông báo của lớp</h3><div id="dashboardNotifications"></div></div>
+          
           <div class="card"><h3>🔔 Hoạt động gần đây</h3><div id="recentActivity"></div></div>
         </div>
       </section>
@@ -2231,7 +2267,10 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   }
 
 function guestGradeFromScore(score,r){return score>=r.good?'Tốt':score>=r.fair?'Khá':score>=r.pass?'Đạt':'Chưa đạt'}
-  async function loadGuestDashboard(){
+  
+
+
+async function loadGuestDashboard(){
     const key=document.getElementById('guestClassSelect')?.value;
     const box=document.getElementById('guestContent');
     if(!key)return;
@@ -2250,12 +2289,37 @@ function guestGradeFromScore(score,r){return score>=r.good?'Tốt':score>=r.fair
       const attendance=d.attendance||{};
       const conduct=Array.isArray(d.conduct)?d.conduct:[];
       const activity=Array.isArray(d.activity)?d.activity:[];
-      const notifications=Array.isArray(d.notifications)?d.notifications:(Array.isArray(d?.class_state?.data?.notifications)?d.class_state.data.notifications:[]);
+      let notifications=(
+        Array.isArray(d?.notifications)?d.notifications:
+        Array.isArray(d?.data?.notifications)?d.data.notifications:
+        Array.isArray(d?.class_state?.data?.notifications)?d.class_state.data.notifications:
+        Array.isArray(d?.classState?.notifications)?d.classState.notifications:
+        Array.isArray(d?.class_state?.notifications)?d.class_state.notifications:
+        []
+      );
+
+      // Fallback: some older RPC versions do not expose notifications.
+      // Try reading the public class_state row if its RLS policy allows Guest access.
+      if(!notifications.length){
+        try{
+          const {data:publicState}=await sb.from('class_state').select('data').eq('state_key',key).maybeSingle();
+          const rawPublic=publicState?.data;
+          const publicData=typeof rawPublic==='string'?(JSON.parse(rawPublic||'{}')||{}):(rawPublic||{});
+          if(Array.isArray(publicData.notifications)) notifications=publicData.notifications;
+        }catch(publicErr){
+          console.warn('Guest không đọc được fallback class_state:',publicErr);
+        }
+      }
+
       const guestNoticeBox=document.getElementById('guestNotifications');
       if(guestNoticeBox){
-        const visibleNotices=notifications.slice().sort((a,b)=>String(b.time||b.created_at||'').localeCompare(String(a.time||a.created_at||''))).slice(0,10);
+        const visibleNotices=notifications.slice().sort((a,b)=>{
+          const ta=Date.parse(a.createdAt||a.created_at||a.time||a.date||'')||0;
+          const tb=Date.parse(b.createdAt||b.created_at||b.time||b.date||'')||0;
+          return tb-ta;
+        }).slice(0,10);
         guestNoticeBox.style.display='block';
-        guestNoticeBox.innerHTML=`<div class="guest-notification-head"><h3>🔔 Thông báo của lớp</h3><span class="badge b-blue">${visibleNotices.length} thông báo</span></div><div class="guest-notification-list">${visibleNotices.length?visibleNotices.map(n=>`<div class="guest-notification-item"><b>${guestEsc(n.text||n.title||n.content||'')}</b><div class="guest-notification-meta">${guestEsc(n.by||n.author||'GVCN')} · ${guestEsc(n.time||n.created_at||'')}</div></div>`).join(''):'<div class="guest-notification-empty">Hiện chưa có thông báo mới.</div>'}</div>`;
+        guestNoticeBox.innerHTML=`<div class="guest-notification-head"><h3>🔔 Thông báo của lớp</h3><span class="badge b-blue">${visibleNotices.length} thông báo</span></div><div class="guest-notification-list">${visibleNotices.length?visibleNotices.map(n=>`<div class="guest-notification-item"><b>${guestEsc(n.text||n.title||n.content||n.message||n.body||'')}</b><div class="guest-notification-meta">${guestEsc(n.by||n.author||'GVCN')}${n.time||n.createdAt||n.created_at?' · '+guestEsc(n.time||n.createdAt||n.created_at):''}</div></div>`).join(''):'<div class="guest-notification-empty">Hiện chưa có thông báo mới.</div>'}</div>`;
       }
       if(!students.length && !Object.keys(attendance).length && !conduct.length && !Object.keys(d.settings||{}).length){
         throw new Error('RPC get_guest_class_dashboard đã trả về dữ liệu rỗng hoặc sai cấu trúc. Hãy kiểm tra hàm RPC/Quyền Guest trong Supabase.');
