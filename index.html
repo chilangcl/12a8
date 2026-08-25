@@ -685,6 +685,9 @@ select option{background:#fff!important;color:#202124!important}
       </section>
 
       <section id="page-dashboard" class="page active">
+<div class="card dashboard-notification-card"><h3>🔔 Thông báo của lớp</h3><div id="dashboardNotifications"></div></div>
+
+
 
         <div class="page-head"><div><h2>Tổng quan lớp 12A8</h2><div class="muted">GVCN: Nguyễn Văn Hoàng · Năm học 2026–2027</div></div><div class="actions"><button class="btn" onclick="showPage('attendance')">+ Điểm danh hôm nay</button><button class="btn secondary" onclick="refreshCloud()">☁️ Đồng bộ</button></div></div>
         <div class="grid cards" id="dashboardStats"></div>
@@ -1316,6 +1319,8 @@ function renderUserNotifications(){
   el.innerHTML=rows.length?`<div class="dashboard-notification-list">${rows.slice(0,20).map(n=>`<div class="dashboard-notification-item"><strong>🔔 ${esc(n.text||n.title||n.content||n.message||n.body||'')}</strong><div class="dashboard-notification-meta">${esc(n.by||n.author||'GVCN')}${n.time||n.createdAt||n.created_at?' · '+esc(n.time||n.createdAt||n.created_at):''}</div></div>`).join('')}</div>`:'<div class="dashboard-notification-empty">Hiện chưa có thông báo mới.</div>';
 }
 function renderDashboard(){
+  const dashboardNoticeCard=document.querySelector('#page-dashboard .dashboard-notification-card');
+  if(dashboardNoticeCard) dashboardNoticeCard.style.display=isAdmin()?'none':'';
  const a=visibleStudents(),att=Object.values(state.attendance||{}).filter(x=>x.date?.slice(0,7)===today().slice(0,7));
  const present=att.filter(x=>x.status==='present').length, absent=att.filter(x=>x.status==='absent').length;
  const approved=(state.conduct||[]).filter(x=>x.status==='approved'); const pts=approved.reduce((s,x)=>s+Number(x.points||0),0);
@@ -1326,6 +1331,7 @@ function renderDashboard(){
  const ae=document.getElementById('studentAlerts'); if(ae)ae.innerHTML=alerts.length?alerts.slice(0,8).map((x,i)=>`<div class="kpi-row"><span><b>${esc(x.s.name)}</b><div class="mini">${esc(x.reasons.join(' · '))}</div></span><button class="btn small ${x.severity==='high'?'danger':'secondary'}" onclick="viewStudent('${esc(x.s.id)}')">Xem</button></div>`).join(''):'<div class="empty">Không có cảnh báo theo các ngưỡng hiện tại.</div>';
  const te=document.getElementById('classTrend'); if(te){const scores=a.map(x=>studentPeriodConduct(x.id,'week').score);const avg=scores.length?scores.reduce((x,y)=>x+y,0)/scores.length:0;const good=scores.filter(x=>x>=rules.good).length;te.innerHTML=`<div class="kpi-list"><div class="kpi-row"><strong>Điểm TB hiện tại</strong><b>${avg.toFixed(1)}</b></div><div class="progress"><span style="width:${Math.max(0,Math.min(100,avg))}%"></span></div><div class="kpi-row"><strong>Mức Tốt</strong><span>${good}/${a.length} học sinh</span></div><div class="kpi-row"><strong>Xu hướng</strong><span>${alerts.length?'Cần theo dõi '+alerts.length+' học sinh':'Ổn định'}</span></div></div>`}
  const acts=(state.activity||[]).slice(-5).reverse();document.getElementById('recentActivity').innerHTML=acts.length?acts.map(x=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><b>${esc(x.text)}</b><div class="mini">${esc(x.time||'')}</div></div>`).join(''):'<div class="empty">Chưa có hoạt động.</div>';
+  renderUserNotifications();
 }
 function log(text){
  state.activity=Array.isArray(state.activity)?state.activity:[]; state.auditLog=Array.isArray(state.auditLog)?state.auditLog:[];
