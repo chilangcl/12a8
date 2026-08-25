@@ -2302,12 +2302,29 @@ async function loadGuestDashboard(){
       // Try reading the public class_state row if its RLS policy allows Guest access.
       if(!notifications.length){
         try{
-          const {data:publicState}=await sb.from('class_state').select('data').eq('state_key',key).maybeSingle();
-          const rawPublic=publicState?.data;
-          const publicData=typeof rawPublic==='string'?(JSON.parse(rawPublic||'{}')||{}):(rawPublic||{});
-          if(Array.isArray(publicData.notifications)) notifications=publicData.notifications;
+          // class_state của hệ thống hiện tại dùng class_id để lưu state key.
+          let publicStateResult=await sb.from('class_state').select('data').eq('class_id',key).maybeSingle();
+
+          // Nếu class_id là UUID ở môi trường khác, thử đổi state_key -> class id.
+          if(publicStateResult.error || !publicStateResult.data){
+            const clsMeta=guestClasses.find(x=>x.state_key===key);
+            if(clsMeta?.id){
+              publicStateResult=await sb.from('class_state').select('data').eq('class_id',clsMeta.id).maybeSingle();
+            }
+          }
+
+          if(publicStateResult.error) throw publicStateResult.error;
+
+          const rawPublic=publicStateResult.data?.data;
+          const publicData=typeof rawPublic==='string'
+            ? (JSON.parse(rawPublic||'{}')||{})
+            : (rawPublic||{});
+
+          if(Array.isArray(publicData.notifications)){
+            notifications=publicData.notifications;
+          }
         }catch(publicErr){
-          console.warn('Guest không đọc được fallback class_state:',publicErr);
+          console.warn('Guest không đọc được thông báo từ class_state:',publicErr);
         }
       }
 
