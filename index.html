@@ -54,10 +54,10 @@ function closeAllModals(){
   document.body.style.overflow='';
 }
 document.addEventListener('keydown',function(e){
-  if(e.key==='Escape'){if(document.getElementById('publicClassChooser')?.classList.contains('show')) return; closeAllModals();}
+  if(e.key==='Escape') closeAllModals();
 });
 document.addEventListener('click',function(e){
-  if(e.target && e.target.classList && e.target.classList.contains('modal') && e.target.id!=='classChooser' && e.target.id!=='publicClassChooser'){
+  if(e.target && e.target.classList && e.target.classList.contains('modal') && e.target.id!=='classChooser'){
     closeModal(e.target.id);
   }
 });
@@ -573,58 +573,8 @@ select option{background:#fff!important;color:#202124!important}
 }
 </style>
 
-
-<style id="bibi-public-entry-v1">
-  #publicClassChooser .modal-card{max-width:620px;border-radius:22px}
-  #publicClassChooser .public-entry-brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-  #publicClassChooser .public-entry-icon{font-size:28px}
-  #publicClassChooser .public-entry-title{font-size:22px;font-weight:900}
-  #publicClassChooser .public-entry-note{background:#eef6ff;border:1px solid #bfdbfe;color:#1e3a8a;border-radius:12px;padding:11px 12px;margin-top:12px;line-height:1.5}
-  #publicClassChooser .public-entry-status{font-size:12px;color:var(--muted);min-height:18px;margin-top:8px}
-  .guest-login-btn{border:0;border-radius:10px;padding:9px 13px;background:#fff;color:#1769aa;font-weight:900;white-space:nowrap}
-  .guest-login-btn:hover{background:#eef5fb}
-  .ai-provider-box{border:1px solid #d9d9d6;border-radius:14px;padding:14px;margin-top:16px;background:#fbfcfd}
-  .ai-provider-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .ai-provider-help{font-size:12px;color:#5f6368;line-height:1.5;margin-top:8px}
-  @media(max-width:650px){.ai-provider-grid{grid-template-columns:1fr}}
-</style>
-
 </head>
 <body>
-
-
-<div id="publicClassChooser" class="modal" style="z-index:3000" aria-hidden="true">
-  <div class="modal-card">
-    <div class="modal-head">
-      <div class="public-entry-brand"><span class="public-entry-icon">🏫</span><div><div class="public-entry-title">ClassManager Pro</div><div class="muted">Chọn lớp để xem thông tin công khai</div></div></div>
-    </div>
-    <div class="public-entry-note">Chọn năm học và lớp. Không cần tài khoản để xem các thông tin công khai của lớp như chuyên cần, rèn luyện, thi đua và bảng vinh danh.</div>
-    <div class="form-grid" style="margin-top:12px">
-      <div class="field"><label>Năm học</label><select id="publicYearSelect"></select></div>
-      <div class="field"><label>Lớp</label><select id="publicClassSelect"></select></div>
-    </div>
-    <div id="publicClassInfo" class="notice" style="margin-top:12px"></div>
-    <div id="publicEntryStatus" class="public-entry-status"></div>
-    <div class="actions" style="justify-content:flex-end;margin-top:14px">
-      <button class="btn" type="button" onclick="enterPublicClass()">👀 Xem thông tin lớp</button>
-    </div>
-  </div>
-</div>
-
-<div id="registerModal" class="modal" style="z-index:2500" aria-hidden="true">
-  <div class="modal-card" style="max-width:620px">
-    <div class="modal-head"><h3>📝 Đăng ký tài khoản giáo viên</h3><button class="x" type="button" onclick="closeModal('registerModal')">×</button></div>
-    <p class="muted">Đăng ký bằng Email và mật khẩu. Sau khi đăng ký, GVCN/Admin cần cấp quyền lớp trong Supabase trước khi tài khoản có thể quản lý dữ liệu.</p>
-    <div class="form-grid" style="margin-top:12px">
-      <div class="field"><label>Họ và tên</label><input id="regName" autocomplete="name" placeholder="Nguyễn Văn A"></div>
-      <div class="field"><label>Email</label><input id="regEmail" type="email" autocomplete="email" placeholder="thayco@example.com"></div>
-      <div class="field"><label>Mật khẩu</label><input id="regPassword" type="password" autocomplete="new-password" placeholder="Tối thiểu 8 ký tự"></div>
-      <div class="field"><label>Xác nhận mật khẩu</label><input id="regPassword2" type="password" autocomplete="new-password" placeholder="Nhập lại mật khẩu"></div>
-    </div>
-    <div id="registerStatus" class="notice" style="display:none;margin-top:12px"></div>
-    <div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="btn secondary" type="button" onclick="closeModal('registerModal')">Hủy</button><button class="btn" type="button" onclick="registerTeacher()">Tạo tài khoản</button></div>
-  </div>
-</div>
 
 <div id="classChooser" class="modal" style="z-index:2000"><div class="modal-card" style="max-width:620px">
   <div class="modal-head"><h3>🏫 Chọn năm học và lớp cần vào</h3><button class="x" onclick="cancelClassEntry()">×</button></div>
@@ -643,8 +593,7 @@ select option{background:#fff!important;color:#202124!important}
     <div class="field"><label>Tài khoản</label><input id="loginUser" placeholder="Nhập tài khoản"></div>
     <div class="field"><label>Mật khẩu</label><input id="loginPass" type="password" placeholder="Nhập mật khẩu"></div>
     <button class="btn" style="width:100%;margin-top:6px" onclick="login()">Đăng nhập</button>
-    <button class="btn secondary" type="button" style="width:100%;margin-top:8px" onclick="openRegister()">📝 Đăng ký tài khoản giáo viên</button>
-     <button class="guest-btn" type="button" onclick="openGuestMode()">👀 Xem thông tin lớp (Khách)</button>
+    <button class="guest-btn" type="button" onclick="openGuestMode()">👀 Xem thông tin lớp (Khách)</button>
     <div class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</div>
   </div>
 </div>
@@ -652,7 +601,7 @@ select option{background:#fff!important;color:#202124!important}
 <div id="guestScreen" class="guest-screen hidden">
   <div class="guest-top">
     <div class="guest-brand"><span class="guest-logo">🎓</span><div>ClassManager Pro<small style="display:block;color:#94a3b8;font-weight:500">Chế độ Khách · Chỉ xem</small></div></div>
-    <button class="guest-login-btn" onclick="openLoginFromGuest()">🔐 Đăng nhập</button>
+    <button class="guest-back" onclick="closeGuestMode()">↩ Đăng nhập</button>
   </div>
   <div class="guest-wrap">
     <div class="card">
@@ -958,19 +907,7 @@ select option{background:#fff!important;color:#202124!important}
           <button class="btn" onclick="saveSettings()">💾 Lưu cài đặt</button>
         </div>
         <div class="card conduct-rules-settings" style="margin-top:16px"><h3>⚙️ Nguyên tắc xếp hạnh kiểm / rèn luyện</h3><p class="muted">GVCN/Admin có thể thay đổi ngưỡng điểm và điểm khởi đầu. Thi đua, Báo cáo tổng hợp và các phần xếp loại sẽ dùng chung các chỉ số này.</p><div class="form-grid"><div class="field"><label>Điểm từ mức Tốt</label><input id="setGoodScore" type="number" step="0.1" value="96"></div><div class="field"><label>Điểm từ mức Khá</label><input id="setFairScore" type="number" step="0.1" value="90"></div><div class="field"><label>Điểm từ mức Đạt</label><input id="setPassScore" type="number" step="0.1" value="85"></div><div class="field"><label>Điểm khởi đầu mỗi tuần</label><input id="setConductBase" type="number" step="0.1" value="100"></div></div><div class="actions" style="margin-top:12px"><button class="btn" type="button" onclick="saveConductRules()">💾 Lưu nguyên tắc</button><button class="btn secondary" type="button" onclick="resetConductRules()">↩ Khôi phục mặc định</button></div><div id="conductRulesStatus" class="notice" style="display:none;margin-top:12px"></div></div>
-        
-        <div class="card ai-provider-box">
-          <h3>🤖 Cấu hình Trợ lý AI</h3>
-          <p class="muted">Chọn AI dùng cho ClassManager Pro. Chế độ Tự động cho phép máy chủ lựa chọn nhà cung cấp phù hợp theo tác vụ và ưu tiên khả năng sẵn có.</p>
-          <div class="ai-provider-grid">
-            <div class="field"><label>Chế độ AI</label><select id="setAIProviderMode" onchange="updateAIProviderUI()"><option value="auto">🤖 Tự động lựa chọn</option><option value="gemini">Google Gemini</option><option value="groq">Groq</option><option value="deepseek">DeepSeek</option></select></div>
-            <div class="field"><label>Model (tùy chọn)</label><input id="setAIModel" placeholder="Để trống = máy chủ dùng model mặc định"></div>
-          </div>
-          <div id="aiProviderStatus" class="notice" style="margin-top:10px"></div>
-          <div class="ai-provider-help">API Key không nhập vào index.html. Khóa Gemini, Groq và DeepSeek phải được lưu trong Supabase Edge Function Secrets. Giao diện chỉ lưu lựa chọn nhà cung cấp/model.</div>
-          <div class="actions" style="margin-top:10px"><button class="btn" type="button" onclick="saveAISettings()">💾 Lưu cấu hình AI</button><button class="btn secondary" type="button" onclick="resetAISettings()">↩ Mặc định</button></div>
-        </div>
-<div class="card" style="margin-top:16px;border:1px solid #f59e0b;background:#fffbeb"><h3>🔄 Bắt đầu năm học mới</h3><p class="muted">Xóa riêng toàn bộ dữ liệu <strong>điểm danh</strong> (có mặt, đi muộn, nghỉ có phép, nghỉ không phép) để bắt đầu lại. Danh sách học sinh, tài khoản, rèn luyện, hạnh kiểm và cài đặt lớp vẫn được giữ nguyên.</p><button class="btn" style="background:#f59e0b;color:#fff" onclick="resetAttendanceOnly()">🔄 Reset điểm danh năm học</button></div>
+        <div class="card" style="margin-top:16px;border:1px solid #f59e0b;background:#fffbeb"><h3>🔄 Bắt đầu năm học mới</h3><p class="muted">Xóa riêng toàn bộ dữ liệu <strong>điểm danh</strong> (có mặt, đi muộn, nghỉ có phép, nghỉ không phép) để bắt đầu lại. Danh sách học sinh, tài khoản, rèn luyện, hạnh kiểm và cài đặt lớp vẫn được giữ nguyên.</p><button class="btn" style="background:#f59e0b;color:#fff" onclick="resetAttendanceOnly()">🔄 Reset điểm danh năm học</button></div>
         <div class="card" style="margin-top:16px"><h3>⚠️ Xóa toàn bộ dữ liệu</h3><p class="muted">Chỉ dùng khi thực sự muốn xóa toàn bộ dữ liệu của lớp. Hãy sao lưu trước.</p><button class="btn danger" onclick="resetAll()">Xóa toàn bộ dữ liệu</button></div>
       </section>
 
@@ -1032,7 +969,7 @@ try {
 } catch (e) { console.error(e); window.__supabaseInitError=e; }
 let currentClass=null, currentStateKey='12A8-2026-2027';
 let state=seed(), currentUser=null, editingStudent=null, availableClasses=[];
-function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4,conductRules:{base:100,good:96,fair:90,pass:85},ai:{provider:'auto',model:''}},students:[],attendance:{},scores:{},conduct:[],activity:[],auditLog:[],notifications:[]}}
+function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4,conductRules:{base:100,good:96,fair:90,pass:85}},students:[],attendance:{},scores:{},conduct:[],activity:[],auditLog:[],notifications:[]}}
 function dataKey(){return DATA_PREFIX+(currentStateKey||'12A8-2026-2027')}
 function loadLocalFallback(){try{return JSON.parse(localStorage.getItem(dataKey()))||seed()}catch(e){return seed()}}
 function saveLocal(){localStorage.setItem(dataKey(),JSON.stringify(state))}
@@ -1111,112 +1048,25 @@ function setUserUi(){
   // Sau khi đổi vai trò/lớp, bảo đảm không còn trang quản trị/AI bị mở.
   if(!isAdmin() && ['ai','classes','profile','excel','users','settings','smart','digital'].some(n=>document.getElementById('page-'+n)?.classList.contains('active'))){showPage('dashboard');}
 }
-function openRegister(){
-  closeAllModals();
-  document.getElementById('registerModal')?.classList.add('show');
-  document.getElementById('registerStatus')?.setAttribute('style','display:none');
-  setTimeout(()=>document.getElementById('regName')?.focus(),50);
-}
-async function registerTeacher(){
-  if(!sb){alert('Supabase chưa sẵn sàng.');return;}
-  const name=document.getElementById('regName')?.value.trim()||'';
-  const email=document.getElementById('regEmail')?.value.trim().toLowerCase()||'';
-  const password=document.getElementById('regPassword')?.value||'';
-  const password2=document.getElementById('regPassword2')?.value||'';
-  const status=document.getElementById('registerStatus');
-  const setStatus=(m,bad=false)=>{if(status){status.style.display='block';status.className='notice '+(bad?'danger':'ok');status.textContent=m;}};
-  if(!name||!email||!password||!password2){setStatus('❌ Vui lòng nhập đầy đủ thông tin.',true);return;}
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){setStatus('❌ Email không hợp lệ.',true);return;}
-  if(password.length<8){setStatus('❌ Mật khẩu phải có ít nhất 8 ký tự.',true);return;}
-  if(password!==password2){setStatus('❌ Mật khẩu xác nhận không khớp.',true);return;}
-  setStatus('⏳ Đang tạo tài khoản...');
-  try{
-    const {data,error}=await sb.auth.signUp({email,password,options:{data:{name,full_name:name}}});
-    if(error)throw error;
-    if(data?.user){
-      setStatus(data.session?'✅ Đăng ký thành công. GVCN/Admin cần cấp quyền lớp cho tài khoản này.':'✅ Đăng ký thành công. Hãy kiểm tra Email để xác nhận tài khoản nếu Supabase đang bật xác nhận Email. Sau đó liên hệ GVCN/Admin để được cấp quyền lớp.');
-    }else throw new Error('Supabase không trả về tài khoản mới.');
-  }catch(e){console.error(e);setStatus('❌ '+(e?.message||String(e)),true);}
-}
 async function login(){
   if(window.__supabaseInitError){setLoginStatus('❌ Không khởi tạo được Supabase: '+window.__supabaseInitError.message);return}
-  if(!sb){setLoginStatus('❌ Supabase chưa sẵn sàng. Hãy tải lại trang.');return}
-  const rawUser=(document.getElementById('loginUser')?.value||'').trim();
-  const p=document.getElementById('loginPass')?.value||'';
-  if(!rawUser||!p){setLoginStatus('⚠️ Vui lòng nhập Email, số điện thoại hoặc tài khoản và mật khẩu.');return}
+  const u=document.getElementById('loginUser').value.trim(), p=document.getElementById('loginPass').value;
+  if(!u||!p){setLoginStatus('⚠️ Vui lòng nhập tài khoản và mật khẩu.');return}
+  const email=u.includes('@')?u:`${u}@12a8.local`;
   setLoginStatus('⏳ Đang kiểm tra tài khoản...');
-
-  // Tương thích ngược với các tài khoản đã tạo ở các phiên bản trước.
-  // Phiên bản cũ dùng username@12a8.local, phiên bản mới dùng Email/phone.
-  const normalizePhone=(v)=>{
-    let x=String(v||'').trim().replace(/[\s().-]/g,'');
-    if(/^0\d{9,10}$/.test(x)) x='+84'+x.slice(1);
-    return x;
-  };
-  const candidates=[];
-  const add=(type,value)=>{if(value&&!candidates.some(x=>x.type===type&&x.value===value))candidates.push({type,value});};
-
-  if(rawUser.includes('@')){
-    add('email',rawUser.toLowerCase());
-  }else{
-    // 1) Tài khoản Supabase dùng phone thật.
-    const phone=normalizePhone(rawUser);
-    if(/^\+\d{8,15}$/.test(phone)) add('phone',phone);
-    // 2) Tài khoản cũ: username@12a8.local.
-    add('email',rawUser.toLowerCase()+'@12a8.local');
-    // 3) Một số bản cũ lưu username với hậu tố cố định khác.
-    add('email',rawUser.toLowerCase()+'@12a8.localhost');
-  }
-
-  let lastError=null, data=null;
   try{
-    for(const c of candidates){
-      const credentials=c.type==='phone'?{phone:c.value,password:p}:{email:c.value,password:p};
-      const result=await sb.auth.signInWithPassword(credentials);
-      if(!result.error && result.data?.user){data=result.data;break;}
-      lastError=result.error;
-    }
-    if(!data?.user){
-      const msg=lastError?.message||'Sai tài khoản hoặc mật khẩu.';
-      setLoginStatus('❌ Đăng nhập thất bại: '+msg);
-      return;
-    }
-
-    // Không đăng xuất ngay chỉ vì profile truy vấn lỗi. Các tài khoản cũ
-    // có thể có metadata/role được cấp qua bảng phân quyền.
+    const {data,error}=await sb.auth.signInWithPassword({email,password:p});
+    if(error){setLoginStatus('❌ Đăng nhập thất bại: '+error.message);return}
     await loadCloudUser(data.user);
     await loadAvailableClasses(data.user.id);
-    if(!availableClasses.length){
-      await sb.auth.signOut({scope:'local'});
-      throw new Error('Tài khoản đã xác thực nhưng chưa được cấp quyền vào lớp nào. Hãy kiểm tra bảng class_user_roles hoặc quyền GVCN/Admin.');
-    }
+    if(!availableClasses.length){await sb.auth.signOut({scope:'local'});throw new Error('Tài khoản chưa được cấp quyền vào lớp nào. Hãy liên hệ GVCN.')}
     showClassChooser();
-  }catch(e){
-    console.error('LOGIN_ERROR',e);
-    try{ await sb.auth.signOut({scope:'local'}); }catch(_){ }
-    setLoginStatus('❌ Không thể hoàn tất đăng nhập: '+(e?.message||String(e)));
-  }
+  }catch(e){console.error(e);setLoginStatus('❌ '+(e?.message||String(e)));}
 }
 async function loadCloudUser(user){
-  if(!user?.id) throw new Error('Supabase không trả về user hợp lệ.');
-  const {data:p,error}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
-  if(p){
-    currentUser={...p};
-    // Giữ email/phone từ Auth nếu profile cũ chưa có.
-    currentUser.email=currentUser.email||user.email||'';
-    currentUser.phone=currentUser.phone||user.phone||'';
-    currentUser.name=currentUser.name||user.user_metadata?.name||user.user_metadata?.full_name||user.email||user.phone||'Người dùng';
-    return currentUser;
-  }
-
-  // Tương thích dữ liệu cũ: nếu profile chưa được tạo nhưng tài khoản Auth
-  // đã tồn tại, vẫn cho phép tiếp tục tới bước kiểm tra class_user_roles.
-  const {data:roles,error:roleError}=await sb.from('class_user_roles').select('role,scope').eq('user_id',user.id).limit(20);
-  if(roleError) throw new Error('Không đọc được hồ sơ/quyền tài khoản: '+roleError.message);
-  if(!roles?.length) throw new Error('Tài khoản đã đăng nhập Auth nhưng chưa có hồ sơ hoặc phân quyền trong hệ thống.');
-  const first=roles[0];
-  currentUser={id:user.id,email:user.email||'',phone:user.phone||'',name:user.user_metadata?.name||user.user_metadata?.full_name||user.email||user.phone||'Người dùng',role:first.role,scope:first.scope||''};
-  return currentUser;
+  const {data:p,error}=await sb.from('profiles').select('*').eq('id',user.id).single();
+  if(error||!p){await sb.auth.signOut({scope:'local'});throw new Error('Tài khoản chưa có hồ sơ trong bảng profiles. Hãy chạy SQL nâng cấp v4.')}
+  currentUser={...p};
 }
 async function loadAvailableClasses(userId){
   let q=sb.from('classes').select('id,class_name,grade,group_count,is_archived,state_key,homeroom_teacher_id,academic_years!inner(id,name,is_locked)').order('created_at',{ascending:false});
@@ -1264,10 +1114,10 @@ async function enterSelectedClass(){
   document.getElementById('loginScreen').classList.add('hidden');document.getElementById('app').classList.remove('hidden');
   setUserUi();
   // Sau khi đăng nhập/chọn lớp, menu luôn đóng mặc định. Người dùng chỉ mở bằng nút ☰.
-  setSidebarHidden(window.innerWidth<=680);
+  setSidebarHidden(true);
   document.getElementById('attDate').value=today();document.getElementById('cDate').value=today();
   renderAll();showPage('dashboard');
-  setSidebarHidden(window.innerWidth<=680);
+  setSidebarHidden(true);
 }
 function cancelClassEntry(){
   document.getElementById('classChooser')?.classList.remove('show');
@@ -1286,7 +1136,7 @@ async function loadCloudState(){
       saveLocal();
       await pushCloud();
     }
-    state.settings={...seed().settings,...(state.settings||{}),conductRules:{...seed().settings.conductRules,...(state.settings?.conductRules||{})},ai:{...seed().settings.ai,...(state.settings?.ai||{})},className:currentClass?.class_name||state.settings?.className||'12A8',year:currentClass?.year||state.settings?.year||'2026-2027',groups:currentClass?.group_count||state.settings?.groups||4};
+    state.settings={...seed().settings,...(state.settings||{}),conductRules:{...seed().settings.conductRules,...(state.settings?.conductRules||{})},className:currentClass?.class_name||state.settings?.className||'12A8',year:currentClass?.year||state.settings?.year||'2026-2027',groups:currentClass?.group_count||state.settings?.groups||4};
     saveLocal();
   }catch(e){console.error(e);state=loadLocalFallback();alert('🔒 Không thể tải dữ liệu lớp này: '+(e.message||e));throw e;}
 }
@@ -1303,31 +1153,6 @@ async function logout(){
   try{if(sb?.auth)await Promise.race([sb.auth.signOut({scope:'local'}),new Promise(r=>setTimeout(r,2500))])}catch(e){console.warn(e)}finally{finish()}
 }
 if(sb)sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;currentClass=null;availableClasses=[];document.getElementById('aiFloatingBtn')?.classList.add('hidden');document.getElementById('app')?.classList.add('hidden');document.getElementById('loginScreen')?.classList.remove('hidden');document.getElementById('appClassContext')?.classList.remove('show')}});
-
-async function bootstrapSession(){
-  if(!sb)return;
-  try{
-    const {data:{session}}=await sb.auth.getSession();
-    if(!session?.user)return;
-    await loadCloudUser(session.user);
-    await loadAvailableClasses(session.user.id);
-    if(!availableClasses.length){await sb.auth.signOut({scope:'local'});return;}
-    const savedId=localStorage.getItem('bibi_current_class_db_id')||localStorage.getItem('bibi_current_class_key');
-    const saved=availableClasses.find(x=>x.id===savedId||x.state_key===savedId);
-    if(saved){
-      currentClass=saved;currentStateKey=saved.state_key;
-      await loadCloudState();
-      document.getElementById('loginScreen')?.classList.add('hidden');
-      document.getElementById('guestScreen')?.classList.add('hidden');
-      document.getElementById('app')?.classList.remove('hidden');
-      document.getElementById('attDate').value=today();document.getElementById('cDate').value=today();
-      setUserUi();renderAll();showPage('dashboard');setSidebarHidden(window.innerWidth<=680);
-    }else{
-      showClassChooser();
-    }
-  }catch(e){console.warn('Không khôi phục phiên đăng nhập:',e);}
-}
-window.addEventListener('DOMContentLoaded',()=>setTimeout(bootstrapSession,150));
 
 function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -1359,8 +1184,8 @@ function showPage(name){updateProfile360Access();
  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');
  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===name));
  document.getElementById('pageTitle').textContent=titles[name]||name;
- /* Desktop giữ menu mở; mobile tự đóng sau khi chọn chức năng. */
- setSidebarHidden(window.innerWidth<=680);
+ /* Sau khi chọn một mục, tự ẩn trình đơn trên cả máy tính và điện thoại */
+ setSidebarHidden(true);
  if(name==='dashboard')renderDashboard();if(name==='students')renderStudents();if(name==='attendance')renderAttendance();if(name==='conduct')renderConduct();if(name==='competition'){
    try{renderCompetition()}catch(err){
      console.error('Lỗi hiển thị Thi đua:',err);
@@ -1370,7 +1195,7 @@ function showPage(name){updateProfile360Access();
  }if(name==='reports')renderReports();if(name==='profile'){
    try{renderProfileSelectors();setTimeout(()=>{try{renderProfile()}catch(err){console.error('Lỗi Hồ sơ 360°:',err)}},0)}
    catch(err){console.error('Lỗi khởi tạo Hồ sơ 360°:',err);const box=document.getElementById('profileContent');if(box)box.innerHTML='<div class="empty">Không thể khởi tạo Hồ sơ 360°. Vui lòng chọn lại học sinh.</div>';}
- }if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule(); if(name==='settings')renderAISettings();
+ }if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule();
 }
 function updateProfile360Access(){
   const canSee=!!currentUser;
@@ -1994,47 +1819,6 @@ function renderProfile(){
 }
 async function saveConductRules(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được thay đổi nguyên tắc.');return}const good=Number(document.getElementById('setGoodScore')?.value),fair=Number(document.getElementById('setFairScore')?.value),pass=Number(document.getElementById('setPassScore')?.value),base=Number(document.getElementById('setConductBase')?.value);if(![good,fair,pass,base].every(Number.isFinite)){alert('⚠️ Vui lòng nhập đủ các chỉ số hợp lệ.');return}if(!(good>=fair&&fair>=pass)){alert('⚠️ Ngưỡng phải theo thứ tự Tốt ≥ Khá ≥ Đạt.');return}if(base<0){alert('⚠️ Điểm khởi đầu không được âm.');return}state.settings=state.settings||{};state.settings.conductRules={base,good,fair,pass};saveData();const ok=await pushCloud();const st=document.getElementById('conductRulesStatus');if(st){st.style.display='block';st.className='notice '+(ok===false?'':'ok');st.textContent=ok===false?'⚠️ Đã lưu trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã lưu nguyên tắc xếp hạnh kiểm.'}renderAll()}
 async function resetConductRules(){if(!isAdmin())return;if(!confirm('Khôi phục mặc định: Tốt ≥96; Khá ≥90; Đạt ≥85; điểm khởi đầu 100?'))return;state.settings=state.settings||{};state.settings.conductRules={base:100,good:96,fair:90,pass:85};saveData();renderConductRulesSettings();const ok=await pushCloud();const st=document.getElementById('conductRulesStatus');if(st){st.style.display='block';st.className='notice ok';st.textContent=ok===false?'⚠️ Đã khôi phục trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã khôi phục mặc định.'}renderAll()}
-
-function getAISettings(){
-  const a=state?.settings?.ai||{};
-  return {provider:['auto','gemini','groq','deepseek'].includes(a.provider)?a.provider:'auto',model:String(a.model||'').trim()};
-}
-function updateAIProviderUI(){
-  const mode=document.getElementById('setAIProviderMode')?.value||'auto';
-  const status=document.getElementById('aiProviderStatus');
-  if(!status)return;
-  const names={auto:'Tự động',gemini:'Google Gemini',groq:'Groq',deepseek:'DeepSeek'};
-  status.className='notice '+(mode==='auto'?'ok':'');
-  status.textContent=mode==='auto'
-    ? '🤖 Máy chủ sẽ tự chọn AI phù hợp; nếu một nhà cung cấp lỗi/quota, có thể chuyển sang nhà cung cấp dự phòng.'
-    : `🎯 Đang ưu tiên ${names[mode]}.`;
-}
-function renderAISettings(){
-  const a=getAISettings();
-  const m=document.getElementById('setAIProviderMode'),model=document.getElementById('setAIModel');
-  if(m)m.value=a.provider;
-  if(model)model.value=a.model;
-  updateAIProviderUI();
-}
-async function saveAISettings(){
-  if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được thay đổi cấu hình AI.');return}
-  const provider=document.getElementById('setAIProviderMode')?.value||'auto';
-  const model=(document.getElementById('setAIModel')?.value||'').trim();
-  state.settings=state.settings||{};
-  state.settings.ai={provider:['auto','gemini','groq','deepseek'].includes(provider)?provider:'auto',model};
-  saveData();
-  const ok=await pushCloud();
-  renderAISettings();
-  const status=document.getElementById('aiProviderStatus');
-  if(status){status.className='notice '+(ok===false?'':'ok');status.textContent=ok===false?'⚠️ Đã lưu trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã lưu cấu hình AI.'}
-}
-function resetAISettings(){
-  if(!isAdmin())return;
-  state.settings=state.settings||{};
-  state.settings.ai={provider:'auto',model:''};
-  saveData();
-  renderAISettings();
-}
 async function saveSettings(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được thay đổi cài đặt.');return}state.settings.teacher=document.getElementById('setTeacher').value;state.settings.className=document.getElementById('setClass').value;state.settings.year=document.getElementById('setYear').value;state.settings.groups=Number(document.getElementById('setGroups').value);state.settings.conductRules=getConductRules();saveData();await pushCloud();renderConductRulesSettings();alert('Đã lưu cài đặt.')}
 async function resetAttendanceOnly(){
   if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được reset điểm danh.');return}
@@ -2253,72 +2037,12 @@ function looksTruncatedAIAnswer(text){
   if(/(?:^|\\n)\\s*(?:\\d+\\.|[IVX]+\\.|Phần\\s+\\d+|Thống kê chung)\\s*$/i.test(t))return true;
   return false;
 }
-function formatAIErrorMessage(error,httpStatus=''){const raw=String(error||'').trim();const lower=raw.toLowerCase();if(httpStatus==='429'||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota|retry in/i.test(raw)){const m=raw.match(/retry in\s+([0-9]+(?:\.[0-9]+)?)s/i);const wait=m?Math.ceil(Number(m[1])):null;return `<div class="ai-error-card"><strong>⚠️ AI đang tạm hết lượt sử dụng</strong><div>Đây là giới hạn quota/rate limit của nhà cung cấp AI, không phải lỗi hiển thị trên điện thoại.</div>${wait?`<div class="ai-retry-note">Thầy có thể thử lại sau khoảng ${wait} giây.</div>`:'<div class="ai-retry-note">Thầy hãy thử lại sau một lúc hoặc kiểm tra quota/billing của nhà cung cấp AI.</div>'}</div>`;}if(/failed to fetch|networkerror|load failed/i.test(lower))return `<div class="ai-error-card"><strong>🌐 Không kết nối được Trợ lý AI</strong><div>Thầy kiểm tra Internet rồi bấm Hỏi AI lại.</div></div>`;return `<div class="ai-error-card"><strong>❌ Trợ lý AI chưa thể trả lời</strong><div>${esc(raw||'Đã xảy ra lỗi không xác định.')}</div></div>`;}
-async function askAI(){const q=document.getElementById('aiQuestion'),ans=document.getElementById('aiAnswer'),meta=document.getElementById('aiMeta'),btn=document.getElementById('aiAskBtn');const question=(q?.value||'').trim();if(!question){if(ans)renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}if(!isAdmin()){renderAIAnswer('🔒 Chỉ GVCN/Admin mới được sử dụng Trợ lý AI.');return;}stopAISpeech(false);btn.disabled=true;btn.classList.add('ai-busy');renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');if(meta)meta.textContent='AI đang đọc dữ liệu lớp đang chọn...';try{const context=buildAIContext();if(isGenderCountQuestion(question)){const answer=buildGenderCountAnswer(context);renderAIAnswer(answer);if(meta)meta.textContent=`🤖 Thống kê trực tiếp từ danh sách học sinh · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}const aiPrompt=buildAIPrompt(question,context);const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';const aiCfg=getAISettings();const payload={question:aiPrompt,stateKey:currentStateKey,context,provider:aiCfg.provider,model:aiCfg.model};const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});const body=await res.json().catch(()=>({}));if(!res.ok){const errText=body.error||body.message||`AI trả về lỗi HTTP ${res.status}`;const quota=/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(errText))||res.status===429;if(ans)ans.innerHTML=formatAIErrorMessage(errText,String(res.status));if(meta)meta.textContent=quota?'⚠️ AI đang giới hạn lượt sử dụng.':'Kiểm tra Edge Function ai-class-assistant và cấu hình API key AI trong Supabase.';return;}let fullAnswer=typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||JSON.stringify(body.answer));if(looksTruncatedAIAnswer(fullAnswer) && String(fullAnswer||'').length>40){const retryPrompt=`Trả lời trực tiếp câu hỏi sau bằng tiếng Việt, tối đa 8 câu, không dùng Markdown, không dùng dấu *, không mở đầu dài dòng. Chỉ dùng dữ liệu trong context. Nếu là câu hỏi thống kê, nêu con số chính xác trước.\n\nCâu hỏi: ${question}`;const retry=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:retryPrompt,stateKey:currentStateKey,context,provider:getAISettings().provider,model:getAISettings().model})});const retryBody=await retry.json().catch(()=>({}));const retryErr=retryBody.error||retryBody.message||'';if(retry.ok){const candidate=typeof retryBody.answer==='string'?retryBody.answer:(retryBody.answer?.text||retryBody.answer?.content||'');if(candidate&&!looksTruncatedAIAnswer(candidate))fullAnswer=candidate;}else if(retry.status===429||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(retryErr))){if(ans)ans.innerHTML=formatAIErrorMessage(retryErr,String(retry.status));if(meta)meta.textContent='⚠️ AI đang giới hạn lượt sử dụng.';return;}}renderAIAnswer(fullAnswer||'AI chưa trả về nội dung.');const finishReason=body.finishReason||body.finish_reason||body.meta?.finishReason||'';if(meta)meta.textContent=`🤖 ${body.providerLabel||body.provider||getAISettings().provider} · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}`;}catch(e){console.error(e);if(ans)ans.innerHTML=formatAIErrorMessage(e?.message||e);if(meta)meta.textContent='Trợ lý AI tạm thời không thể kết nối.';}finally{btn.classList.remove('ai-busy');btn.disabled=false;}}
+function formatAIErrorMessage(error,httpStatus=''){const raw=String(error||'').trim();const lower=raw.toLowerCase();if(httpStatus==='429'||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota|retry in/i.test(raw)){const m=raw.match(/retry in\s+([0-9]+(?:\.[0-9]+)?)s/i);const wait=m?Math.ceil(Number(m[1])):null;return `<div class="ai-error-card"><strong>⚠️ Gemini đang tạm hết lượt sử dụng</strong><div>Đây là giới hạn quota của API Gemini, không phải lỗi hiển thị trên điện thoại.</div>${wait?`<div class="ai-retry-note">Thầy có thể thử lại sau khoảng ${wait} giây.</div>`:'<div class="ai-retry-note">Thầy hãy thử lại sau một lúc hoặc kiểm tra quota/billing của Gemini.</div>'}</div>`;}if(/failed to fetch|networkerror|load failed/i.test(lower))return `<div class="ai-error-card"><strong>🌐 Không kết nối được Trợ lý AI</strong><div>Thầy kiểm tra Internet rồi bấm Hỏi AI lại.</div></div>`;return `<div class="ai-error-card"><strong>❌ Trợ lý AI chưa thể trả lời</strong><div>${esc(raw||'Đã xảy ra lỗi không xác định.')}</div></div>`;}
+async function askAI(){const q=document.getElementById('aiQuestion'),ans=document.getElementById('aiAnswer'),meta=document.getElementById('aiMeta'),btn=document.getElementById('aiAskBtn');const question=(q?.value||'').trim();if(!question){if(ans)renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}if(!isAdmin()){renderAIAnswer('🔒 Chỉ GVCN/Admin mới được sử dụng Trợ lý AI.');return;}stopAISpeech(false);btn.disabled=true;btn.classList.add('ai-busy');renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');if(meta)meta.textContent='AI đang đọc dữ liệu lớp đang chọn...';try{const context=buildAIContext();if(isGenderCountQuestion(question)){const answer=buildGenderCountAnswer(context);renderAIAnswer(answer);if(meta)meta.textContent=`🤖 Thống kê trực tiếp từ danh sách học sinh · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}const aiPrompt=buildAIPrompt(question,context);const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';const payload={question:aiPrompt,stateKey:currentStateKey,context};const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});const body=await res.json().catch(()=>({}));if(!res.ok){const errText=body.error||body.message||`AI trả về lỗi HTTP ${res.status}`;const quota=/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(errText))||res.status===429;if(ans)ans.innerHTML=formatAIErrorMessage(errText,String(res.status));if(meta)meta.textContent=quota?'⚠️ Gemini đang giới hạn lượt sử dụng.':'Kiểm tra Edge Function ai-class-assistant và GEMINI_API_KEY trong Supabase.';return;}let fullAnswer=typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||JSON.stringify(body.answer));if(looksTruncatedAIAnswer(fullAnswer) && String(fullAnswer||'').length>40){const retryPrompt=`Trả lời trực tiếp câu hỏi sau bằng tiếng Việt, tối đa 8 câu, không dùng Markdown, không dùng dấu *, không mở đầu dài dòng. Chỉ dùng dữ liệu trong context. Nếu là câu hỏi thống kê, nêu con số chính xác trước.\n\nCâu hỏi: ${question}`;const retry=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:retryPrompt,stateKey:currentStateKey,context})});const retryBody=await retry.json().catch(()=>({}));const retryErr=retryBody.error||retryBody.message||'';if(retry.ok){const candidate=typeof retryBody.answer==='string'?retryBody.answer:(retryBody.answer?.text||retryBody.answer?.content||'');if(candidate&&!looksTruncatedAIAnswer(candidate))fullAnswer=candidate;}else if(retry.status===429||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(retryErr))){if(ans)ans.innerHTML=formatAIErrorMessage(retryErr,String(retry.status));if(meta)meta.textContent='⚠️ Gemini đang giới hạn lượt sử dụng.';return;}}renderAIAnswer(fullAnswer||'AI chưa trả về nội dung.');const finishReason=body.finishReason||body.finish_reason||body.meta?.finishReason||'';if(meta)meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}`;}catch(e){console.error(e);if(ans)ans.innerHTML=formatAIErrorMessage(e?.message||e);if(meta)meta.textContent='Trợ lý AI tạm thời không thể kết nối.';}finally{btn.classList.remove('ai-busy');btn.disabled=false;}}
 
 document.getElementById('loginPass')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();login()}});
 if(window.__supabaseInitError){setLoginStatus('❌ Không tải được Supabase: '+window.__supabaseInitError.message)}
 window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.show').forEach(x=>x.classList.remove('show'))}})
-</script>
-
-
-<script id="bibi-public-entry-v1">
-(function(){
-  function publicEsc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
-  let publicClasses=[];
-  function publicStatus(msg,bad=false){
-    const el=document.getElementById('publicEntryStatus');
-    if(el){el.textContent=msg||'';el.className='public-entry-status '+(bad?'danger':'');}
-  }
-  function fillPublicClasses(){
-    const y=document.getElementById('publicYearSelect'),c=document.getElementById('publicClassSelect'),info=document.getElementById('publicClassInfo');
-    if(!y||!c)return;
-    const years=[...new Set(publicClasses.map(x=>x.year).filter(Boolean))].sort().reverse();
-    y.innerHTML=years.map(v=>`<option value="${publicEsc(v)}">${publicEsc(v)}</option>`).join('');
-    function fill(){
-      const list=publicClasses.filter(x=>x.year===y.value);
-      c.innerHTML=list.map(x=>`<option value="${publicEsc(x.state_key)}">${publicEsc(x.class_name)} · Khối ${publicEsc(x.grade||'')}</option>`).join('');
-      const x=list.find(v=>v.state_key===c.value)||list[0];
-      if(x)info.textContent=`${x.class_name} · ${x.year} · Khối ${x.grade||''}${x.is_locked||x.is_archived?' · Chỉ xem':''}`;
-      else info.textContent='Chưa có lớp công khai.';
-    }
-    y.onchange=fill;c.onchange=fill;fill();
-  }
-  window.openPublicClassChooser=async function(){
-    const modal=document.getElementById('publicClassChooser');
-    const box=document.getElementById('publicClassInfo');
-    if(modal)modal.classList.add('show');
-    publicStatus('⏳ Đang tải danh sách năm học và lớp công khai...');
-    try{
-      if(!sb)throw new Error('Không khởi tạo được Supabase.');
-      const {data,error}=await sb.rpc('get_guest_class_catalog');
-      if(error)throw error;
-      publicClasses=Array.isArray(data)?data:(data?.classes||[]);
-      if(!publicClasses.length){box.textContent='Chưa có lớp được công khai. GVCN cần bật chế độ Guest trong Supabase.';publicStatus('⚠️ Không có lớp công khai.',true);return;}
-      fillPublicClasses();publicStatus('');
-    }catch(e){console.error(e);publicStatus('❌ Không tải được danh sách lớp: '+(e.message||e),true);}
-  };
-  window.enterPublicClass=async function(){
-    const key=document.getElementById('publicClassSelect')?.value;
-    const year=document.getElementById('publicYearSelect')?.value;
-    if(!key){publicStatus('⚠️ Vui lòng chọn năm học và lớp.',true);return;}
-    window.__publicGuestSelection={stateKey:key,year};
-    document.getElementById('publicClassChooser')?.classList.remove('show');
-    await openGuestMode();
-    const gy=document.getElementById('guestYearSelect'),gc=document.getElementById('guestClassSelect');
-    if(gy&&year)gy.value=year;
-    if(gc)gc.value=key;
-  };
-  window.openLoginFromGuest=function(){
-    document.getElementById('guestScreen')?.classList.add('hidden');
-    document.getElementById('publicClassChooser')?.classList.remove('show');
-    document.getElementById('loginScreen')?.classList.remove('hidden');
-    document.getElementById('loginUser')?.focus();
-  };
-  window.addEventListener('DOMContentLoaded',function(){
-    setTimeout(()=>window.openPublicClassChooser(),80);
-  });
-})();
 </script>
 
 <script id="bibi-sidebar-init">
@@ -2532,13 +2256,6 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
 
       y.onchange=fill;
       fill();
-      const preset=window.__publicGuestSelection||null;
-      if(preset){
-        if(preset.year && ys.includes(preset.year)) y.value=preset.year;
-        fill();
-        if(preset.stateKey && [...c.options].some(o=>o.value===preset.stateKey)) c.value=preset.stateKey;
-        window.__publicGuestSelection=null;
-      }
       await loadGuestDashboard();
     }catch(e){
       console.error(e);
@@ -2789,7 +2506,7 @@ async function loadGuestDashboard(){
   };
   window.refreshSmartModule=function(){renderSmartModule();alert('✅ Đã làm mới phân tích thông minh.');};
   window.renderStudentTimeline=function(){const host=document.getElementById('studentTimeline');const sid=document.getElementById('timelineStudent')?.value;const days=Number(document.getElementById('timelineRange')?.value||30);if(!host||!sid)return;const cutoff=new Date();cutoff.setDate(cutoff.getDate()-days);const isoCut=isoDate(cutoff);const s=state.students.find(x=>x.id===sid)||{};const items=[];Object.values(state.attendance||{}).filter(x=>(x.studentId||x.id)===sid&&x.date>=isoCut).forEach(x=>items.push({date:x.date,title:'Chuyên cần',detail:x.status==='present'?'Có mặt':x.status==='late'?'Đi muộn':x.status==='excused'?'Nghỉ có phép':'Nghỉ không phép'}));(state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved'&&x.date>=isoCut).forEach(x=>items.push({date:x.date,title:x.points>0?'Khen thưởng':'Vi phạm / nhắc nhở',detail:`${Number(x.points).toFixed(1)} điểm · ${x.content||x.type||''}`}));items.sort((a,b)=>String(b.date).localeCompare(String(a.date)));host.innerHTML=items.length?items.map(x=>`<div class="timeline-item"><div class="timeline-date">${fmtDate(x.date)}</div><div><div class="timeline-dot">${esc(x.title)}</div><div>${esc(x.detail)}</div></div></div>`).join(''):`<div class="empty">Chưa có hoạt động trong khoảng thời gian đã chọn cho ${esc(s.name||'học sinh')}.</div>`;};
-  async function callAIForPhase(question,targetId){if(!isAdmin())throw new Error('Chỉ GVCN/Admin được sử dụng AI.');const context=buildAIContext();const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết.');const prompt=buildAIPrompt(question,context)+'\n\nYÊU CẦU BỔ SUNG: Trả lời tự nhiên, không Markdown, không dấu *, không JSON. Nêu kết quả chính trước, sau đó mới phân tích.';const res=await fetch(SUPABASE_URL+'/functions/v1/ai-class-assistant',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:prompt,stateKey:currentStateKey,context,provider:getAISettings().provider,model:getAISettings().model})});const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body.error||body.message||`HTTP ${res.status}`);return cleanAIText(typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||''));}
+  async function callAIForPhase(question,targetId){if(!isAdmin())throw new Error('Chỉ GVCN/Admin được sử dụng AI.');const context=buildAIContext();const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết.');const prompt=buildAIPrompt(question,context)+'\n\nYÊU CẦU BỔ SUNG: Trả lời tự nhiên, không Markdown, không dấu *, không JSON. Nêu kết quả chính trước, sau đó mới phân tích.';const res=await fetch(SUPABASE_URL+'/functions/v1/ai-class-assistant',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:prompt,stateKey:currentStateKey,context})});const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body.error||body.message||`HTTP ${res.status}`);return cleanAIText(typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||''));}
   window.runPeriodAI=async function(period){const host=document.getElementById('periodAIResult');if(!host)return;host.textContent='⏳ AI đang phân tích...';try{const label=periodLabel(period),range=rangeFor(period);const data=range?{range,students:visibleStudents().length,conduct:recordsInRange(range).length,attendance:attendanceInRange(range).length}:{};const q=`Hãy phân tích ${label} của lớp đang chọn dựa trên dữ liệu thực tế. Nêu 1) kết quả nổi bật, 2) học sinh cần quan tâm, 3) điểm mạnh, 4) điểm cần cải thiện, 5) ba việc GVCN nên ưu tiên. Không bịa nguyên nhân. Thời gian phân tích: ${JSON.stringify(data)}.`;host.textContent=await callAIForPhase(q);log(`AI phân tích ${label}`);}catch(e){host.textContent='❌ '+(e.message||e)}};
   window.generateAIComment=async function(){const host=document.getElementById('aiCommentResult'),sid=document.getElementById('commentStudent')?.value,type=document.getElementById('commentType')?.value||'general',s=state.students.find(x=>x.id===sid);if(!host||!s)return;host.textContent='⏳ AI đang viết nhận xét...';try{const q=`Viết nhận xét giáo dục cho học sinh ${s.name} (${s.code}). Loại nhận xét: ${type}. Dựa trên dữ liệu chuyên cần, rèn luyện và học tập của học sinh. Viết 1 đoạn ngắn, tích cực nhưng trung thực, phù hợp hồ sơ GVCN. Không bịa nguyên nhân.`;host.textContent=await callAIForPhase(q,sid);log(`AI viết nhận xét cho ${s.name}`);}catch(e){host.textContent='❌ '+(e.message||e)}};
   window.generateAIReport=async function(){const host=document.getElementById('aiReportResult'),type=document.getElementById('aiReportType')?.value||'week';if(!host)return;host.textContent='⏳ AI đang tạo báo cáo...';try{const label=periodLabel(type);const q=`Hãy viết báo cáo ${label} cho GVCN lớp đang chọn. Cấu trúc: khái quát, sĩ số và giới tính, chuyên cần, rèn luyện, học sinh nổi bật, học sinh cần quan tâm, hoạt động gần đây, kiến nghị. Dùng số liệu thực tế từ context. Không Markdown, không dấu * và không bịa dữ liệu.`;host.textContent=await callAIForPhase(q);log(`AI tạo báo cáo ${label}`);}catch(e){host.textContent='❌ '+(e.message||e)}};
@@ -2818,7 +2535,7 @@ async function loadGuestDashboard(){
 // Không lưu service_role key trong index.html.
 </script>
 <script id="bibi-conduct-rules-report-init">
-window.addEventListener('load',function(){setTimeout(function(){try{renderConductRulesSettings();populateReportSelectors();renderAISettings()}catch(e){console.warn(e)}},200)});
+window.addEventListener('load',function(){setTimeout(function(){try{renderConductRulesSettings();populateReportSelectors()}catch(e){console.warn(e)}},200)});
 </script>
 <button id="bibi-final-pwa-install" type="button" aria-label="Cài đặt ứng dụng">📲 Cài ứng dụng</button>
 
