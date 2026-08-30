@@ -1140,25 +1140,83 @@ async function registerTeacher(){
 }
 async function login(){
   if(window.__supabaseInitError){setLoginStatus('❌ Không khởi tạo được Supabase: '+window.__supabaseInitError.message);return}
-  const u=document.getElementById('loginUser').value.trim(), p=document.getElementById('loginPass').value;
-  if(!u||!p){setLoginStatus('⚠️ Vui lòng nhập Email/số điện thoại và mật khẩu.');return}
+  if(!sb){setLoginStatus('❌ Supabase chưa sẵn sàng. Hãy tải lại trang.');return}
+  const rawUser=(document.getElementById('loginUser')?.value||'').trim();
+  const p=document.getElementById('loginPass')?.value||'';
+  if(!rawUser||!p){setLoginStatus('⚠️ Vui lòng nhập Email, số điện thoại hoặc tài khoản và mật khẩu.');return}
   setLoginStatus('⏳ Đang kiểm tra tài khoản...');
+
+  // Tương thích ngược với các tài khoản đã tạo ở các phiên bản trước.
+  // Phiên bản cũ dùng username@12a8.local, phiên bản mới dùng Email/phone.
+  const normalizePhone=(v)=>{
+    let x=String(v||'').trim().replace(/[\s().-]/g,'');
+    if(/^0\d{9,10}$/.test(x)) x='+84'+x.slice(1);
+    return x;
+  };
+  const candidates=[];
+  const add=(type,value)=>{if(value&&!candidates.some(x=>x.type===type&&x.value===value))candidates.push({type,value});};
+
+  if(rawUser.includes('@')){
+    add('email',rawUser.toLowerCase());
+  }else{
+    // 1) Tài khoản Supabase dùng phone thật.
+    const phone=normalizePhone(rawUser);
+    if(/^\+\d{8,15}$/.test(phone)) add('phone',phone);
+    // 2) Tài khoản cũ: username@12a8.local.
+    add('email',rawUser.toLowerCase()+'@12a8.local');
+    // 3) Một số bản cũ lưu username với hậu tố cố định khác.
+    add('email',rawUser.toLowerCase()+'@12a8.localhost');
+  }
+
+  let lastError=null, data=null;
   try{
-    const isEmail=u.includes('@');
-    const normalizedPhone=u.replace(/[\s().-]/g,'');
-    const credentials=isEmail?{email:u,password:p}:{phone:normalizedPhone,password:p};
-    const {data,error}=await sb.auth.signInWithPassword(credentials);
-    if(error){setLoginStatus('❌ Đăng nhập thất bại: '+error.message);return}
+    for(const c of candidates){
+      const credentials=c.type==='phone'?{phone:c.value,password:p}:{email:c.value,password:p};
+      const result=await sb.auth.signInWithPassword(credentials);
+      if(!result.error && result.data?.user){data=result.data;break;}
+      lastError=result.error;
+    }
+    if(!data?.user){
+      const msg=lastError?.message||'Sai tài khoản hoặc mật khẩu.';
+      setLoginStatus('❌ Đăng nhập thất bại: '+msg);
+      return;
+    }
+
+    // Không đăng xuất ngay chỉ vì profile truy vấn lỗi. Các tài khoản cũ
+    // có thể có metadata/role được cấp qua bảng phân quyền.
     await loadCloudUser(data.user);
     await loadAvailableClasses(data.user.id);
-    if(!availableClasses.length){await sb.auth.signOut({scope:'local'});throw new Error('Tài khoản chưa được cấp quyền vào lớp nào. Hãy liên hệ GVCN.')}
+    if(!availableClasses.length){
+      await sb.auth.signOut({scope:'local'});
+      throw new Error('Tài khoản đã xác thực nhưng chưa được cấp quyền vào lớp nào. Hãy kiểm tra bảng class_user_roles hoặc quyền GVCN/Admin.');
+    }
     showClassChooser();
-  }catch(e){console.error(e);setLoginStatus('❌ '+(e?.message||String(e)));}
+  }catch(e){
+    console.error('LOGIN_ERROR',e);
+    try{ await sb.auth.signOut({scope:'local'}); }catch(_){ }
+    setLoginStatus('❌ Không thể hoàn tất đăng nhập: '+(e?.message||String(e)));
+  }
 }
 async function loadCloudUser(user){
-  const {data:p,error}=await sb.from('profiles').select('*').eq('id',user.id).single();
-  if(error||!p){await sb.auth.signOut({scope:'local'});throw new Error('Tài khoản chưa có hồ sơ trong bảng profiles. Hãy chạy SQL nâng cấp v4.')}
-  currentUser={...p};
+  if(!user?.id) throw new Error('Supabase không trả về user hợp lệ.');
+  const {data:p,error}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
+  if(p){
+    currentUser={...p};
+    // Giữ email/phone từ Auth nếu profile cũ chưa có.
+    currentUser.email=currentUser.email||user.email||'';
+    currentUser.phone=currentUser.phone||user.phone||'';
+    currentUser.name=currentUser.name||user.user_metadata?.name||user.user_metadata?.full_name||user.email||user.phone||'Người dùng';
+    return currentUser;
+  }
+
+  // Tương thích dữ liệu cũ: nếu profile chưa được tạo nhưng tài khoản Auth
+  // đã tồn tại, vẫn cho phép tiếp tục tới bước kiểm tra class_user_roles.
+  const {data:roles,error:roleError}=await sb.from('class_user_roles').select('role,scope').eq('user_id',user.id).limit(20);
+  if(roleError) throw new Error('Không đọc được hồ sơ/quyền tài khoản: '+roleError.message);
+  if(!roles?.length) throw new Error('Tài khoản đã đăng nhập Auth nhưng chưa có hồ sơ hoặc phân quyền trong hệ thống.');
+  const first=roles[0];
+  currentUser={id:user.id,email:user.email||'',phone:user.phone||'',name:user.user_metadata?.name||user.user_metadata?.full_name||user.email||user.phone||'Người dùng',role:first.role,scope:first.scope||''};
+  return currentUser;
 }
 async function loadAvailableClasses(userId){
   let q=sb.from('classes').select('id,class_name,grade,group_count,is_archived,state_key,homeroom_teacher_id,academic_years!inner(id,name,is_locked)').order('created_at',{ascending:false});
