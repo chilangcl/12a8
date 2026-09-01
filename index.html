@@ -609,7 +609,7 @@ select option{background:#fff!important;color:#202124!important}
     <div class="field"><label>Tài khoản</label><input id="loginUser" placeholder="Nhập tài khoản"></div>
     <div class="field"><label>Mật khẩu</label><input id="loginPass" type="password" placeholder="Nhập mật khẩu"></div>
     <button class="btn" style="width:100%;margin-top:6px" onclick="login()">Đăng nhập</button>
-    <button class="guest-btn" type="button" onclick="openGuestMode()">👀 Xem thông tin lớp (Khách)</button>
+    <button class="guest-btn" type="button" onclick="openGuestMode()">👀 Vào xem (Không đăng nhập)</button>
     <div class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</div>
   </div>
 </div>
@@ -1301,6 +1301,13 @@ function openCompetitionHistory(studentId,mode,detail){
   const rows=result.events.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
   document.getElementById('competitionHistoryContent').innerHTML=`<div class="muted">Biến động điểm · ${competitionPeriodLabel(mode,detail)}</div><div class="history-score">Điểm hiện tại: ${result.score.toFixed(1)} · ${conductLabel(result.score)}</div>${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Điểm</th></tr></thead><tbody>${rows.map(x=>`<tr class="${Number(x.points)>=0?'positive-row':'negative-row'}"><td>${fmtDate(x.date)}</td><td>${esc(x.content||x.type||'')}</td><td><b>${Number(x.points)>=0?'+':''}${Number(x.points).toFixed(1)}</b></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">Chưa có biến động điểm trong giai đoạn này.</div>`}`;
   document.getElementById('competitionHistoryModal').classList.add('show');
+}
+function recentScoreTrend(studentId){
+  const events=(state.conduct||[]).filter(x=>x.studentId===studentId&&x.status==='approved'&&x.date).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  const recent=events.slice(-3);
+  if(recent.length<2)return {decline:false,delta:0};
+  const delta=recent.reduce((s,x)=>s+Number(x.points||0),0);
+  return {decline:delta<0,delta};
 }
 function classifyStudentAttention(s){
   const r=getAttentionRules(), z=attendanceCounts(s.id), allScore=competitionStudentScore(s.id,'year').score;
