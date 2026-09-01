@@ -653,7 +653,7 @@ select option{background:#fff!important;color:#202124!important}
 <body>
 
 <div id="classChooser" class="modal" style="z-index:2000"><div class="modal-card" style="max-width:620px">
-  <div class="modal-head"><h3>🏫 Chọn năm học và lớp cần vào</h3><button class="x" onclick="cancelClassEntry()">×</button></div>
+  <div class="modal-head"><h3>🏫 Chọn năm học và lớp</h3><button class="x" onclick="cancelClassEntry()">×</button></div>
   <p class="muted">Sau khi đăng nhập, hệ thống hiển thị đúng các lớp mà tài khoản được phép truy cập.</p>
   <div class="form-grid" style="margin-top:12px">
     <div class="field"><label>Năm học</label><select id="loginYearSelect"></select></div>
@@ -669,7 +669,7 @@ select option{background:#fff!important;color:#202124!important}
     <div class="field"><label>Tài khoản</label><input id="loginUser" placeholder="Nhập tài khoản"></div>
     <div class="field"><label>Mật khẩu</label><input id="loginPass" type="password" placeholder="Nhập mật khẩu"></div>
     <button class="btn" style="width:100%;margin-top:6px" onclick="login()">Đăng nhập</button>
-    <button class="guest-btn" type="button" onclick="openGuestMode()">👀 Vào xem (Không đăng nhập)</button>
+    <button class="guest-btn" type="button" onclick="openGuestMode()">👀 Vào xem (Không cần đăng nhập)</button>
     <div class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</div>
   </div>
 </div>
@@ -800,7 +800,7 @@ select option{background:#fff!important;color:#202124!important}
             <textarea id="aiQuestion" placeholder="Ví dụ: Học sinh nào có điểm rèn luyện giảm? Tổ nào có nền nếp tốt nhất? Hãy phân tích lớp tuần này..."></textarea>
             <div class="actions"><button class="btn" id="aiAskBtn" onclick="askAI()">🤖 Hỏi AI</button><button class="btn secondary" onclick="clearAIAnswer()">Xóa</button></div>
             <div id="aiMeta" class="ai-meta"></div>
-            <div class="ai-data-note">🔐 Dữ liệu Trợ lý AI được giới hạn theo phiên GVCN đang đăng nhập và lớp đang chọn. AI có thể phân tích đầy đủ hồ sơ, chuyên cần, rèn luyện, thi đua và dữ liệu học tập đã có trong hệ thống; không tự ý chia sẻ dữ liệu ra giao diện công khai.</div>
+            <div class="ai-data-note">🔐 Trợ lý AI được phép khai thác toàn bộ dữ liệu nghiệp vụ của lớp đang chọn theo phiên GVCN: hồ sơ học sinh, chuyên cần, rèn luyện, thi đua, hoạt động lớp và dữ liệu học tập đã có trong hệ thống.</div>
             <div id="aiAnswer" class="ai-answer" tabindex="0" aria-label="Nội dung trả lời của Trợ lý AI">AI sẽ trả lời dựa trên dữ liệu lớp đang chọn.</div>
             <div class="ai-speech-actions">
               <button class="btn secondary" id="aiSpeakBtn" onclick="speakAIAnswer()">🔊 Nghe toàn bộ</button>
@@ -857,7 +857,7 @@ select option{background:#fff!important;color:#202124!important}
                     <tr><td>Học tập & ý thức lớp</td><td>Không học bài / Không làm bài</td><td><b>-5</b></td></tr>
                     <tr><td>Học tập & ý thức lớp</td><td>Mất trật tự trong giờ học</td><td><b>-3</b></td></tr>
                     <tr><td>Học tập & ý thức lớp</td><td>Sử dụng điện thoại không phép</td><td><b>-5</b></td></tr>
-                    <tr><td>An toàn & pháp luật</td><td>Vi phạm an toàn giao thông</td><td><b>-15 đến -20</b></td></tr>
+                    <tr><td>An toàn & pháp luật</td><td>Vi phạm an toàn giao thông</td><td><b>-20</b></td></tr>
                   </tbody>
                 </table>
               </div>
@@ -869,8 +869,8 @@ select option{background:#fff!important;color:#202124!important}
                 <table class="table guide-table">
                   <thead><tr><th>Nội dung khen thưởng</th><th>Mức cộng</th></tr></thead>
                   <tbody>
-                    <tr><td>Thành tích đột xuất (giải HSG, năng khiếu, thể thao cấp Trường/Tỉnh)</td><td><b>+10 đến +20</b></td></tr>
-                    <tr><td>Làm việc tốt (nhặt được của rơi trả lại, giúp đỡ bạn bè, bảo vệ tài sản chung)</td><td><b>+5 đến +10</b></td></tr>
+                    <tr><td>Thành tích đột xuất (giải HSG, năng khiếu, thể thao cấp Trường/Tỉnh)</td><td><b>+20</b></td></tr>
+                    <tr><td>Làm việc tốt (nhặt được của rơi trả lại, giúp đỡ bạn bè, bảo vệ tài sản chung)</td><td><b>+10</b></td></tr>
                     <tr><td>Tích cực hoạt động tập thể (văn nghệ, thể thao, phong trào Đoàn)</td><td><b>+5 / sự kiện</b></td></tr>
                     <tr><td>Đạt điểm 9, 10 trong giờ học</td><td><b>+2 / điểm tốt</b></td></tr>
                     <tr><td>Tuần học tốt (cá nhân không vi phạm bất kỳ lỗi nào trong tuần)</td><td><b>+5</b></td></tr>
@@ -882,7 +882,6 @@ select option{background:#fff!important;color:#202124!important}
 
           <div class="notice" style="margin-top:12px">
             <b>Nguyên tắc ghi nhận:</b> cán sự lớp chỉ ghi nhận sự việc có căn cứ; nội dung cần mô tả rõ, tránh ghi chung chung.
-            Với mức điểm là một khoảng (ví dụ -15 đến -20 hoặc +10 đến +20), cán sự lớp cần thống nhất mức áp dụng theo quy định của lớp/GVCN trước khi lưu.
             Điểm tuần được tính từ 100 điểm ban đầu, sau đó cộng/trừ các lượt được ghi nhận.
           </div>
         </div>
@@ -1433,7 +1432,7 @@ function renderStudents(){
  let a=visibleStudents().filter(s=>(!q||`${s.code} ${s.name}`.toLowerCase().includes(q))&&(!g||String(s.group)===g)&&(!sex||s.gender===sex));
  document.getElementById('studentsBody').innerHTML=a.length?a.map((s,i)=>`<tr><td>${i+1}</td><td><b>${esc(s.code)}</b></td><td>${esc(s.name)}</td><td>${fmtDate(s.dob)}</td><td>${esc(s.gender)}</td><td>${esc(s.group)}</td><td>${esc(s.role)}</td><td>${esc(s.parentPhone)}</td><td>${isAdmin()?`<button class="btn small" onclick="openStudent('${esc(s.id)}')">Sửa</button> <button class="btn secondary small" onclick="viewStudent('${esc(s.id)}')">Hồ sơ 360°</button> <button class="btn danger small" onclick="deleteStudent('${esc(s.id)}')">Xóa</button>`:`<button class="btn secondary small" onclick="viewStudent('${esc(s.id)}')">Hồ sơ 360°</button>`}</td></tr>`).join(''):`<tr><td colspan="9" class="empty">Chưa có học sinh. Thầy có thể tải mẫu Excel rồi nhập danh sách.</td></tr>`;
 }
-function openStudent(id=''){if(!canManageStudents()){alert('🔒 Chỉ GVCN/Admin được thêm hoặc sửa hồ sơ học sinh.');return}editingStudent=id||null;const s=state.students.find(x=>x.id===id)||{};document.getElementById('studentModalTitle').textContent=id?'Sửa học sinh':'Thêm học sinh';
+function openStudent(id=''){if(!canManageStudents()){alert('🔒 Chỉ GVCN được thêm hoặc sửa hồ sơ học sinh.');return}editingStudent=id||null;const s=state.students.find(x=>x.id===id)||{};document.getElementById('studentModalTitle').textContent=id?'Sửa học sinh':'Thêm học sinh';
  [['sCode',s.code],['sName',s.name],['sDob',s.dob],['sEthnic',s.ethnic],['sPhone',s.phone],['sEmail',s.email],['sParent',s.parent],['sParentPhone',s.parentPhone],['sAddress',s.address],['sNote',s.note]].forEach(([id,v])=>document.getElementById(id).value=v||'');
  document.getElementById('sGender').value=s.gender||'Nam';document.getElementById('sGroup').value=s.group||'1';document.getElementById('sRole').value=s.role||'';document.getElementById('studentModal').classList.add('show')}
 async function saveStudent(){
@@ -1504,8 +1503,8 @@ async function saveLearning(){
 function openConduct(){document.getElementById('cDate').value=today();document.getElementById('cContent').value='';document.getElementById('cPoints').value=1;document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');document.getElementById('conductModal').classList.add('show')}
 async function saveConduct(){const sid=document.getElementById('cStudent').value;if(!sid){alert('Chưa có học sinh.');return}let type=document.getElementById('cType').value,pts=Number(document.getElementById('cPoints').value||0);if(type==='Điểm trừ'||type==='Vi phạm')pts=-Math.abs(pts);const x={id:crypto.randomUUID(),date:document.getElementById('cDate').value,studentId:sid,type,content:document.getElementById('cContent').value,points:pts,by:currentUser.username,status:isAdmin()?'approved':'pending'};state.conduct.push(x);saveData();await pushCloud();log(`Ghi nhận rèn luyện cho ${state.students.find(s=>s.id===sid)?.name||''}`);closeModal('conductModal');renderAll()}
 function renderConduct(){const q=(document.getElementById('conductSearch').value||'').toLowerCase(),st=document.getElementById('conductStatus').value||'';let a=state.conduct||[];if(currentUser?.role?.startsWith('to'))a=a.filter(x=>state.students.find(s=>s.id===x.studentId)?.group==currentUser.role.replace('to',''));a=a.filter(x=>(!q||`${x.content} ${state.students.find(s=>s.id===x.studentId)?.name||''}`.toLowerCase().includes(q))&&(!st||x.status===st));document.getElementById('conductBody').innerHTML=a.length?a.slice().reverse().map(x=>{const s=state.students.find(s=>s.id===x.studentId)||{};return `<tr><td>${fmtDate(x.date)}</td><td>${esc(s.name||'')}</td><td>${esc(x.type)}</td><td>${esc(x.content)}</td><td><b>${Number(x.points).toFixed(1)}</b></td><td>${esc(x.by)}</td><td><span class="badge ${x.status==='approved'?'b-green':'b-yellow'}">${x.status==='approved'?'Đã duyệt':'Chờ duyệt'}</span></td><td>${isAdmin()&&x.status==='pending'?`<button class="btn small success" onclick="approveConduct('${x.id}')">Duyệt</button>`:''} ${isAdmin()?`<button class="btn small danger" onclick="deleteConduct('${x.id}')">Xóa</button>`:''}</td></tr>`}).join(''):'<tr><td colspan="8" class="empty">Chưa có bản ghi.</td></tr>'}
-async function approveConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được duyệt rèn luyện.');return}const x=state.conduct.find(x=>x.id===id);if(x){x.status='approved';saveData();await pushCloud();log('GVCN duyệt một bản ghi rèn luyện');renderAll()}}
-async function deleteConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được xóa bản ghi rèn luyện.');return}if(!confirm('Xóa bản ghi này?'))return;state.conduct=state.conduct.filter(x=>x.id!==id);saveData();await pushCloud();renderAll()}
+async function approveConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN được duyệt rèn luyện.');return}const x=state.conduct.find(x=>x.id===id);if(x){x.status='approved';saveData();await pushCloud();log('GVCN duyệt một bản ghi rèn luyện');renderAll()}}
+async function deleteConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN được xóa bản ghi rèn luyện.');return}if(!confirm('Xóa bản ghi này?'))return;state.conduct=state.conduct.filter(x=>x.id!==id);saveData();await pushCloud();renderAll()}
 function conductPoints(sid){return (state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved').reduce((a,x)=>a+Number(x.points||0),0)}
 function attendanceCounts(sid){let o={present:0,late:0,excused:0,absent:0};Object.values(state.attendance||{}).filter(x=>(x.studentId||x.id)===sid).forEach(x=>{const k=x.status;if(Object.prototype.hasOwnProperty.call(o,k))o[k]++});return o}
 const BIBI_ACADEMIC_START='2026-09-07';
@@ -1750,9 +1749,9 @@ async function importExcel(e){
   }finally{e.target.value=''}
 }
 function parseCSV(text){const rows=[];let row=[],cell='',q=false;for(let i=0;i<text.length;i++){const c=text[i],n=text[i+1];if(c==='"'&&q&&n==='"'){cell+='"';i++;continue}if(c==='"'){q=!q;continue}if(c===','&&!q){row.push(cell);cell='';continue}if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell);cell='';if(row.some(x=>x!==''))rows.push(row);row=[];continue}cell+=c}if(cell!==''||row.length){row.push(cell);rows.push(row)}return rows}
-function exportStudentsCSV(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được xuất danh sách học sinh.');return}const rows=[['Mã HS','Họ và tên','Ngày sinh','Giới tính','Dân tộc','Địa chỉ','SĐT học sinh','Email','Họ tên phụ huynh','SĐT phụ huynh','Tổ','Chức vụ','Ghi chú'],...visibleStudents().map(s=>[s.code,s.name,s.dob,s.gender,s.ethnic,s.address,s.phone,s.email,s.parent,s.parentPhone,s.group,s.role,s.note])];downloadBlob('\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\n'),'Danh_sach_12A8.csv','text/csv;charset=utf-8')}
-function exportBackup(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được sao lưu dữ liệu.');return}downloadBlob(JSON.stringify(state,null,2),'Backup_12A8_'+today()+'.json','application/json')}
-async function importBackup(e){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được khôi phục dữ liệu.');if(e?.target)e.target.value='';return}const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=async ev=>{try{const x=JSON.parse(ev.target.result);if(!x.students||!x.settings)throw Error();if(!confirm('Khôi phục sẽ thay thế dữ liệu hiện tại. Tiếp tục?'))return;state=x;saveData();await pushCloud();renderAll();alert('Đã khôi phục dữ liệu.')}catch(err){alert('File sao lưu không hợp lệ.')}};r.readAsText(file);e.target.value=''}
+function exportStudentsCSV(){if(!isAdmin()){alert('🔒 Chỉ GVCN được xuất danh sách học sinh.');return}const rows=[['Mã HS','Họ và tên','Ngày sinh','Giới tính','Dân tộc','Địa chỉ','SĐT học sinh','Email','Họ tên phụ huynh','SĐT phụ huynh','Tổ','Chức vụ','Ghi chú'],...visibleStudents().map(s=>[s.code,s.name,s.dob,s.gender,s.ethnic,s.address,s.phone,s.email,s.parent,s.parentPhone,s.group,s.role,s.note])];downloadBlob('\uFEFF'+rows.map(r=>r.map(csvCell).join(',')).join('\n'),'Danh_sach_12A8.csv','text/csv;charset=utf-8')}
+function exportBackup(){if(!isAdmin()){alert('🔒 Chỉ GVCN được sao lưu dữ liệu.');return}downloadBlob(JSON.stringify(state,null,2),'Backup_12A8_'+today()+'.json','application/json')}
+async function importBackup(e){if(!isAdmin()){alert('🔒 Chỉ GVCN được khôi phục dữ liệu.');if(e?.target)e.target.value='';return}const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=async ev=>{try{const x=JSON.parse(ev.target.result);if(!x.students||!x.settings)throw Error();if(!confirm('Khôi phục sẽ thay thế dữ liệu hiện tại. Tiếp tục?'))return;state=x;saveData();await pushCloud();renderAll();alert('Đã khôi phục dữ liệu.')}catch(err){alert('File sao lưu không hợp lệ.')}};r.readAsText(file);e.target.value=''}
 function downloadBlob(content,name,type){const blob=new Blob([content],{type}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 
 function renderProfileSelectors(selectedId=''){
@@ -1867,11 +1866,11 @@ function renderProfile(){
     box.innerHTML='<div class="empty">Không thể hiển thị hồ sơ 360°. Vui lòng tải lại dữ liệu hoặc chọn lại học sinh.</div>';
   }
 }
-async function saveConductRules(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được thay đổi nguyên tắc.');return}const good=Number(document.getElementById('setGoodScore')?.value),fair=Number(document.getElementById('setFairScore')?.value),pass=Number(document.getElementById('setPassScore')?.value),base=Number(document.getElementById('setConductBase')?.value);if(![good,fair,pass,base].every(Number.isFinite)){alert('⚠️ Vui lòng nhập đủ các chỉ số hợp lệ.');return}if(!(good>=fair&&fair>=pass)){alert('⚠️ Ngưỡng phải theo thứ tự Tốt ≥ Khá ≥ Đạt.');return}if(base<0){alert('⚠️ Điểm khởi đầu không được âm.');return}state.settings=state.settings||{};state.settings.conductRules={base,good,fair,pass};saveData();const ok=await pushCloud();const st=document.getElementById('conductRulesStatus');if(st){st.style.display='block';st.className='notice '+(ok===false?'':'ok');st.textContent=ok===false?'⚠️ Đã lưu trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã lưu nguyên tắc xếp hạnh kiểm.'}renderAll()}
+async function saveConductRules(){if(!isAdmin()){alert('🔒 Chỉ GVCN được thay đổi nguyên tắc.');return}const good=Number(document.getElementById('setGoodScore')?.value),fair=Number(document.getElementById('setFairScore')?.value),pass=Number(document.getElementById('setPassScore')?.value),base=Number(document.getElementById('setConductBase')?.value);if(![good,fair,pass,base].every(Number.isFinite)){alert('⚠️ Vui lòng nhập đủ các chỉ số hợp lệ.');return}if(!(good>=fair&&fair>=pass)){alert('⚠️ Ngưỡng phải theo thứ tự Tốt ≥ Khá ≥ Đạt.');return}if(base<0){alert('⚠️ Điểm khởi đầu không được âm.');return}state.settings=state.settings||{};state.settings.conductRules={base,good,fair,pass};saveData();const ok=await pushCloud();const st=document.getElementById('conductRulesStatus');if(st){st.style.display='block';st.className='notice '+(ok===false?'':'ok');st.textContent=ok===false?'⚠️ Đã lưu trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã lưu nguyên tắc xếp hạnh kiểm.'}renderAll()}
 async function resetConductRules(){if(!isAdmin())return;if(!confirm('Khôi phục mặc định: Tốt ≥96; Khá ≥90; Đạt ≥85; điểm khởi đầu 100?'))return;state.settings=state.settings||{};state.settings.conductRules={base:100,good:96,fair:90,pass:85};saveData();renderConductRulesSettings();const ok=await pushCloud();const st=document.getElementById('conductRulesStatus');if(st){st.style.display='block';st.className='notice ok';st.textContent=ok===false?'⚠️ Đã khôi phục trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã khôi phục mặc định.'}renderAll()}
-async function saveSettings(){if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được thay đổi cài đặt.');return}state.settings.teacher=document.getElementById('setTeacher').value;state.settings.className=document.getElementById('setClass').value;state.settings.year=document.getElementById('setYear').value;state.settings.groups=Number(document.getElementById('setGroups').value);state.settings.conductRules=getConductRules();saveData();await pushCloud();renderConductRulesSettings();alert('Đã lưu cài đặt.')}
+async function saveSettings(){if(!isAdmin()){alert('🔒 Chỉ GVCN được thay đổi cài đặt.');return}state.settings.teacher=document.getElementById('setTeacher').value;state.settings.className=document.getElementById('setClass').value;state.settings.year=document.getElementById('setYear').value;state.settings.groups=Number(document.getElementById('setGroups').value);state.settings.conductRules=getConductRules();saveData();await pushCloud();renderConductRulesSettings();alert('Đã lưu cài đặt.')}
 async function resetAttendanceOnly(){
-  if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được reset điểm danh.');return}
+  if(!isAdmin()){alert('🔒 Chỉ GVCN được reset điểm danh.');return}
   const className=currentClass?.class_name||state.settings?.className||'lớp đang chọn';
   const ok1=confirm(`🔄 RESET ĐIỂM DANH\n\nLớp: ${className}\n\nThao tác này sẽ xóa toàn bộ dữ liệu: Có mặt, Đi muộn, Nghỉ có phép, Nghỉ không phép.\n\nKHÔNG xóa: danh sách học sinh, tài khoản học sinh, sơ đồ chỗ ngồi, rèn luyện, hạnh kiểm và cài đặt lớp.\n\nThầy có muốn tiếp tục không?`);
   if(!ok1)return;
@@ -1902,20 +1901,42 @@ function buildAIContext(){
   const attendance=state.attendance&&typeof state.attendance==='object'?Object.values(state.attendance):[];
   const conduct=Array.isArray(state.conduct)?state.conduct:[];
   const scores=state.scores&&typeof state.scores==='object'?state.scores:{};
-  const byId={}; students.forEach(s=>byId[s.id]=s);
+  const activities=Array.isArray(state.activity)?state.activity:[];
+  const auditLog=Array.isArray(state.auditLog)?state.auditLog:[];
+  const notifications=Array.isArray(state.notifications)?state.notifications:[];
   const stats=students.map(s=>{
     const ar=attendance.filter(x=>x.studentId===s.id||x.id===s.id);
     const cr=conduct.filter(x=>x.studentId===s.id&&x.status==='approved');
     const plus=cr.filter(x=>Number(x.points)>0).reduce((a,x)=>a+Number(x.points||0),0);
     const minus=cr.filter(x=>Number(x.points)<0).reduce((a,x)=>a+Number(x.points||0),0);
     const studentScores={};
-    Object.entries(scores).forEach(([k,v])=>{if(k.endsWith('_'+s.id)||k===s.id)studentScores[k.replace('_'+s.id,'')]=v;});
-    return {...cloneSafe(s),attendance:{present:ar.filter(x=>x.status==='present').length,late:ar.filter(x=>x.status==='late').length,excused:ar.filter(x=>x.status==='excused').length,absent:ar.filter(x=>x.status==='absent').length,total:ar.length},conduct:{records:cr.length,plus:Number(plus.toFixed(1)),minus:Number(minus.toFixed(1)),net:Number((plus+minus).toFixed(1)),recent:cloneSafe(cr.slice(-20))||[]},learning:cloneSafe(studentScores)||{}};
+    Object.entries(scores).forEach(([k,v])=>{
+      if(k.endsWith('_'+s.id)||k===s.id) studentScores[k.replace('_'+s.id,'')]=cloneSafe(v);
+    });
+    const studentActivities=activities.filter(x=>x.studentId===s.id||x.student_id===s.id);
+    return {...cloneSafe(s),
+      attendance:{present:ar.filter(x=>x.status==='present').length,late:ar.filter(x=>x.status==='late').length,excused:ar.filter(x=>x.status==='excused').length,absent:ar.filter(x=>x.status==='absent').length,total:ar.length,records:cloneSafe(ar)||[]},
+      conduct:{records:cr.length,plus:Number(plus.toFixed(1)),minus:Number(minus.toFixed(1)),net:Number((plus+minus).toFixed(1)),recent:cloneSafe(cr)||[]},
+      learning:studentScores,activities:cloneSafe(studentActivities)||[]};
   });
   const approved=conduct.filter(x=>x.status==='approved');
   const genderStats=getGenderStatsFromStudents(students);
-  const groups={}; students.forEach(s=>{const g=String(s.group||'Chưa xếp');groups[g]=(groups[g]||0)+1;});
-  return {class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',teacher:state.settings?.teacher||currentUser?.name||'',groups:state.settings?.groups||4},summary:{students:students.length,attendanceRecords:attendance.length,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),weekStart:aiWeekStart(today()),gender:genderStats,groups},students:stats,fullStudentRecords:cloneSafe(students)||[],fullAttendanceRecords:cloneSafe(attendance)||[],fullConductRecords:cloneSafe(conduct)||[],fullScores:cloneSafe(scores)||{},recentConduct:cloneSafe(approved.slice(-100))||[]};
+  const groups={};
+  students.forEach(s=>{const g=String(s.group||'Chưa xếp');if(!groups[g])groups[g]=[];groups[g].push(s.id);});
+  const classState=cloneSafe({settings:state.settings||{},students,attendance:state.attendance||{},scores,conduct,activity:activities,auditLog,notifications})||{};
+  return {
+    scope:{currentClassKey:currentStateKey,className:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',teacher:state.settings?.teacher||currentUser?.name||'',instruction:'Chỉ sử dụng dữ liệu của lớp đang được chọn.'},
+    class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',teacher:state.settings?.teacher||currentUser?.name||'',groups:state.settings?.groups||4},
+    summary:{students:students.length,attendanceRecords:attendance.length,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),activityRecords:activities.length,auditRecords:auditLog.length,notificationRecords:notifications.length,weekStart:aiWeekStart(today()),gender:genderStats,groups},
+    students:stats,
+    fullStudentRecords:cloneSafe(students)||[],
+    fullAttendanceRecords:cloneSafe(attendance)||[],
+    fullConductRecords:cloneSafe(conduct)||[],
+    fullActivityRecords:cloneSafe(activities)||[],
+    fullScores:cloneSafe(scores)||{},
+    recentConduct:cloneSafe(approved)||[],
+    classState
+  };
 }
 function buildAIGenderSummary(context){
   const g=context?.summary?.gender||{};
@@ -1924,32 +1945,27 @@ function buildAIGenderSummary(context){
 function buildAIPrompt(question,context){
   return `Bạn là Trợ lý AI chuyên nghiệp của GVCN trong hệ thống ClassManager Pro.
 
-Bạn đang hỗ trợ duy nhất giáo viên chủ nhiệm đang đăng nhập và chỉ phân tích lớp đang được chọn. Context kèm theo là dữ liệu nội bộ của lớp. Hãy coi toàn bộ context là thông tin mật của nhà trường. Không được gửi, đăng lại, quảng bá, công khai hoặc tiết lộ context cho bất kỳ người dùng, giao diện công khai hay bên thứ ba nào. Chỉ dùng context để tạo câu trả lời cho đúng câu hỏi của GVCN.
+PHẠM VI DỮ LIỆU:
+Bạn hỗ trợ duy nhất GVCN đang đăng nhập và chỉ phân tích lớp đang được chọn. Bạn được phép đọc và đối chiếu TOÀN BỘ dữ liệu nghiệp vụ có trong context, gồm toàn bộ hồ sơ học sinh, chuyên cần, rèn luyện/thi đua, hoạt động lớp và hoạt động của từng học sinh, dữ liệu học tập/điểm, cấu hình lớp và các bản ghi nghiệp vụ khác trong classState.
 
-QUYỀN KHAI THÁC DỮ LIỆU:
-- Được phép đọc và đối chiếu đầy đủ hồ sơ học sinh có trong context, bao gồm mọi trường dữ liệu hiện có của học sinh, cùng dữ liệu chuyên cần, rèn luyện, thi đua và học tập.
-- Không tự suy đoán dữ liệu còn thiếu. Không bịa tên, điểm, ngày tháng, sự kiện hoặc nguyên nhân.
-- Khi GVCN hỏi thống kê, phải tính từ dữ liệu thực tế trong context; ưu tiên con số chính xác trước.
-- Đặc biệt với câu hỏi số học sinh nam/nữ: phải sử dụng trường gender trong fullStudentRecords, tự đếm từng học sinh và trả lời con số nam/nữ trước; tuyệt đối không được nói rằng dữ liệu không có giới tính nếu context có trường gender.
-- Khi GVCN hỏi về một học sinh, phải đối chiếu đúng mã học sinh và họ tên trước khi kết luận.
-- Khi GVCN hỏi so sánh tổ, phải tính theo dữ liệu thực tế và nêu căn cứ.
-- Khi GVCN hỏi biến động, phải so sánh theo thời gian nếu dữ liệu có đủ mốc.
-- Khi GVCN hỏi thành tích hoặc vi phạm, phải nêu rõ học sinh, ngày, số điểm và nội dung nếu các trường đó có trong dữ liệu.
-- Khi dữ liệu không đủ để kết luận, nói thẳng phần dữ liệu còn thiếu.
+NGUYÊN TẮC BẮT BUỘC:
+- Không tự giới hạn quyền đọc dữ liệu khi dữ liệu đã có trong context.
+- Không bịa tên, số liệu, ngày tháng, sự kiện, điểm hoặc nguyên nhân.
+- Thống kê phải tính từ dữ liệu thực tế; nêu con số chính xác trước.
+- Hỏi về học sinh phải đối chiếu đúng họ tên/mã học sinh.
+- Hỏi về tổ phải tính từ danh sách học sinh thực tế và nêu căn cứ.
+- Hỏi về hoạt động, chuyên cần, rèn luyện, thi đua hoặc học tập phải khai thác toàn bộ bản ghi liên quan, không chỉ vài bản ghi gần nhất.
+- Câu hỏi nhiều ý phải trả lời ĐỦ TẤT CẢ các ý theo đúng thứ tự.
+- Không tự ý rút gọn danh sách thành vài ví dụ nếu GVCN yêu cầu danh sách đầy đủ.
+- Không được dừng giữa câu, giữa mục, bằng dấu “...” hoặc tiêu đề chưa hoàn chỉnh.
+- Kết thúc phải là một câu hoàn chỉnh.
+- Nếu dữ liệu thật sự thiếu, chỉ rõ chính xác phần thiếu nhưng vẫn trả lời đầy đủ phần xác định được.
 
-BẢO MẬT THÔNG TIN:
-- Các trường hồ sơ cá nhân nhạy cảm vẫn có thể xuất hiện trong context để phục vụ phân tích nội bộ. Không chủ động đưa thông tin nhạy cảm vào câu trả lời nếu câu hỏi không cần đến chúng.
-- Chỉ trả lời thông tin cá nhân chi tiết khi GVCN hỏi trực tiếp và thông tin đó thực sự có trong context.
-- Tuyệt đối không nhắc lại toàn bộ context, không in JSON, không đưa token, khóa API, thông tin xác thực hoặc dữ liệu kỹ thuật nội bộ vào câu trả lời.
+BẢO MẬT:
+Chỉ dùng context để trả lời GVCN. Không tiết lộ token, khóa API, thông tin xác thực hoặc dữ liệu kỹ thuật nội bộ. Không chủ động nêu dữ liệu nhạy cảm nếu câu hỏi không cần.
 
-PHONG CÁCH TRẢ LỜI:
-- Trả lời bằng tiếng Việt, tự nhiên như một trợ lý thật đang trao đổi với GVCN.
-- Đi thẳng vào kết quả, không mở đầu dài dòng.
-- Không dùng Markdown, không dùng dấu sao, dấu thăng, backtick, bảng Markdown hay ký hiệu định dạng gây khó nghe bằng giọng nói.
-- Có thể xuống dòng giữa các ý, nhưng mỗi ý phải là câu hoàn chỉnh, dễ đọc.
-- Nếu câu hỏi đơn giản, trả lời ngắn gọn. Nếu câu hỏi cần phân tích, trình bày đủ căn cứ và kết luận.
-- Nếu đưa danh sách học sinh, mỗi dòng ghi rõ họ tên và thông tin cần thiết.
-- Không nói rằng bạn bị giới hạn dữ liệu nếu context đã có dữ liệu tương ứng.
+PHONG CÁCH:
+Trả lời bằng tiếng Việt, tự nhiên, đi thẳng vào kết quả. Không Markdown, không bảng Markdown, không dấu * hoặc #. Có thể xuống dòng giữa các ý. Câu hỏi đơn giản trả lời ngắn gọn; câu hỏi phân tích/tổng hợp phải đầy đủ, có số liệu và căn cứ.
 
 CÂU HỎI CỦA GVCN:
 ${question}`;
