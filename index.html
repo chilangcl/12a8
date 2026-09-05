@@ -591,6 +591,12 @@ select option{background:#fff!important;color:#202124!important}
 .today-attendance-names{display:flex;flex-wrap:wrap;gap:7px}
 .today-attendance-name{display:inline-flex;align-items:center;padding:7px 9px;border-radius:9px;font-weight:800;font-size:14px;background:#f8fafc;border:1px solid #e2e8f0;color:#1e293b!important}
 .today-attendance-empty{color:#64748b!important;font-weight:700;font-size:14px}
+.today-attendance-unmarked{margin-top:14px;border:1px solid #cbd5e1;border-radius:12px;padding:13px 14px;background:#f8fafc}
+.today-attendance-unmarked-title{margin:0 0 7px;font-size:16px;font-weight:900;color:#0f172a!important}
+.today-attendance-unmarked-count{font-size:24px;font-weight:950;color:#475569}
+.today-attendance-groups{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.today-attendance-group{display:inline-flex;align-items:center;padding:7px 10px;border-radius:9px;background:#fff;border:1px solid #cbd5e1;color:#334155!important;font-size:14px;font-weight:800}
+.today-attendance-group b{font-size:16px;margin-left:4px;color:#0f172a!important}
 @media(max-width:760px){.today-attendance-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.today-attendance-lists{grid-template-columns:1fr}.today-attendance-card{padding:15px}.today-attendance-title{font-size:20px}}
 @media(max-width:430px){.today-attendance-grid{grid-template-columns:1fr 1fr}.today-attendance-stat .value{font-size:27px}.today-attendance-stat .label{font-size:14px}}
 </style>
@@ -1353,6 +1359,14 @@ function renderTodayAttendanceSummary(containerId, students, attendanceData){
   const present=rows.filter(x=>x.r.status==='present');
   const late=rows.filter(x=>x.r.status==='late');
   const absent=rows.filter(x=>x.r.status==='excused'||x.r.status==='absent');
+  const unmarked=rows.filter(x=>!x.r.status);
+  const groupCounts={};
+  unmarked.forEach(x=>{
+    const g=String(x.s.group||'Chưa phân tổ').trim()||'Chưa phân tổ';
+    groupCounts[g]=(groupCounts[g]||0)+1;
+  });
+  const groupNames=Object.keys(groupCounts).sort((a,b)=>a.localeCompare(b,'vi',{numeric:true}));
+  const groupSummary=groupNames.map(g=>`<span class="today-attendance-group">${esc(g)}<b>${groupCounts[g]}</b></span>`).join('');
   const lateNames=late.map(x=>`<span class="today-attendance-name">${esc(x.s.name||'')}</span>`).join('');
   const absentNames=absent.map(x=>`<span class="today-attendance-name">${esc(x.s.name||'')} · ${x.r.status==='excused'?'Có phép':'Không phép'}</span>`).join('');
   el.innerHTML=`<div class="today-attendance-card">
@@ -1366,6 +1380,10 @@ function renderTodayAttendanceSummary(containerId, students, attendanceData){
     <div class="today-attendance-lists">
       <div class="today-attendance-list"><h4>⏰ Danh sách đi muộn</h4><div class="today-attendance-names">${lateNames||'<span class="today-attendance-empty">Không có học sinh đi muộn.</span>'}</div></div>
       <div class="today-attendance-list"><h4>🚫 Danh sách vắng mặt</h4><div class="today-attendance-names">${absentNames||'<span class="today-attendance-empty">Không có học sinh vắng mặt.</span>'}</div></div>
+    </div>
+    <div class="today-attendance-unmarked">
+      <div class="today-attendance-unmarked-title">🕘 Chưa điểm danh: <span class="today-attendance-unmarked-count">${unmarked.length} học sinh</span></div>
+      <div class="today-attendance-groups">${groupSummary||'<span class="today-attendance-empty">Không có học sinh chưa điểm danh.</span>'}</div>
     </div>
   </div>`;
 }
