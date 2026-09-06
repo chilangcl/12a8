@@ -775,19 +775,30 @@ select option{background:#fff!important;color:#202124!important}
           <div class="cm-utility-grid cm-recent-grid">
             <button class="cm-utility-card pink" type="button" onclick="showPage('conduct')"><span class="cm-utility-icon">📋</span><span>Quản lý nền nếp</span></button>
             <button class="cm-utility-card mint" type="button" onclick="showPage('students')"><span class="cm-utility-icon">👩‍🎓</span><span>Hồ sơ học sinh</span></button>
-            <button class="cm-utility-card orange" type="button" onclick="showPage('attendance')"><span class="cm-utility-icon">🗓️</span><span>Sổ điểm danh</span></button>
+            <button class="cm-utility-card orange" type="button" onclick="openTodayAttendance()"><span class="cm-utility-icon">🗓️</span><span>Điểm danh hôm nay</span></button>
           </div>
         </section>
 
         <section class="cm-utility-section" aria-label="Tiện ích yêu thích">
-          <div class="cm-section-title"><h2>Tiện ích yêu thích</h2><button class="cm-text-action" type="button" onclick="showPage('settings')">⚙️ Tùy chỉnh</button></div>
+          <div class="cm-section-title"><h2>Tiện ích yêu thích</h2><button class="cm-text-action admin-only" type="button" onclick="showPage('settings')">⚙️ Tùy chỉnh</button></div>
           <div class="cm-utility-grid">
             <button class="cm-utility-card mint" type="button" onclick="showPage('conduct')"><span class="cm-utility-icon">⭐</span><span>Rèn luyện</span></button>
             <button class="cm-utility-card orange" type="button" onclick="showPage('attendance')"><span class="cm-utility-icon">✅</span><span>Điểm danh</span></button>
+            <button class="cm-utility-card pink cm-attendance-summary-card" type="button" onclick="openTodayAttendanceSummary()"><span class="cm-utility-icon">👁️</span><span>Xem điểm danh hôm nay</span></button>
             <button class="cm-utility-card blue" type="button" onclick="showPage('digital')"><span class="cm-utility-icon">💬</span><span>Thông báo lớp</span></button>
             <button class="cm-utility-card purple" type="button" onclick="showPage('reports')"><span class="cm-utility-icon">📊</span><span>Báo cáo</span></button>
             <button class="cm-utility-card cyan" type="button" onclick="showPage('competition')"><span class="cm-utility-icon">🏆</span><span>Thi đua</span></button>
             <button class="cm-utility-card lavender" type="button" onclick="showPage('profile')"><span class="cm-utility-icon">📝</span><span>Hồ sơ 360°</span></button>
+          </div>
+        </section>
+
+        <section class="cm-utility-section admin-only" aria-label="Quản trị hệ thống">
+          <div class="cm-section-title"><h2>⚙️ Quản trị hệ thống</h2><button class="cm-text-action" type="button" onclick="showPage('settings')">Tùy chỉnh ›</button></div>
+          <div class="cm-utility-grid cm-admin-grid">
+            <button class="cm-utility-card pink" type="button" onclick="showPage('ai')"><span class="cm-utility-icon">🤖</span><span>Trợ lý AI</span></button>
+            <button class="cm-utility-card blue" type="button" onclick="showPage('classes')"><span class="cm-utility-icon">🏫</span><span>Quản lý năm học & lớp</span></button>
+            <button class="cm-utility-card purple" type="button" onclick="showPage('users')"><span class="cm-utility-icon">🔐</span><span>Quản lý tài khoản</span></button>
+            <button class="cm-utility-card cyan" type="button" onclick="showPage('settings')"><span class="cm-utility-icon">⚙️</span><span>Cài đặt hệ thống</span></button>
           </div>
         </section>
 
@@ -1301,8 +1312,9 @@ function showPage(name){updateProfile360Access();
  }if(name==='reports')renderReports();if(name==='profile'){
    try{renderProfileSelectors();setTimeout(()=>{try{renderProfile()}catch(err){console.error('Lỗi Hồ sơ 360°:',err)}},0)}
    catch(err){console.error('Lỗi khởi tạo Hồ sơ 360°:',err);const box=document.getElementById('profileContent');if(box)box.innerHTML='<div class="empty">Không thể khởi tạo Hồ sơ 360°. Vui lòng chọn lại học sinh.</div>';}
- }if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule();
+}if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule();
 }
+function openTodayAttendance(){const dateInput=document.getElementById('attDate');if(dateInput)dateInput.value=today();showPage('attendance')}
 function updateProfile360Access(){
   const canSee=!!currentUser;
   document.querySelectorAll('.member-only').forEach(el=>el.style.display=canSee?'':'none');
@@ -2834,6 +2846,13 @@ window.addEventListener('load',function(){setTimeout(function(){try{renderConduc
     <div class="cm-account-heading"><div class="cm-account-avatar" id="cmAccountInitial">GV</div><div><small>Tài khoản đang đăng nhập</small><h3 id="cmAccountName">Giáo viên</h3><p id="cmAccountRole">Giáo viên chủ nhiệm</p></div><button class="cm-sheet-close" type="button" onclick="closeAccountPanel()" aria-label="Đóng">×</button></div>
     <div class="cm-account-info"><div><span>👤 Tên đăng nhập</span><b id="cmAccountUsername">—</b></div><div><span>🏫 Lớp đang quản lý</span><b id="cmAccountClass">—</b></div></div>
     <button class="cm-account-logout" type="button" onclick="closeAccountPanel();logout()">↪️ Thoát tài khoản</button>
+  </section>
+</div>
+<div id="cmTodayAttendancePanel" class="cm-today-attendance-modal" role="dialog" aria-modal="true" aria-label="Điểm danh hôm nay" onclick="if(event.target===this)closeTodayAttendanceSummary()">
+  <section class="cm-today-attendance-sheet">
+    <div class="cm-sheet-handle"></div>
+    <div class="cm-today-attendance-heading"><div><small>THÔNG TIN CHUYÊN CẦN</small><h3>🗓️ Điểm danh hôm nay</h3></div><button class="cm-sheet-close" type="button" onclick="closeTodayAttendanceSummary()" aria-label="Đóng">×</button></div>
+    <div id="cmTodayAttendanceContent" class="cm-today-attendance-content"></div>
   </section>
 </div>
 <style id="cm-account-panel-ui-v1">
