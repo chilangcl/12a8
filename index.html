@@ -775,7 +775,7 @@ select option{background:#fff!important;color:#202124!important}
           <div class="cm-utility-grid cm-recent-grid">
             <button class="cm-utility-card pink" type="button" onclick="showPage('conduct')"><span class="cm-utility-icon">📋</span><span>Quản lý nền nếp</span></button>
             <button class="cm-utility-card mint" type="button" onclick="showPage('students')"><span class="cm-utility-icon">👩‍🎓</span><span>Hồ sơ học sinh</span></button>
-            <button class="cm-utility-card orange" type="button" onclick="openTodayAttendance()"><span class="cm-utility-icon">🗓️</span><span>Điểm danh hôm nay</span></button>
+            <button class="cm-utility-card orange" type="button" onclick="openTodayAttendance()"><span class="cm-utility-icon">🗓️</span><span>Điểm danh</span></button>
           </div>
         </section>
 
@@ -803,7 +803,7 @@ select option{background:#fff!important;color:#202124!important}
         </section>
 
         <div class="card dashboard-notification-card"><h3>🔔 Thông báo của lớp</h3><div id="dashboardNotifications"></div></div>
-        <div class="page-head cm-dashboard-detail"><div><h2>Tổng quan lớp 12A8</h2><div class="muted">GVCN: Nguyễn Văn Hoàng · Năm học 2026–2027</div></div><div class="actions"><button class="btn" onclick="showPage('attendance')">+ Điểm danh hôm nay</button><button class="btn secondary" onclick="refreshCloud()">☁️ Đồng bộ</button></div></div>
+        <div class="page-head cm-dashboard-detail"><div><h2>Tổng quan lớp 12A8</h2><div class="muted">GVCN: Nguyễn Văn Hoàng · Năm học 2026–2027</div></div><div class="actions"><button class="btn" onclick="showPage('attendance')">+ Điểm danh</button><button class="btn secondary" onclick="refreshCloud()">☁️ Đồng bộ</button></div></div>
         <div id="attendanceTodayDashboard"></div>
         <div class="grid cards" id="dashboardStats"></div>
         <div class="grid two" style="margin-top:16px">
@@ -2851,7 +2851,6 @@ window.addEventListener('load',function(){setTimeout(function(){try{renderConduc
 <div id="cmTodayAttendancePanel" class="cm-today-attendance-modal" role="dialog" aria-modal="true" aria-label="Điểm danh hôm nay" onclick="if(event.target===this)closeTodayAttendanceSummary()">
   <section class="cm-today-attendance-sheet">
     <div class="cm-sheet-handle"></div>
-    <div class="cm-today-attendance-heading"><div><small>THÔNG TIN CHUYÊN CẦN</small><h3>🗓️ Điểm danh hôm nay</h3></div><button class="cm-sheet-close" type="button" onclick="closeTodayAttendanceSummary()" aria-label="Đóng">×</button></div>
     <div id="cmTodayAttendanceContent" class="cm-today-attendance-content"></div>
   </section>
 </div>
