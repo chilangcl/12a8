@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sổ Chủ Nhiệm Số - ClassManager_Pro - Nguyễn Văn Hoàng_Trường THPT Chi Lăng</title>
+<title>Sổ Chủ Nhiệm Số — ClassManager_Pro - Nguyễn Văn Hoàng_Trường THPT Chi Lăng</title>
 <style>
 :root{--primary:#2563eb;--primary2:#1d4ed8;--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--danger:#dc2626;--success:#16a34a;--warning:#d97706;--border:#e2e8f0}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--text)}
@@ -771,20 +771,20 @@ select option{background:#fff!important;color:#202124!important}
         </section>
 
         <section class="cm-utility-section" aria-label="Tiện ích gần đây">
-          <div class="cm-section-title"><h2>Tiện ích gần đây</h2><button class="cm-text-action" type="button" onclick="showPage('attendance')"></button></div>
+          <div class="cm-section-title"><h2>Tiện ích gần đây</h2></div>
           <div class="cm-utility-grid cm-recent-grid">
             <button class="cm-utility-card pink" type="button" onclick="showPage('conduct')"><span class="cm-utility-icon">📋</span><span>Quản lý nền nếp</span></button>
             <button class="cm-utility-card mint" type="button" onclick="showPage('students')"><span class="cm-utility-icon">👩‍🎓</span><span>Hồ sơ học sinh</span></button>
-            <button class="cm-utility-card orange" type="button" onclick="openTodayAttendance()"><span class="cm-utility-icon">🗓️</span><span>Điểm danh</span></button>
+            <button class="cm-utility-card orange" type="button" onclick="openTodayAttendance()"><span class="cm-utility-icon">🗓️</span><span>Điểm danh hôm nay</span></button>
           </div>
         </section>
 
         <section class="cm-utility-section" aria-label="Tiện ích yêu thích">
-          <div class="cm-section-title"><h2>Tiện ích yêu thích</h2><button class="cm-text-action admin-only" type="button" onclick="showPage('settings')"></button></div>
+          <div class="cm-section-title"><h2>Tiện ích yêu thích</h2><button class="cm-text-action admin-only" type="button" onclick="showPage('settings')"></div>
           <div class="cm-utility-grid">
             <button class="cm-utility-card mint" type="button" onclick="showPage('conduct')"><span class="cm-utility-icon">⭐</span><span>Rèn luyện</span></button>
-            <button class="cm-utility-card orange" type="button" onclick="showPage('attendance')"><span class="cm-utility-icon">✅</span><span>Điểm danh</span></button>
-            <button class="cm-utility-card pink cm-attendance-summary-card" type="button" onclick="openTodayAttendanceSummary()"><span class="cm-utility-icon">👁️</span><span>Xem điểm danh hôm nay</span></button>
+            <button class="cm-utility-card orange" type="button" onclick="showPage('attendance')"><span class="cm-utility-icon">🗓️</span><span>Điểm danh</span></button>
+            <button class="cm-utility-card pink cm-attendance-summary-card" type="button" onclick="openTodayAttendanceSummary()"><span class="cm-utility-icon">🗓️</span><span>Xem điểm danh hôm nay</span></button>
             <button class="cm-utility-card blue" type="button" onclick="showPage('digital')"><span class="cm-utility-icon">💬</span><span>Thông báo lớp</span></button>
             <button class="cm-utility-card purple" type="button" onclick="showPage('reports')"><span class="cm-utility-icon">📊</span><span>Báo cáo</span></button>
             <button class="cm-utility-card cyan" type="button" onclick="showPage('competition')"><span class="cm-utility-icon">🏆</span><span>Thi đua</span></button>
@@ -793,7 +793,7 @@ select option{background:#fff!important;color:#202124!important}
         </section>
 
         <section class="cm-utility-section admin-only" aria-label="Quản trị hệ thống">
-          <div class="cm-section-title"><h2>⚙️ Quản trị hệ thống</h2><button class="cm-text-action" type="button" onclick="showPage('settings')"></button></div>
+          <div class="cm-section-title"><h2>⚙️ Quản trị hệ thống</h2><button class="cm-text-action" type="button" onclick="showPage('settings')"></div>
           <div class="cm-utility-grid cm-admin-grid">
             <button class="cm-utility-card pink" type="button" onclick="showPage('ai')"><span class="cm-utility-icon">🤖</span><span>Trợ lý AI</span></button>
             <button class="cm-utility-card blue" type="button" onclick="showPage('classes')"><span class="cm-utility-icon">🏫</span><span>Quản lý năm học & lớp</span></button>
@@ -803,7 +803,7 @@ select option{background:#fff!important;color:#202124!important}
         </section>
 
         <div class="card dashboard-notification-card"><h3>🔔 Thông báo của lớp</h3><div id="dashboardNotifications"></div></div>
-        <div class="page-head cm-dashboard-detail"><div><h2>Tổng quan lớp 12A8</h2><div class="muted">GVCN: Nguyễn Văn Hoàng · Năm học 2026–2027</div></div><div class="actions"><button class="btn" onclick="showPage('attendance')">+ Điểm danh</button><button class="btn secondary" onclick="refreshCloud()">☁️ Đồng bộ</button></div></div>
+        <div class="page-head cm-dashboard-detail"><div><h2>Tổng quan lớp 12A8</h2><div class="muted">GVCN: Nguyễn Văn Hoàng · Năm học 2026–2027</div></div><div class="actions"><button class="btn" onclick="showPage('attendance')">+ Điểm danh hôm nay</button><button class="btn secondary" onclick="refreshCloud()">☁️ Đồng bộ</button></div></div>
         <div id="attendanceTodayDashboard"></div>
         <div class="grid cards" id="dashboardStats"></div>
         <div class="grid two" style="margin-top:16px">
@@ -2851,14 +2851,18 @@ window.addEventListener('load',function(){setTimeout(function(){try{renderConduc
 <div id="cmTodayAttendancePanel" class="cm-today-attendance-modal" role="dialog" aria-modal="true" aria-label="Điểm danh hôm nay" onclick="if(event.target===this)closeTodayAttendanceSummary()">
   <section class="cm-today-attendance-sheet">
     <div class="cm-sheet-handle"></div>
+    <div class="cm-today-attendance-heading"><div><small>THÔNG TIN CHUYÊN CẦN</small><h3>🗓️ Điểm danh</h3></div><button class="cm-sheet-close" type="button" onclick="closeTodayAttendanceSummary()" aria-label="Đóng">×</button></div>
     <div id="cmTodayAttendanceContent" class="cm-today-attendance-content"></div>
   </section>
 </div>
 <style id="cm-account-panel-ui-v1">
 .cm-account-panel{position:fixed;inset:0;z-index:4000;display:none;align-items:flex-end;justify-content:center;background:rgba(8,37,70,.36);padding:16px}.cm-account-panel.show{display:flex}.cm-account-sheet{width:min(470px,100%);background:#fff;border-radius:24px;padding:10px 18px 22px;box-shadow:0 -12px 45px rgba(4,55,105,.24);animation:cmSheetIn .2s ease-out}.cm-sheet-handle{width:42px;height:4px;border-radius:99px;background:#d4e1ed;margin:1px auto 16px}.cm-account-heading{display:flex;align-items:center;gap:12px}.cm-account-avatar{width:58px;height:58px;flex:0 0 58px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,#d9f3ff,#74cdfb);color:#0668bb;font-size:18px;font-weight:900}.cm-account-heading small{color:#6b7a8b;font-size:12px}.cm-account-heading h3{margin:2px 0;font-size:19px;color:#142235!important}.cm-account-heading p{margin:0;color:#0879dc;font-size:13px;font-weight:700}.cm-sheet-close{margin-left:auto;width:34px;height:34px;border:0;border-radius:50%;background:#eef5fa;color:#516172;font-size:24px;line-height:1;cursor:pointer}.cm-account-info{display:grid;gap:1px;margin:18px 0;border:1px solid #e4edf5;border-radius:14px;overflow:hidden}.cm-account-info div{display:flex;justify-content:space-between;gap:14px;padding:12px 13px;background:#fbfdff;font-size:13px}.cm-account-info div+div{border-top:1px solid #e4edf5}.cm-account-info span{color:#64748b}.cm-account-info b{color:#1e293b;text-align:right;overflow-wrap:anywhere}.cm-account-logout{width:100%;border:0;border-radius:13px;padding:13px;background:#fff0f1;color:#d92d3b;font-size:15px;font-weight:900;cursor:pointer}.cm-account-logout:hover{background:#ffe2e5}@keyframes cmSheetIn{from{transform:translateY(28px);opacity:.3}to{transform:none;opacity:1}}
+.cm-today-attendance-modal{position:fixed;inset:0;z-index:4100;display:none;align-items:flex-end;justify-content:center;background:rgba(8,37,70,.42);padding:12px}.cm-today-attendance-modal.show{display:flex}.cm-today-attendance-sheet{width:min(720px,100%);max-height:90vh;overflow:auto;background:#fff;border-radius:24px;padding:10px 16px 20px;box-shadow:0 -12px 45px rgba(4,55,105,.24);animation:cmSheetIn .2s ease-out}.cm-today-attendance-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.cm-today-attendance-heading small{font-size:11px;color:#0879dc;font-weight:900;letter-spacing:.7px}.cm-today-attendance-heading h3{margin:3px 0 0;color:#142235!important;font-size:20px}.cm-today-attendance-content .today-attendance-panel{margin:0;padding:14px;border-width:1px;box-shadow:none}.cm-today-attendance-content .today-attendance-head{display:none}.cm-today-attendance-content .today-attendance-grid{grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}.cm-today-attendance-content .today-attendance-item{min-height:100px;padding:10px}.cm-today-attendance-content .today-label{font-size:12px!important}.cm-today-attendance-content .today-number{font-size:25px!important}.cm-today-attendance-content .today-detail{font-size:11px!important}.cm-today-attendance-content .mini{font-size:10px!important}@media(max-width:680px){.cm-today-attendance-sheet{padding:9px 12px 16px}.cm-today-attendance-content .today-attendance-grid{grid-template-columns:1fr}.cm-today-attendance-content .today-attendance-item{min-height:0}.cm-today-attendance-content .today-label{font-size:14px!important}.cm-today-attendance-content .today-detail{font-size:12px!important}}
 </style>
 <style id="cm-auth-navigation-visibility-v1">#app.hidden~.cm-bottom-nav{display:none!important}</style>
 <script id="cm-account-panel-js-v1">
 window.openAccountPanel=function(){const p=document.getElementById('cmAccountPanel');if(!p)return;const u=typeof currentUser!=='undefined'?currentUser:null,c=typeof currentClass!=='undefined'?currentClass:null;const name=u?.name||u?.username||'Giáo viên',role=u?.role==='admin'?'Giáo viên chủ nhiệm · Quản trị viên':(u?.roleLabel||u?.role||'Thành viên lớp');document.getElementById('cmAccountName').textContent=name;document.getElementById('cmAccountRole').textContent=role;document.getElementById('cmAccountUsername').textContent=u?.username||u?.email||'—';document.getElementById('cmAccountClass').textContent=c?.class_name?(c.class_name+(c.year?' · '+c.year:'')):'—';document.getElementById('cmAccountInitial').textContent=name.split(/\s+/).filter(Boolean).slice(-2).map(x=>x[0]).join('').toUpperCase()||'GV';p.classList.add('show')};
 window.closeAccountPanel=function(){document.getElementById('cmAccountPanel')?.classList.remove('show')};
+window.openTodayAttendanceSummary=function(){const panel=document.getElementById('cmTodayAttendancePanel'),content=document.getElementById('cmTodayAttendanceContent');if(!panel||!content)return;const date=typeof today==='function'?today():new Date().toISOString().slice(0,10),students=Array.isArray(state?.students)?state.students:[],attendance=state?.attendance||{};if(typeof attendanceTodaySummary==='function'&&typeof attendanceTodayPanelMarkup==='function'){content.innerHTML=attendanceTodayPanelMarkup(attendanceTodaySummary(students,attendance,date));}else{content.innerHTML='<div class="empty">Không thể tải dữ liệu điểm danh hôm nay.</div>';}panel.classList.add('show');};
+window.closeTodayAttendanceSummary=function(){document.getElementById('cmTodayAttendancePanel')?.classList.remove('show')};
 </script>
