@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Browser-side defence in depth. Deploy the equivalent CSP as an HTTP header for full enforcement. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'; connect-src 'self' https://ewbrnzgmivkmddkkolwq.supabase.co; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' data: https:; worker-src 'self' blob:; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=()">
 <title>Sổ Chủ Nhiệm Số — ClassManager_Pro - Nguyễn Văn Hoàng_Trường THPT Chi Lăng</title>
 <style>
 :root{--primary:#2563eb;--primary2:#1d4ed8;--bg:#f1f5f9;--card:#fff;--text:#0f172a;--muted:#64748b;--danger:#dc2626;--success:#16a34a;--warning:#d97706;--border:#e2e8f0}
@@ -67,6 +71,56 @@ document.addEventListener('click',function(e){
     closeModal(e.target.id);
   }
 });
+</script>
+<!-- Lai navigation and client-security hardening: appended as an isolated, reversible layer. -->
+<style id="lai-navigation-v1">
+:root{--lai-blue:#0879dc;--lai-ink:#142235;--lai-surface:#fff;--lai-line:#e4edf5}
+/* The bottom navigation is always above ordinary content; dialogs are always above it. */
+.cm-bottom-nav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;z-index:700!important;height:68px!important;background:rgba(255,255,255,.98)!important;border-top:1px solid var(--lai-line)!important;border-bottom:0!important;box-shadow:0 -6px 22px rgba(15,45,75,.10)!important;padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right))!important}
+.cm-bottom-nav button{min-height:52px!important;border-radius:13px!important;color:#617084!important;transition:background .16s,color .16s,transform .16s!important}.cm-bottom-nav button:hover{background:#eef7ff!important}.cm-bottom-nav button.active{color:var(--lai-blue)!important;background:#e9f5ff!important}.cm-bottom-nav button:last-child span{font-size:25px!important;font-weight:400!important}
+.content{padding-bottom:94px!important}.modal,.cm-account-panel,.cm-today-attendance-modal{z-index:1200!important}.competition-picker-menu{z-index:1300!important}.ai-floating-btn{bottom:86px!important;z-index:650!important}
+/* Full-screen module dashboard */
+.lai-module-overlay{position:fixed;inset:0;z-index:1100;display:none;flex-direction:column;background:#f8fbff;color:var(--lai-ink);overflow:hidden}.lai-module-overlay.show{display:flex}.lai-module-appbar{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:66px;padding:12px 20px;background:#fff;border-bottom:1px solid var(--lai-line);box-shadow:0 2px 12px rgba(15,45,75,.06)}.lai-module-appbar h2{margin:0;font-size:20px;color:var(--lai-ink)!important}.lai-module-appbar p{margin:2px 0 0;color:#64748b!important;font-size:13px}.lai-close{width:38px;height:38px;border:0;border-radius:50%;background:#eef5fa;color:#344255;font-size:25px;line-height:1;cursor:pointer}.lai-tabs{display:flex;gap:6px;padding:12px 20px 0;background:#fff;border-bottom:1px solid var(--lai-line)}.lai-tab{border:0;border-bottom:3px solid transparent;background:transparent;color:#667085;padding:10px 13px;font-weight:800;cursor:pointer}.lai-tab.active{color:var(--lai-blue);border-color:var(--lai-blue)}.lai-module-body{overflow:auto;padding:20px;flex:1}.lai-module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;max-width:1000px;margin:0 auto}.lai-module-card{min-height:126px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:10px;padding:16px;border:1px solid #deebf5;border-radius:18px;background:#fff;color:var(--lai-ink);text-align:left;box-shadow:0 5px 18px rgba(15,72,130,.06);cursor:pointer;transition:transform .16s,box-shadow .16s}.lai-module-card:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(15,72,130,.13)}.lai-module-icon{width:45px;height:45px;display:grid;place-items:center;border-radius:14px;background:#e9f5ff;font-size:24px}.lai-module-card span:last-child{font-size:14px;font-weight:800;line-height:1.35}.lai-module-empty{max-width:500px;margin:50px auto;color:#64748b;text-align:center}
+/* Avatar becomes the compact personal menu entry. */
+.avatar{cursor:pointer!important}.avatar:focus-visible,.lai-close:focus-visible,.lai-tab:focus-visible,.lai-module-card:focus-visible,.cm-bottom-nav button:focus-visible{outline:3px solid #60a5fa;outline-offset:2px}
+@media(max-width:680px){.content{padding-bottom:88px!important}.cm-bottom-nav{height:66px!important}.ai-floating-btn{bottom:78px!important}.lai-module-appbar{min-height:60px;padding:10px 14px}.lai-module-appbar h2{font-size:18px}.lai-tabs{padding:9px 12px 0}.lai-module-body{padding:14px}.lai-module-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.lai-module-card{min-height:112px;padding:13px}.lai-module-icon{width:41px;height:41px;font-size:22px}}
+</style>
+<script id="lai-navigation-v1-js">
+(()=>{'use strict';
+  const modules=[
+    {id:'dashboard',icon:'⌂',label:'Trang chủ',scope:'all'},
+    {id:'attendance',icon:'🗓️',label:'Điểm danh',scope:'all'},
+    {id:'conduct',icon:'⭐',label:'Rèn luyện',scope:'all'},
+    {id:'competition',icon:'🏆',label:'Thi đua',scope:'all'},
+    {id:'students',icon:'👩‍🎓',label:'Học sinh',scope:'all'},
+    {id:'reports',icon:'📊',label:'Báo cáo',scope:'all'},
+    {id:'ai',icon:'🤖',label:'Trợ lý AI',scope:'admin'},
+    {id:'classes',icon:'🏫',label:'Quản lý lớp',scope:'admin'},
+    {id:'smart',icon:'🧠',label:'Phân tích thông minh',scope:'admin'},
+    {id:'digital',icon:'🗂️',label:'Số hóa & Nhật ký',scope:'admin'},
+    {id:'excel',icon:'📥',label:'Excel / Sao lưu',scope:'admin'},
+    {id:'users',icon:'🔐',label:'Tài khoản & quyền',scope:'admin'},
+    {id:'settings',icon:'⚙️',label:'Cài đặt',scope:'admin'}
+  ];
+  let tab='all'; let overlay;
+  function admin(){return typeof isAdmin==='function'&&isAdmin();}
+  function allowed(m){return m.scope==='all'||admin();}
+  function make(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;}
+  function render(){if(!overlay)return;const grid=overlay.querySelector('.lai-module-grid');grid.replaceChildren();let list=modules.filter(allowed);if(tab==='favorites')list=list.filter(m=>['dashboard','attendance','conduct','students'].includes(m.id));if(tab==='admin')list=list.filter(m=>m.scope==='admin');if(!list.length){grid.append(make('div','lai-module-empty','Không có chức năng phù hợp với quyền hiện tại.'));return;}list.forEach(m=>{const b=make('button','lai-module-card');b.type='button';b.setAttribute('aria-label','Mở '+m.label);b.append(make('span','lai-module-icon',m.icon),make('span','',m.label));b.addEventListener('click',()=>{close();if(typeof showPage==='function')showPage(m.id);});grid.append(b);});overlay.querySelectorAll('.lai-tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));}
+  function close(){overlay?.classList.remove('show');document.body.style.overflow='';}
+  function open(){if(!overlay)return;tab='all';render();overlay.classList.add('show');document.body.style.overflow='hidden';overlay.querySelector('.lai-close')?.focus();}
+  function init(){
+    const nav=document.querySelector('.cm-bottom-nav');if(!nav)return;
+    const add=nav.querySelector('button:last-child');if(add){add.replaceChildren(make('span','', '⊞'),document.createTextNode('Thêm'));add.setAttribute('aria-label','Mở thêm chức năng');add.onclick=open;}
+    const avatar=document.getElementById('avatar');if(avatar){avatar.tabIndex=0;avatar.setAttribute('role','button');avatar.setAttribute('aria-label','Mở hồ sơ và đăng xuất');avatar.onclick=()=>window.openAccountPanel?.();avatar.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();window.openAccountPanel?.();}};}
+    overlay=make('section','lai-module-overlay');overlay.id='laiModuleOverlay';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-label','Thêm chức năng');
+    const bar=make('div','lai-module-appbar'),heading=make('div');heading.append(make('h2','', 'Thêm chức năng'),make('p','', 'Chọn công cụ bạn cần dùng'));const x=make('button','lai-close','×');x.type='button';x.setAttribute('aria-label','Đóng bảng điều khiển');x.onclick=close;bar.append(heading,x);
+    const tabs=make('div','lai-tabs');[['all','Tất cả'],['favorites','Yêu thích'],['admin','Quản trị']].forEach(([id,label])=>{const b=make('button','lai-tab',label);b.type='button';b.dataset.tab=id;b.onclick=()=>{tab=id;render();};if(id==='admin'&&!admin())b.hidden=true;tabs.append(b);});
+    const body=make('div','lai-module-body'),grid=make('div','lai-module-grid');body.append(grid);overlay.append(bar,tabs,body);document.body.append(overlay);
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('show'))close();});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
@@ -1047,7 +1101,8 @@ const createClient = window.supabase?.createClient;
 let sb=null;
 try {
   if (!window.supabase || typeof window.supabase.createClient !== 'function') throw new Error('Không tải được thư viện Supabase. Hãy kiểm tra kết nối Internet hoặc CDN.');
-  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  // Keep auth tokens only for the current browser session; never leave them in persistent localStorage.
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:true,storage:window.sessionStorage,autoRefreshToken:true,detectSessionInUrl:false,flowType:'pkce'}});
 } catch (e) { console.error(e); window.__supabaseInitError=e; }
 let currentClass=null, currentStateKey='12A8-2026-2027', cloudWriteQueue=Promise.resolve();
 let state=seed(), currentUser=null, editingStudent=null, availableClasses=[];
@@ -1130,7 +1185,12 @@ function setUserUi(){
   // Sau khi đổi vai trò/lớp, bảo đảm không còn trang quản trị/AI bị mở.
   if(!isAdmin() && ['ai','classes','profile','excel','users','settings','smart','digital'].some(n=>document.getElementById('page-'+n)?.classList.contains('active'))){showPage('dashboard');}
 }
+const CM_LOGIN_GUARD_KEY='cm_login_guard_v1';
+function loginGuard(){try{const now=Date.now(),raw=JSON.parse(sessionStorage.getItem(CM_LOGIN_GUARD_KEY)||'{"count":0,"until":0}');if(raw.until>now)return {blocked:true,seconds:Math.ceil((raw.until-now)/1000)};if(now-(raw.first||now)>15*60*1000)return {count:0,first:now,until:0};return raw;}catch(e){return {count:0,first:Date.now(),until:0};}}
+function recordLoginFailure(){try{const g=loginGuard(),count=(g.count||0)+1,until=count>=5?Date.now()+15*60*1000:0;sessionStorage.setItem(CM_LOGIN_GUARD_KEY,JSON.stringify({count,first:g.first||Date.now(),until}));return until;}catch(e){return 0;}}
+function clearLoginGuard(){try{sessionStorage.removeItem(CM_LOGIN_GUARD_KEY)}catch(e){}}
 async function login(){
+  const guard=loginGuard();if(guard.blocked){setLoginStatus(`⛔ Quá nhiều lần đăng nhập không thành công. Vui lòng thử lại sau ${guard.seconds} giây.`);return}
   if(window.__supabaseInitError){setLoginStatus('❌ Không khởi tạo được Supabase: '+window.__supabaseInitError.message);return}
   const u=document.getElementById('loginUser').value.trim(), p=document.getElementById('loginPass').value;
   if(!u||!p){setLoginStatus('⚠️ Vui lòng nhập tài khoản và mật khẩu.');return}
@@ -1138,7 +1198,8 @@ async function login(){
   setLoginStatus('⏳ Đang kiểm tra tài khoản...');
   try{
     const {data,error}=await sb.auth.signInWithPassword({email,password:p});
-    if(error){setLoginStatus('❌ Đăng nhập thất bại: '+error.message);return}
+    if(error){const until=recordLoginFailure();setLoginStatus(until?'⛔ Đăng nhập bị tạm khóa trong 15 phút do quá nhiều lần thử.':'❌ Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');return}
+    clearLoginGuard();
     await loadCloudUser(data.user);
     await loadAvailableClasses(data.user.id);
     if(!availableClasses.length){await sb.auth.signOut({scope:'local'});throw new Error('Tài khoản chưa được cấp quyền vào lớp nào. Hãy liên hệ GVCN.')}
@@ -2907,3 +2968,9 @@ window.closeAccountPanel=function(){document.getElementById('cmAccountPanel')?.c
 window.openTodayAttendanceSummary=function(){const panel=document.getElementById('cmTodayAttendancePanel'),content=document.getElementById('cmTodayAttendanceContent'),title=document.getElementById('cmTodayAttendanceTitle');if(!panel||!content)return;const date=typeof today==='function'?today():new Date().toISOString().slice(0,10),students=Array.isArray(state?.students)?state.students:[],attendance=state?.attendance||{};if(title)title.textContent='🗓️ Điểm danh hôm nay ('+(typeof fmtDate==='function'?fmtDate(date):date.split('-').reverse().join('/'))+')';if(typeof attendanceTodaySummary==='function'&&typeof attendanceTodayPanelMarkup==='function'){content.innerHTML=attendanceTodayPanelMarkup(attendanceTodaySummary(students,attendance,date));}else{content.innerHTML='<div class="empty">Không thể tải dữ liệu điểm danh hôm nay.</div>';}panel.classList.add('show');};
 window.closeTodayAttendanceSummary=function(){document.getElementById('cmTodayAttendancePanel')?.classList.remove('show')};
 </script>
+<!-- Keep this final cascade last: older mobile styles above must not move the Lai navigation. -->
+<style id="lai-navigation-final-cascade">
+.cm-bottom-nav{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;align-items:center!important}
+.cm-bottom-nav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;z-index:700!important;height:68px!important;background:rgba(255,255,255,.98)!important;border-top:1px solid #e4edf5!important;border-bottom:0!important;box-shadow:0 -6px 22px rgba(15,45,75,.10)!important;padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right))!important}.cm-bottom-nav button{min-height:52px!important;border-radius:13px!important;color:#617084!important}.cm-bottom-nav button:hover{background:#eef7ff!important}.cm-bottom-nav button.active{color:#0879dc!important;background:#e9f5ff!important}.cm-bottom-nav button:last-child span{font-size:25px!important;font-weight:400!important}.content{padding-bottom:94px!important}.modal,.cm-account-panel,.cm-today-attendance-modal{z-index:1200!important}.competition-picker-menu{z-index:1300!important}.ai-floating-btn{bottom:86px!important;z-index:650!important}
+@media(max-width:680px){body{padding-top:0!important}.app-brand-banner{top:0!important}.topbar{top:62px!important}.content{padding-bottom:88px!important}.cm-bottom-nav{height:66px!important}.ai-floating-btn{bottom:78px!important}}
+</style>
