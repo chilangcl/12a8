@@ -762,7 +762,7 @@ select option{background:#fff!important;color:#202124!important}
           <div id="userName" style="font-weight:700;font-size:13px">Nguyễn Văn Hoàng</div>
           <div id="userRole" class="mini">GVCN / Admin</div>
         </div>
-        <div class="avatar" id="avatar">H</div>
+        <button class="avatar" id="avatar" type="button" onclick="openAccountPanel()" aria-label="Mở hồ sơ tài khoản và đăng xuất" title="Tài khoản">H</button>
         <button class="btn secondary small" onclick="logout()">Thoát</button>
       </div>
     </header>
@@ -2970,6 +2970,7 @@ window.closeTodayAttendanceSummary=function(){document.getElementById('cmTodayAt
 </script>
 <!-- Keep this final cascade last: older mobile styles above must not move the Lai navigation. -->
 <style id="lai-navigation-final-cascade">
+button.avatar{border:0!important;appearance:none!important;-webkit-appearance:none!important}
 .cm-bottom-nav{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;align-items:center!important}
 .cm-bottom-nav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;z-index:700!important;height:68px!important;background:rgba(255,255,255,.98)!important;border-top:1px solid #e4edf5!important;border-bottom:0!important;box-shadow:0 -6px 22px rgba(15,45,75,.10)!important;padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right))!important}.cm-bottom-nav button{min-height:52px!important;border-radius:13px!important;color:#617084!important}.cm-bottom-nav button:hover{background:#eef7ff!important}.cm-bottom-nav button.active{color:#0879dc!important;background:#e9f5ff!important}.cm-bottom-nav button:last-child span{font-size:25px!important;font-weight:400!important}.content{padding-bottom:94px!important}.modal,.cm-account-panel,.cm-today-attendance-modal{z-index:1200!important}.competition-picker-menu{z-index:1300!important}.ai-floating-btn{bottom:86px!important;z-index:650!important}
 @media(max-width:680px){body{padding-top:0!important}.app-brand-banner{top:0!important}.topbar{top:62px!important}.content{padding-bottom:88px!important}.cm-bottom-nav{height:66px!important}.ai-floating-btn{bottom:78px!important}}
