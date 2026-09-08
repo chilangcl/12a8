@@ -1522,17 +1522,17 @@ function getStudentAlerts(){
   return [...board.high,...board.watch].map(x=>({s:x.s,reasons:x.reasons,severity:x.level==='high'?'high':'medium'}));
 }
 function studentPeriodConduct(id,mode){const rules=getConductRules();const rows=(state.conduct||[]).filter(x=>x.studentId===id&&x.status==='approved');let filtered=rows;if(mode==='week'){const d=new Date(), from=new Date(d);from.setDate(d.getDate()-6);filtered=rows.filter(x=>new Date(x.date)>=from)}const score=rules.base+filtered.reduce((t,x)=>t+Number(x.points||0),0);return {score,label:conductLabel(score)}}
-function attendanceTodaySessionSummary(list,recs,sessionKey){
+function attendanceTodaySessionSummary(list,recs,sessionKey,date){
  const byStudent=new Map();
  recs.forEach(r=>{if((r.session||'sang')!==sessionKey)return;byStudent.set(String(r.studentId||r.id||''),r)});
  const out={total:list.length,present:[],late:[],excused:[],absent:[],pending:[]};
- list.forEach(s=>{const r=byStudent.get(String(s.id));if(!r){out.pending.push(s);return}const status=r.status;if(status==='present')out.present.push(s);else if(status==='late')out.late.push(s);else if(status==='excused')out.excused.push(s);else if(status==='absent')out.absent.push(s);else out.pending.push(s)});
+ list.forEach(s=>{const r=byStudent.get(String(s.id));const status=r?.status||(isSchoolDay(date)?'present':'');if(status==='present')out.present.push(s);else if(status==='late')out.late.push(s);else if(status==='excused')out.excused.push(s);else if(status==='absent')out.absent.push(s);else out.pending.push(s)});
  return out;
 }
 function attendanceTodaySummary(students,attendance,date=today()){
  const list=Array.isArray(students)?students:[], ids=new Set(list.map(s=>String(s.id)));
  const recs=Object.values(attendance&&typeof attendance==='object'?attendance:{}).filter(r=>r&&r.date===date&&ids.has(String(r.studentId||r.id||'')));
- return {date,total:list.length,sang:attendanceTodaySessionSummary(list,recs,'sang'),chieu:attendanceTodaySessionSummary(list,recs,'chieu')};
+ return {date,total:list.length,sang:attendanceTodaySessionSummary(list,recs,'sang',date),chieu:attendanceTodaySessionSummary(list,recs,'chieu',date)};
 }
 function attendanceNames(list,escapeFn){return list.length?list.map(s=>`${escapeFn(s.name||s.code||'Học sinh')} <span class="mini">(Tổ ${escapeFn(s.group||'—')})</span>`).join('<br>'):'<span class="today-attendance-empty">Không có</span>'}
 function attendanceTodaySessionBlockMarkup(session,summary,escapeFn){
@@ -1559,10 +1559,10 @@ function renderDashboard(){
   const recentCard=document.getElementById('recentActivityCard');
   if(recentCard)recentCard.style.display=currentUser&&!isAdmin()?'none':'';
   renderRecentUtilities();
- const a=visibleStudents(),att=Object.values(state.attendance||{}).filter(x=>x?.date?.slice(0,7)===today().slice(0,7));
+ const a=visibleStudents(),monthStart=today().slice(0,7)+'-01',monthTotals=a.reduce((sum,s)=>{const x=attendanceCountsInRange(s.id,{start:monthStart,end:today()});Object.keys(sum).forEach(k=>sum[k]+=Number(x[k]||0));return sum;},{present:0,late:0,excused:0,absent:0});
  // Bảng đầu trang luôn phản ánh toàn bộ lớp, kể cả khi tài khoản hiện tại chỉ được phân quyền theo tổ.
  const todayPanel=document.getElementById('attendanceTodayDashboard');if(todayPanel)todayPanel.innerHTML=attendanceTodayPanelMarkup(attendanceTodaySummary(state.students,state.attendance,today()));
- const present=att.filter(x=>x?.status==='present').length, absent=att.filter(x=>x?.status==='absent').length;
+ const present=monthTotals.present, absent=monthTotals.absent;
  const approved=(state.conduct||[]).filter(x=>x?.status==='approved'); const pts=approved.reduce((s,x)=>s+Number(x?.points||0),0);
  const alerts=getStudentAlerts(); const rules=getConductRules();
  document.getElementById('dashboardStats').innerHTML=[['📅','Có mặt tháng này',present,'lượt'],['⚠️','Nghỉ không phép tháng này',absent,'lượt'],['🔔','Cần quan tâm',alerts.length,'học sinh'],['⭐','Điểm rèn luyện',pts.toFixed(1),'tổng điểm']].map(x=>`<div class="card stat"><div class="label">${x[0]} ${x[1]}</div><div class="value">${x[2]}</div><div class="hint">${x[3]}</div></div>`).join('');
@@ -1639,11 +1639,24 @@ function attSessionLabel(session){return session==='chieu'?'Học chiều':'Họ
 function currentAttSession(){return document.getElementById('attSession')?.value||'sang'}
 function attLockKey(date,session){return date+'_'+session}
 function isAttendanceLocked(date,session){state.attendanceLocks=state.attendanceLocks&&typeof state.attendanceLocks==='object'?state.attendanceLocks:{};return !!state.attendanceLocks[attLockKey(date,session)]}
+/* Mặc định học từ Thứ 2 đến Thứ 7: không lưu "Có mặt" để giảm dữ liệu, nhưng mọi báo cáo vẫn hiểu đó là có mặt. */
+function isSchoolDay(date){const d=new Date(`${date}T00:00:00`);return !Number.isNaN(d.getTime())&&d.getDay()!==0}
+function attendanceRecordKey(date,session,studentId){return `${date}_${session}_${studentId}`}
+function attendanceStatusFor(studentId,date,session){const r=state.attendance?.[attendanceRecordKey(date,session,studentId)];return r?.status||(isSchoolDay(date)?'present':'')}
+const ATTENDANCE_CONDUCT_RULES={excused:{points:-2,label:'Nghỉ học có phép'},absent:{points:-10,label:'Nghỉ học không phép'},late:{points:-3,label:'Đi học muộn'}};
+function syncAttendanceConduct(date,session,studentId,status){
+ const key=attendanceRecordKey(date,session,studentId),rule=ATTENDANCE_CONDUCT_RULES[status];
+ state.conduct=Array.isArray(state.conduct)?state.conduct:[];
+ const index=state.conduct.findIndex(x=>x?.source==='attendance_auto'&&x.attendanceKey===key);
+ if(!rule){if(index>=0)state.conduct.splice(index,1);return;}
+ const record={date,studentId,type:'Điểm trừ',content:`${rule.label} · ${attSessionLabel(session)} ngày ${fmtDate(date)} (tự động từ điểm danh)`,points:rule.points,by:'Hệ thống điểm danh',status:'approved',source:'attendance_auto',attendanceKey:key,updatedAt:new Date().toISOString()};
+ if(index>=0)state.conduct[index]={...state.conduct[index],...record};else state.conduct.push({id:crypto.randomUUID(),...record});
+}
 function renderAttendance(){
  const date=document.getElementById('attDate').value||today(),session=currentAttSession(),filter=document.getElementById('attStatusFilter').value||'',a=visibleStudents();
  const locked=isAttendanceLocked(date,session);
- const rows=a.map((s,i)=>{const key=date+'_'+session+'_'+s.id, r=state.attendance[key]||{status:'present',note:''};return {s,i,r}}).filter(x=>!filter||x.r.status===filter);
- document.getElementById('attendanceBody').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.i+1}</td><td>${esc(x.s.code)}</td><td><b>${esc(x.s.name)}</b></td><td>${x.s.group}</td><td><select data-att="${x.s.id}" class="attSel" ${locked?'disabled':''}><option value="present" ${x.r.status==='present'?'selected':''}>Có mặt</option><option value="late" ${x.r.status==='late'?'selected':''}>Đi muộn</option><option value="excused" ${x.r.status==='excused'?'selected':''}>Nghỉ có phép</option><option value="absent" ${x.r.status==='absent'?'selected':''}>Nghỉ không phép</option></select></td><td><input data-note="${x.s.id}" value="${esc(x.r.note||'')}" placeholder="Ghi chú" ${locked?'disabled':''} style="padding:7px;border:1px solid var(--border);border-radius:8px"></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Không có dữ liệu phù hợp.</td></tr>';
+ const rows=a.map((s,i)=>{const key=attendanceRecordKey(date,session,s.id),r=state.attendance[key]||{status:attendanceStatusFor(s.id,date,session),note:''};return {s,i,r}}).filter(x=>!filter||x.r.status===filter);
+ document.getElementById('attendanceBody').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.i+1}</td><td>${esc(x.s.code)}</td><td><b>${esc(x.s.name)}</b></td><td>${x.s.group}</td><td><select data-att="${x.s.id}" class="attSel" onchange="saveAttendance(true)" ${locked?'disabled':''}><option value="present" ${x.r.status==='present'?'selected':''}>Có mặt</option><option value="late" ${x.r.status==='late'?'selected':''}>Đi muộn</option><option value="excused" ${x.r.status==='excused'?'selected':''}>Nghỉ có phép</option><option value="absent" ${x.r.status==='absent'?'selected':''}>Nghỉ không phép</option></select></td><td><input data-note="${x.s.id}" value="${esc(x.r.note||'')}" placeholder="Ghi chú" ${locked?'disabled':''} style="padding:7px;border:1px solid var(--border);border-radius:8px"></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Không có dữ liệu phù hợp.</td></tr>';
  const saveBtn=document.getElementById('attSaveBtn');if(saveBtn){saveBtn.disabled=locked;saveBtn.style.opacity=locked?'0.55':'1'}
  const lockBtn=document.getElementById('attLockBtn');if(lockBtn)lockBtn.textContent=locked?'🔓 Mở khóa điểm danh':'🔒 Khóa điểm danh';
  const notice=document.getElementById('attLockNotice');
@@ -1652,17 +1665,22 @@ function renderAttendance(){
    else{notice.classList.add('hidden');notice.textContent='';}
  }
 }
-async function saveAttendance(){
+async function saveAttendance(silent=false){
  if(!roleCanEdit()){alert('🔒 Tài khoản học sinh chỉ được xem chuyên cần; chỉ GVCN hoặc cán bộ lớp được điểm danh.');return}
  const date=document.getElementById('attDate').value||today(), session=currentAttSession();
  if(isAttendanceLocked(date,session)){alert('🔒 Điểm danh buổi này đã được GVCN khóa, không thể chỉnh sửa.');return}
  const rows=[...document.querySelectorAll('.attSel')];
  if(!rows.length){alert('⚠️ Không có học sinh nào đang hiển thị để lưu. Hãy bỏ bộ lọc hoặc kiểm tra danh sách lớp.');return}
  state.attendance=state.attendance&&typeof state.attendance==='object'?state.attendance:{};
- rows.forEach(sel=>{const id=sel.dataset.att,note=document.querySelector(`[data-note="${id}"]`)?.value||'';state.attendance[date+'_'+session+'_'+id]={date,session,id,studentId:id,status:sel.value,note,by:currentUser?.username||currentUser?.name||'Hệ thống',savedAt:new Date().toISOString()}});
+ rows.forEach(sel=>{const id=sel.dataset.att,note=(document.querySelector(`[data-note="${id}"]`)?.value||'').trim(),status=sel.value,key=attendanceRecordKey(date,session,id);
+   /* Có mặt là trạng thái mặc định: chỉ lưu ngoại lệ hoặc ghi chú, và xoá ngoại lệ khi trả về Có mặt. */
+   if(status==='present'&&!note)delete state.attendance[key];
+   else state.attendance[key]={date,session,id,studentId:id,status,note,by:currentUser?.username||currentUser?.name||'Hệ thống',savedAt:new Date().toISOString()};
+   syncAttendanceConduct(date,session,id,status);
+ });
  log(`Lưu điểm danh ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)} (${rows.length} học sinh)`);saveData();
  const saved=await pushCloud();renderAll();
- if(saved)alert(`✅ Đã lưu và đồng bộ điểm danh ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)} (${rows.length} học sinh).`);
+ if(saved&&!silent)alert(`✅ Đã lưu và đồng bộ điểm danh ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)} (${rows.length} học sinh).`);
  else alert('⚠️ Điểm danh đã được lưu tạm trên thiết bị nhưng CHƯA đồng bộ lên Supabase. Hãy kiểm tra mạng/quyền ghi rồi bấm Lưu điểm danh lại; không đóng trang trước khi đồng bộ thành công.');
 }
 async function toggleAttendanceLock(){
@@ -1691,7 +1709,7 @@ async function saveLearning(){
  const term=document.getElementById('scoreTerm').value;document.querySelectorAll('.scoreInp').forEach(inp=>{const key=term+'_'+inp.dataset.sid;state.scores[key]=state.scores[key]||{};state.scores[key][inp.dataset.key]=inp.value===''?'':Number(inp.value)});saveData();await pushCloud();log(`Cập nhật điểm học tập ${term}`);alert('Đã lưu điểm.');renderDashboard();
 }
 function openConduct(){document.getElementById('cEditId').value='';document.getElementById('conductModalTitle').textContent='Ghi nhận rèn luyện';document.getElementById('cDate').value=today();document.getElementById('cContent').value='';document.getElementById('cPoints').value=1;document.getElementById('cType').value='Điểm cộng';document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');document.getElementById('conductModal').classList.add('show')}
-function canEditConductRecord(x){if(!x)return false;if(isAdmin())return true;return isClassOfficer()&&x.status==='pending'}
+function canEditConductRecord(x){if(!x||x.source==='attendance_auto')return false;if(isAdmin())return true;return isClassOfficer()&&x.status==='pending'}
 function editConduct(id){
  const x=(state.conduct||[]).find(x=>x.id===id);
  if(!x){alert('Không tìm thấy bản ghi.');return}
@@ -1720,9 +1738,9 @@ async function saveConduct(){
  const x={id:crypto.randomUUID(),date:document.getElementById('cDate').value,studentId:sid,type,content:document.getElementById('cContent').value,points:pts,by:currentUser.username,status:isAdmin()?'approved':'pending'};state.conduct.push(x);saveData();await pushCloud();log(`Ghi nhận rèn luyện cho ${state.students.find(s=>s.id===sid)?.name||''}`);closeModal('conductModal');renderAll()}
 function renderConduct(){const q=(document.getElementById('conductSearch').value||'').toLowerCase(),st=document.getElementById('conductStatus').value||'';let a=state.conduct||[];if(currentUser?.role?.startsWith('to'))a=a.filter(x=>state.students.find(s=>s.id===x.studentId)?.group==currentUser.role.replace('to',''));a=a.filter(x=>(!q||`${x.content} ${state.students.find(s=>s.id===x.studentId)?.name||''}`.toLowerCase().includes(q))&&(!st||x.status===st));document.getElementById('conductBody').innerHTML=a.length?a.slice().reverse().map(x=>{const s=state.students.find(s=>s.id===x.studentId)||{};return `<tr><td>${fmtDate(x.date)}</td><td>${esc(s.name||'')}</td><td>${esc(x.type)}</td><td>${esc(x.content)}</td><td><b>${Number(x.points).toFixed(1)}</b></td><td>${esc(x.by)}</td><td><span class="badge ${x.status==='approved'?'b-green':'b-yellow'}">${x.status==='approved'?'Đã duyệt':'Chờ duyệt'}</span></td><td>${canEditConductRecord(x)?`<button class="btn small secondary" onclick="editConduct('${x.id}')">✏️ Sửa</button>`:''} ${isAdmin()&&x.status==='pending'?`<button class="btn small success" onclick="approveConduct('${x.id}')">Duyệt</button>`:''} ${isAdmin()?`<button class="btn small danger" onclick="deleteConduct('${x.id}')">Xóa</button>`:''}</td></tr>`}).join(''):'<tr><td colspan="8" class="empty">Chưa có bản ghi.</td></tr>'}
 async function approveConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN được duyệt rèn luyện.');return}const x=state.conduct.find(x=>x.id===id);if(x){x.status='approved';saveData();await pushCloud();log('GVCN duyệt một bản ghi rèn luyện');renderAll()}}
-async function deleteConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN được xóa bản ghi rèn luyện.');return}if(!confirm('Xóa bản ghi này?'))return;state.conduct=state.conduct.filter(x=>x.id!==id);saveData();await pushCloud();renderAll()}
+async function deleteConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN được xóa bản ghi rèn luyện.');return}const record=(state.conduct||[]).find(x=>x.id===id);if(record?.source==='attendance_auto'){alert('🔒 Bản ghi này được đồng bộ từ điểm danh. Hãy sửa trạng thái điểm danh để hệ thống tự cập nhật điểm rèn luyện.');return}if(!confirm('Xóa bản ghi này?'))return;state.conduct=state.conduct.filter(x=>x.id!==id);saveData();await pushCloud();renderAll()}
 function conductPoints(sid){return (state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved').reduce((a,x)=>a+Number(x.points||0),0)}
-function attendanceCounts(sid){let o={present:0,late:0,excused:0,absent:0};Object.values(state.attendance||{}).filter(x=>(x.studentId||x.id)===sid).forEach(x=>{const k=x.status;if(Object.prototype.hasOwnProperty.call(o,k))o[k]++});return o}
+function attendanceCounts(sid){return attendanceCountsInRange(sid,{start:BIBI_ACADEMIC_START,end:today()})}
 const BIBI_ACADEMIC_START='2026-09-07';
 const BIBI_ACADEMIC_END='2027-06-30';
 function dateObj(s){const d=new Date((s||'')+'T00:00:00');return Number.isNaN(d.getTime())?null:d}
@@ -1824,15 +1842,20 @@ function toggleCompetitionPicker(){document.getElementById('competitionPickerMen
 document.addEventListener('click',function(e){const picker=e.target.closest('.competition-period-picker');if(!picker)document.getElementById('competitionPickerMenu')?.classList.add('hidden')});
 function renderReports(){
  const sel=getReportSelection(),a=visibleStudents(),range=sel.range||periodRange('week',academicWeekNumber(today()));if(!range)return;
- const allAtt=Object.values(state.attendance||{}).filter(x=>x.date>=range.start&&x.date<=range.end),c={present:0,late:0,excused:0,absent:0};allAtt.forEach(x=>c[x.status]=(c[x.status]||0)+1);
  const results=a.map(s=>({s,att:attendanceCountsInRange(s.id,range),conduct:conductResultForPeriod(s.id,sel.period,sel.detail)}));
+ const c={present:0,late:0,excused:0,absent:0};results.forEach(x=>Object.keys(c).forEach(k=>c[k]+=Number(x.att[k]||0)));
  const grades={Tốt:0,Khá:0,Đạt:0,'Chưa đạt':0};results.forEach(x=>grades[x.conduct.grade]++);
  const totalConduct=results.reduce((sum,x)=>sum+x.conduct.score,0);const avgConduct=results.length?totalConduct/results.length:100;
  document.getElementById('reportPrintTitle').textContent=`BÁO CÁO TỔNG HỢP — ${sel.range.label} — Lớp ${state.settings?.className||'12A8'} — Năm học ${state.settings?.year||'2026-2027'}`;
  document.getElementById('reportCards').innerHTML=[['Sĩ số',a.length],['Có mặt',c.present],['Đi muộn',c.late],['Nghỉ phép',c.excused],['Nghỉ KP',c.absent],['TB Hạnh kiểm',avgConduct.toFixed(1)],['Tốt',grades['Tốt']],['Khá',grades['Khá']],['Đạt',grades['Đạt']],['Chưa đạt',grades['Chưa đạt']]].map(x=>`<div class="card stat"><div class="label">${x[0]}</div><div class="value">${x[1]}</div></div>`).join('');
  document.getElementById('reportBody').innerHTML=a.map((s,i)=>{const z=results.find(x=>x.s.id===s.id);return `<tr><td>${i+1}</td><td><b>${esc(s.name)}</b></td><td>${z.att.present}</td><td>${z.att.excused}</td><td>${z.att.absent}</td><td>${z.att.late}</td><td>${z.conduct.score.toFixed(1)}</td><td><span class="badge ${z.conduct.grade==='Tốt'?'b-green':z.conduct.grade==='Khá'?'b-blue':z.conduct.grade==='Đạt'?'b-yellow':'b-red'}">${z.conduct.grade}</span></td></tr>`}).join('');
 }
-function attendanceCountsInRange(sid,range){const o={present:0,late:0,excused:0,absent:0};Object.values(state.attendance||{}).filter(x=>x.id===sid&&x.date>=range.start&&x.date<=range.end).forEach(x=>o[x.status]=(o[x.status]||0)+1);return o}
+function attendanceCountsInRange(sid,range){
+ const o={present:0,late:0,excused:0,absent:0},start=dateObj(range?.start),end=dateObj(range?.end),latest=dateObj(today());
+ if(!start||!end)return o;const last=end>latest?latest:end;
+ for(let d=new Date(start);d<=last;d.setDate(d.getDate()+1)){const date=isoDate(d);if(!isSchoolDay(date))continue;['sang','chieu'].forEach(session=>{const status=attendanceStatusFor(sid,date,session);if(Object.prototype.hasOwnProperty.call(o,status))o[status]++;});}
+ return o;
+}
 function printSelectedReport(){renderReports();setTimeout(()=>window.print(),50)}
 async function renderUsers(){
  const el=document.getElementById('usersBody');if(!el)return;
