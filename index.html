@@ -502,41 +502,9 @@ select option{background:#fff!important;color:#202124!important}
 </style>
 
 
-<style id="bibi-final-pwa-install-css">
-#bibi-final-pwa-install{
-  position:fixed;
-  right:18px;
-  bottom:22px;
-  z-index:999999;
-  display:none;
-  align-items:center;
-  gap:7px;
-  border:0;
-  border-radius:999px;
-  padding:11px 15px;
-  background:#10b981;
-  color:#fff;
-  font-weight:900;
-  font-size:14px;
-  line-height:1;
-  box-shadow:0 10px 28px rgba(16,185,129,.30);
-  cursor:pointer;
-  -webkit-tap-highlight-color:transparent;
-}
-#bibi-final-pwa-install.show{display:inline-flex!important}
-#bibi-final-pwa-install:hover{transform:translateY(-1px)}
-@media(max-width:700px){
-  #bibi-final-pwa-install{
-    right:12px;
-    bottom:14px;
-    padding:10px 13px;
-    font-size:13px;
-  }
-}
-</style>
 
 <style id="bibi-notification-pwa-v1">
-.notification-admin-list{display:grid;gap:10px;margin-top:14px}.notification-admin-item{background:#fff;border:1px solid #d9d9d6;border-left:5px solid #10b981;border-radius:14px;padding:12px;box-shadow:0 6px 18px rgba(32,33,36,.07)}.notification-admin-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.guest-notification-card{display:none;margin:14px 0;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#ecfeff,#f0fdf4);border:2px solid #14b8a6;box-shadow:0 8px 24px rgba(13,148,136,.14)}.guest-notification-card .notif-title{font-weight:900;color:#0f766e;margin-bottom:8px}.guest-notification-item{padding:10px 0;border-top:1px solid #99f6e4}.guest-notification-item:first-child{border-top:0}.guest-notification-item strong{display:block;color:#202124}.guest-notification-item small{color:#5f6368}.cm-pwa-install{position:fixed;right:14px;bottom:18px;z-index:99999;display:none;align-items:center;justify-content:center;text-align:center;line-height:1.15;min-width:118px;max-width:145px;padding:8px 10px;border-radius:14px;border:1px solid #0f766e;background:#10b981;color:#fff;font-weight:900;font-size:11px;box-shadow:0 9px 24px rgba(16,185,129,.28);white-space:normal}.cm-pwa-install.show{display:flex!important}.cm-pwa-install span{display:block}.cm-pwa-install b{display:block;font-size:10px;margin-top:2px}@media(max-width:680px){.cm-pwa-install{right:8px;bottom:12px;min-width:105px;max-width:118px;font-size:10px;padding:7px 8px}.cm-pwa-install b{font-size:9px}.guest-notification-card{margin:10px 0;padding:12px}}
+.notification-admin-list{display:grid;gap:10px;margin-top:14px}.notification-admin-item{background:#fff;border:1px solid #d9d9d6;border-left:5px solid #10b981;border-radius:14px;padding:12px;box-shadow:0 6px 18px rgba(32,33,36,.07)}.notification-admin-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px}.guest-notification-card{display:none;margin:14px 0;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,#ecfeff,#f0fdf4);border:2px solid #14b8a6;box-shadow:0 8px 24px rgba(13,148,136,.14)}.guest-notification-card .notif-title{font-weight:900;color:#0f766e;margin-bottom:8px}.guest-notification-item{padding:10px 0;border-top:1px solid #99f6e4}.guest-notification-item:first-child{border-top:0}.guest-notification-item strong{display:block;color:#202124}.guest-notification-item small{color:#5f6368}.cm-pwa-install{position:fixed;left:20px;bottom:24px;z-index:1200;width:72px;height:72px;padding:0;border:0;background:transparent!important;box-shadow:none!important;color:inherit;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .22s ease,filter .22s ease;animation:cmInstallFloat 3.2s ease-in-out infinite;isolation:isolate}.cm-pwa-install::before{content:"";position:absolute;left:15px;right:15px;bottom:7px;height:13px;border-radius:50%;background:radial-gradient(ellipse,rgba(15,23,42,.28) 0%,rgba(15,23,42,.12) 42%,transparent 72%);filter:blur(3px);z-index:-1}.cm-pwa-install:hover{transform:translateY(-5px) scale(1.08)}.cm-pwa-install:active{transform:translateY(-1px) scale(.96)}.cm-pwa-install.show{display:flex!important}.cm-pwa-install:not(.show){display:none!important}.cm-install-svg{width:68px;height:68px;display:block;overflow:visible;filter:drop-shadow(0 7px 4px rgba(15,23,42,.22)) drop-shadow(0 0 8px rgba(16,185,129,.24))}.cm-install-bob{transform-origin:50% 58%;animation:cmInstallBob 2.4s ease-in-out infinite}.cm-install-eye{animation:cmInstallBlink 4.8s ease-in-out infinite}.cm-install-badge{position:absolute;top:-2px;right:-2px;width:22px;height:22px;border-radius:50%;background:#f59e0b;color:#fff;display:grid;place-items:center;font-size:13px;box-shadow:0 3px 8px rgba(0,0,0,.25);animation:cmInstallLight 1.8s ease-in-out infinite}.cm-install-label{position:absolute;left:74px;white-space:nowrap;background:#0f766e;color:#fff;font-size:12px;font-weight:800;border-radius:999px;padding:7px 10px;opacity:0;pointer-events:none;transform:translateX(-5px);transition:.18s ease}.cm-pwa-install:hover .cm-install-label{opacity:1;transform:none}@keyframes cmInstallFloat{0%,100%{margin-bottom:0}50%{margin-bottom:3px}}@keyframes cmInstallBob{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-1.5px) rotate(1deg)}}@keyframes cmInstallBlink{0%,43%,47%,100%{transform:scaleY(1)}45%{transform:scaleY(.12)}}@keyframes cmInstallLight{0%,100%{opacity:.8;transform:scale(1)}50%{opacity:1;transform:scale(1.12)}}@media(max-width:600px){.cm-pwa-install{left:10px;bottom:70px;width:64px;height:64px}.cm-install-svg{width:62px;height:62px}.cm-install-label{display:none}}
 </style>
 <style id="class-notification-display-fix">
 .dashboard-notification-card{grid-column:1/-1}
@@ -772,33 +740,30 @@ select option{background:#fff!important;color:#202124!important}
 
         <section class="cm-utility-section" aria-label="Tiện ích gần đây">
           <div class="cm-section-title"><h2>Tiện ích gần đây</h2></div>
-          <div class="cm-utility-grid cm-recent-grid">
-            <button class="cm-utility-card pink" type="button" onclick="showPage('conduct')"><span class="cm-utility-icon">📋</span><span>Quản lý nền nếp</span></button>
-            <button class="cm-utility-card mint" type="button" onclick="showPage('students')"><span class="cm-utility-icon">👩‍🎓</span><span>Hồ sơ học sinh</span></button>
-            <button class="cm-utility-card orange" type="button" onclick="openTodayAttendance()"><span class="cm-utility-icon">🗓️</span><span>Điểm danh</span></button>
-          </div>
+          <div class="cm-utility-grid cm-recent-grid" id="recentUtilitiesGrid"></div>
         </section>
 
         <section class="cm-utility-section" aria-label="Tiện ích yêu thích">
-          <div class="cm-section-title"><h2>Tiện ích yêu thích</h2><button class="cm-text-action admin-only" type="button" onclick="showPage('settings')"></div>
+          <div class="cm-section-title"><h2>Tiện ích yêu thích</h2><button class="cm-text-action admin-only" type="button" onclick="showPage('settings')">Cài đặt</button></div>
           <div class="cm-utility-grid">
-            <button class="cm-utility-card mint" type="button" onclick="showPage('conduct')"><span class="cm-utility-icon">⭐</span><span>Rèn luyện</span></button>
-            <button class="cm-utility-card orange" type="button" onclick="showPage('attendance')"><span class="cm-utility-icon">🗓️</span><span>Điểm danh</span></button>
-            <button class="cm-utility-card pink cm-attendance-summary-card" type="button" onclick="openTodayAttendanceSummary()"><span class="cm-utility-icon">🗓️</span><span>Xem điểm danh hôm nay</span></button>
-            <button class="cm-utility-card blue" type="button" onclick="showPage('digital')"><span class="cm-utility-icon">💬</span><span>Thông báo lớp</span></button>
-            <button class="cm-utility-card purple" type="button" onclick="showPage('reports')"><span class="cm-utility-icon">📊</span><span>Báo cáo</span></button>
-            <button class="cm-utility-card cyan" type="button" onclick="showPage('competition')"><span class="cm-utility-icon">🏆</span><span>Thi đua</span></button>
-            <button class="cm-utility-card lavender" type="button" onclick="showPage('profile')"><span class="cm-utility-icon">📝</span><span>Hồ sơ 360°</span></button>
+            <button class="cm-utility-card mint" type="button" onclick="useUtility('conduct')"><span class="cm-utility-icon">⭐</span><span>Rèn luyện</span></button>
+            <button class="cm-utility-card orange" type="button" onclick="useUtility('attendance')"><span class="cm-utility-icon">🗓️</span><span>Điểm danh</span></button>
+            <button class="cm-utility-card pink cm-attendance-summary-card" type="button" onclick="useUtility('today-attendance')"><span class="cm-utility-icon">🗓️</span><span>Xem điểm danh hôm nay</span></button>
+            <button class="cm-utility-card blue" type="button" onclick="useUtility('digital')"><span class="cm-utility-icon">💬</span><span>Thông báo lớp</span></button>
+            <button class="cm-utility-card purple" type="button" onclick="useUtility('reports')"><span class="cm-utility-icon">📊</span><span>Báo cáo</span></button>
+            <button class="cm-utility-card cyan" type="button" onclick="useUtility('competition')"><span class="cm-utility-icon">🏆</span><span>Thi đua</span></button>
+            <button class="cm-utility-card lavender" type="button" onclick="useUtility('profile')"><span class="cm-utility-icon">📝</span><span>Hồ sơ 360°</span></button>
+            <button class="cm-utility-card cyan admin-only" type="button" onclick="useUtility('auditlog')"><span class="cm-utility-icon">🛡️</span><span>Nhật ký hoạt động hệ thống</span></button>
           </div>
         </section>
 
         <section class="cm-utility-section admin-only" aria-label="Quản trị hệ thống">
-          <div class="cm-section-title"><h2>⚙️ Quản trị hệ thống</h2><button class="cm-text-action" type="button" onclick="showPage('settings')"></div>
+          <div class="cm-section-title"><h2>⚙️ Quản trị hệ thống</h2><button class="cm-text-action" type="button" onclick="showPage('settings')">Cài đặt</button></div>
           <div class="cm-utility-grid cm-admin-grid">
-            <button class="cm-utility-card pink" type="button" onclick="showPage('ai')"><span class="cm-utility-icon">🤖</span><span>Trợ lý AI</span></button>
-            <button class="cm-utility-card blue" type="button" onclick="showPage('classes')"><span class="cm-utility-icon">🏫</span><span>Quản lý năm học & lớp</span></button>
-            <button class="cm-utility-card purple" type="button" onclick="showPage('users')"><span class="cm-utility-icon">🔐</span><span>Quản lý tài khoản</span></button>
-            <button class="cm-utility-card cyan" type="button" onclick="showPage('settings')"><span class="cm-utility-icon">⚙️</span><span>Cài đặt hệ thống</span></button>
+            <button class="cm-utility-card pink" type="button" onclick="useUtility('ai')"><span class="cm-utility-icon">🤖</span><span>Trợ lý AI</span></button>
+            <button class="cm-utility-card blue" type="button" onclick="useUtility('classes')"><span class="cm-utility-icon">🏫</span><span>Quản lý năm học & lớp</span></button>
+            <button class="cm-utility-card purple" type="button" onclick="useUtility('users')"><span class="cm-utility-icon">🔐</span><span>Quản lý tài khoản</span></button>
+            <button class="cm-utility-card cyan" type="button" onclick="useUtility('settings')"><span class="cm-utility-icon">⚙️</span><span>Cài đặt hệ thống</span></button>
           </div>
         </section>
 
@@ -856,9 +821,10 @@ select option{background:#fff!important;color:#202124!important}
       </section>
 
       <section id="page-attendance" class="page">
-        <div class="page-head"><div><h2>Chuyên cần</h2><div class="muted">Theo dõi hằng ngày và tự động tổng hợp</div></div><button class="btn" onclick="saveAttendance()">💾 Lưu điểm danh</button></div>
-        <div class="toolbar"><label style="display:flex;align-items:center;gap:6px">Ngày <input type="date" id="attDate" onchange="renderAttendance()"></label><select id="attStatusFilter" onchange="renderAttendance()"><option value="">Tất cả</option><option value="present">Có mặt</option><option value="late">Đi muộn</option><option value="excused">Nghỉ phép</option><option value="absent">Nghỉ không phép</option></select></div>
-        <div class="notice">Chọn trạng thái cho từng học sinh. Dữ liệu được lưu theo từng ngày và dùng cho báo cáo tuần/tháng/HKI/HKII/cả năm.</div>
+        <div class="page-head"><div><h2>Chuyên cần</h2><div class="muted">Theo dõi hằng ngày và tự động tổng hợp</div></div><div class="actions"><button class="btn" id="attSaveBtn" onclick="saveAttendance()">💾 Lưu điểm danh</button><button class="btn warning admin-only" id="attLockBtn" onclick="toggleAttendanceLock()">🔒 Khóa điểm danh</button></div></div>
+        <div class="toolbar"><label style="display:flex;align-items:center;gap:6px">Ngày <input type="date" id="attDate" onchange="renderAttendance()"></label><label style="display:flex;align-items:center;gap:6px">Buổi <select id="attSession" onchange="renderAttendance()"><option value="sang">🌅 Học sáng</option><option value="chieu">🌇 Học chiều</option></select></label><select id="attStatusFilter" onchange="renderAttendance()"><option value="">Tất cả</option><option value="present">Có mặt</option><option value="late">Đi muộn</option><option value="excused">Nghỉ phép</option><option value="absent">Nghỉ không phép</option></select></div>
+        <div id="attLockNotice" class="notice hidden"></div>
+        <div class="notice">Hệ thống tự động mặc định tất cả học sinh là <b>"Có mặt"</b>; thầy/cô chỉ cần chọn lại trạng thái với học sinh nghỉ/đi muộn. Điểm danh được tính riêng theo buổi Sáng/Chiều và dùng cho báo cáo tuần/tháng/HKI/HKII/cả năm. GVCN khóa điểm danh vào cuối mỗi buổi học để chốt số liệu.</div>
         <div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Mã HS</th><th>Họ tên</th><th>Tổ</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead><tbody id="attendanceBody"></tbody></table></div>
       </section>
 
@@ -1060,7 +1026,8 @@ select option{background:#fff!important;color:#202124!important}
 </div></div>
 
 <div id="conductModal" class="modal"><div class="modal-card">
-  <div class="modal-head"><h3>Ghi nhận rèn luyện</h3><button class="x" onclick="closeModal('conductModal')">×</button></div>
+  <div class="modal-head"><h3 id="conductModalTitle">Ghi nhận rèn luyện</h3><button class="x" onclick="closeModal('conductModal')">×</button></div>
+  <input type="hidden" id="cEditId" value="">
   <div class="form-grid">
     <div class="field"><label>Ngày</label><input id="cDate" type="date"></div><div class="field"><label>Học sinh</label><select id="cStudent"></select></div>
     <div class="field"><label>Loại</label><select id="cType"><option>Điểm cộng</option><option>Điểm trừ</option><option>Thành tích</option><option>Vi phạm</option><option>Hoạt động</option></select></div>
@@ -1082,7 +1049,7 @@ try {
 } catch (e) { console.error(e); window.__supabaseInitError=e; }
 let currentClass=null, currentStateKey='12A8-2026-2027', cloudWriteQueue=Promise.resolve();
 let state=seed(), currentUser=null, editingStudent=null, availableClasses=[];
-function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4,conductRules:{base:100,good:96,fair:90,pass:85}},students:[],attendance:{},scores:{},conduct:[],activity:[],auditLog:[],notifications:[]}}
+function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4,conductRules:{base:100,good:96,fair:90,pass:85}},students:[],attendance:{},attendanceLocks:{},scores:{},conduct:[],activity:[],auditLog:[],notifications:[]}}
 function dataKey(){return DATA_PREFIX+(currentStateKey||'12A8-2026-2027')}
 function loadLocalFallback(){try{return JSON.parse(localStorage.getItem(dataKey()))||seed()}catch(e){return seed()}}
 function saveLocal(){localStorage.setItem(dataKey(),JSON.stringify(state))}
@@ -1315,6 +1282,53 @@ function showPage(name){updateProfile360Access();
 }if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule();
 }
 function openTodayAttendance(){const dateInput=document.getElementById('attDate');if(dateInput)dateInput.value=today();showPage('attendance')}
+const CM_UTILITY_CATALOG={
+ 'students':{label:'Hồ sơ học sinh',icon:'👩‍🎓',color:'mint'},
+ 'attendance':{label:'Điểm danh',icon:'🗓️',color:'orange'},
+ 'conduct':{label:'Quản lý nền nếp',icon:'📋',color:'pink'},
+ 'today-attendance':{label:'Xem điểm danh hôm nay',icon:'🗓️',color:'pink'},
+ 'digital':{label:'Thông báo lớp',icon:'💬',color:'blue'},
+ 'reports':{label:'Báo cáo',icon:'📊',color:'purple'},
+ 'competition':{label:'Thi đua',icon:'🏆',color:'cyan'},
+ 'profile':{label:'Hồ sơ 360°',icon:'📝',color:'lavender'},
+ 'auditlog':{label:'Nhật ký hoạt động hệ thống',icon:'🛡️',color:'cyan'},
+ 'ai':{label:'Trợ lý AI',icon:'🤖',color:'pink'},
+ 'classes':{label:'Quản lý năm học & lớp',icon:'🏫',color:'blue'},
+ 'users':{label:'Quản lý tài khoản',icon:'🔐',color:'purple'},
+ 'settings':{label:'Cài đặt hệ thống',icon:'⚙️',color:'cyan'}
+};
+function cmRecentUtilKey(){return 'CM_RECENT_UTIL_'+(currentUser?.username||currentUser?.id||'guest')}
+function recordUtilityUse(id){
+ if(!CM_UTILITY_CATALOG[id])return;
+ try{
+   const key=cmRecentUtilKey();
+   let list=JSON.parse(localStorage.getItem(key)||'[]');
+   if(!Array.isArray(list))list=[];
+   list=list.filter(x=>x!==id);
+   list.unshift(id);
+   list=list.slice(0,3);
+   localStorage.setItem(key,JSON.stringify(list));
+ }catch(e){}
+ renderRecentUtilities();
+}
+function useUtility(id){
+ recordUtilityUse(id);
+ if(id==='attendance')showPage('attendance');
+ else if(id==='today-attendance')openTodayAttendanceSummary();
+ else if(id==='auditlog'){showPage('digital');setTimeout(()=>document.getElementById('auditLogList')?.scrollIntoView({behavior:'smooth',block:'center'}),150);}
+ else showPage(id);
+}
+function renderRecentUtilities(){
+ const host=document.getElementById('recentUtilitiesGrid');if(!host)return;
+ let list=[];
+ try{list=JSON.parse(localStorage.getItem(cmRecentUtilKey())||'[]');}catch(e){list=[]}
+ if(!Array.isArray(list))list=[];
+ list=list.filter(id=>CM_UTILITY_CATALOG[id]&&(id!=='auditlog'||isAdmin()));
+ const defaults=['conduct','students','attendance'];
+ defaults.forEach(id=>{if(list.length<3&&!list.includes(id))list.push(id)});
+ list=list.slice(0,3);
+ host.innerHTML=list.map(id=>{const u=CM_UTILITY_CATALOG[id];return `<button class="cm-utility-card ${u.color}" type="button" onclick="useUtility('${id}')"><span class="cm-utility-icon">${u.icon}</span><span>${esc(u.label)}</span></button>`}).join('');
+}
 function updateProfile360Access(){
   const canSee=!!currentUser;
   document.querySelectorAll('.member-only').forEach(el=>el.style.display=canSee?'':'none');
@@ -1469,6 +1483,7 @@ function renderDashboard(){
   if(heroName)heroName.textContent=displayName;if(heroAccount)heroAccount.textContent=roleTitle;if(heroInitial)heroInitial.textContent=displayName.split(/\s+/).filter(Boolean).slice(-2).map(x=>x[0]).join('').toUpperCase()||'GV';if(heroScopeLabel)heroScopeLabel.textContent=scopeLabel;if(heroClass)heroClass.textContent=scopeValue;if(heroYear)heroYear.textContent=roleCode==='admin'||roleCode==='loptruong'||roleCode==='loppho'?schoolYear:'';
   const recentCard=document.getElementById('recentActivityCard');
   if(recentCard)recentCard.style.display=currentUser&&!isAdmin()?'none':'';
+  renderRecentUtilities();
  const a=visibleStudents(),att=Object.values(state.attendance||{}).filter(x=>x?.date?.slice(0,7)===today().slice(0,7));
  // Bảng đầu trang luôn phản ánh toàn bộ lớp, kể cả khi tài khoản hiện tại chỉ được phân quyền theo tổ.
  const todayPanel=document.getElementById('attendanceTodayDashboard');if(todayPanel)todayPanel.innerHTML=attendanceTodayPanelMarkup(attendanceTodaySummary(state.students,state.attendance,today()));
@@ -1545,21 +1560,51 @@ async function deleteStudent(id){
   renderAll();
   alert(`✅ Đã xóa ${s.code} - ${s.name}.`);
 }
+function attSessionLabel(session){return session==='chieu'?'Học chiều':'Học sáng'}
+function currentAttSession(){return document.getElementById('attSession')?.value||'sang'}
+function attLockKey(date,session){return date+'_'+session}
+function isAttendanceLocked(date,session){state.attendanceLocks=state.attendanceLocks&&typeof state.attendanceLocks==='object'?state.attendanceLocks:{};return !!state.attendanceLocks[attLockKey(date,session)]}
 function renderAttendance(){
- const date=document.getElementById('attDate').value||today(),filter=document.getElementById('attStatusFilter').value||'',a=visibleStudents();
- const rows=a.map((s,i)=>{const key=date+'_'+s.id, r=state.attendance[key]||{status:'present',note:''};return {s,i,r}}).filter(x=>!filter||x.r.status===filter);
- document.getElementById('attendanceBody').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.i+1}</td><td>${esc(x.s.code)}</td><td><b>${esc(x.s.name)}</b></td><td>${x.s.group}</td><td><select data-att="${x.s.id}" class="attSel"><option value="present" ${x.r.status==='present'?'selected':''}>Có mặt</option><option value="late" ${x.r.status==='late'?'selected':''}>Đi muộn</option><option value="excused" ${x.r.status==='excused'?'selected':''}>Nghỉ có phép</option><option value="absent" ${x.r.status==='absent'?'selected':''}>Nghỉ không phép</option></select></td><td><input data-note="${x.s.id}" value="${esc(x.r.note||'')}" placeholder="Ghi chú" style="padding:7px;border:1px solid var(--border);border-radius:8px"></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Không có dữ liệu phù hợp.</td></tr>';
+ const date=document.getElementById('attDate').value||today(),session=currentAttSession(),filter=document.getElementById('attStatusFilter').value||'',a=visibleStudents();
+ const locked=isAttendanceLocked(date,session);
+ const rows=a.map((s,i)=>{const key=date+'_'+session+'_'+s.id, r=state.attendance[key]||{status:'present',note:''};return {s,i,r}}).filter(x=>!filter||x.r.status===filter);
+ document.getElementById('attendanceBody').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.i+1}</td><td>${esc(x.s.code)}</td><td><b>${esc(x.s.name)}</b></td><td>${x.s.group}</td><td><select data-att="${x.s.id}" class="attSel" ${locked?'disabled':''}><option value="present" ${x.r.status==='present'?'selected':''}>Có mặt</option><option value="late" ${x.r.status==='late'?'selected':''}>Đi muộn</option><option value="excused" ${x.r.status==='excused'?'selected':''}>Nghỉ có phép</option><option value="absent" ${x.r.status==='absent'?'selected':''}>Nghỉ không phép</option></select></td><td><input data-note="${x.s.id}" value="${esc(x.r.note||'')}" placeholder="Ghi chú" ${locked?'disabled':''} style="padding:7px;border:1px solid var(--border);border-radius:8px"></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Không có dữ liệu phù hợp.</td></tr>';
+ const saveBtn=document.getElementById('attSaveBtn');if(saveBtn){saveBtn.disabled=locked;saveBtn.style.opacity=locked?'0.55':'1'}
+ const lockBtn=document.getElementById('attLockBtn');if(lockBtn)lockBtn.textContent=locked?'🔓 Mở khóa điểm danh':'🔒 Khóa điểm danh';
+ const notice=document.getElementById('attLockNotice');
+ if(notice){
+   if(locked){const info=state.attendanceLocks[attLockKey(date,session)]||{};notice.classList.remove('hidden');notice.textContent=`🔒 Điểm danh ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)} đã được GVCN khóa${info.by?' bởi '+info.by:''}${info.at?' lúc '+new Date(info.at).toLocaleString('vi-VN'):''}. Không thể chỉnh sửa.`;}
+   else{notice.classList.add('hidden');notice.textContent='';}
+ }
 }
 async function saveAttendance(){
  if(!roleCanEdit()){alert('🔒 Tài khoản học sinh chỉ được xem chuyên cần; chỉ GVCN hoặc cán bộ lớp được điểm danh.');return}
- const date=document.getElementById('attDate').value||today(), rows=[...document.querySelectorAll('.attSel')];
+ const date=document.getElementById('attDate').value||today(), session=currentAttSession();
+ if(isAttendanceLocked(date,session)){alert('🔒 Điểm danh buổi này đã được GVCN khóa, không thể chỉnh sửa.');return}
+ const rows=[...document.querySelectorAll('.attSel')];
  if(!rows.length){alert('⚠️ Không có học sinh nào đang hiển thị để lưu. Hãy bỏ bộ lọc hoặc kiểm tra danh sách lớp.');return}
  state.attendance=state.attendance&&typeof state.attendance==='object'?state.attendance:{};
- rows.forEach(sel=>{const id=sel.dataset.att,note=document.querySelector(`[data-note="${id}"]`)?.value||'';state.attendance[date+'_'+id]={date,id,studentId:id,status:sel.value,note,by:currentUser?.username||currentUser?.name||'Hệ thống',savedAt:new Date().toISOString()}});
- log(`Lưu điểm danh ngày ${fmtDate(date)} (${rows.length} học sinh)`);saveData();
+ rows.forEach(sel=>{const id=sel.dataset.att,note=document.querySelector(`[data-note="${id}"]`)?.value||'';state.attendance[date+'_'+session+'_'+id]={date,session,id,studentId:id,status:sel.value,note,by:currentUser?.username||currentUser?.name||'Hệ thống',savedAt:new Date().toISOString()}});
+ log(`Lưu điểm danh ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)} (${rows.length} học sinh)`);saveData();
  const saved=await pushCloud();renderAll();
- if(saved)alert(`✅ Đã lưu và đồng bộ điểm danh ngày ${fmtDate(date)} (${rows.length} học sinh).`);
+ if(saved)alert(`✅ Đã lưu và đồng bộ điểm danh ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)} (${rows.length} học sinh).`);
  else alert('⚠️ Điểm danh đã được lưu tạm trên thiết bị nhưng CHƯA đồng bộ lên Supabase. Hãy kiểm tra mạng/quyền ghi rồi bấm Lưu điểm danh lại; không đóng trang trước khi đồng bộ thành công.');
+}
+async function toggleAttendanceLock(){
+ if(!isAdmin()){alert('🔒 Chỉ GVCN được khóa/mở khóa điểm danh.');return}
+ const date=document.getElementById('attDate').value||today(), session=currentAttSession();
+ state.attendanceLocks=state.attendanceLocks&&typeof state.attendanceLocks==='object'?state.attendanceLocks:{};
+ const key=attLockKey(date,session);
+ if(state.attendanceLocks[key]){
+   if(!confirm(`Mở khóa điểm danh ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)} để cho phép chỉnh sửa lại?`))return;
+   delete state.attendanceLocks[key];
+   log(`Mở khóa điểm danh ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)}`);
+ }else{
+   if(!confirm(`Khóa điểm danh ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)}? Sau khi khóa sẽ không thể chỉnh sửa cho tới khi GVCN mở khóa lại.`))return;
+   state.attendanceLocks[key]={locked:true,by:currentUser?.name||currentUser?.username||'GVCN',at:new Date().toISOString()};
+   log(`Khóa điểm danh ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)}`);
+ }
+ saveData();await pushCloud();renderAttendance();
 }
 function scoreObj(id,term){return state.scores[term+'_'+id]||{}}
 function avgScore(id,term=document.getElementById('scoreTerm')?.value||'HKI'){const s=scoreObj(id,term), vals=['tx1','tx2','tx3','mid','final'].map(k=>Number(s[k])).filter(x=>Number.isFinite(x)&&x>=0&&x<=10);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null}
@@ -1570,9 +1615,35 @@ function renderLearning(){
 async function saveLearning(){
  const term=document.getElementById('scoreTerm').value;document.querySelectorAll('.scoreInp').forEach(inp=>{const key=term+'_'+inp.dataset.sid;state.scores[key]=state.scores[key]||{};state.scores[key][inp.dataset.key]=inp.value===''?'':Number(inp.value)});saveData();await pushCloud();log(`Cập nhật điểm học tập ${term}`);alert('Đã lưu điểm.');renderDashboard();
 }
-function openConduct(){document.getElementById('cDate').value=today();document.getElementById('cContent').value='';document.getElementById('cPoints').value=1;document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');document.getElementById('conductModal').classList.add('show')}
-async function saveConduct(){const sid=document.getElementById('cStudent').value;if(!sid){alert('Chưa có học sinh.');return}let type=document.getElementById('cType').value,pts=Number(document.getElementById('cPoints').value||0);if(type==='Điểm trừ'||type==='Vi phạm')pts=-Math.abs(pts);const x={id:crypto.randomUUID(),date:document.getElementById('cDate').value,studentId:sid,type,content:document.getElementById('cContent').value,points:pts,by:currentUser.username,status:isAdmin()?'approved':'pending'};state.conduct.push(x);saveData();await pushCloud();log(`Ghi nhận rèn luyện cho ${state.students.find(s=>s.id===sid)?.name||''}`);closeModal('conductModal');renderAll()}
-function renderConduct(){const q=(document.getElementById('conductSearch').value||'').toLowerCase(),st=document.getElementById('conductStatus').value||'';let a=state.conduct||[];if(currentUser?.role?.startsWith('to'))a=a.filter(x=>state.students.find(s=>s.id===x.studentId)?.group==currentUser.role.replace('to',''));a=a.filter(x=>(!q||`${x.content} ${state.students.find(s=>s.id===x.studentId)?.name||''}`.toLowerCase().includes(q))&&(!st||x.status===st));document.getElementById('conductBody').innerHTML=a.length?a.slice().reverse().map(x=>{const s=state.students.find(s=>s.id===x.studentId)||{};return `<tr><td>${fmtDate(x.date)}</td><td>${esc(s.name||'')}</td><td>${esc(x.type)}</td><td>${esc(x.content)}</td><td><b>${Number(x.points).toFixed(1)}</b></td><td>${esc(x.by)}</td><td><span class="badge ${x.status==='approved'?'b-green':'b-yellow'}">${x.status==='approved'?'Đã duyệt':'Chờ duyệt'}</span></td><td>${isAdmin()&&x.status==='pending'?`<button class="btn small success" onclick="approveConduct('${x.id}')">Duyệt</button>`:''} ${isAdmin()?`<button class="btn small danger" onclick="deleteConduct('${x.id}')">Xóa</button>`:''}</td></tr>`}).join(''):'<tr><td colspan="8" class="empty">Chưa có bản ghi.</td></tr>'}
+function openConduct(){document.getElementById('cEditId').value='';document.getElementById('conductModalTitle').textContent='Ghi nhận rèn luyện';document.getElementById('cDate').value=today();document.getElementById('cContent').value='';document.getElementById('cPoints').value=1;document.getElementById('cType').value='Điểm cộng';document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');document.getElementById('conductModal').classList.add('show')}
+function canEditConductRecord(x){if(!x)return false;if(isAdmin())return true;return isClassOfficer()&&x.status==='pending'}
+function editConduct(id){
+ const x=(state.conduct||[]).find(x=>x.id===id);
+ if(!x){alert('Không tìm thấy bản ghi.');return}
+ if(!canEditConductRecord(x)){alert(x.status==='approved'?'🔒 Bản ghi đã được GVCN duyệt, không thể chỉnh sửa.':'🔒 Thầy/cô không có quyền chỉnh sửa bản ghi này.');return}
+ document.getElementById('cEditId').value=x.id;
+ document.getElementById('conductModalTitle').textContent='Chỉnh sửa rèn luyện';
+ document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');
+ document.getElementById('cDate').value=x.date;
+ document.getElementById('cStudent').value=x.studentId;
+ document.getElementById('cType').value=x.type;
+ document.getElementById('cPoints').value=Math.abs(Number(x.points||0));
+ document.getElementById('cContent').value=x.content||'';
+ document.getElementById('conductModal').classList.add('show');
+}
+async function saveConduct(){
+ const sid=document.getElementById('cStudent').value;if(!sid){alert('Chưa có học sinh.');return}
+ let type=document.getElementById('cType').value,pts=Number(document.getElementById('cPoints').value||0);if(type==='Điểm trừ'||type==='Vi phạm')pts=-Math.abs(pts);
+ const editId=document.getElementById('cEditId').value;
+ if(editId){
+   const x=(state.conduct||[]).find(x=>x.id===editId);
+   if(!x){alert('Không tìm thấy bản ghi để cập nhật.');return}
+   if(!canEditConductRecord(x)){alert(x.status==='approved'?'🔒 Bản ghi đã được GVCN duyệt, không thể chỉnh sửa.':'🔒 Thầy/cô không có quyền chỉnh sửa bản ghi này.');return}
+   x.date=document.getElementById('cDate').value;x.studentId=sid;x.type=type;x.content=document.getElementById('cContent').value;x.points=pts;x.updatedBy=currentUser?.username||currentUser?.name||'';x.updatedAt=new Date().toISOString();
+   saveData();await pushCloud();log(`Chỉnh sửa rèn luyện cho ${state.students.find(s=>s.id===sid)?.name||''}`);closeModal('conductModal');renderAll();return;
+ }
+ const x={id:crypto.randomUUID(),date:document.getElementById('cDate').value,studentId:sid,type,content:document.getElementById('cContent').value,points:pts,by:currentUser.username,status:isAdmin()?'approved':'pending'};state.conduct.push(x);saveData();await pushCloud();log(`Ghi nhận rèn luyện cho ${state.students.find(s=>s.id===sid)?.name||''}`);closeModal('conductModal');renderAll()}
+function renderConduct(){const q=(document.getElementById('conductSearch').value||'').toLowerCase(),st=document.getElementById('conductStatus').value||'';let a=state.conduct||[];if(currentUser?.role?.startsWith('to'))a=a.filter(x=>state.students.find(s=>s.id===x.studentId)?.group==currentUser.role.replace('to',''));a=a.filter(x=>(!q||`${x.content} ${state.students.find(s=>s.id===x.studentId)?.name||''}`.toLowerCase().includes(q))&&(!st||x.status===st));document.getElementById('conductBody').innerHTML=a.length?a.slice().reverse().map(x=>{const s=state.students.find(s=>s.id===x.studentId)||{};return `<tr><td>${fmtDate(x.date)}</td><td>${esc(s.name||'')}</td><td>${esc(x.type)}</td><td>${esc(x.content)}</td><td><b>${Number(x.points).toFixed(1)}</b></td><td>${esc(x.by)}</td><td><span class="badge ${x.status==='approved'?'b-green':'b-yellow'}">${x.status==='approved'?'Đã duyệt':'Chờ duyệt'}</span></td><td>${canEditConductRecord(x)?`<button class="btn small secondary" onclick="editConduct('${x.id}')">✏️ Sửa</button>`:''} ${isAdmin()&&x.status==='pending'?`<button class="btn small success" onclick="approveConduct('${x.id}')">Duyệt</button>`:''} ${isAdmin()?`<button class="btn small danger" onclick="deleteConduct('${x.id}')">Xóa</button>`:''}</td></tr>`}).join(''):'<tr><td colspan="8" class="empty">Chưa có bản ghi.</td></tr>'}
 async function approveConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN được duyệt rèn luyện.');return}const x=state.conduct.find(x=>x.id===id);if(x){x.status='approved';saveData();await pushCloud();log('GVCN duyệt một bản ghi rèn luyện');renderAll()}}
 async function deleteConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN được xóa bản ghi rèn luyện.');return}if(!confirm('Xóa bản ghi này?'))return;state.conduct=state.conduct.filter(x=>x.id!==id);saveData();await pushCloud();renderAll()}
 function conductPoints(sid){return (state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved').reduce((a,x)=>a+Number(x.points||0),0)}
@@ -1947,10 +2018,13 @@ async function resetAttendanceOnly(){
   const ok2=confirm(`⚠️ XÁC NHẬN LẦN CUỐI\n\nThầy chắc chắn muốn đưa điểm danh của ${className} về trạng thái ban đầu (chưa có dữ liệu) chứ?`);
   if(!ok2)return;
   const oldAttendance=state.attendance;
+  const oldAttendanceLocks=state.attendanceLocks;
   state.attendance={};
+  state.attendanceLocks={};
   const saved=await pushCloud();
   if(!saved){
     state.attendance=oldAttendance;
+    state.attendanceLocks=oldAttendanceLocks;
     saveData();
     return;
   }
@@ -2673,101 +2747,39 @@ async function loadGuestDashboard(){
 <script id="bibi-conduct-rules-report-init">
 window.addEventListener('load',function(){setTimeout(function(){try{renderConductRulesSettings();populateReportSelectors()}catch(e){console.warn(e)}},200)});
 </script>
-<button id="bibi-final-pwa-install" type="button" aria-label="Cài đặt ứng dụng">📲 Cài ứng dụng</button>
 
-<script id="bibi-final-pwa-install-js">
-(function(){
-  let installPrompt = null;
-
-  function getButton(){
-    return document.getElementById('bibi-final-pwa-install');
-  }
-
-  function screenAvailable(){
-    const guest = document.getElementById('guestScreen');
-    const app = document.getElementById('app');
-    const guestVisible = guest && !guest.classList.contains('hidden') && getComputedStyle(guest).display !== 'none';
-    const appVisible = app && !app.classList.contains('hidden') && getComputedStyle(app).display !== 'none';
-    return !!(guestVisible || appVisible);
-  }
-
-  function isStandalone(){
-    return !!((window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
-               window.navigator.standalone === true);
-  }
-
-  function syncInstallButton(){
-    const b = getButton();
-    if(!b) return;
-    if(installPrompt && !isStandalone() && screenAvailable()){
-      b.classList.add('show');
-    }else{
-      b.classList.remove('show');
-    }
-  }
-
-  window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault();
-    installPrompt = e;
-    syncInstallButton();
-  });
-
-  window.addEventListener('appinstalled', function(){
-    installPrompt = null;
-    syncInstallButton();
-  });
-
-  document.addEventListener('click', async function(e){
-    const b = e.target.closest ? e.target.closest('#bibi-final-pwa-install') : null;
-    if(!b) return;
-
-    if(installPrompt){
-      try{
-        installPrompt.prompt();
-        await installPrompt.userChoice;
-      }catch(_){}
-      installPrompt = null;
-      syncInstallButton();
-      return;
-    }
-
-    alert('Nếu chưa thấy lời mời cài đặt, hãy mở ClassManager Pro bằng Chrome/Edge trên HTTPS rồi chọn “Cài đặt ứng dụng” hoặc “Thêm vào màn hình chính”.');
-  });
-
-  // Keep the button synchronized after login/Guest rendering.
-  window.addEventListener('load', function(){
-    setTimeout(syncInstallButton, 300);
-    setTimeout(syncInstallButton, 1200);
-  });
-  window.addEventListener('resize', syncInstallButton);
-  window.addEventListener('pageshow', syncInstallButton);
-
-  // Re-check when the app changes between hidden/visible states.
-  const observer = new MutationObserver(function(){ syncInstallButton(); });
-  window.addEventListener('DOMContentLoaded', function(){
-    const guest = document.getElementById('guestScreen');
-    const app = document.getElementById('app');
-    if(guest) observer.observe(guest,{attributes:true,attributeFilter:['class','style']});
-    if(app) observer.observe(app,{attributes:true,attributeFilter:['class','style']});
-    syncInstallButton();
-  });
-})();
-</script>
-
-<button id="cmPwaInstallButton" class="cm-pwa-install" type="button" aria-label="Cài đặt ứng dụng"><span>📲 Cài đặt ứng dụng</span><b>Thêm ClassManager Pro vào màn hình chính</b></button>
+<button id="cmPwaInstallButton" class="cm-pwa-install" type="button" aria-label="Cài đặt ứng dụng lên màn hình chính" title="Cài đặt ứng dụng"><svg class="cm-install-svg" viewBox="0 0 96 96" role="img" aria-hidden="true"><defs><linearGradient id="cmInstallBody" x1="18" y1="10" x2="78" y2="86" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#a7f3d0"/><stop offset=".4" stop-color="#34d399"/><stop offset=".75" stop-color="#10b981"/><stop offset="1" stop-color="#0f766e"/></linearGradient><linearGradient id="cmInstallFace" x1="25" y1="28" x2="72" y2="73" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f8fffb"/><stop offset="1" stop-color="#d1fae5"/></linearGradient><linearGradient id="cmInstallSide" x1="8" y1="38" x2="25" y2="61" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6ee7b7"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs><g class="cm-install-bob"><ellipse cx="48" cy="82" rx="27" ry="6" fill="#064e3b" opacity=".18"/><path d="M30 16 48 8l18 8-18 8Z" fill="#0f766e" stroke="#064e3b" stroke-width="1.5"/><path d="M30 16v6c0 3 8 5 18 5s18-2 18-5v-6" fill="none" stroke="#0f766e" stroke-width="2"/><rect x="18" y="19" width="60" height="54" rx="19" fill="url(#cmInstallBody)" stroke="#065f46" stroke-width="2"/><rect x="25" y="28" width="46" height="37" rx="14" fill="url(#cmInstallFace)" stroke="#6ee7b7" stroke-width="2"/><rect x="11" y="39" width="13" height="20" rx="6" fill="url(#cmInstallSide)" stroke="#065f46" stroke-width="2"/><rect x="72" y="39" width="13" height="20" rx="6" fill="url(#cmInstallSide)" stroke="#065f46" stroke-width="2"/><circle class="cm-install-eye" cx="38" cy="45" r="4.5" fill="#065f46"/><circle class="cm-install-eye" cx="58" cy="45" r="4.5" fill="#065f46"/><circle cx="36.5" cy="43.5" r="1.4" fill="#fff"/><circle cx="56.5" cy="43.5" r="1.4" fill="#fff"/><path d="M39 55.5c3 3.7 9 3.7 12 0" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/></g></svg><span class="cm-install-badge" aria-hidden="true">⬇️</span><span class="cm-install-label">Cài đặt ứng dụng</span></button>
 <script id="bibi-notification-pwa-v1-js">
 (function(){
   // --- PWA install suggestion: visible on Guest and student/cadre accounts; hidden after install ---
+  // Icon 3D động (robot) chỉ hiện tối đa 60 giây mỗi lần rồi tự ẩn.
   let cmDeferredPrompt=null;
+  let cmInstallHideTimer=null;
+  const CM_INSTALL_VISIBLE_MS=60000;
   const getPwaBtn=()=>document.getElementById('cmPwaInstallButton');
   function standalone(){return !!((window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true);}
-  function syncPwaButton(){const b=getPwaBtn();if(!b)return;if(standalone()){b.classList.remove('show');}else{b.classList.add('show');}}
+  function showPwaButton(){
+    const b=getPwaBtn();if(!b)return;
+    const wasShown=b.classList.contains('show');
+    b.classList.add('show');
+    if(!wasShown){
+      clearTimeout(cmInstallHideTimer);
+      cmInstallHideTimer=setTimeout(()=>{b.classList.remove('show');},CM_INSTALL_VISIBLE_MS);
+    }
+  }
+  function hidePwaButton(){
+    const b=getPwaBtn();if(!b)return;
+    b.classList.remove('show');
+    clearTimeout(cmInstallHideTimer);
+    cmInstallHideTimer=null;
+  }
+  function syncPwaButton(){if(standalone()){hidePwaButton();}else{showPwaButton();}}
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();cmDeferredPrompt=e;syncPwaButton();});
-  window.addEventListener('appinstalled',()=>{cmDeferredPrompt=null;syncPwaButton();});
-  document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('#cmPwaInstallButton');if(!b)return;if(cmDeferredPrompt){try{cmDeferredPrompt.prompt();await cmDeferredPrompt.userChoice;}catch(_){}cmDeferredPrompt=null;syncPwaButton();}else{alert('Để cài ứng dụng, hãy mở ClassManager Pro bằng Chrome/Edge trên HTTPS rồi chọn “Cài đặt ứng dụng” hoặc “Thêm vào màn hình chính”.');}});
+  window.addEventListener('appinstalled',()=>{cmDeferredPrompt=null;hidePwaButton();});
+  document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('#cmPwaInstallButton');if(!b)return;if(cmDeferredPrompt){try{cmDeferredPrompt.prompt();await cmDeferredPrompt.userChoice;}catch(_){}cmDeferredPrompt=null;hidePwaButton();}else{hidePwaButton();alert('Để cài ứng dụng, hãy mở ClassManager Pro bằng Chrome/Edge trên HTTPS rồi chọn “Cài đặt ứng dụng” hoặc “Thêm vào màn hình chính”.');}});
   window.addEventListener('load',()=>{setTimeout(syncPwaButton,300);setTimeout(syncPwaButton,1200);});
   window.addEventListener('pageshow',syncPwaButton);
-  window.addEventListener('resize',syncPwaButton);
+  window.addEventListener('resize',()=>{if(getPwaBtn()?.classList.contains('show'))return;syncPwaButton();});
 
   // --- Guest notifications: render safely from the dashboard payload when available ---
   window.renderGuestNotifications=function(list){
@@ -2836,7 +2848,7 @@ window.addEventListener('load',function(){setTimeout(function(){try{renderConduc
 :root{--cm-blue:#0879dc}body{background:#f8fbff}.app-brand-banner{min-height:72px!important;padding:13px 24px!important;background:linear-gradient(112deg,#086abd,#0789e7 55%,#24acee)!important;box-shadow:0 3px 12px rgba(6,101,189,.28)!important}.app-brand-title{font-size:25px!important}.app-brand-title .cap{background:rgba(255,255,255,.18)!important}.topbar{height:58px!important;background:#fff!important;border-bottom:1px solid #e8f0f8!important;box-shadow:0 2px 9px rgba(15,72,130,.05)}
 .dashboard-home{padding-bottom:24px}.dashboard-home .cm-home-hero{display:grid;grid-template-columns:minmax(0,1fr) 155px;gap:12px;position:relative;overflow:hidden;padding:26px 28px 20px;border-radius:26px;background:linear-gradient(130deg,#159cf1 0%,#0a86e8 54%,#0572d8 100%);color:#fff;box-shadow:0 13px 29px rgba(8,121,220,.25);isolation:isolate}.cm-home-hero::before{content:"";position:absolute;width:230px;height:230px;right:-105px;top:-100px;border:35px solid rgba(255,255,255,.09);border-radius:50%;z-index:-1}.cm-home-hero::after{content:"";position:absolute;width:170px;height:170px;left:29%;bottom:-135px;background:rgba(255,255,255,.08);clip-path:polygon(50% 0,100% 100%,0 100%);z-index:-1}.cm-home-profile{display:flex;align-items:center;gap:15px;min-width:0}.cm-home-avatar{flex:0 0 68px;width:68px;height:68px;border:3px solid rgba(255,255,255,.78);border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#e0f5ff,#7bd5ff);box-shadow:0 5px 15px rgba(0,80,150,.22);color:#0865b6;font-size:22px;font-weight:900}.cm-home-greeting{font-size:13px;opacity:.82;margin-bottom:2px}.cm-home-profile h2{margin:0;font-size:28px;line-height:1.15;color:#fff!important;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cm-home-profile p{margin:5px 0 0;opacity:.92;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cm-home-illustration{align-self:center;position:relative;font-size:82px;line-height:1;filter:drop-shadow(0 8px 8px rgba(2,65,126,.2));transform:translateY(-2px)}.cm-home-illustration span{position:absolute;right:-3px;bottom:1px;font-size:25px;transform:rotate(-10deg)}.cm-home-class{grid-column:1/-1;display:flex;align-items:center;gap:9px;padding-top:9px;border-top:1px solid rgba(255,255,255,.28)}.cm-home-class>span:first-child{font-size:19px}.cm-home-class small{display:block;opacity:.78;font-size:11px}.cm-home-class strong{display:block;font-size:18px;color:#fff!important}.cm-home-year{margin-left:auto;font-size:13px;font-weight:800;white-space:nowrap}
 .cm-utility-section{margin:30px 0 0}.cm-section-title{display:flex;align-items:center;justify-content:space-between;margin:0 2px 15px}.cm-section-title h2{margin:0;font-size:24px;letter-spacing:-.5px;color:#111827!important}.cm-text-action{border:0;background:transparent;color:#0879dc;font-size:14px;font-weight:800;padding:6px;cursor:pointer}.cm-utility-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid #edf2f7;border-left:1px solid #edf2f7;background:#fff}.cm-utility-card{min-height:144px;padding:18px 9px 14px;border:0;border-right:1px solid #edf2f7;border-bottom:1px solid #edf2f7;background:#fff;color:#172033;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:12px;font:inherit;font-size:15px;line-height:1.27;text-align:center;cursor:pointer;transition:transform .16s ease,background .16s ease}.cm-utility-card:hover{background:#f6fbff;transform:translateY(-2px)}.cm-utility-icon{display:grid;place-items:center;width:66px;height:66px;border-radius:20px;font-size:32px;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)}.cm-utility-card.pink .cm-utility-icon{background:#fde3ed}.cm-utility-card.mint .cm-utility-icon{background:#dff5ef}.cm-utility-card.orange .cm-utility-icon{background:#fff0dc}.cm-utility-card.blue .cm-utility-icon{background:#dcefff}.cm-utility-card.purple .cm-utility-icon{background:#eee3ff}.cm-utility-card.cyan .cm-utility-icon{background:#d9f3f6}.cm-utility-card.lavender .cm-utility-icon{background:#f2e4fc}.cm-recent-grid .cm-utility-card{min-height:158px}.dashboard-home>.dashboard-notification-card{margin-top:30px}.cm-dashboard-detail{margin-top:25px}.dashboard-home>#attendanceTodayDashboard,.dashboard-home>#dashboardStats,.dashboard-home>.grid.two,.dashboard-home>.cm-dashboard-detail{display:none}.cm-bottom-nav{display:none}
-@media(max-width:680px){body{background:#fff}.app-brand-banner{min-height:62px!important;padding:10px 15px!important;position:sticky;top:0;z-index:30}.app-brand-title{font-size:20px!important}.app-class-context{font-size:11px!important}.topbar{height:48px!important;min-height:48px!important;padding:4px 12px!important;position:sticky;top:62px;z-index:25}.topbar .title{font-size:14px!important;color:#0f5fa9!important}.topbar .userbox>div:first-child,.topbar .userbox .btn{display:none!important}.topbar .avatar{width:32px;height:32px}.content{padding:0 0 88px!important;max-width:100%}.dashboard-home{margin:0}.dashboard-home .cm-home-hero{border-radius:0 0 24px 24px;grid-template-columns:minmax(0,1fr) 90px;padding:22px 18px 16px;gap:8px}.cm-home-avatar{flex-basis:55px;width:55px;height:55px;font-size:17px}.cm-home-profile{gap:11px}.cm-home-profile h2{font-size:21px}.cm-home-profile p{font-size:12px}.cm-home-illustration{font-size:58px}.cm-home-illustration span{font-size:18px}.cm-home-class{padding-top:10px}.cm-home-class strong{font-size:16px}.cm-home-year{font-size:11px}.cm-utility-section{margin:26px 0 0}.cm-section-title{margin:0 16px 13px}.cm-section-title h2{font-size:22px}.cm-utility-card{min-height:128px;padding:13px 5px 10px;gap:9px;font-size:14px}.cm-recent-grid .cm-utility-card{min-height:140px}.cm-utility-icon{width:57px;height:57px;border-radius:18px;font-size:28px}.dashboard-home>.dashboard-notification-card{margin:24px 12px 0}.sidebar{display:none!important}.main,.main.sidebar-hidden{margin-left:0!important}.menu-toggle{display:none!important}.cm-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:100;background:rgba(255,255,255,.96);border-top:1px solid #dbe7f3;box-shadow:0 -4px 18px rgba(22,73,124,.09);display:grid;grid-template-columns:repeat(4,1fr);padding:6px 4px max(6px,env(safe-area-inset-bottom))}.cm-bottom-nav button{border:0;background:transparent;color:#7c8795;min-width:0;padding:3px 1px;font:inherit;font-size:10px;line-height:1.18;display:flex;flex-direction:column;align-items:center;gap:2px}.cm-bottom-nav button span{font-size:23px;line-height:1}.cm-bottom-nav button.active{color:#0879dc;font-weight:900}.ai-floating-btn{bottom:80px!important}}
+@media(max-width:680px){body{background:#fff}.app-brand-banner{min-height:62px!important;padding:10px 15px!important;position:sticky;top:0;z-index:30}.app-brand-title{font-size:20px!important}.app-class-context{font-size:11px!important}.topbar{height:48px!important;min-height:48px!important;padding:4px 12px!important;position:sticky;top:62px;z-index:25}.topbar .title{font-size:14px!important;color:#0f5fa9!important}.topbar .userbox>div:first-child,.topbar .userbox .btn{display:none!important}.topbar .avatar{width:32px;height:32px}.content{padding:0 0 88px!important;max-width:100%}.dashboard-home{margin:0}.dashboard-home .cm-home-hero{border-radius:0 0 24px 24px;grid-template-columns:minmax(0,1fr) 90px;padding:22px 18px 16px;gap:8px}.cm-home-avatar{flex-basis:55px;width:55px;height:55px;font-size:17px}.cm-home-profile{gap:11px}.cm-home-profile h2{font-size:21px}.cm-home-profile p{font-size:12px}.cm-home-illustration{font-size:58px}.cm-home-illustration span{font-size:18px}.cm-home-class{padding-top:10px}.cm-home-class strong{font-size:16px}.cm-home-year{font-size:11px}.cm-utility-section{margin:26px 0 0}.cm-section-title{margin:0 16px 13px}.cm-section-title h2{font-size:22px}.cm-utility-card{min-height:128px;padding:13px 5px 10px;gap:9px;font-size:14px}.cm-recent-grid .cm-utility-card{min-height:140px}.cm-utility-icon{width:57px;height:57px;border-radius:18px;font-size:28px}.dashboard-home>.dashboard-notification-card{margin:24px 12px 0}.sidebar{display:none!important}.main,.main.sidebar-hidden{margin-left:0!important}.menu-toggle{display:none!important}.cm-bottom-nav{position:fixed;left:0;right:0;top:0;bottom:auto;z-index:200;background:rgba(255,255,255,.97);border-top:0;border-bottom:1px solid #dbe7f3;box-shadow:0 4px 18px rgba(22,73,124,.09);display:grid;grid-template-columns:repeat(4,1fr);padding:calc(4px + env(safe-area-inset-top)) 4px 4px}.cm-bottom-nav button{border:0;background:transparent;color:#7c8795;min-width:0;padding:3px 1px;font:inherit;font-size:10px;line-height:1.18;display:flex;flex-direction:column;align-items:center;gap:2px}.cm-bottom-nav button span{font-size:21px;line-height:1}.cm-bottom-nav button.active{color:#0879dc;font-weight:900}.ai-floating-btn{bottom:24px!important}body{padding-top:56px}.app-brand-banner{top:56px!important}.topbar{top:118px!important}.content{padding:0 0 20px!important}}
 @media(min-width:681px){.dashboard-home{max-width:1050px;margin:0 auto}.dashboard-home .cm-home-hero{margin-top:4px}.cm-utility-grid{border-radius:18px;overflow:hidden;box-shadow:0 5px 18px rgba(15,72,130,.05)}}
 </style>
 <nav class="cm-bottom-nav" aria-label="Điều hướng nhanh"><button class="active" type="button" onclick="showPage('dashboard')"><span>⌂</span>Trang chủ</button><button type="button" onclick="showPage('attendance')"><span>🗓️</span>Điểm danh</button><button type="button" onclick="showPage('conduct')"><span>⭐</span>Rèn luyện</button><button type="button" onclick="openAccountPanel()"><span>👤</span>Cá nhân</button></nav>
