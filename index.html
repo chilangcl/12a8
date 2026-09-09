@@ -878,7 +878,7 @@ select option{background:#fff!important;color:#202124!important}
 
       <section id="page-attendance" class="page">
         <div class="page-head"><div><h2>Chuyên cần</h2><div class="muted">Theo dõi hằng ngày và tự động tổng hợp</div></div><div class="actions"><button class="btn" id="attSaveBtn" onclick="saveAttendance()">💾 Lưu điểm danh</button><button class="btn warning admin-only" id="attLockBtn" onclick="toggleAttendanceLock()">🔒 Khóa điểm danh</button></div></div>
-        <div class="toolbar"><label style="display:flex;align-items:center;gap:6px">Ngày <input type="date" id="attDate" onchange="renderAttendance()"></label><label style="display:flex;align-items:center;gap:6px">Buổi <select id="attSession" onchange="renderAttendance()"><option value="sang">🌅 Học sáng</option><option value="chieu">🌇 Học chiều</option></select></label><select id="attStatusFilter" onchange="renderAttendance()"><option value="">Tất cả</option><option value="present">Đúng giờ</option><option value="late">Đi muộn</option><option value="excused">Nghỉ phép</option><option value="absent">Nghỉ không phép</option></select></div>
+        <div class="toolbar"><label style="display:flex;align-items:center;gap:6px">Ngày <input type="date" id="attDate" onchange="renderAttendance()"></label><label style="display:flex;align-items:center;gap:6px">Buổi <select id="attSession" onchange="renderAttendance()"><option value="sang">🌅 Học sáng</option><option value="chieu">🌇 Học chiều</option></select></label><select id="attStatusFilter" onchange="renderAttendance()"><option value="">Tất cả</option><option value="present">Có mặt</option><option value="late">Đi muộn</option><option value="excused">Nghỉ phép</option><option value="absent">Nghỉ không phép</option></select></div>
         <div id="attLockNotice" class="notice hidden"></div>
         <div class="notice">Hệ thống tự động mặc định tất cả học sinh là <b>"Có mặt"</b>; thầy/cô chỉ cần chọn lại trạng thái với học sinh nghỉ/đi muộn. Điểm danh được tính riêng theo buổi Sáng/Chiều và dùng cho báo cáo tuần/tháng/HKI/HKII/cả năm. GVCN khóa điểm danh vào cuối mỗi buổi học để chốt số liệu.</div>
         <div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Mã HS</th><th>Họ tên</th><th>Tổ</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead><tbody id="attendanceBody"></tbody></table></div>
@@ -1537,7 +1537,7 @@ function attendanceTodaySummary(students,attendance,date=today()){
 function attendanceNames(list,escapeFn){return list.length?list.map(s=>`${escapeFn(s.name||s.code||'Học sinh')} <span class="mini">(Tổ ${escapeFn(s.group||'—')})</span>`).join('<br>'):'<span class="today-attendance-empty">Không có</span>'}
 function attendanceTodaySessionBlockMarkup(session,summary,escapeFn){
  const absent=[...summary.excused,...summary.absent];
- return `<div class="today-attendance-session-block"><div class="today-session-title">${session==='chieu'?'🌙 Điểm danh buổi chiều':'🌤️ Điểm danh buổi sáng'}</div><div class="today-attendance-grid"><div class="today-attendance-item total"><div class="today-label">👥 Sĩ số lớp</div><div class="today-number">${summary.total}</div><div class="today-detail">Tổng số học sinh</div></div><div class="today-attendance-item present"><div class="today-label">✅ Đúng giờ</div><div class="today-number">${summary.present.length}</div><div class="today-detail">Đã xác nhận đi học</div></div><div class="today-attendance-item late"><div class="today-label">⏰ Đi muộn</div><div class="today-number">${summary.late.length}</div><div class="today-detail">${attendanceNames(summary.late,escapeFn)}</div></div><div class="today-attendance-item absent"><div class="today-label">🏠 Vắng mặt</div><div class="today-number">${absent.length}</div><div class="today-detail"><b>Có phép ${summary.excused.length} · Không phép ${summary.absent.length}</b><br>${attendanceNames(summary.excused,escapeFn)}${summary.excused.length&&summary.absent.length?'<br>':''}${attendanceNames(summary.absent,escapeFn)}</div></div><div class="today-attendance-item pending"><div class="today-label">📝 Chưa điểm danh</div><div class="today-number">${summary.pending.length}</div><div class="today-detail">${attendanceNames(summary.pending,escapeFn)}</div></div></div></div>`;
+ return `<div class="today-attendance-session-block"><div class="today-session-title">${session==='chieu'?'🌙 Điểm danh buổi chiều':'🌤️ Điểm danh buổi sáng'}</div><div class="today-attendance-grid"><div class="today-attendance-item total"><div class="today-label">👥 Sĩ số lớp</div><div class="today-number">${summary.total}</div><div class="today-detail">Tổng số học sinh</div></div><div class="today-attendance-item present"><div class="today-label">✅ Có mặt</div><div class="today-number">${summary.present.length}</div><div class="today-detail">Đã xác nhận đi học</div></div><div class="today-attendance-item late"><div class="today-label">⏰ Đi muộn</div><div class="today-number">${summary.late.length}</div><div class="today-detail">${attendanceNames(summary.late,escapeFn)}</div></div><div class="today-attendance-item absent"><div class="today-label">🏠 Vắng mặt</div><div class="today-number">${absent.length}</div><div class="today-detail"><b>Có phép ${summary.excused.length} · Không phép ${summary.absent.length}</b><br>${attendanceNames(summary.excused,escapeFn)}${summary.excused.length&&summary.absent.length?'<br>':''}${attendanceNames(summary.absent,escapeFn)}</div></div><div class="today-attendance-item pending"><div class="today-label">📝 Chưa điểm danh</div><div class="today-number">${summary.pending.length}</div><div class="today-detail">${attendanceNames(summary.pending,escapeFn)}</div></div></div></div>`;
 }
 function attendanceTodayPanelMarkup(summary,escapeFn=esc){
  const dateLabel=fmtDate(summary.date), isSunday=new Date(`${summary.date}T00:00:00`).getDay()===0;
@@ -1656,7 +1656,7 @@ function renderAttendance(){
  const date=document.getElementById('attDate').value||today(),session=currentAttSession(),filter=document.getElementById('attStatusFilter').value||'',a=visibleStudents();
  const locked=isAttendanceLocked(date,session);
  const rows=a.map((s,i)=>{const key=attendanceRecordKey(date,session,s.id),r=state.attendance[key]||{status:attendanceStatusFor(s.id,date,session),note:''};return {s,i,r}}).filter(x=>!filter||x.r.status===filter);
- document.getElementById('attendanceBody').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.i+1}</td><td>${esc(x.s.code)}</td><td><b>${esc(x.s.name)}</b></td><td>${x.s.group}</td><td><select data-att="${x.s.id}" class="attSel" onchange="saveAttendance(true)" ${locked?'disabled':''}><option value="present" ${x.r.status==='present'?'selected':''}>Đúng giờ</option><option value="late" ${x.r.status==='late'?'selected':''}>Đi muộn</option><option value="excused" ${x.r.status==='excused'?'selected':''}>Nghỉ có phép</option><option value="absent" ${x.r.status==='absent'?'selected':''}>Nghỉ không phép</option></select></td><td><input data-note="${x.s.id}" value="${esc(x.r.note||'')}" placeholder="Ghi chú" ${locked?'disabled':''} style="padding:7px;border:1px solid var(--border);border-radius:8px"></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Không có dữ liệu phù hợp.</td></tr>';
+ document.getElementById('attendanceBody').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.i+1}</td><td>${esc(x.s.code)}</td><td><b>${esc(x.s.name)}</b></td><td>${x.s.group}</td><td><select data-att="${x.s.id}" class="attSel" onchange="saveAttendance(true)" ${locked?'disabled':''}><option value="present" ${x.r.status==='present'?'selected':''}>Có mặt</option><option value="late" ${x.r.status==='late'?'selected':''}>Đi muộn</option><option value="excused" ${x.r.status==='excused'?'selected':''}>Nghỉ có phép</option><option value="absent" ${x.r.status==='absent'?'selected':''}>Nghỉ không phép</option></select></td><td><input data-note="${x.s.id}" value="${esc(x.r.note||'')}" placeholder="Ghi chú" ${locked?'disabled':''} style="padding:7px;border:1px solid var(--border);border-radius:8px"></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Không có dữ liệu phù hợp.</td></tr>';
  const saveBtn=document.getElementById('attSaveBtn');if(saveBtn){saveBtn.disabled=locked;saveBtn.style.opacity=locked?'0.55':'1'}
  const lockBtn=document.getElementById('attLockBtn');if(lockBtn)lockBtn.textContent=locked?'🔓 Mở khóa điểm danh':'🔒 Khóa điểm danh';
  const notice=document.getElementById('attLockNotice');
@@ -2153,46 +2153,19 @@ function cloneSafe(value){
   try{return JSON.parse(JSON.stringify(value??null));}catch(e){return null;}
 }
 function buildAIContext(){
+  /* Context chuẩn hóa: mỗi dữ liệu chỉ xuất hiện một lần để tránh request quá lớn và mất đoạn trả lời. */
   const students=Array.isArray(state.students)?state.students:[];
   const attendance=state.attendance&&typeof state.attendance==='object'?Object.values(state.attendance):[];
   const conduct=Array.isArray(state.conduct)?state.conduct:[];
   const scores=state.scores&&typeof state.scores==='object'?state.scores:{};
   const activities=Array.isArray(state.activity)?state.activity:[];
-  const auditLog=Array.isArray(state.auditLog)?state.auditLog:[];
   const notifications=Array.isArray(state.notifications)?state.notifications:[];
-  const stats=students.map(s=>{
-    const ar=attendance.filter(x=>x.studentId===s.id||x.id===s.id);
-    const cr=conduct.filter(x=>x.studentId===s.id&&x.status==='approved');
-    const plus=cr.filter(x=>Number(x.points)>0).reduce((a,x)=>a+Number(x.points||0),0);
-    const minus=cr.filter(x=>Number(x.points)<0).reduce((a,x)=>a+Number(x.points||0),0);
-    const studentScores={};
-    Object.entries(scores).forEach(([k,v])=>{
-      if(k.endsWith('_'+s.id)||k===s.id) studentScores[k.replace('_'+s.id,'')]=cloneSafe(v);
-    });
-    const studentActivities=activities.filter(x=>x.studentId===s.id||x.student_id===s.id);
-    return {...cloneSafe(s),
-      attendance:{present:ar.filter(x=>x.status==='present').length,late:ar.filter(x=>x.status==='late').length,excused:ar.filter(x=>x.status==='excused').length,absent:ar.filter(x=>x.status==='absent').length,total:ar.length,records:cloneSafe(ar)||[]},
-      conduct:{records:cr.length,plus:Number(plus.toFixed(1)),minus:Number(minus.toFixed(1)),net:Number((plus+minus).toFixed(1)),recent:cloneSafe(cr)||[]},
-      learning:studentScores,activities:cloneSafe(studentActivities)||[]};
-  });
+  const safeStudents=students.map(s=>({id:s.id,code:s.code||'',name:s.name||'',gender:s.gender||'',group:s.group||'',role:s.role||s.position||''}));
   const approved=conduct.filter(x=>x.status==='approved');
-  const genderStats=getGenderStatsFromStudents(students);
-  const groups={};
-  students.forEach(s=>{const g=String(s.group||'Chưa xếp');if(!groups[g])groups[g]=[];groups[g].push(s.id);});
-  const classState=cloneSafe({settings:state.settings||{},students,attendance:state.attendance||{},scores,conduct,activity:activities,auditLog,notifications})||{};
-  return {
-    scope:{currentClassKey:currentStateKey,className:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',teacher:state.settings?.teacher||currentUser?.name||'',instruction:'Chỉ sử dụng dữ liệu của lớp đang được chọn.'},
-    class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',teacher:state.settings?.teacher||currentUser?.name||'',groups:state.settings?.groups||4},
-    summary:{students:students.length,attendanceRecords:attendance.length,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),activityRecords:activities.length,auditRecords:auditLog.length,notificationRecords:notifications.length,weekStart:aiWeekStart(today()),gender:genderStats,groups},
-    students:stats,
-    fullStudentRecords:cloneSafe(students)||[],
-    fullAttendanceRecords:cloneSafe(attendance)||[],
-    fullConductRecords:cloneSafe(conduct)||[],
-    fullActivityRecords:cloneSafe(activities)||[],
-    fullScores:cloneSafe(scores)||{},
-    recentConduct:cloneSafe(approved)||[],
-    classState
-  };
+  const genderStats=getGenderStatsFromStudents(students),groups={};
+  safeStudents.forEach(s=>{const g=String(s.group||'Chưa xếp');if(!groups[g])groups[g]=[];groups[g].push(s.id);});
+  const studentStats=safeStudents.map(s=>{const ar=attendance.filter(x=>(x.studentId||x.id)===s.id),cr=approved.filter(x=>x.studentId===s.id);return {id:s.id,attendance:{present:ar.filter(x=>x.status==='present').length,late:ar.filter(x=>x.status==='late').length,excused:ar.filter(x=>x.status==='excused').length,absent:ar.filter(x=>x.status==='absent').length},conductPoints:Number(cr.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1))};});
+  return {version:'ai-context-v2',generatedAt:new Date().toISOString(),scope:{currentClassKey:currentStateKey,className:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',instruction:'Chỉ sử dụng dữ liệu của lớp đang được chọn.'},class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',groups:state.settings?.groups||4},summary:{students:safeStudents.length,attendanceRecords:attendance.length,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),activityRecords:activities.length,notificationRecords:notifications.length,weekStart:aiWeekStart(today()),gender:genderStats,groups},students:safeStudents,studentStats,attendance:cloneSafe(attendance)||[],conduct:cloneSafe(conduct)||[],activities:cloneSafe(activities)||[],scores:cloneSafe(scores)||{},notifications:cloneSafe(notifications.slice(-30))||[]};
 }
 function buildAIGenderSummary(context){
   const g=context?.summary?.gender||{};
@@ -2202,7 +2175,7 @@ function buildAIPrompt(question,context){
   return `Bạn là Trợ lý AI chuyên nghiệp của GVCN trong hệ thống ClassManager Pro.
 
 PHẠM VI DỮ LIỆU:
-Bạn hỗ trợ duy nhất GVCN đang đăng nhập và chỉ phân tích lớp đang được chọn. Bạn được phép đọc và đối chiếu TOÀN BỘ dữ liệu nghiệp vụ có trong context, gồm toàn bộ hồ sơ học sinh, chuyên cần, rèn luyện/thi đua, hoạt động lớp và hoạt động của từng học sinh, dữ liệu học tập/điểm, cấu hình lớp và các bản ghi nghiệp vụ khác trong classState.
+Bạn hỗ trợ duy nhất GVCN đang đăng nhập và chỉ phân tích lớp đang được chọn. Context chuẩn hóa có danh sách học sinh, thống kê từng học sinh, chuyên cần, rèn luyện/thi đua, hoạt động, điểm học tập, thông báo và cấu hình lớp. Không có dữ liệu nào ngoài context.
 
 NGUYÊN TẮC BẮT BUỘC:
 - Không tự giới hạn quyền đọc dữ liệu khi dữ liệu đã có trong context.
@@ -2365,6 +2338,315 @@ async function askAI(){const q=document.getElementById('aiQuestion'),ans=documen
 document.getElementById('loginPass')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();login()}});
 if(window.__supabaseInitError){setLoginStatus('❌ Không tải được Supabase: '+window.__supabaseInitError.message)}
 window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.modal.show').forEach(x=>x.classList.remove('show'))}})
+</script>
+
+<script id="ai-rule-based-engine">
+/* ============================================================================
+   TRỢ LÝ AI RULE-BASED (KHÔNG SUPABASE, KHÔNG API KEY, KHÔNG TỐN PHÍ)
+   ----------------------------------------------------------------------------
+   Mục tiêu:
+   - Trả lời NGAY LẬP TỨC, tại trình duyệt, cho các câu hỏi thống kê/tra cứu
+     rõ ràng (sĩ số, chuyên cần, rèn luyện, danh sách tổ, học sinh cần quan
+     tâm, so sánh tổ, thông báo...) mà KHÔNG gọi Gemini => tiết kiệm quota AI.
+   - Hoạt động được ngay cả khi CHƯA đăng nhập / mất phiên với backend AI
+     (Edge Function ai-class-assistant), vì toàn bộ dữ liệu lấy từ `state`
+     đang có sẵn trên máy, không cần mạng.
+   - Dùng làm PHƯƠNG ÁN DỰ PHÒNG khi Gemini lỗi hoặc hết quota: hệ thống sẽ
+     tự tổng hợp một bản tóm tắt cơ bản để GVCN vẫn có thông tin dùng ngay.
+   - Chỉ những câu hỏi PHỨC TẠP (cần suy luận, phân tích nguyên nhân, viết
+     báo cáo/nhận xét, đề xuất...) mới được chuyển tiếp cho AI thật (Gemini).
+   ========================================================================== */
+(()=>{
+  function normVN(s){
+    return String(s||'')
+      .toLowerCase()
+      .replace(/đ/g,'d')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g,'')
+      .trim();
+  }
+  function hasAny(t,words){return words.some(w=>t.includes(w));}
+  function hasAll(t,words){return words.every(w=>t.includes(w));}
+
+  // Các dấu hiệu câu hỏi "phức tạp": cần suy luận/nguyên nhân/dự đoán/soạn thảo
+  // -> luôn nhường cho AI thật (Gemini), rule-based không tự suy diễn.
+  const COMPLEX_SIGNALS=['vi sao','tai sao','nguyen nhan','du doan','du bao',
+    'de xuat','kien nghi','viet bao cao','soan','viet nhan xet','nhan xet cho',
+    'nen uu tien','viec nen lam','khuyen','danh gia tong the','y kien cua ban'];
+
+  function isForcedComplex(t){return hasAny(t,COMPLEX_SIGNALS);}
+
+  // Tóm tắt tổng quan lớp — dùng cho cả câu hỏi "tóm tắt lớp" lẫn khi cần
+  // fallback tự động lúc Gemini lỗi/hết quota.
+  function overviewText(context){
+    const c=context;
+    const rules=(typeof getConductRules==='function')?getConductRules():{base:100,good:96,fair:90,pass:85};
+    const students=(typeof visibleStudents==='function')?visibleStudents():(state.students||[]);
+    let present=0,late=0,excused=0,absent=0;
+    const dist={'Tốt':0,'Khá':0,'Đạt':0,'Chưa đạt':0};
+    students.forEach(s=>{
+      if(typeof attendanceCounts==='function'){
+        const a=attendanceCounts(s.id);present+=a.present||0;late+=a.late||0;excused+=a.excused||0;absent+=a.absent||0;
+      }
+      if(typeof conductPoints==='function'&&typeof gradeFromScore==='function'){
+        const score=rules.base+conductPoints(s.id);
+        const g=gradeFromScore(score); if(dist[g]!==undefined)dist[g]++;
+      }
+    });
+    const g=c.summary?.gender||{};
+    const lines=[
+      `Lớp ${c.class.name} (năm học ${c.class.year||''}) hiện có ${c.summary.students} học sinh, chia thành ${c.class.groups||0} tổ.`,
+      `Giới tính: ${Number(g.nam||0)} nam, ${Number(g.nu||0)} nữ${g.khac?`, ${g.khac} khác`:''}${g.chuaCo?`, ${g.chuaCo} chưa cập nhật`:''}.`,
+      `Chuyên cần (từ đầu năm học): có mặt ${present} lượt, đi muộn ${late} lượt, nghỉ có phép ${excused} lượt, nghỉ không phép ${absent} lượt.`,
+      `Rèn luyện/hạnh kiểm: Tốt ${dist['Tốt']}, Khá ${dist['Khá']}, Đạt ${dist['Đạt']}, Chưa đạt ${dist['Chưa đạt']}.`
+    ];
+    return lines.join('\n');
+  }
+
+  function ruleBasedFallbackOverview(context){
+    try{
+      return overviewText(context)+'\n\nLưu ý: đây là dữ liệu tổng hợp tự động (rule-based), chưa có phân tích chuyên sâu như AI thật. Thầy có thể thử hỏi lại AI sau ít phút.';
+    }catch(e){
+      return 'Hiện chưa thể tổng hợp dữ liệu dự phòng. Thầy vui lòng thử lại sau.';
+    }
+  }
+
+  function ruleBasedAnswer(question,context){
+    const t=normVN(question);
+    if(!t)return null;
+    if(isForcedComplex(t))return null; // câu hỏi cần suy luận -> để AI thật xử lý
+
+    try{
+      const c=context;
+      const rules=(typeof getConductRules==='function')?getConductRules():{base:100,good:96,fair:90,pass:85};
+      const attRules=(typeof getAttentionRules==='function')?getAttentionRules():{absent:2,late:3,lowConduct:85,violations:3,decline:2};
+      const students=(typeof visibleStudents==='function')?visibleStudents():(state.students||[]);
+
+      // 1) Tra cứu 1 học sinh cụ thể theo tên (ưu tiên cao nhất, tránh nhầm lẫn)
+      if(hasAny(t,['chuyen can','ren luyen','hanh kiem','diem','thong tin','vang','di tre','di muon'])){
+        const matches=students.filter(s=>{
+          const n=normVN(s.name||'');
+          if(!n||n.split(' ').filter(Boolean).length<2)return false;
+          return t.includes(n);
+        });
+        if(matches.length===1){
+          const s=matches[0];
+          const a=(typeof attendanceCounts==='function')?attendanceCounts(s.id):{present:0,late:0,excused:0,absent:0};
+          const score=rules.base+((typeof conductPoints==='function')?conductPoints(s.id):0);
+          const grade=(typeof gradeFromScore==='function')?gradeFromScore(score):'';
+          const text=`Thông tin học sinh ${s.name} (${s.code||''}), tổ ${s.group||'chưa xếp'}:\n`+
+            `- Chuyên cần: có mặt ${a.present||0}, đi muộn ${a.late||0}, nghỉ có phép ${a.excused||0}, nghỉ không phép ${a.absent||0}.\n`+
+            `- Điểm rèn luyện hiện tại: ${score.toFixed(1)} (${grade}).`;
+          return {label:`Thông tin học sinh ${s.name}`,text};
+        }
+      }
+
+      // 2) Danh sách một tổ cụ thể
+      const groupMatch=t.match(/to\s*(\d+)/);
+      if(groupMatch&&hasAny(t,['danh sach','gom nhung ai','co nhung ai','la ai','thanh vien','gom ai'])){
+        const gnum=groupMatch[1];
+        const list=students.filter(s=>String(s.group)===gnum);
+        if(!list.length)return {label:`Tổ ${gnum}`,text:`Chưa có học sinh nào được xếp vào tổ ${gnum}.`};
+        const names=list.map((s,i)=>`${i+1}. ${s.name||s.code||'Học sinh'}${s.role?` (${s.role})`:''}`).join('\n');
+        return {label:`Danh sách tổ ${gnum}`,text:`Tổ ${gnum} có ${list.length} học sinh:\n${names}`};
+      }
+
+      // 3) So sánh / phân tích các tổ
+      if(hasAny(t,['so sanh cac to','so sanh giua cac to','phan tich to','phan tich cac to','so sanh to'])){
+        if(typeof competitionGroupRanking==='function'&&typeof attendanceCounts==='function'&&typeof normalizeGenderValue==='function'){
+          const rankings=competitionGroupRanking('year');
+          const groups={};
+          students.forEach(s=>{
+            const gk=String(s.group||'Chưa phân tổ');
+            groups[gk]=groups[gk]||{count:0,nam:0,nu:0,absent:0,late:0};
+            groups[gk].count++;
+            const gg=normalizeGenderValue(s.gender);
+            if(gg==='nam')groups[gk].nam++; else if(gg==='nu'||gg==='female'||gg==='f')groups[gk].nu++;
+            const a=attendanceCounts(s.id); groups[gk].absent+=a.absent||0; groups[gk].late+=a.late||0;
+          });
+          const lines=rankings.map((r,i)=>{
+            const g=groups[r.group]||{count:r.count,nam:0,nu:0,absent:0,late:0};
+            return `${i+1}. Tổ ${r.group}: ${g.count} học sinh (${g.nam} nam, ${g.nu} nữ), điểm rèn luyện TB ${r.score.toFixed(1)} (${gradeFromScore(r.score)}), nghỉ không phép ${g.absent} lượt, đi muộn ${g.late} lượt.`;
+          });
+          return {label:'So sánh các tổ',text:`So sánh các tổ trong lớp ${c.class.name}, xếp theo điểm rèn luyện trung bình cả năm:\n${lines.join('\n')}`};
+        }
+      }
+
+      // 4) Học sinh cần quan tâm / cần lưu ý
+      if(hasAny(t,['can quan tam','can luu y','can theo doi'])){
+        if(typeof getAttentionBoard==='function'){
+          const board=getAttentionBoard();
+          const fmtList=arr=>arr.slice(0,10).map((x,i)=>`${i+1}. ${x.s.name} - ${x.reasons.join('; ')||('Điểm rèn luyện '+x.score.toFixed(1))}`).join('\n');
+          let text='';
+          if(board.high.length)text+=`Cần quan tâm nhiều (${board.high.length}):\n${fmtList(board.high)}\n\n`;
+          if(board.watch.length)text+=`Cần theo dõi thêm (${board.watch.length}):\n${fmtList(board.watch)}\n\n`;
+          if(!board.high.length&&!board.watch.length)text+='Hiện chưa có học sinh nào vượt ngưỡng cảnh báo theo cấu hình hiện tại.\n\n';
+          if(board.positive.length)text+=`Học sinh có biểu hiện tích cực nổi bật (${board.positive.length}):\n${fmtList(board.positive)}`;
+          return {label:'Học sinh cần quan tâm',text:text.trim()};
+        }
+      }
+
+      // 5) Gợi ý vinh danh / khen thưởng
+      if(hasAny(t,['vinh danh','khen thuong','tuyen duong'])){
+        const topScorers=students.map(s=>({s,score:rules.base+((typeof conductPoints==='function')?conductPoints(s.id):0)})).sort((a,b)=>b.score-a.score).slice(0,5);
+        let text=`Gợi ý học sinh xem xét tuyên dương (điểm rèn luyện cao nhất):\n`+
+          topScorers.map((x,i)=>`${i+1}. ${x.s.name}: ${x.score.toFixed(1)} điểm (${(typeof gradeFromScore==='function')?gradeFromScore(x.score):''})`).join('\n');
+        if(typeof getAttentionBoard==='function'){
+          const positive=getAttentionBoard().positive;
+          if(positive.length)text+=`\n\nHọc sinh có biểu hiện tích cực khác:\n`+positive.slice(0,5).map((x,i)=>`${i+1}. ${x.s.name}`).join('\n');
+        }
+        return {label:'Gợi ý vinh danh',text};
+      }
+
+      // 6) Biến động rèn luyện (xu hướng giảm điểm gần đây)
+      if(hasAny(t,['bien dong ren luyen','bien dong diem','bien dong hanh kiem'])){
+        if(typeof recentScoreTrend==='function'){
+          const declines=students.map(s=>({s,trend:recentScoreTrend(s.id)})).filter(x=>x.trend.decline).sort((a,b)=>a.trend.delta-b.trend.delta);
+          if(!declines.length)return {label:'Biến động rèn luyện',text:'Không phát hiện học sinh nào có điểm rèn luyện giảm trong các lần ghi nhận gần đây nhất.'};
+          const text='Học sinh có điểm rèn luyện giảm trong những lần ghi nhận gần đây:\n'+declines.map((x,i)=>`${i+1}. ${x.s.name}: giảm ${Math.abs(x.trend.delta).toFixed(1)} điểm`).join('\n');
+          return {label:'Biến động rèn luyện',text};
+        }
+      }
+
+      // 7) Rèn luyện / hạnh kiểm tổng quan
+      if(hasAny(t,['ren luyen','hanh kiem'])&&hasAny(t,['tong quan','thong ke','phan tich','xep loai','phan loai'])){
+        const scored=students.map(s=>({s,score:rules.base+((typeof conductPoints==='function')?conductPoints(s.id):0)}));
+        const dist={'Tốt':0,'Khá':0,'Đạt':0,'Chưa đạt':0};
+        scored.forEach(x=>{const g=(typeof gradeFromScore==='function')?gradeFromScore(x.score):''; if(dist[g]!==undefined)dist[g]++;});
+        const sortedDesc=scored.slice().sort((a,b)=>b.score-a.score);
+        const top=sortedDesc.slice(0,3),bottom=sortedDesc.slice(-3).reverse();
+        let text=`Xếp loại rèn luyện/hạnh kiểm lớp ${c.class.name}: Tốt ${dist['Tốt']}, Khá ${dist['Khá']}, Đạt ${dist['Đạt']}, Chưa đạt ${dist['Chưa đạt']} (trên tổng ${scored.length} học sinh).`;
+        if(top.length)text+=`\nĐiểm cao nhất: `+top.map(x=>`${x.s.name} (${x.score.toFixed(1)})`).join(', ')+'.';
+        if(bottom.length)text+=`\nĐiểm thấp nhất: `+bottom.map(x=>`${x.s.name} (${x.score.toFixed(1)})`).join(', ')+'.';
+        return {label:'Phân tích rèn luyện',text};
+      }
+
+      // 8) Chuyên cần tổng quan
+      if(hasAny(t,['chuyen can'])){
+        if(typeof attendanceCounts==='function'){
+          let present=0,late=0,excused=0,absent=0;
+          const rows=students.map(s=>{const a=attendanceCounts(s.id);present+=a.present||0;late+=a.late||0;excused+=a.excused||0;absent+=a.absent||0;return {s,a};});
+          const flagged=rows.filter(r=>(r.a.absent||0)>=attRules.absent||(r.a.late||0)>=attRules.late).sort((a,b)=>(b.a.absent-a.a.absent)||(b.a.late-a.a.late));
+          let text=`Chuyên cần lớp ${c.class.name} tính từ đầu năm học: có mặt ${present} lượt, đi muộn ${late} lượt, nghỉ có phép ${excused} lượt, nghỉ không phép ${absent} lượt.`;
+          if(flagged.length)text+=`\nHọc sinh cần lưu ý về chuyên cần (${flagged.length}):\n`+flagged.slice(0,10).map((r,i)=>`${i+1}. ${r.s.name} - nghỉ không phép ${r.a.absent||0} lần, đi muộn ${r.a.late||0} lần`).join('\n');
+          else text+=`\nHiện chưa có học sinh nào vượt ngưỡng cảnh báo chuyên cần (nghỉ ≥${attRules.absent} buổi hoặc muộn ≥${attRules.late} lần).`;
+          return {label:'Phân tích chuyên cần',text};
+        }
+      }
+
+      // 9) Thông báo gần đây
+      if(hasAny(t,['thong bao'])&&hasAny(t,['gan day','moi nhat','gan nhat'])){
+        const list=(state.notifications||[]).slice(0,5);
+        if(!list.length)return {label:'Thông báo',text:'Hiện lớp chưa có thông báo nào.'};
+        return {label:'Thông báo gần đây',text:'Các thông báo gần đây nhất:\n'+list.map((n,i)=>`${i+1}. [${n.time||''}] ${n.text}`).join('\n')};
+      }
+
+      // 10) Tóm tắt lớp nhanh
+      if(hasAny(t,['tom tat lop','tong quan lop','thong tin chung ve lop'])){
+        return {label:'Tóm tắt lớp',text:overviewText(c)};
+      }
+
+      // 11) Sĩ số lớp
+      if(hasAny(t,['si so','tong so hoc sinh'])||/lop co bao nhieu hoc sinh/.test(t)){
+        const g=c.summary?.gender||{};
+        return {label:'Sĩ số lớp',text:`Lớp ${c.class.name} (năm học ${c.class.year||''}) hiện có ${c.summary.students} học sinh, chia thành ${c.class.groups||0} tổ. Trong đó có ${Number(g.nam||0)} nam và ${Number(g.nu||0)} nữ${g.khac?`, ${g.khac} học sinh giới tính khác`:''}${g.chuaCo?`, ${g.chuaCo} học sinh chưa cập nhật giới tính`:''}.`};
+      }
+
+      return null; // không khớp mẫu nào -> để AI thật xử lý
+    }catch(e){
+      console.warn('ruleBasedAnswer error',e);
+      return null;
+    }
+  }
+
+  window.ruleBasedAnswer=ruleBasedAnswer;
+  window.ruleBasedFallbackOverview=ruleBasedFallbackOverview;
+})();
+</script>
+
+<script id="ai-reliability-client-v2">
+/* Lớp ổn định phía giao diện. Edge Function vẫn là nơi giữ API key và gọi Gemini.
+   Rule-based (ai-rule-based-engine) luôn được thử trước để tiết kiệm quota;
+   Gemini chỉ được gọi cho câu hỏi phức tạp hoặc khi rule-based không khớp mẫu,
+   và nếu Gemini lỗi/hết quota, hệ thống tự động hiển thị dữ liệu tổng hợp dự
+   phòng từ rule-based thay vì chỉ báo lỗi. */
+(()=>{
+  let activeRequest=0;
+  const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  const transient=(status,message)=>status===408||status===429||status>=500||/failed to fetch|networkerror|network request failed|timeout|temporar/i.test(String(message||''));
+  const readBody=async res=>{const raw=await res.text();try{return raw?JSON.parse(raw):{}}catch(e){return {error:raw||`Phản hồi AI không đúng định dạng (HTTP ${res.status}).`}}};
+  const textOf=body=>typeof body?.answer==='string'?body.answer:(body?.answer?.text||body?.answer?.content||body?.text||'');
+  async function requestAI(url,token,payload,requestId){
+    let lastError='';
+    for(let attempt=0;attempt<3;attempt++){
+      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),55000);
+      try{
+        const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,'X-Client-Request-Id':requestId},body:JSON.stringify(payload),signal:controller.signal});
+        clearTimeout(timer);const body=await readBody(res);const message=body?.error||body?.message||'';
+        if(res.ok)return {res,body,attempt};
+        lastError=message||`AI trả về lỗi HTTP ${res.status}`;
+        if(!transient(res.status,lastError)||attempt===2)return {res,body,attempt};
+      }catch(e){clearTimeout(timer);const timedOut=e?.name==='AbortError';lastError=timedOut?'Yêu cầu AI quá thời gian chờ.':(e?.message||String(e));if((!timedOut&&!transient(0,lastError))||attempt===2)throw new Error(lastError);}
+      await wait((700*(2**attempt))+Math.floor(Math.random()*350));
+    }
+    throw new Error(lastError||'Không thể kết nối Trợ lý AI.');
+  }
+  // Hiển thị thông báo lỗi Gemini + kèm bản tóm tắt dự phòng từ rule-based,
+  // để GVCN vẫn có dữ liệu dùng ngay dù AI thật đang lỗi/hết quota/mất phiên.
+  function renderErrorWithFallback(ans,meta,err,status,context,metaFallbackNote){
+    const errCard=formatAIErrorMessage(err,String(status||''));
+    let fbText='';
+    try{fbText=(typeof window.ruleBasedFallbackOverview==='function')?window.ruleBasedFallbackOverview(context):'';}catch(e){fbText='';}
+    if(ans){
+      ans.innerHTML=errCard+(fbText?`<div class="ai-fallback-note" style="margin-top:10px;padding-top:10px;border-top:1px dashed #e2e8f0"><strong>📋 Dữ liệu tổng hợp dự phòng (rule-based, không dùng quota AI):</strong><div style="white-space:pre-wrap;margin-top:6px">${esc(fbText)}</div></div>`:'');
+    }
+    if(meta)meta.textContent=metaFallbackNote;
+  }
+  window.askAI=async function(){
+    const q=document.getElementById('aiQuestion'),ans=document.getElementById('aiAnswer'),meta=document.getElementById('aiMeta'),btn=document.getElementById('aiAskBtn');
+    const question=(q?.value||'').trim();if(!question){renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}if(!isAdmin()){renderAIAnswer('🔒 Chỉ GVCN/Admin mới được sử dụng Trợ lý AI.');return;}
+    const requestId=`ai_${Date.now()}_${Math.random().toString(36).slice(2)}`,requestNo=++activeRequest;stopAISpeech(false);btn.disabled=true;btn.classList.add('ai-busy');renderAIAnswer('⏳ Đang xử lý câu hỏi...');if(meta)meta.textContent='Đang kiểm tra bằng rule-based trước khi dùng đến AI thật...';
+    try{
+      const context=buildAIContext();
+      // Bước 1 — Rule-based trước tiên (miễn phí, tức thì, không cần đăng nhập
+      // backend AI, không tốn quota Gemini). Chỉ khi không khớp mẫu (câu hỏi
+      // phức tạp cần suy luận) mới chuyển sang AI thật ở bước 2.
+      if(isGenderCountQuestion(question)){renderAIAnswer(buildGenderCountAnswer(context));if(meta)meta.textContent=`⚡ Thống kê trực tiếp (rule-based) · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}
+      const rb=(typeof window.ruleBasedAnswer==='function')?window.ruleBasedAnswer(question,context):null;
+      if(rb){renderAIAnswer(rb.text);if(meta)meta.textContent=`⚡ ${rb.label} · Rule-based, không dùng quota AI · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}
+      // Bước 2 — Câu hỏi phức tạp / không khớp rule-based: dùng AI thật (Gemini).
+      if(meta)meta.textContent='Câu hỏi cần phân tích sâu, đang chuyển sang AI thật (Gemini)...';
+      renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');
+      let session=null;
+      try{const s=await sb.auth.getSession();session=s?.data?.session||null;}catch(e){session=null;}
+      if(!session?.access_token){renderErrorWithFallback(ans,meta,'Phiên đăng nhập với backend AI đã hết hoặc chưa đăng nhập.','',context,'⚠️ Chưa kết nối được AI thật (Gemini) — đã hiển thị dữ liệu tổng hợp dự phòng bằng rule-based.');return;}
+      const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';
+      const payload={question:buildAIPrompt(question,context),stateKey:currentStateKey,context,clientRequestId:requestId,requestOptions:{maxOutputTokens:2048,temperature:0.35,requireCompleteAnswer:true}};
+      const first=await requestAI(url,session.access_token,payload,requestId);if(requestNo!==activeRequest)return;
+      if(!first.res.ok){
+        const err=first.body?.error||first.body?.message||`AI trả về lỗi HTTP ${first.res.status}`;
+        renderErrorWithFallback(ans,meta,err,first.res.status,context,'⚠️ Gemini đang lỗi/hết quota — đã hiển thị dữ liệu tổng hợp dự phòng bằng rule-based.');
+        return;
+      }
+      let answer=textOf(first.body),finishReason=first.body?.finishReason||first.body?.finish_reason||first.body?.meta?.finishReason||'';
+      if(String(finishReason).toUpperCase()==='MAX_TOKENS'&&answer){
+        if(meta)meta.textContent='AI đang hoàn tất phần còn lại của câu trả lời...';
+        const continuation=`Hãy viết tiếp phần trả lời còn dang dở cho câu hỏi gốc. Không lặp lại nội dung đã có; bắt đầu ngay tại ý còn thiếu và kết thúc bằng câu hoàn chỉnh. Câu hỏi gốc: ${question}\n\nPhần đã trả lời: ${answer.slice(-1800)}`;
+        const next=await requestAI(url,session.access_token,{...payload,question:continuation,clientRequestId:requestId+'_continue'},requestId+'_continue');
+        if(next.res.ok){const tail=textOf(next.body);if(tail)answer=`${answer.trim()}\n${tail.trim()}`;finishReason=next.body?.finishReason||next.body?.finish_reason||finishReason;}
+      }
+      renderAIAnswer(answer||'AI chưa trả về nội dung.');
+      const stamp=new Date().toLocaleString('vi-VN');if(meta)meta.textContent=`🤖 Gemini · ${stamp} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}${first.attempt?` · đã tự thử lại ${first.attempt} lần`:''}`;
+    }catch(e){
+      if(requestNo!==activeRequest)return;
+      console.error(e);
+      let context=null;try{context=buildAIContext();}catch(e2){context=null;}
+      renderErrorWithFallback(ans,meta,e?.message||e,'',context,'⚠️ Trợ lý AI thật tạm thời không thể kết nối — đã hiển thị dữ liệu tổng hợp dự phòng bằng rule-based.');
+    }
+    finally{if(requestNo===activeRequest){btn.classList.remove('ai-busy');btn.disabled=false;}}
+  };
+  window.askAIQuick=async q=>{const input=document.getElementById('aiQuestion');if(input)input.value=q;return window.askAI();};
+})();
 </script>
 
 <script id="bibi-sidebar-init">
@@ -2828,9 +3110,67 @@ async function loadGuestDashboard(){
   window.refreshSmartModule=function(){renderSmartModule();alert('✅ Đã làm mới phân tích thông minh.');};
   window.renderStudentTimeline=function(){const host=document.getElementById('studentTimeline');const sid=document.getElementById('timelineStudent')?.value;const days=Number(document.getElementById('timelineRange')?.value||30);if(!host||!sid)return;const cutoff=new Date();cutoff.setDate(cutoff.getDate()-days);const isoCut=isoDate(cutoff);const s=state.students.find(x=>x.id===sid)||{};const items=[];Object.values(state.attendance||{}).filter(x=>(x.studentId||x.id)===sid&&x.date>=isoCut).forEach(x=>items.push({date:x.date,title:'Chuyên cần',detail:x.status==='present'?'Có mặt':x.status==='late'?'Đi muộn':x.status==='excused'?'Nghỉ có phép':'Nghỉ không phép'}));(state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved'&&x.date>=isoCut).forEach(x=>items.push({date:x.date,title:x.points>0?'Khen thưởng':'Vi phạm / nhắc nhở',detail:`${Number(x.points).toFixed(1)} điểm · ${x.content||x.type||''}`}));items.sort((a,b)=>String(b.date).localeCompare(String(a.date)));host.innerHTML=items.length?items.map(x=>`<div class="timeline-item"><div class="timeline-date">${fmtDate(x.date)}</div><div><div class="timeline-dot">${esc(x.title)}</div><div>${esc(x.detail)}</div></div></div>`).join(''):`<div class="empty">Chưa có hoạt động trong khoảng thời gian đã chọn cho ${esc(s.name||'học sinh')}.</div>`;};
   async function callAIForPhase(question,targetId){if(!isAdmin())throw new Error('Chỉ GVCN/Admin được sử dụng AI.');const context=buildAIContext();const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết.');const prompt=buildAIPrompt(question,context)+'\n\nYÊU CẦU BỔ SUNG: Trả lời tự nhiên, không Markdown, không dấu *, không JSON. Nêu kết quả chính trước, sau đó mới phân tích.';const res=await fetch(SUPABASE_URL+'/functions/v1/ai-class-assistant',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:prompt,stateKey:currentStateKey,context})});const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body.error||body.message||`HTTP ${res.status}`);return cleanAIText(typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||''));}
-  window.runPeriodAI=async function(period){const host=document.getElementById('periodAIResult');if(!host)return;host.textContent='⏳ AI đang phân tích...';try{const label=periodLabel(period),range=rangeFor(period);const data=range?{range,students:visibleStudents().length,conduct:recordsInRange(range).length,attendance:attendanceInRange(range).length}:{};const q=`Hãy phân tích ${label} của lớp đang chọn dựa trên dữ liệu thực tế. Nêu 1) kết quả nổi bật, 2) học sinh cần quan tâm, 3) điểm mạnh, 4) điểm cần cải thiện, 5) ba việc GVCN nên ưu tiên. Không bịa nguyên nhân. Thời gian phân tích: ${JSON.stringify(data)}.`;host.textContent=await callAIForPhase(q);log(`AI phân tích ${label}`);}catch(e){host.textContent='❌ '+(e.message||e)}};
-  window.generateAIComment=async function(){const host=document.getElementById('aiCommentResult'),sid=document.getElementById('commentStudent')?.value,type=document.getElementById('commentType')?.value||'general',s=state.students.find(x=>x.id===sid);if(!host||!s)return;host.textContent='⏳ AI đang viết nhận xét...';try{const q=`Viết nhận xét giáo dục cho học sinh ${s.name} (${s.code}). Loại nhận xét: ${type}. Dựa trên dữ liệu chuyên cần, rèn luyện và học tập của học sinh. Viết 1 đoạn ngắn, tích cực nhưng trung thực, phù hợp hồ sơ GVCN. Không bịa nguyên nhân.`;host.textContent=await callAIForPhase(q,sid);log(`AI viết nhận xét cho ${s.name}`);}catch(e){host.textContent='❌ '+(e.message||e)}};
-  window.generateAIReport=async function(){const host=document.getElementById('aiReportResult'),type=document.getElementById('aiReportType')?.value||'week';if(!host)return;host.textContent='⏳ AI đang tạo báo cáo...';try{const label=periodLabel(type);const q=`Hãy viết báo cáo ${label} cho GVCN lớp đang chọn. Cấu trúc: khái quát, sĩ số và giới tính, chuyên cần, rèn luyện, học sinh nổi bật, học sinh cần quan tâm, hoạt động gần đây, kiến nghị. Dùng số liệu thực tế từ context. Không Markdown, không dấu * và không bịa dữ liệu.`;host.textContent=await callAIForPhase(q);log(`AI tạo báo cáo ${label}`);}catch(e){host.textContent='❌ '+(e.message||e)}};
+
+  /* ---- Rule-based dự phòng cho "Phân tích thông minh" (không Supabase, không API key, không tốn phí) ----
+     Dùng khi Gemini lỗi/hết quota/mất phiên đăng nhập, để GVCN vẫn có số liệu dùng ngay. */
+  function ruleBasedPeriodFallback(period){
+    const label=periodLabel(period),range=rangeFor(period),students=visibleStudents();
+    const att=attendanceInRange(range),cond=recordsInRange(range);
+    let present=0,late=0,excused=0,absent=0;
+    att.forEach(x=>{if(x.status==='present')present++;else if(x.status==='late')late++;else if(x.status==='excused')excused++;else if(x.status==='absent')absent++;});
+    const scored=students.map(s=>({s,score:scoreForStudent(s.id,range)}));
+    const dist={'Tốt':0,'Khá':0,'Đạt':0,'Chưa đạt':0};
+    scored.forEach(x=>{const g=gradeFromScore(x.score);if(dist[g]!==undefined)dist[g]++;});
+    const sortedDesc=scored.slice().sort((a,b)=>b.score-a.score);
+    const top=sortedDesc.slice(0,3),bottom=sortedDesc.slice(-3).reverse();
+    const alerts=(typeof getStudentAlerts==='function')?getStudentAlerts().slice(0,8):[];
+    const lines=[
+      `${label} · Lớp ${state.settings?.className||''}: sĩ số ${students.length} học sinh.`,
+      `Chuyên cần trong giai đoạn: có mặt ${present}, đi muộn ${late}, nghỉ có phép ${excused}, nghỉ không phép ${absent} (${cond.length} bản ghi rèn luyện đã duyệt).`,
+      `Xếp loại rèn luyện trong giai đoạn: Tốt ${dist['Tốt']}, Khá ${dist['Khá']}, Đạt ${dist['Đạt']}, Chưa đạt ${dist['Chưa đạt']}.`
+    ];
+    if(top.length)lines.push('Điểm cao nhất: '+top.map(x=>`${x.s.name} (${x.score.toFixed(1)})`).join(', ')+'.');
+    if(bottom.length)lines.push('Điểm thấp nhất: '+bottom.map(x=>`${x.s.name} (${x.score.toFixed(1)})`).join(', ')+'.');
+    lines.push(alerts.length?`Học sinh cần quan tâm (theo ngưỡng cảnh báo chung): ${alerts.map(x=>x.s.name).join(', ')}.`:'Hiện chưa có học sinh vượt ngưỡng cảnh báo.');
+    lines.push('⚠️ Đây là dữ liệu tổng hợp tự động (rule-based), chưa có nhận định/đề xuất chuyên sâu như AI thật.');
+    return lines.join('\n');
+  }
+  function ruleBasedCommentFallback(sid){
+    const s=state.students.find(x=>x.id===sid);if(!s)return 'Không tìm thấy học sinh để tổng hợp.';
+    const a=attendanceCounts(sid),score=getConductRules().base+conductPoints(sid),grade=gradeFromScore(score);
+    let text=`${s.name} (${s.code||''}) — chuyên cần: có mặt ${a.present||0}, đi muộn ${a.late||0}, nghỉ có phép ${a.excused||0}, nghỉ không phép ${a.absent||0}. Điểm rèn luyện hiện tại ${score.toFixed(1)}, xếp loại ${grade}.`;
+    text+=(grade==='Tốt'||grade==='Khá')?' Học sinh duy trì nền nếp tốt, cần tiếp tục phát huy.':' Học sinh cần được nhắc nhở, hỗ trợ thêm để cải thiện chuyên cần và rèn luyện.';
+    text+='\n⚠️ Đây là nhận xét mẫu tổng hợp tự động (rule-based) — AI thật hiện chưa khả dụng, thầy nên chỉnh sửa thêm trước khi dùng.';
+    return text;
+  }
+  function ruleBasedReportFallback(type){
+    const label=periodLabel(type),range=rangeFor(type),students=visibleStudents();
+    const rows=students.map(s=>{const att=attendanceCountsInRange(s.id,range||{start:'0000-01-01',end:'9999-12-31'});const score=range?scoreForStudent(s.id,range):getConductRules().base;return {s,att,score,grade:gradeFromScore(score)};});
+    const boys=students.filter(s=>normalizeGenderValue(s.gender)==='nam').length,girls=students.filter(s=>normalizeGenderValue(s.gender)==='nu').length;
+    let present=0,late=0,excused=0,absent=0;
+    rows.forEach(r=>{present+=r.att.present||0;late+=r.att.late||0;excused+=r.att.excused||0;absent+=r.att.absent||0;});
+    const dist={'Tốt':0,'Khá':0,'Đạt':0,'Chưa đạt':0};
+    rows.forEach(r=>{if(dist[r.grade]!==undefined)dist[r.grade]++;});
+    const sortedDesc=rows.slice().sort((a,b)=>b.score-a.score);
+    const top=sortedDesc.slice(0,5),bottom=sortedDesc.slice(-5).reverse();
+    const alerts=(typeof getStudentAlerts==='function')?getStudentAlerts().slice(0,8):[];
+    const lines=[
+      `BÁO CÁO ${label.toUpperCase()} (tổng hợp tự động - rule-based)`,
+      `Sĩ số: ${students.length} học sinh (${boys} nam, ${girls} nữ).`,
+      `Chuyên cần: có mặt ${present}, đi muộn ${late}, nghỉ có phép ${excused}, nghỉ không phép ${absent}.`,
+      `Rèn luyện: Tốt ${dist['Tốt']}, Khá ${dist['Khá']}, Đạt ${dist['Đạt']}, Chưa đạt ${dist['Chưa đạt']}.`,
+      top.length?`Học sinh nổi bật: ${top.map(x=>`${x.s.name} (${x.score.toFixed(1)})`).join(', ')}.`:'',
+      bottom.length?`Học sinh cần cải thiện rèn luyện: ${bottom.map(x=>`${x.s.name} (${x.score.toFixed(1)})`).join(', ')}.`:'',
+      alerts.length?`Học sinh cần quan tâm: ${alerts.map(x=>x.s.name).join(', ')}.`:'Hiện chưa có học sinh vượt ngưỡng cảnh báo.',
+      'Kiến nghị: GVCN tiếp tục theo dõi sát nhóm học sinh cần quan tâm ở trên và duy trì nền nếp chung của lớp.',
+      '⚠️ Báo cáo tổng hợp tự động (rule-based), chưa có phân tích chuyên sâu như AI thật.'
+    ].filter(Boolean);
+    return lines.join('\n');
+  }
+
+  window.runPeriodAI=async function(period){const host=document.getElementById('periodAIResult');if(!host)return;host.textContent='⏳ Đang kiểm tra AI thật (Gemini)...';try{const label=periodLabel(period),range=rangeFor(period);const data=range?{range,students:visibleStudents().length,conduct:recordsInRange(range).length,attendance:attendanceInRange(range).length}:{};const q=`Hãy phân tích ${label} của lớp đang chọn dựa trên dữ liệu thực tế. Nêu 1) kết quả nổi bật, 2) học sinh cần quan tâm, 3) điểm mạnh, 4) điểm cần cải thiện, 5) ba việc GVCN nên ưu tiên. Không bịa nguyên nhân. Thời gian phân tích: ${JSON.stringify(data)}.`;host.textContent=await callAIForPhase(q);log(`AI phân tích ${label}`);}catch(e){console.warn(e);host.textContent=`⚠️ AI thật hiện lỗi/hết quota/mất phiên đăng nhập (${e.message||e}). Đã hiển thị dữ liệu tổng hợp dự phòng:\n\n`+ruleBasedPeriodFallback(period);log(`AI phân tích ${periodLabel(period)} (dùng rule-based dự phòng)`)}};
+  window.generateAIComment=async function(){const host=document.getElementById('aiCommentResult'),sid=document.getElementById('commentStudent')?.value,type=document.getElementById('commentType')?.value||'general',s=state.students.find(x=>x.id===sid);if(!host||!s)return;host.textContent='⏳ Đang kiểm tra AI thật (Gemini)...';try{const q=`Viết nhận xét giáo dục cho học sinh ${s.name} (${s.code}). Loại nhận xét: ${type}. Dựa trên dữ liệu chuyên cần, rèn luyện và học tập của học sinh. Viết 1 đoạn ngắn, tích cực nhưng trung thực, phù hợp hồ sơ GVCN. Không bịa nguyên nhân.`;host.textContent=await callAIForPhase(q,sid);log(`AI viết nhận xét cho ${s.name}`);}catch(e){console.warn(e);host.textContent=`⚠️ AI thật hiện lỗi/hết quota/mất phiên đăng nhập (${e.message||e}). Đã hiển thị nhận xét mẫu dự phòng:\n\n`+ruleBasedCommentFallback(sid);log(`AI viết nhận xét cho ${s.name} (dùng rule-based dự phòng)`)}};
+  window.generateAIReport=async function(){const host=document.getElementById('aiReportResult'),type=document.getElementById('aiReportType')?.value||'week';if(!host)return;host.textContent='⏳ Đang kiểm tra AI thật (Gemini)...';try{const label=periodLabel(type);const q=`Hãy viết báo cáo ${label} cho GVCN lớp đang chọn. Cấu trúc: khái quát, sĩ số và giới tính, chuyên cần, rèn luyện, học sinh nổi bật, học sinh cần quan tâm, hoạt động gần đây, kiến nghị. Dùng số liệu thực tế từ context. Không Markdown, không dấu * và không bịa dữ liệu.`;host.textContent=await callAIForPhase(q);log(`AI tạo báo cáo ${label}`);}catch(e){console.warn(e);host.textContent=`⚠️ AI thật hiện lỗi/hết quota/mất phiên đăng nhập (${e.message||e}). Đã hiển thị báo cáo tổng hợp dự phòng:\n\n`+ruleBasedReportFallback(type);log(`AI tạo báo cáo ${periodLabel(type)} (dùng rule-based dự phòng)`)}};
 
   window.renderDigitalModule=function(){if(!isAdmin())return;renderAuditLog();renderNotifications();renderActivityCalendar();const p=document.getElementById('activityDate');if(p&&!p.value)p.value=today();initPWA();};
   window.renderAuditLog=function(){const el=document.getElementById('auditLogList');if(!el)return;const rows=Array.isArray(state.auditLog)?state.auditLog.slice().reverse():[];el.innerHTML=rows.length?rows.slice(0,100).map(x=>`<div class="audit-item"><b>${esc(x.action||'Thao tác')}</b><span>${esc(x.actor||'')} · ${esc(x.role||'')} · ${esc(x.time||'')}</span><div class="mini">Lớp: ${esc(x.className||'')}</div></div>`).join(''):'<div class="empty">Chưa có audit log.</div>';};
