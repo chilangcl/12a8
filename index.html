@@ -959,7 +959,7 @@ select option{background:#fff!important;color:#202124!important}
         </div>
         <div class="report-title-print" id="reportPrintTitle"></div>
         <div class="grid cards" id="reportCards"></div>
-        <div class="card" style="margin-top:16px"><h3>📈 Tổng hợp theo học sinh</h3><div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Học sinh</th><th>Có mặt</th><th>Nghỉ phép</th><th>Nghỉ KP</th><th>Đi muộn</th><th>Điểm RL</th><th>Hạnh kiểm</th></tr></thead><tbody id="reportBody"></tbody></table></div></div>
+        <div class="card" style="margin-top:16px"><h3>📈 Tổng hợp theo học sinh</h3><div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Học sinh</th><th>Đúng giờ</th><th>Nghỉ phép</th><th>Nghỉ KP</th><th>Đi muộn</th><th>Điểm RL</th><th>Hạnh kiểm</th></tr></thead><tbody id="reportBody"></tbody></table></div></div>
       </section>
 
       <section id="page-profile" class="page">
@@ -1105,6 +1105,9 @@ try {
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:true,storage:window.sessionStorage,autoRefreshToken:true,detectSessionInUrl:false,flowType:'pkce'}});
 } catch (e) { console.error(e); window.__supabaseInitError=e; }
 let currentClass=null, currentStateKey='12A8-2026-2027', cloudWriteQueue=Promise.resolve();
+// Version của bản ghi class_state đang có trên máy (dùng để chống 2 thiết bị ghi đè dữ liệu của nhau).
+// Yêu cầu cột `version` trên bảng class_state — xem file migration supabase_migration_stability.sql.
+let currentStateVersion=0;
 let state=seed(), currentUser=null, editingStudent=null, availableClasses=[];
 function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4,conductRules:{base:100,good:96,fair:90,pass:85}},students:[],attendance:{},attendanceLocks:{},scores:{},conduct:[],activity:[],auditLog:[],notifications:[]}}
 function dataKey(){return DATA_PREFIX+(currentStateKey||'12A8-2026-2027')}
@@ -1271,9 +1274,10 @@ async function loadCloudState(){
   try{
     if(currentClass?.id)await assertClassAccess(currentClass.id);
     const localBefore=loadLocalFallback();
-    const {data,error}=await sb.from('class_state').select('data,updated_at').eq('class_id',currentStateKey).maybeSingle();
+    const {data,error}=await sb.from('class_state').select('data,updated_at,version').eq('class_id',currentStateKey).maybeSingle();
     if(error)throw error;
     state=data?.data||seed();
+    currentStateVersion=Number(data?.version)||0;
     if(!(Array.isArray(state.notifications)&&state.notifications.length) && Array.isArray(localBefore.notifications)&&localBefore.notifications.length){
       state.notifications=localBefore.notifications;
       saveLocal();
@@ -1281,7 +1285,24 @@ async function loadCloudState(){
     }
     state.settings={...seed().settings,...(state.settings||{}),conductRules:{...seed().settings.conductRules,...(state.settings?.conductRules||{})},className:currentClass?.class_name||state.settings?.className||'12A8',year:currentClass?.year||state.settings?.year||'2026-2027',groups:currentClass?.group_count||state.settings?.groups||4};
     saveLocal();
+    subscribeClassRealtime();
   }catch(e){console.error(e);state=loadLocalFallback();alert('🔒 Không thể tải dữ liệu lớp này: '+(e.message||e));throw e;}
+}
+// Khi máy chủ đã có bản mới hơn bản trên máy này (2 thiết bị cùng sửa gần như đồng thời),
+// KHÔNG được âm thầm ghi đè — hỏi người dùng muốn tải bản mới hay chắc chắn ghi đè.
+async function resolveCloudConflict(serverVersion){
+  const wantsLatest=confirm(
+    '⚠️ XUNG ĐỘT DỮ LIỆU\n\n'+
+    'Một thiết bị/tài khoản khác vừa lưu một bản cập nhật mới hơn lên máy chủ (có thể là tổ trưởng vừa điểm danh, hoặc bạn đang mở app ở 2 nơi).\n\n'+
+    'Bấm OK để TẢI BẢN MỚI NHẤT từ máy chủ (khuyến nghị — các thay đổi vừa nhập trên máy này có thể bị mất, nên kiểm tra/nhập lại nếu cần).\n'+
+    'Bấm Huỷ nếu bạn chắc chắn muốn GHI ĐÈ máy chủ bằng dữ liệu hiện tại trên máy này (có thể làm mất thay đổi của người khác).'
+  );
+  if(wantsLatest){
+    await refreshCloud(true);
+    alert('Đã tải bản mới nhất từ máy chủ.');
+  }else{
+    currentStateVersion=serverVersion; // chấp nhận version hiện tại của server để lần lưu tới ghi đè có chủ đích
+  }
 }
 async function pushCloud(){
   if(!currentStateKey||!currentUser)return false;
@@ -1289,13 +1310,31 @@ async function pushCloud(){
   const stateSnapshot=JSON.parse(JSON.stringify(state)), stateKey=currentStateKey, classId=currentClass?.id, userId=currentUser.id;
   const write=async()=>{try{
     if(classId)await assertClassAccess(classId);
-    const {error}=await sb.from('class_state').upsert({class_id:stateKey,data:stateSnapshot,updated_by:userId,updated_at:new Date().toISOString()},{onConflict:'class_id'});
-    if(error)throw error;saveLocal();return true;
+    const expectedVersion=currentStateVersion;
+    // Ghi có điều kiện: chỉ cập nhật nếu version trên server vẫn đúng bằng version đã tải về.
+    // Đây là "optimistic locking" — chống 2 thiết bị ghi đè dữ liệu của nhau một cách âm thầm.
+    const {data:updated,error}=await sb.from('class_state')
+      .update({data:stateSnapshot,updated_by:userId,updated_at:new Date().toISOString(),version:expectedVersion+1})
+      .eq('class_id',stateKey).eq('version',expectedVersion)
+      .select('version');
+    if(error)throw error;
+    if(updated&&updated.length){currentStateVersion=updated[0].version;lastOwnPushAt=Date.now();saveLocal();return true;}
+    // Không có dòng nào khớp điều kiện: hoặc chưa từng có bản ghi (lần lưu đầu), hoặc version đã lệch (xung đột thật).
+    const {data:existing,error:selErr}=await sb.from('class_state').select('version').eq('class_id',stateKey).maybeSingle();
+    if(selErr)throw selErr;
+    if(!existing){
+      const {data:inserted,error:insErr}=await sb.from('class_state').insert({class_id:stateKey,data:stateSnapshot,updated_by:userId,updated_at:new Date().toISOString(),version:1}).select('version').single();
+      if(insErr)throw insErr;
+      currentStateVersion=inserted.version;lastOwnPushAt=Date.now();saveLocal();return true;
+    }
+    await resolveCloudConflict(Number(existing.version)||0);
+    return false;
   }catch(e){console.error(e);return false;}};
   cloudWriteQueue=cloudWriteQueue.catch(()=>false).then(write);
   return cloudWriteQueue;
 }
 async function logout(){
+  unsubscribeClassRealtime();
   const finish=()=>{currentUser=null;currentClass=null;availableClasses=[];currentStateKey='12A8-2026-2027';try{localStorage.removeItem('bibi_current_class_db_id');localStorage.removeItem('bibi_current_class_key')}catch(e){};document.getElementById('app')?.classList.add('hidden');document.getElementById('classChooser')?.classList.remove('show');document.getElementById('loginScreen')?.classList.remove('hidden');document.getElementById('appClassContext')?.classList.remove('show');const p=document.getElementById('loginPass');if(p)p.value='';try{setSidebarHidden(false)}catch(e){};setLoginStatus('✅ Đã đăng xuất. Vui lòng đăng nhập lại.','ok')};
   try{if(sb?.auth)await Promise.race([sb.auth.signOut({scope:'local'}),new Promise(r=>setTimeout(r,2500))])}catch(e){console.warn(e)}finally{finish()}
 }
@@ -1420,7 +1459,59 @@ function renderAll(){
   decorateResponsiveStudentTables(); setTimeout(()=>decorateResponsiveStudentTables(),80);
 }
 
-async function refreshCloud(){if(!currentUser||!currentStateKey)return;const {data,error}=await sb.from('class_state').select('data,updated_at').eq('class_id',currentStateKey).maybeSingle();if(error){alert('Không đồng bộ được: '+error.message);return}if(data?.data){state=data.data;state.settings={...(state.settings||{}),className:currentClass?.class_name||state.settings?.className,year:currentClass?.year||state.settings?.year,groups:currentClass?.group_count||state.settings?.groups};saveLocal();renderAll();alert('Đã tải dữ liệu mới nhất từ Supabase.')}}
+async function refreshCloud(silent=false){
+  if(!currentUser||!currentStateKey)return;
+  const {data,error}=await sb.from('class_state').select('data,updated_at,version').eq('class_id',currentStateKey).maybeSingle();
+  if(error){if(!silent)alert('Không đồng bộ được: '+error.message);return}
+  if(data?.data){
+    state=data.data;
+    currentStateVersion=Number(data.version)||0;
+    state.settings={...(state.settings||{}),className:currentClass?.class_name||state.settings?.className,year:currentClass?.year||state.settings?.year,groups:currentClass?.group_count||state.settings?.groups};
+    saveLocal();renderAll();
+    hideCloudUpdateBanner();
+    if(!silent)alert('Đã tải dữ liệu mới nhất từ Supabase.');
+  }
+}
+/* ---- Realtime: báo cho GVCN biết khi có thiết bị/tài khoản khác vừa lưu dữ liệu lớp ----
+   Chỉ HIỂN THỊ BANNER nhắc tải lại, KHÔNG tự động thay dữ liệu đang sửa dở trên màn hình,
+   để tránh mất thao tác đang gõ dở của người dùng. Yêu cầu bật Realtime cho bảng class_state
+   trong Supabase (xem supabase_migration_stability.sql). */
+let classRealtimeChannel=null, lastOwnPushAt=0;
+function subscribeClassRealtime(){
+  try{
+    if(typeof sb==='undefined'||!sb?.channel||!currentStateKey)return;
+    unsubscribeClassRealtime();
+    classRealtimeChannel=sb.channel('class_state_'+currentStateKey)
+      .on('postgres_changes',{event:'UPDATE',schema:'public',table:'class_state',filter:'class_id=eq.'+currentStateKey},payload=>{
+        const newVersion=Number(payload?.new?.version)||0;
+        // Bỏ qua nếu đây chính là lượt ghi của thiết bị này (vừa pushCloud xong trong vài giây gần đây).
+        if(Date.now()-lastOwnPushAt<4000 && newVersion<=currentStateVersion+1)return;
+        if(newVersion>currentStateVersion)showCloudUpdateBanner();
+      })
+      .subscribe();
+  }catch(e){console.warn('Không bật được realtime cho class_state:',e);}
+}
+function unsubscribeClassRealtime(){
+  try{if(classRealtimeChannel){sb.removeChannel(classRealtimeChannel);classRealtimeChannel=null;}}catch(e){}
+}
+function showCloudUpdateBanner(){
+  let el=document.getElementById('cloudUpdateBanner');
+  if(!el){
+    el=document.createElement('div');
+    el.id='cloudUpdateBanner';
+    el.style.cssText='position:fixed;left:50%;top:12px;transform:translateX(-50%);z-index:9999;background:#1d4ed8;color:#fff;padding:10px 16px;border-radius:12px;box-shadow:0 10px 30px #0f172a33;display:flex;gap:10px;align-items:center;font-size:14px;max-width:92vw;';
+    el.innerHTML='<span>🔄 Có cập nhật mới từ thiết bị khác cho lớp này.</span>';
+    const btn=document.createElement('button');
+    btn.textContent='Tải lại ngay';
+    btn.className='btn small';
+    btn.style.cssText='background:#fff;color:#1d4ed8;border:0;border-radius:8px;padding:6px 10px;font-weight:700;cursor:pointer;';
+    btn.onclick=()=>refreshCloud(true);
+    el.appendChild(btn);
+    document.body.appendChild(el);
+  }
+  el.style.display='flex';
+}
+function hideCloudUpdateBanner(){const el=document.getElementById('cloudUpdateBanner');if(el)el.style.display='none';}
 
 function getAttentionRules(){
   const d={absent:2,late:3,lowConduct:85,violations:3,decline:2};
@@ -2277,7 +2368,9 @@ function stopAISpeech(showStatus=true){
   }
 }
 if('speechSynthesis' in window){speechSynthesis.onvoiceschanged=()=>speechSynthesis.getVoices();}
-async function askAIQuick(q){document.getElementById('aiQuestion').value=q;await askAI();}
+// Lưu ý: askAI/askAIQuick THẬT nằm trong script "ai-reliability-client-v2" bên dưới
+// (window.askAI/window.askAIQuick) — bản này đã bị loại bỏ vì trước đây là code chết
+// (luôn bị ghi đè), để tránh nhầm lẫn khi bảo trì.
 function normalizeGenderValue(value){
   return String(value??'')
     .trim()
@@ -2333,7 +2426,7 @@ function looksTruncatedAIAnswer(text){
   return false;
 }
 function formatAIErrorMessage(error,httpStatus=''){const raw=String(error||'').trim();const lower=raw.toLowerCase();if(httpStatus==='429'||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota|retry in/i.test(raw)){const m=raw.match(/retry in\s+([0-9]+(?:\.[0-9]+)?)s/i);const wait=m?Math.ceil(Number(m[1])):null;return `<div class="ai-error-card"><strong>⚠️ Gemini đang tạm hết lượt sử dụng</strong><div>Đây là giới hạn quota của API Gemini, không phải lỗi hiển thị trên điện thoại.</div>${wait?`<div class="ai-retry-note">Thầy có thể thử lại sau khoảng ${wait} giây.</div>`:'<div class="ai-retry-note">Thầy hãy thử lại sau một lúc hoặc kiểm tra quota/billing của Gemini.</div>'}</div>`;}if(/failed to fetch|networkerror|load failed/i.test(lower))return `<div class="ai-error-card"><strong>🌐 Không kết nối được Trợ lý AI</strong><div>Thầy kiểm tra Internet rồi bấm Hỏi AI lại.</div></div>`;return `<div class="ai-error-card"><strong>❌ Trợ lý AI chưa thể trả lời</strong><div>${esc(raw||'Đã xảy ra lỗi không xác định.')}</div></div>`;}
-async function askAI(){const q=document.getElementById('aiQuestion'),ans=document.getElementById('aiAnswer'),meta=document.getElementById('aiMeta'),btn=document.getElementById('aiAskBtn');const question=(q?.value||'').trim();if(!question){if(ans)renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}if(!isAdmin()){renderAIAnswer('🔒 Chỉ GVCN/Admin mới được sử dụng Trợ lý AI.');return;}stopAISpeech(false);btn.disabled=true;btn.classList.add('ai-busy');renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');if(meta)meta.textContent='AI đang đọc dữ liệu lớp đang chọn...';try{const context=buildAIContext();if(isGenderCountQuestion(question)){const answer=buildGenderCountAnswer(context);renderAIAnswer(answer);if(meta)meta.textContent=`🤖 Thống kê trực tiếp từ danh sách học sinh · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}const aiPrompt=buildAIPrompt(question,context);const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết. Thầy đăng nhập lại.');const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';const payload={question:aiPrompt,stateKey:currentStateKey,context};const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify(payload)});const body=await res.json().catch(()=>({}));if(!res.ok){const errText=body.error||body.message||`AI trả về lỗi HTTP ${res.status}`;const quota=/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(errText))||res.status===429;if(ans)ans.innerHTML=formatAIErrorMessage(errText,String(res.status));if(meta)meta.textContent=quota?'⚠️ Gemini đang giới hạn lượt sử dụng.':'Kiểm tra Edge Function ai-class-assistant và GEMINI_API_KEY trong Supabase.';return;}let fullAnswer=typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||JSON.stringify(body.answer));if(looksTruncatedAIAnswer(fullAnswer) && String(fullAnswer||'').length>40){const retryPrompt=`Trả lời trực tiếp câu hỏi sau bằng tiếng Việt, tối đa 8 câu, không dùng Markdown, không dùng dấu *, không mở đầu dài dòng. Chỉ dùng dữ liệu trong context. Nếu là câu hỏi thống kê, nêu con số chính xác trước.\n\nCâu hỏi: ${question}`;const retry=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:retryPrompt,stateKey:currentStateKey,context})});const retryBody=await retry.json().catch(()=>({}));const retryErr=retryBody.error||retryBody.message||'';if(retry.ok){const candidate=typeof retryBody.answer==='string'?retryBody.answer:(retryBody.answer?.text||retryBody.answer?.content||'');if(candidate&&!looksTruncatedAIAnswer(candidate))fullAnswer=candidate;}else if(retry.status===429||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota/i.test(String(retryErr))){if(ans)ans.innerHTML=formatAIErrorMessage(retryErr,String(retry.status));if(meta)meta.textContent='⚠️ Gemini đang giới hạn lượt sử dụng.';return;}}renderAIAnswer(fullAnswer||'AI chưa trả về nội dung.');const finishReason=body.finishReason||body.finish_reason||body.meta?.finishReason||'';if(meta)meta.textContent=`🤖 Gemini · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}`;}catch(e){console.error(e);if(ans)ans.innerHTML=formatAIErrorMessage(e?.message||e);if(meta)meta.textContent='Trợ lý AI tạm thời không thể kết nối.';}finally{btn.classList.remove('ai-busy');btn.disabled=false;}}
+// (đã xoá bản askAI cũ trùng lặp — xem ghi chú phía trên)
 
 document.getElementById('loginPass')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();login()}});
 if(window.__supabaseInitError){setLoginStatus('❌ Không tải được Supabase: '+window.__supabaseInitError.message)}
@@ -2572,6 +2665,10 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
    phòng từ rule-based thay vì chỉ báo lỗi. */
 (()=>{
   let activeRequest=0;
+  // Rate limit phía client: chặn bấm dồn dập gọi AI thật (Gemini), bổ sung cho rate limit
+  // phía server trong Edge Function. Không áp dụng cho câu trả lời rule-based (miễn phí, tức thì).
+  let realCooldownUntil=0;
+  const REAL_AI_COOLDOWN_MS=8000;
   const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   const transient=(status,message)=>status===408||status===429||status>=500||/failed to fetch|networkerror|network request failed|timeout|temporar/i.test(String(message||''));
   const readBody=async res=>{const raw=await res.text();try{return raw?JSON.parse(raw):{}}catch(e){return {error:raw||`Phản hồi AI không đúng định dạng (HTTP ${res.status}).`}}};
@@ -2615,6 +2712,13 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       const rb=(typeof window.ruleBasedAnswer==='function')?window.ruleBasedAnswer(question,context):null;
       if(rb){renderAIAnswer(rb.text);if(meta)meta.textContent=`⚡ ${rb.label} · Rule-based, không dùng quota AI · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}
       // Bước 2 — Câu hỏi phức tạp / không khớp rule-based: dùng AI thật (Gemini).
+      const nowTs=Date.now();
+      if(nowTs<realCooldownUntil){
+        const remain=Math.ceil((realCooldownUntil-nowTs)/1000);
+        renderAIAnswer(`⏳ Vui lòng đợi khoảng ${remain} giây trước khi gửi tiếp câu hỏi cho AI thật (tránh gọi dồn dập, tốn quota Gemini). Rule-based vẫn dùng được ngay lập tức cho các câu hỏi thống kê.`);
+        if(meta)meta.textContent='Đang trong thời gian chờ giữa các lượt gọi AI thật (client-side rate limit).';
+        return;
+      }
       if(meta)meta.textContent='Câu hỏi cần phân tích sâu, đang chuyển sang AI thật (Gemini)...';
       renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');
       let session=null;
@@ -2622,7 +2726,9 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       if(!session?.access_token){renderErrorWithFallback(ans,meta,'Phiên đăng nhập với backend AI đã hết hoặc chưa đăng nhập.','',context,'⚠️ Chưa kết nối được AI thật (Gemini) — đã hiển thị dữ liệu tổng hợp dự phòng bằng rule-based.');return;}
       const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';
       const payload={question:buildAIPrompt(question,context),stateKey:currentStateKey,context,clientRequestId:requestId,requestOptions:{maxOutputTokens:2048,temperature:0.35,requireCompleteAnswer:true}};
-      const first=await requestAI(url,session.access_token,payload,requestId);if(requestNo!==activeRequest)return;
+      const first=await requestAI(url,session.access_token,payload,requestId);
+      realCooldownUntil=Date.now()+REAL_AI_COOLDOWN_MS; // đã thật sự gọi Gemini -> bắt đầu thời gian chờ, dù thành công hay lỗi
+      if(requestNo!==activeRequest)return;
       if(!first.res.ok){
         const err=first.body?.error||first.body?.message||`AI trả về lỗi HTTP ${first.res.status}`;
         renderErrorWithFallback(ans,meta,err,first.res.status,context,'⚠️ Gemini đang lỗi/hết quota — đã hiển thị dữ liệu tổng hợp dự phòng bằng rule-based.');
@@ -2698,8 +2804,8 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
    if(cr.error)throw cr.error;
    const x={...cr.data,year:cr.data.academic_years?.name||year,is_locked:cr.data.academic_years?.is_locked||false};
    await sb.from('class_user_roles').upsert({user_id:currentUser.id,class_id:x.id,role:'admin',scope:'Toàn lớp'},{onConflict:'user_id,class_id'});
-   await sb.from('class_state').upsert({class_id:stateKey,data:{settings:{teacher:currentUser.name,className:name,year,groups},students:[],attendance:{},scores:{},conduct:[],activity:[]},updated_by:currentUser.id},{onConflict:'class_id'});
-   availableClasses.unshift(x);currentClass=x;currentStateKey=stateKey;state=loadLocalFallback();state.settings={teacher:currentUser.name,className:name,year,groups};saveLocal();setUserUi();myRefreshClasses();renderAll();notice(`✅ Đã tạo ${name} – ${year}.`);
+   await sb.from('class_state').upsert({class_id:stateKey,data:{settings:{teacher:currentUser.name,className:name,year,groups},students:[],attendance:{},scores:{},conduct:[],activity:[]},updated_by:currentUser.id,version:1},{onConflict:'class_id'});
+   availableClasses.unshift(x);currentClass=x;currentStateKey=stateKey;currentStateVersion=1;state=loadLocalFallback();state.settings={teacher:currentUser.name,className:name,year,groups};saveLocal();setUserUi();myRefreshClasses();renderAll();subscribeClassRealtime();notice(`✅ Đã tạo ${name} – ${year}.`);
   }catch(e){console.error(e);notice('❌ Không tạo được lớp: '+(e.message||e),true)}
  };
  window.mySwitchClass=async function(id){
@@ -3109,7 +3215,19 @@ async function loadGuestDashboard(){
   };
   window.refreshSmartModule=function(){renderSmartModule();alert('✅ Đã làm mới phân tích thông minh.');};
   window.renderStudentTimeline=function(){const host=document.getElementById('studentTimeline');const sid=document.getElementById('timelineStudent')?.value;const days=Number(document.getElementById('timelineRange')?.value||30);if(!host||!sid)return;const cutoff=new Date();cutoff.setDate(cutoff.getDate()-days);const isoCut=isoDate(cutoff);const s=state.students.find(x=>x.id===sid)||{};const items=[];Object.values(state.attendance||{}).filter(x=>(x.studentId||x.id)===sid&&x.date>=isoCut).forEach(x=>items.push({date:x.date,title:'Chuyên cần',detail:x.status==='present'?'Có mặt':x.status==='late'?'Đi muộn':x.status==='excused'?'Nghỉ có phép':'Nghỉ không phép'}));(state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved'&&x.date>=isoCut).forEach(x=>items.push({date:x.date,title:x.points>0?'Khen thưởng':'Vi phạm / nhắc nhở',detail:`${Number(x.points).toFixed(1)} điểm · ${x.content||x.type||''}`}));items.sort((a,b)=>String(b.date).localeCompare(String(a.date)));host.innerHTML=items.length?items.map(x=>`<div class="timeline-item"><div class="timeline-date">${fmtDate(x.date)}</div><div><div class="timeline-dot">${esc(x.title)}</div><div>${esc(x.detail)}</div></div></div>`).join(''):`<div class="empty">Chưa có hoạt động trong khoảng thời gian đã chọn cho ${esc(s.name||'học sinh')}.</div>`;};
-  async function callAIForPhase(question,targetId){if(!isAdmin())throw new Error('Chỉ GVCN/Admin được sử dụng AI.');const context=buildAIContext();const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết.');const prompt=buildAIPrompt(question,context)+'\n\nYÊU CẦU BỔ SUNG: Trả lời tự nhiên, không Markdown, không dấu *, không JSON. Nêu kết quả chính trước, sau đó mới phân tích.';const res=await fetch(SUPABASE_URL+'/functions/v1/ai-class-assistant',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:prompt,stateKey:currentStateKey,context})});const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body.error||body.message||`HTTP ${res.status}`);return cleanAIText(typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||''));}
+  // Rate limit phía client dùng chung cho cả 3 nút AI của "Phân tích thông minh" — bổ sung
+  // cho rate limit phía server trong Edge Function, tránh bấm dồn dập tốn quota Gemini.
+  let smartAiCooldownUntil=0;
+  const SMART_AI_COOLDOWN_MS=8000;
+  async function callAIForPhase(question,targetId){
+    if(!isAdmin())throw new Error('Chỉ GVCN/Admin được sử dụng AI.');
+    const now=Date.now();
+    if(now<smartAiCooldownUntil)throw new Error(`Vui lòng đợi khoảng ${Math.ceil((smartAiCooldownUntil-now)/1000)} giây trước khi gọi AI thật tiếp (client-side rate limit).`);
+    const context=buildAIContext();const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết.');const prompt=buildAIPrompt(question,context)+'\n\nYÊU CẦU BỔ SUNG: Trả lời tự nhiên, không Markdown, không dấu *, không JSON. Nêu kết quả chính trước, sau đó mới phân tích.';
+    let res;
+    try{res=await fetch(SUPABASE_URL+'/functions/v1/ai-class-assistant',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:prompt,stateKey:currentStateKey,context})});}
+    finally{smartAiCooldownUntil=Date.now()+SMART_AI_COOLDOWN_MS;}
+    const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body.error||body.message||`HTTP ${res.status}`);return cleanAIText(typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||''));}
 
   /* ---- Rule-based dự phòng cho "Phân tích thông minh" (không Supabase, không API key, không tốn phí) ----
      Dùng khi Gemini lỗi/hết quota/mất phiên đăng nhập, để GVCN vẫn có số liệu dùng ngay. */
