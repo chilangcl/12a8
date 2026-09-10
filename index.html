@@ -959,7 +959,7 @@ select option{background:#fff!important;color:#202124!important}
         </div>
         <div class="report-title-print" id="reportPrintTitle"></div>
         <div class="grid cards" id="reportCards"></div>
-        <div class="card" style="margin-top:16px"><h3>📈 Tổng hợp theo học sinh</h3><div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Học sinh</th><th>Đúng giờ</th><th>Nghỉ phép</th><th>Nghỉ KP</th><th>Đi muộn</th><th>Điểm RL</th><th>Hạnh kiểm</th></tr></thead><tbody id="reportBody"></tbody></table></div></div>
+        <div class="card" style="margin-top:16px"><h3>📈 Tổng hợp theo học sinh</h3><div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Học sinh</th><th>Có mặt</th><th>Nghỉ phép</th><th>Nghỉ KP</th><th>Đi muộn</th><th>Điểm RL</th><th>Hạnh kiểm</th></tr></thead><tbody id="reportBody"></tbody></table></div></div>
       </section>
 
       <section id="page-profile" class="page">
@@ -1090,7 +1090,7 @@ select option{background:#fff!important;color:#202124!important}
     <div class="field"><label>Điểm</label><input id="cPoints" type="number" step="0.5" value="1"><div class="hint">Chọn mức theo bảng gợi ý ở phần Rèn luyện. Điểm trừ sẽ tự lưu thành số âm.</div></div>
     <div class="field span2"><label>Nội dung</label><textarea id="cContent" rows="3" placeholder="Mô tả rõ sự việc, thời gian hoặc căn cứ ghi nhận..."></textarea></div>
   </div>
-  <div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="btn secondary" onclick="closeModal('conductModal')">Hủy</button><button class="btn" onclick="saveConduct()">Lưu</button></div>
+  <div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="btn secondary" onclick="closeModal('conductModal')">Hủy</button><button class="btn" id="cSaveBtn" onclick="saveConduct()">Lưu</button></div>
 </div></div>
 
 <script>
@@ -1747,7 +1747,7 @@ function renderAttendance(){
  const date=document.getElementById('attDate').value||today(),session=currentAttSession(),filter=document.getElementById('attStatusFilter').value||'',a=visibleStudents();
  const locked=isAttendanceLocked(date,session);
  const rows=a.map((s,i)=>{const key=attendanceRecordKey(date,session,s.id),r=state.attendance[key]||{status:attendanceStatusFor(s.id,date,session),note:''};return {s,i,r}}).filter(x=>!filter||x.r.status===filter);
- document.getElementById('attendanceBody').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.i+1}</td><td>${esc(x.s.code)}</td><td><b>${esc(x.s.name)}</b></td><td>${x.s.group}</td><td><select data-att="${x.s.id}" class="attSel" onchange="saveAttendance(true)" ${locked?'disabled':''}><option value="present" ${x.r.status==='present'?'selected':''}>Có mặt</option><option value="late" ${x.r.status==='late'?'selected':''}>Đi muộn</option><option value="excused" ${x.r.status==='excused'?'selected':''}>Nghỉ có phép</option><option value="absent" ${x.r.status==='absent'?'selected':''}>Nghỉ không phép</option></select></td><td><input data-note="${x.s.id}" value="${esc(x.r.note||'')}" placeholder="Ghi chú" ${locked?'disabled':''} style="padding:7px;border:1px solid var(--border);border-radius:8px"></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Không có dữ liệu phù hợp.</td></tr>';
+ document.getElementById('attendanceBody').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.i+1}</td><td>${esc(x.s.code)}</td><td><b>${esc(x.s.name)}</b></td><td>${x.s.group}</td><td><select data-att="${x.s.id}" class="attSel" onchange="saveAttendance(true)" ${locked?'disabled':''}><option value="present" ${x.r.status==='present'?'selected':''}>Đúng giờ</option><option value="late" ${x.r.status==='late'?'selected':''}>Đi muộn</option><option value="excused" ${x.r.status==='excused'?'selected':''}>Nghỉ có phép</option><option value="absent" ${x.r.status==='absent'?'selected':''}>Nghỉ không phép</option></select></td><td><input data-note="${x.s.id}" value="${esc(x.r.note||'')}" placeholder="Ghi chú" ${locked?'disabled':''} style="padding:7px;border:1px solid var(--border);border-radius:8px"></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Không có dữ liệu phù hợp.</td></tr>';
  const saveBtn=document.getElementById('attSaveBtn');if(saveBtn){saveBtn.disabled=locked;saveBtn.style.opacity=locked?'0.55':'1'}
  const lockBtn=document.getElementById('attLockBtn');if(lockBtn)lockBtn.textContent=locked?'🔓 Mở khóa điểm danh':'🔒 Khóa điểm danh';
  const notice=document.getElementById('attLockNotice');
@@ -1799,7 +1799,8 @@ function renderLearning(){
 async function saveLearning(){
  const term=document.getElementById('scoreTerm').value;document.querySelectorAll('.scoreInp').forEach(inp=>{const key=term+'_'+inp.dataset.sid;state.scores[key]=state.scores[key]||{};state.scores[key][inp.dataset.key]=inp.value===''?'':Number(inp.value)});saveData();await pushCloud();log(`Cập nhật điểm học tập ${term}`);alert('Đã lưu điểm.');renderDashboard();
 }
-function openConduct(){document.getElementById('cEditId').value='';document.getElementById('conductModalTitle').textContent='Ghi nhận rèn luyện';document.getElementById('cDate').value=today();document.getElementById('cContent').value='';document.getElementById('cPoints').value=1;document.getElementById('cType').value='Điểm cộng';document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');document.getElementById('conductModal').classList.add('show')}
+function openConduct(){document.getElementById('cEditId').value='';document.getElementById('conductModalTitle').textContent='Ghi nhận rèn luyện';document.getElementById('cDate').value=today();document.getElementById('cContent').value='';document.getElementById('cPoints').value=1;document.getElementById('cType').value='Điểm cộng';document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');resetConductSaveButton();document.getElementById('conductModal').classList.add('show')}
+function resetConductSaveButton(){conductSaving=false;const btn=document.getElementById('cSaveBtn');if(btn){btn.disabled=false;btn.textContent='Lưu';}}
 function canEditConductRecord(x){if(!x||x.source==='attendance_auto')return false;if(isAdmin())return true;return isClassOfficer()&&x.status==='pending'}
 function editConduct(id){
  const x=(state.conduct||[]).find(x=>x.id===id);
@@ -1813,20 +1814,42 @@ function editConduct(id){
  document.getElementById('cType').value=x.type;
  document.getElementById('cPoints').value=Math.abs(Number(x.points||0));
  document.getElementById('cContent').value=x.content||'';
+ resetConductSaveButton();
  document.getElementById('conductModal').classList.add('show');
 }
+// Chống lưu trùng lặp: nếu người dùng bấm "Lưu" nhiều lần liên tiếp (double-click, tap kép
+// trên điện thoại, hoặc chờ mạng chậm rồi bấm lại), mỗi lần bấm trước đây tạo ra MỘT bản ghi
+// rèn luyện riêng (cùng nội dung) vì hàm saveConduct() không có cơ chế khoá — đây chính là
+// nguyên nhân "6 lần thao tác giống hệt nhau". Khoá `conductSaving` + disable nút xử lý việc này.
+let conductSaving=false;
 async function saveConduct(){
+ if(conductSaving)return; // đang xử lý một lượt lưu khác -> bỏ qua lượt bấm thừa
  const sid=document.getElementById('cStudent').value;if(!sid){alert('Chưa có học sinh.');return}
  let type=document.getElementById('cType').value,pts=Number(document.getElementById('cPoints').value||0);if(type==='Điểm trừ'||type==='Vi phạm')pts=-Math.abs(pts);
  const editId=document.getElementById('cEditId').value;
- if(editId){
-   const x=(state.conduct||[]).find(x=>x.id===editId);
-   if(!x){alert('Không tìm thấy bản ghi để cập nhật.');return}
-   if(!canEditConductRecord(x)){alert(x.status==='approved'?'🔒 Bản ghi đã được GVCN duyệt, không thể chỉnh sửa.':'🔒 Thầy/cô không có quyền chỉnh sửa bản ghi này.');return}
-   x.date=document.getElementById('cDate').value;x.studentId=sid;x.type=type;x.content=document.getElementById('cContent').value;x.points=pts;x.updatedBy=currentUser?.username||currentUser?.name||'';x.updatedAt=new Date().toISOString();
-   saveData();await pushCloud();log(`Chỉnh sửa rèn luyện cho ${state.students.find(s=>s.id===sid)?.name||''}`);closeModal('conductModal');renderAll();return;
+ const btn=document.getElementById('cSaveBtn'),btnOriginalText=btn?.textContent;
+ conductSaving=true;
+ if(btn){btn.disabled=true;btn.textContent='⏳ Đang lưu...';}
+ try{
+   if(editId){
+     const x=(state.conduct||[]).find(x=>x.id===editId);
+     if(!x){alert('Không tìm thấy bản ghi để cập nhật.');return}
+     if(!canEditConductRecord(x)){alert(x.status==='approved'?'🔒 Bản ghi đã được GVCN duyệt, không thể chỉnh sửa.':'🔒 Thầy/cô không có quyền chỉnh sửa bản ghi này.');return}
+     x.date=document.getElementById('cDate').value;x.studentId=sid;x.type=type;x.content=document.getElementById('cContent').value;x.points=pts;x.updatedBy=currentUser?.username||currentUser?.name||'';x.updatedAt=new Date().toISOString();
+     saveData();await pushCloud();log(`Chỉnh sửa rèn luyện cho ${state.students.find(s=>s.id===sid)?.name||''}`);closeModal('conductModal');renderAll();return;
+   }
+   const content=document.getElementById('cContent').value;
+   // Lớp bảo vệ thứ hai: nếu vì lý do gì đó (ví dụ 2 sự kiện click/touch bắn liên tiếp) hàm
+   // vẫn bị gọi 2 lần với NỘI DUNG GIỐNG HỆT trong vài giây, không tạo thêm bản ghi trùng.
+   const recentDuplicate=(state.conduct||[]).some(r=>r.studentId===sid&&r.type===type&&r.content===content&&Number(r.points)===pts&&r.by===currentUser.username&&r.createdAt&&(Date.now()-new Date(r.createdAt).getTime())<8000);
+   if(recentDuplicate){closeModal('conductModal');return;}
+   const x={id:crypto.randomUUID(),date:document.getElementById('cDate').value,studentId:sid,type,content,points:pts,by:currentUser.username,status:isAdmin()?'approved':'pending',createdAt:new Date().toISOString()};
+   state.conduct.push(x);saveData();await pushCloud();log(`Ghi nhận rèn luyện cho ${state.students.find(s=>s.id===sid)?.name||''}`);closeModal('conductModal');renderAll();
+ }finally{
+   conductSaving=false;
+   if(btn){btn.disabled=false;btn.textContent=btnOriginalText||'Lưu';}
  }
- const x={id:crypto.randomUUID(),date:document.getElementById('cDate').value,studentId:sid,type,content:document.getElementById('cContent').value,points:pts,by:currentUser.username,status:isAdmin()?'approved':'pending'};state.conduct.push(x);saveData();await pushCloud();log(`Ghi nhận rèn luyện cho ${state.students.find(s=>s.id===sid)?.name||''}`);closeModal('conductModal');renderAll()}
+}
 function renderConduct(){const q=(document.getElementById('conductSearch').value||'').toLowerCase(),st=document.getElementById('conductStatus').value||'';let a=state.conduct||[];if(currentUser?.role?.startsWith('to'))a=a.filter(x=>state.students.find(s=>s.id===x.studentId)?.group==currentUser.role.replace('to',''));a=a.filter(x=>(!q||`${x.content} ${state.students.find(s=>s.id===x.studentId)?.name||''}`.toLowerCase().includes(q))&&(!st||x.status===st));document.getElementById('conductBody').innerHTML=a.length?a.slice().reverse().map(x=>{const s=state.students.find(s=>s.id===x.studentId)||{};return `<tr><td>${fmtDate(x.date)}</td><td>${esc(s.name||'')}</td><td>${esc(x.type)}</td><td>${esc(x.content)}</td><td><b>${Number(x.points).toFixed(1)}</b></td><td>${esc(x.by)}</td><td><span class="badge ${x.status==='approved'?'b-green':'b-yellow'}">${x.status==='approved'?'Đã duyệt':'Chờ duyệt'}</span></td><td>${canEditConductRecord(x)?`<button class="btn small secondary" onclick="editConduct('${x.id}')">✏️ Sửa</button>`:''} ${isAdmin()&&x.status==='pending'?`<button class="btn small success" onclick="approveConduct('${x.id}')">Duyệt</button>`:''} ${isAdmin()?`<button class="btn small danger" onclick="deleteConduct('${x.id}')">Xóa</button>`:''}</td></tr>`}).join(''):'<tr><td colspan="8" class="empty">Chưa có bản ghi.</td></tr>'}
 async function approveConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN được duyệt rèn luyện.');return}const x=state.conduct.find(x=>x.id===id);if(x){x.status='approved';saveData();await pushCloud();log('GVCN duyệt một bản ghi rèn luyện');renderAll()}}
 async function deleteConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN được xóa bản ghi rèn luyện.');return}const record=(state.conduct||[]).find(x=>x.id===id);if(record?.source==='attendance_auto'){alert('🔒 Bản ghi này được đồng bộ từ điểm danh. Hãy sửa trạng thái điểm danh để hệ thống tự cập nhật điểm rèn luyện.');return}if(!confirm('Xóa bản ghi này?'))return;state.conduct=state.conduct.filter(x=>x.id!==id);saveData();await pushCloud();renderAll()}
@@ -3102,8 +3125,11 @@ async function loadGuestDashboard(){
             return true;
           });
       }
-      const praisedRecords=uniqueHonorRecords(approvedConduct.filter(x=>Number(x.points||0)>0 || positiveTypes.has(x.type)));
-      const criticizedRecords=uniqueHonorRecords(approvedConduct.filter(x=>Number(x.points||0)<0 || negativeTypes.has(x.type)));
+      // Chỉ hiển thị 5 lượt khen thưởng và 5 lượt phê bình GẦN NHẤT (uniqueHonorRecords
+      // đã sắp xếp mới nhất trước) để tránh danh sách quá dài, khó xem trên trang Vinh danh.
+      const HONOR_DISPLAY_LIMIT=5;
+      const praisedRecords=uniqueHonorRecords(approvedConduct.filter(x=>Number(x.points||0)>0 || positiveTypes.has(x.type))).slice(0,HONOR_DISPLAY_LIMIT);
+      const criticizedRecords=uniqueHonorRecords(approvedConduct.filter(x=>Number(x.points||0)<0 || negativeTypes.has(x.type))).slice(0,HONOR_DISPLAY_LIMIT);
       function honorItem(x){
         const s=studentById[x.studentId]||{};
         const pts=Number(x.points||0);
@@ -3154,7 +3180,7 @@ async function loadGuestDashboard(){
         <div id="guestConductSummary" class="kpi-list" style="margin-top:12px"></div>
       </div>
 
-      <div class="guest-honor-card"><div class="guest-honor-head"><div><h3>🏅 Vinh danh</h3></div></div><div class="guest-honor-grid"><div class="guest-honor-panel good"><div class="guest-honor-title">🌟 Học sinh được khen thưởng</div><div class="guest-honor-names">${praisedRecords.length?praisedRecords.map(honorItem).join(''):'<div class="empty">Chưa có học sinh được ghi nhận khen thưởng.</div>'}</div></div><div class="guest-honor-panel warn"><div class="guest-honor-title">⚠️ Học sinh bị phê bình</div><div class="guest-honor-names">${criticizedRecords.length?criticizedRecords.map(honorItem).join(''):'<div class="empty">Chưa có học sinh bị phê bình.</div>'}</div></div></div></div>
+      <div class="guest-honor-card"><div class="guest-honor-head"><div><h3>🏅 Vinh danh</h3></div></div><div class="guest-honor-grid"><div class="guest-honor-panel good"><div class="guest-honor-title">🌟 Học sinh được khen thưởng (5 gần nhất)</div><div class="guest-honor-names">${praisedRecords.length?praisedRecords.map(honorItem).join(''):'<div class="empty">Chưa có học sinh được ghi nhận khen thưởng.</div>'}</div></div><div class="guest-honor-panel warn"><div class="guest-honor-title">⚠️ Học sinh bị phê bình (5 gần nhất)</div><div class="guest-honor-names">${criticizedRecords.length?criticizedRecords.map(honorItem).join(''):'<div class="empty">Chưa có học sinh bị phê bình.</div>'}</div></div></div></div>
 
       <div class="guest-card"><h3>⭐ Rèn luyện gần đây</h3>${recent.length?`<table class="guest-table"><thead><tr><th>Ngày</th><th>Loại</th><th>Điểm</th></tr></thead><tbody>${recent.map(x=>`<tr><td>${guestEsc(x.date||'')}</td><td>${guestEsc(x.type||'')}</td><td><b>${Number(x.points||0).toFixed(1)}</b></td></tr>`).join('')}</tbody></table>`:'<div class="empty">Chưa có ghi nhận rèn luyện được duyệt.</div>'}</div>
       <div class="guest-card"><h3>📊 Tổng hợp nền nếp tháng này</h3><table class="guest-table"><thead><tr><th>Trạng thái</th><th>Số lượt</th></tr></thead><tbody><tr><td>Có mặt</td><td>${att.month_present}</td></tr><tr><td>Đi muộn</td><td>${att.month_late}</td></tr><tr><td>Nghỉ có phép</td><td>${att.month_excused}</td></tr><tr><td>Nghỉ không phép</td><td>${att.month_absent}</td></tr></tbody></table></div>
