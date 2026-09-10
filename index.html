@@ -2267,7 +2267,10 @@ function cloneSafe(value){
   try{return JSON.parse(JSON.stringify(value??null));}catch(e){return null;}
 }
 function buildAIContext(){
-  /* Context chuẩn hóa: mỗi dữ liệu chỉ xuất hiện một lần để tránh request quá lớn và mất đoạn trả lời. */
+  /* Context rút gọn: giữ nguyên toàn bộ thống kê tổng hợp (summary, studentStats) vì đây là phần
+     AI dùng để trả lời nhanh, chính xác mà rẻ; chỉ cắt bớt phần bản ghi thô ít cần thiết
+     (rèn luyện chưa duyệt, hoạt động/thông báo quá cũ) để giảm số token đầu vào — không tốn phí
+     hơn mức cần mà vẫn đủ dữ liệu cho GVCN hỏi đáp linh hoạt. */
   const students=Array.isArray(state.students)?state.students:[];
   const attendance=state.attendance&&typeof state.attendance==='object'?Object.values(state.attendance):[];
   const conduct=Array.isArray(state.conduct)?state.conduct:[];
@@ -2279,7 +2282,7 @@ function buildAIContext(){
   const genderStats=getGenderStatsFromStudents(students),groups={};
   safeStudents.forEach(s=>{const g=String(s.group||'Chưa xếp');if(!groups[g])groups[g]=[];groups[g].push(s.id);});
   const studentStats=safeStudents.map(s=>{const ar=attendance.filter(x=>(x.studentId||x.id)===s.id),cr=approved.filter(x=>x.studentId===s.id);return {id:s.id,attendance:{present:ar.filter(x=>x.status==='present').length,late:ar.filter(x=>x.status==='late').length,excused:ar.filter(x=>x.status==='excused').length,absent:ar.filter(x=>x.status==='absent').length},conductPoints:Number(cr.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1))};});
-  return {version:'ai-context-v2',generatedAt:new Date().toISOString(),scope:{currentClassKey:currentStateKey,className:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',instruction:'Chỉ sử dụng dữ liệu của lớp đang được chọn.'},class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',groups:state.settings?.groups||4},summary:{students:safeStudents.length,attendanceRecords:attendance.length,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),activityRecords:activities.length,notificationRecords:notifications.length,weekStart:aiWeekStart(today()),gender:genderStats,groups},students:safeStudents,studentStats,attendance:cloneSafe(attendance)||[],conduct:cloneSafe(conduct)||[],activities:cloneSafe(activities)||[],scores:cloneSafe(scores)||{},notifications:cloneSafe(notifications.slice(-30))||[]};
+  return {version:'ai-context-v3',generatedAt:new Date().toISOString(),scope:{currentClassKey:currentStateKey,className:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',instruction:'Chỉ sử dụng dữ liệu của lớp đang được chọn.'},class:{name:state.settings?.className||currentClass?.class_name||'',year:state.settings?.year||currentClass?.year||'',groups:state.settings?.groups||4},summary:{students:safeStudents.length,attendanceRecords:attendance.length,conductRecords:approved.length,totalConductPoints:Number(approved.reduce((a,x)=>a+Number(x.points||0),0).toFixed(1)),activityRecords:activities.length,notificationRecords:notifications.length,weekStart:aiWeekStart(today()),gender:genderStats,groups},students:safeStudents,studentStats,attendance:cloneSafe(attendance)||[],conduct:cloneSafe(approved)||[],activities:cloneSafe(activities.slice(-60))||[],scores:cloneSafe(scores)||{},notifications:cloneSafe(notifications.slice(-15))||[]};
 }
 function buildAIGenderSummary(context){
   const g=context?.summary?.gender||{};
@@ -2693,6 +2696,25 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   let realCooldownUntil=0;
   const REAL_AI_COOLDOWN_MS=8000;
   const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  // Chọn maxOutputTokens linh hoạt theo độ phức tạp câu hỏi: trần vẫn là 2048 (đủ cho câu hỏi
+  // phân tích/liệt kê dài), nhưng câu hỏi đơn giản (1 con số/tên/ngày) chỉ xin ngân sách nhỏ để
+  // đỡ tốn quota. Nếu Gemini vẫn bị cắt giữa chừng (finishReason=MAX_TOKENS), luồng gọi tiếp theo
+  // (continuation) đã tự động xin đủ 2048 để hoàn tất câu trả lời, nên không lo mất nội dung.
+  const AI_TOKEN_SIMPLE=300,AI_TOKEN_SHORT=500,AI_TOKEN_MEDIUM=900,AI_TOKEN_MAX=2048;
+  function estimateAIMaxTokens(question){
+    const q=String(question||'').trim().toLowerCase();
+    if(!q)return AI_TOKEN_SIMPLE;
+    const len=q.length;
+    // Dấu hiệu cần liệt kê/phân tích/tổng hợp nhiều ý -> luôn xin trần tối đa.
+    const complexHints=/(phân tích|tổng hợp|nhận xét|đánh giá|so sánh|danh sách|liệt kê|báo cáo|đề xuất|xu hướng|nguyên nhân|giải pháp|toàn bộ lớp|tất cả (học sinh|bạn|tổ))/;
+    const multiPart=(q.match(/\?/g)||[]).length>1||/(và|,).*(và|,).*(và|,)/.test(q);
+    if(complexHints.test(q)||multiPart||len>160)return AI_TOKEN_MAX;
+    // Dấu hiệu câu hỏi đơn giản: chỉ hỏi 1 con số/tên/ngày/đúng-sai, ngắn gọn.
+    const simpleHints=/(bao nhiêu|mấy (bạn|học sinh|em|điểm)|là ai|tên là gì|ngày nào|khi nào|có (mặt|nghỉ) (hay không|không)|đúng hay sai|xếp loại gì)/;
+    if(simpleHints.test(q)&&len<=80)return AI_TOKEN_SIMPLE;
+    if(len<=50)return AI_TOKEN_SHORT;
+    return AI_TOKEN_MEDIUM; // câu hỏi không rõ ràng -> mức an toàn ở giữa
+  }
   const transient=(status,message)=>status===408||status===429||status>=500||/failed to fetch|networkerror|network request failed|timeout|temporar/i.test(String(message||''));
   const readBody=async res=>{const raw=await res.text();try{return raw?JSON.parse(raw):{}}catch(e){return {error:raw||`Phản hồi AI không đúng định dạng (HTTP ${res.status}).`}}};
   const textOf=body=>typeof body?.answer==='string'?body.answer:(body?.answer?.text||body?.answer?.content||body?.text||'');
@@ -2748,7 +2770,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       try{const s=await sb.auth.getSession();session=s?.data?.session||null;}catch(e){session=null;}
       if(!session?.access_token){renderErrorWithFallback(ans,meta,'Phiên đăng nhập với backend AI đã hết hoặc chưa đăng nhập.','',context,'⚠️ Chưa kết nối được AI thật (Gemini) — đã hiển thị dữ liệu tổng hợp dự phòng bằng rule-based.');return;}
       const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';
-      const payload={question:buildAIPrompt(question,context),stateKey:currentStateKey,context,clientRequestId:requestId,requestOptions:{maxOutputTokens:2048,temperature:0.35,requireCompleteAnswer:true}};
+      const payload={question:buildAIPrompt(question,context),stateKey:currentStateKey,context,clientRequestId:requestId,requestOptions:{maxOutputTokens:estimateAIMaxTokens(question),temperature:0.35,requireCompleteAnswer:true}};
       const first=await requestAI(url,session.access_token,payload,requestId);
       realCooldownUntil=Date.now()+REAL_AI_COOLDOWN_MS; // đã thật sự gọi Gemini -> bắt đầu thời gian chờ, dù thành công hay lỗi
       if(requestNo!==activeRequest)return;
@@ -2761,7 +2783,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       if(String(finishReason).toUpperCase()==='MAX_TOKENS'&&answer){
         if(meta)meta.textContent='AI đang hoàn tất phần còn lại của câu trả lời...';
         const continuation=`Hãy viết tiếp phần trả lời còn dang dở cho câu hỏi gốc. Không lặp lại nội dung đã có; bắt đầu ngay tại ý còn thiếu và kết thúc bằng câu hoàn chỉnh. Câu hỏi gốc: ${question}\n\nPhần đã trả lời: ${answer.slice(-1800)}`;
-        const next=await requestAI(url,session.access_token,{...payload,question:continuation,clientRequestId:requestId+'_continue'},requestId+'_continue');
+        const next=await requestAI(url,session.access_token,{...payload,question:continuation,requestOptions:{...payload.requestOptions,maxOutputTokens:AI_TOKEN_MAX},clientRequestId:requestId+'_continue'},requestId+'_continue');
         if(next.res.ok){const tail=textOf(next.body);if(tail)answer=`${answer.trim()}\n${tail.trim()}`;finishReason=next.body?.finishReason||next.body?.finish_reason||finishReason;}
       }
       renderAIAnswer(answer||'AI chưa trả về nội dung.');
