@@ -433,6 +433,13 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
 <style id="bibi-report-rules-v1">
 .report-period-box{align-items:end}.conduct-rules-settings{border:1px solid #c7d2fe;background:linear-gradient(135deg,#ffffff,#eef2ff)}.conduct-rules-settings .field input{font-weight:800}.conduct-rules-settings h3{margin-top:0}
 @media(max-width:680px){.report-period-box{display:grid!important;grid-template-columns:1fr}.report-period-box .field{min-width:0!important;width:100%}.conduct-rules-settings .actions .btn{flex:1 1 180px}}
+.conduct-guide-row{display:grid;gap:6px;margin-bottom:6px;align-items:center}
+.conduct-guide-row[data-type="deduct"]{grid-template-columns:1fr 2fr 90px 36px}
+.conduct-guide-row[data-type="bonus"]{grid-template-columns:2fr 90px 110px 36px}
+.conduct-guide-row input{padding:8px 9px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:13px;width:100%}
+.conduct-guide-row .btn{padding:6px}
+.conduct-guide-editor{margin-bottom:8px}
+@media(max-width:680px){.conduct-guide-row[data-type="deduct"],.conduct-guide-row[data-type="bonus"]{grid-template-columns:1fr}.conduct-guide-row .btn{justify-self:end;width:auto;padding:6px 12px}}
 </style>
 
 <style id="interactive-immersive-webgl-upgrade">
@@ -928,20 +935,7 @@ select option{background:#fff!important;color:#202124!important}
               <div class="table-wrap">
                 <table class="table guide-table">
                   <thead><tr><th>Nhóm</th><th>Hành vi</th><th>Mức trừ</th></tr></thead>
-                  <tbody>
-                    <tr><td>Nền nếp & chuyên cần</td><td>Nghỉ học có phép</td><td><b>-2</b></td></tr>
-                    <tr><td>Nền nếp & chuyên cần</td><td>Nghỉ học không phép</td><td><b>-10</b></td></tr>
-                    <tr><td>Nền nếp & chuyên cần</td><td>Đi học muộn</td><td><b>-5</b></td></tr>
-                    <tr><td>Nền nếp & chuyên cần</td><td>Bỏ tiết / Trốn tiết</td><td><b>-15</b></td></tr>
-                    <tr><td>Trang phục & tác phong</td><td>Không đeo thẻ học sinh</td><td><b>-5</b></td></tr>
-                    <tr><td>Trang phục & tác phong</td><td>Đi dép lê (không quai hậu)</td><td><b>-5</b></td></tr>
-                    <tr><td>Trang phục & tác phong</td><td>Không mặc đúng đồng phục</td><td><b>-5</b></td></tr>
-                    <tr><td>Trang phục & tác phong</td><td>Mặc quần rách, áo không cổ</td><td><b>-5</b></td></tr>
-                    <tr><td>Học tập & ý thức lớp</td><td>Không học bài / Không làm bài</td><td><b>-5</b></td></tr>
-                    <tr><td>Học tập & ý thức lớp</td><td>Mất trật tự trong giờ học</td><td><b>-5</b></td></tr>
-                    <tr><td>Học tập & ý thức lớp</td><td>Sử dụng điện thoại không phép</td><td><b>-10</b></td></tr>
-                    <tr><td>An toàn & pháp luật</td><td>Vi phạm an toàn giao thông</td><td><b>-50</b></td></tr>
-                  </tbody>
+                  <tbody id="guideDeductBody"></tbody>
                 </table>
               </div>
             </div>
@@ -951,14 +945,7 @@ select option{background:#fff!important;color:#202124!important}
               <div class="table-wrap">
                 <table class="table guide-table">
                   <thead><tr><th>Nội dung khen thưởng</th><th>Mức cộng</th></tr></thead>
-                  <tbody>
-                    <tr><td>Thành tích đột xuất (giải HSG, năng khiếu, thể thao cấp Trường/Tỉnh)</td><td><b>+20</b></td></tr>
-                    <tr><td>Làm việc tốt (nhặt được của rơi trả lại, giúp đỡ bạn bè, bảo vệ tài sản chung)</td><td><b>+10</b></td></tr>
-                    <tr><td>Tích cực hoạt động tập thể (văn nghệ, thể thao, phong trào Đoàn)</td><td><b>+5 / sự kiện</b></td></tr>
-                    <tr><td>Tích cực phát biểu xây dựng bài trong giờ học</td><td><b>+5 / tiết học</b></td></tr>                    
-                    <tr><td>Đạt điểm 9, 10 trong giờ học</td><td><b>+5 / điểm tốt</b></td></tr>
-                    <tr><td>Tuần học tốt (cá nhân không vi phạm bất kỳ lỗi nào trong tuần)</td><td><b>+5</b></td></tr>
-                  </tbody>
+                  <tbody id="guideBonusBody"></tbody>
                 </table>
               </div>
             </div>
@@ -967,6 +954,7 @@ select option{background:#fff!important;color:#202124!important}
           <div class="notice" style="margin-top:12px">
             <b>Nguyên tắc ghi nhận:</b> cán sự lớp chỉ ghi nhận sự việc có căn cứ; nội dung cần mô tả rõ, tránh ghi chung chung.
             Điểm tuần được tính từ 100 điểm ban đầu, sau đó cộng/trừ các lượt được ghi nhận.
+            GVCN/Admin có thể chỉnh sửa bảng này trong mục <b>⚙️ Cài đặt</b>.
           </div>
         </div>
       </section>
@@ -1066,6 +1054,24 @@ select option{background:#fff!important;color:#202124!important}
           <button class="btn" onclick="saveSettings()">💾 Lưu cài đặt</button>
         </div>
         <div class="card conduct-rules-settings" style="margin-top:16px"><h3>⚙️ Nguyên tắc xếp hạnh kiểm / rèn luyện</h3><p class="muted">GVCN/Admin có thể thay đổi ngưỡng điểm và điểm khởi đầu. Thi đua, Báo cáo tổng hợp và các phần xếp loại sẽ dùng chung các chỉ số này.</p><div class="form-grid"><div class="field"><label>Điểm từ mức Tốt</label><input id="setGoodScore" type="number" step="0.1" value="96"></div><div class="field"><label>Điểm từ mức Khá</label><input id="setFairScore" type="number" step="0.1" value="90"></div><div class="field"><label>Điểm từ mức Đạt</label><input id="setPassScore" type="number" step="0.1" value="85"></div><div class="field"><label>Điểm khởi đầu mỗi tuần</label><input id="setConductBase" type="number" step="0.1" value="100"></div></div><div class="actions" style="margin-top:12px"><button class="btn" type="button" onclick="saveConductRules()">💾 Lưu nguyên tắc</button><button class="btn secondary" type="button" onclick="resetConductRules()">↩ Khôi phục mặc định</button></div><div id="conductRulesStatus" class="notice" style="display:none;margin-top:12px"></div></div>
+        <div class="card conduct-rules-settings" id="conductGuideSettingsCard" style="margin-top:16px">
+          <h3>🎯 Quản lý bảng gợi ý chấm điểm rèn luyện</h3>
+          <p class="muted">Chỉnh sửa/Thêm/Xóa nội dung và điểm cộng/trừ gợi ý. Sau khi lưu, bảng gợi ý ở trang Rèn luyện và danh sách chọn nhanh khi ghi nhận sẽ tự cập nhật theo.</p>
+          <div class="grid two">
+            <div>
+              <h4 style="margin:6px 0 8px">🔻 Điểm trừ vi phạm</h4>
+              <div id="guideDeductRows" class="conduct-guide-editor"></div>
+              <button class="btn secondary small" type="button" onclick="addConductGuideRow('deduct')">+ Thêm hành vi trừ điểm</button>
+            </div>
+            <div>
+              <h4 style="margin:6px 0 8px">🔺 Điểm cộng khen thưởng</h4>
+              <div id="guideBonusRows" class="conduct-guide-editor"></div>
+              <button class="btn secondary small" type="button" onclick="addConductGuideRow('bonus')">+ Thêm nội dung khen thưởng</button>
+            </div>
+          </div>
+          <div class="actions" style="margin-top:12px"><button class="btn" type="button" onclick="saveConductGuideSettings()">💾 Lưu bảng gợi ý</button><button class="btn secondary" type="button" onclick="resetConductGuideSettings()">↩ Khôi phục mặc định</button></div>
+          <div id="conductGuideStatus" class="notice" style="display:none;margin-top:12px"></div>
+        </div>
         <div class="card" style="margin-top:16px;border:1px solid #f59e0b;background:#fffbeb"><h3>🔄 Bắt đầu năm học mới</h3><p class="muted">Xóa riêng toàn bộ dữ liệu <strong>điểm danh</strong> (có mặt, đi muộn, nghỉ có phép, nghỉ không phép) để bắt đầu lại. Danh sách học sinh, tài khoản, rèn luyện, hạnh kiểm và cài đặt lớp vẫn được giữ nguyên.</p><button class="btn" style="background:#f59e0b;color:#fff" onclick="resetAttendanceOnly()">🔄 Reset điểm danh năm học</button></div>
         <div class="card" style="margin-top:16px"><h3>⚠️ Xóa toàn bộ dữ liệu</h3><p class="muted">Chỉ dùng khi thực sự muốn xóa toàn bộ dữ liệu của lớp. Hãy sao lưu trước.</p><button class="btn danger" onclick="resetAll()">Xóa toàn bộ dữ liệu</button></div>
       </section>
@@ -1111,8 +1117,15 @@ select option{background:#fff!important;color:#202124!important}
   <div class="form-grid">
     <div class="field"><label>Ngày</label><input id="cDate" type="date"></div><div class="field"><label>Học sinh</label><select id="cStudent"></select></div>
     <div class="field"><label>Loại</label><select id="cType"><option>Điểm cộng</option><option>Điểm trừ</option><option>Thành tích</option><option>Vi phạm</option><option>Hoạt động</option></select></div>
-    <div class="field"><label>Điểm</label><input id="cPoints" type="number" step="0.5" value="1"><div class="hint">Chọn mức theo bảng gợi ý ở phần Rèn luyện. Điểm trừ sẽ tự lưu thành số âm.</div></div>
-    <div class="field span2"><label>Nội dung</label><textarea id="cContent" rows="3" placeholder="Mô tả rõ sự việc, thời gian hoặc căn cứ ghi nhận..."></textarea></div>
+    <div class="field"><label>Điểm</label><input id="cPoints" type="number" step="0.5" value="1"><div class="hint">Chọn nội dung gợi ý bên dưới để tự động điền điểm, hoặc tự nhập điểm nếu chọn "Nội dung khác". Điểm trừ sẽ tự lưu thành số âm.</div></div>
+    <div class="field span2"><label>Nội dung gợi ý (theo hướng dẫn của lớp)</label>
+      <select id="cContentPreset" onchange="applyConductPreset()">
+        <option value="custom">✏️ Nhập nội dung khác (tự nhập)</option>
+        <optgroup label="🔻 Gợi ý điểm trừ" id="cContentPresetDeductGroup"></optgroup>
+        <optgroup label="🔺 Gợi ý điểm cộng" id="cContentPresetBonusGroup"></optgroup>
+      </select>
+    </div>
+    <div class="field span2"><label>Nội dung chi tiết</label><textarea id="cContent" rows="3" placeholder="Mô tả rõ sự việc, thời gian hoặc căn cứ ghi nhận..."></textarea></div>
   </div>
   <div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="btn secondary" onclick="closeModal('conductModal')">Hủy</button><button class="btn" id="cSaveBtn" onclick="saveConduct()">Lưu</button></div>
 </div></div>
@@ -1133,7 +1146,7 @@ let currentClass=null, currentStateKey='12A8-2026-2027', cloudWriteQueue=Promise
 // Yêu cầu cột `version` trên bảng class_state — xem file migration supabase_migration_stability.sql.
 let currentStateVersion=0;
 let state=seed(), currentUser=null, editingStudent=null, availableClasses=[];
-function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4,conductRules:{base:100,good:96,fair:90,pass:85}},students:[],attendance:{},attendanceLocks:{},scores:{},conduct:[],activity:[],auditLog:[],notifications:[]}}
+function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4,conductRules:{base:100,good:96,fair:90,pass:85},conductGuide:defaultConductGuide()},students:[],attendance:{},attendanceLocks:{},scores:{},conduct:[],activity:[],auditLog:[],notifications:[]}}
 function dataKey(){return DATA_PREFIX+(currentStateKey||'12A8-2026-2027')}
 function loadLocalFallback(){try{return JSON.parse(localStorage.getItem(dataKey()))||seed()}catch(e){return seed()}}
 function saveLocal(){localStorage.setItem(dataKey(),JSON.stringify(state))}
@@ -1307,7 +1320,7 @@ async function loadCloudState(){
       saveLocal();
       await pushCloud();
     }
-    state.settings={...seed().settings,...(state.settings||{}),conductRules:{...seed().settings.conductRules,...(state.settings?.conductRules||{})},className:currentClass?.class_name||state.settings?.className||'12A8',year:currentClass?.year||state.settings?.year||'2026-2027',groups:currentClass?.group_count||state.settings?.groups||4};
+    state.settings={...seed().settings,...(state.settings||{}),conductRules:{...seed().settings.conductRules,...(state.settings?.conductRules||{})},conductGuide:(state.settings?.conductGuide&&(state.settings.conductGuide.deduct||state.settings.conductGuide.bonus))?state.settings.conductGuide:seed().settings.conductGuide,className:currentClass?.class_name||state.settings?.className||'12A8',year:currentClass?.year||state.settings?.year||'2026-2027',groups:currentClass?.group_count||state.settings?.groups||4};
     saveLocal();
     subscribeClassRealtime();
   }catch(e){console.error(e);state=loadLocalFallback();alert('🔒 Không thể tải dữ liệu lớp này: '+(e.message||e));throw e;}
@@ -1407,7 +1420,7 @@ function showPage(name){updateProfile360Access();
  }if(name==='reports')renderReports();if(name==='profile'){
    try{renderProfileSelectors();setTimeout(()=>{try{renderProfile()}catch(err){console.error('Lỗi Hồ sơ 360°:',err)}},0)}
    catch(err){console.error('Lỗi khởi tạo Hồ sơ 360°:',err);const box=document.getElementById('profileContent');if(box)box.innerHTML='<div class="empty">Không thể khởi tạo Hồ sơ 360°. Vui lòng chọn lại học sinh.</div>';}
-}if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule();
+}if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule(); if(name==='settings'){try{renderConductRulesSettings();renderConductGuideSettings()}catch(e){console.warn(e)}}
 }
 function openTodayAttendance(){const dateInput=document.getElementById('attDate');if(dateInput)dateInput.value=today();showPage('attendance')}
 const CM_UTILITY_CATALOG={
@@ -1823,7 +1836,7 @@ function renderLearning(){
 async function saveLearning(){
  const term=document.getElementById('scoreTerm').value;document.querySelectorAll('.scoreInp').forEach(inp=>{const key=term+'_'+inp.dataset.sid;state.scores[key]=state.scores[key]||{};state.scores[key][inp.dataset.key]=inp.value===''?'':Number(inp.value)});saveData();await pushCloud();log(`Cập nhật điểm học tập ${term}`);alert('Đã lưu điểm.');renderDashboard();
 }
-function openConduct(){document.getElementById('cEditId').value='';document.getElementById('conductModalTitle').textContent='Ghi nhận rèn luyện';document.getElementById('cDate').value=today();document.getElementById('cContent').value='';document.getElementById('cPoints').value=1;document.getElementById('cType').value='Điểm cộng';document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');resetConductSaveButton();document.getElementById('conductModal').classList.add('show')}
+function openConduct(){document.getElementById('cEditId').value='';document.getElementById('conductModalTitle').textContent='Ghi nhận rèn luyện';document.getElementById('cDate').value=today();document.getElementById('cContent').value='';document.getElementById('cPoints').value=1;document.getElementById('cType').value='Điểm cộng';document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');renderConductContentPresetOptions();const cp=document.getElementById('cContentPreset');if(cp)cp.value='custom';resetConductSaveButton();document.getElementById('conductModal').classList.add('show')}
 function resetConductSaveButton(){conductSaving=false;const btn=document.getElementById('cSaveBtn');if(btn){btn.disabled=false;btn.textContent='Lưu';}}
 function canEditConductRecord(x){if(!x||x.source==='attendance_auto')return false;if(isAdmin())return true;return isClassOfficer()&&x.status==='pending'}
 function editConduct(id){
@@ -1838,6 +1851,7 @@ function editConduct(id){
  document.getElementById('cType').value=x.type;
  document.getElementById('cPoints').value=Math.abs(Number(x.points||0));
  document.getElementById('cContent').value=x.content||'';
+ renderConductContentPresetOptions();const cp=document.getElementById('cContentPreset');if(cp)cp.value='custom';
  resetConductSaveButton();
  document.getElementById('conductModal').classList.add('show');
 }
@@ -1874,7 +1888,7 @@ async function saveConduct(){
    if(btn){btn.disabled=false;btn.textContent=btnOriginalText||'Lưu';}
  }
 }
-function renderConduct(){const q=(document.getElementById('conductSearch').value||'').toLowerCase(),st=document.getElementById('conductStatus').value||'';let a=state.conduct||[];if(currentUser?.role?.startsWith('to'))a=a.filter(x=>state.students.find(s=>s.id===x.studentId)?.group==currentUser.role.replace('to',''));a=a.filter(x=>(!q||`${x.content} ${state.students.find(s=>s.id===x.studentId)?.name||''}`.toLowerCase().includes(q))&&(!st||x.status===st));document.getElementById('conductBody').innerHTML=a.length?a.slice().reverse().map(x=>{const s=state.students.find(s=>s.id===x.studentId)||{};return `<tr><td>${fmtDate(x.date)}</td><td>${esc(s.name||'')}</td><td>${esc(x.type)}</td><td>${esc(x.content)}</td><td><b>${Number(x.points).toFixed(1)}</b></td><td>${esc(x.by)}</td><td><span class="badge ${x.status==='approved'?'b-green':'b-yellow'}">${x.status==='approved'?'Đã duyệt':'Chờ duyệt'}</span></td><td>${canEditConductRecord(x)?`<button class="btn small secondary" onclick="editConduct('${x.id}')">✏️ Sửa</button>`:''} ${isAdmin()&&x.status==='pending'?`<button class="btn small success" onclick="approveConduct('${x.id}')">Duyệt</button>`:''} ${isAdmin()?`<button class="btn small danger" onclick="deleteConduct('${x.id}')">Xóa</button>`:''}</td></tr>`}).join(''):'<tr><td colspan="8" class="empty">Chưa có bản ghi.</td></tr>'}
+function renderConduct(){try{renderConductGuideTable()}catch(e){console.warn(e)}const q=(document.getElementById('conductSearch').value||'').toLowerCase(),st=document.getElementById('conductStatus').value||'';let a=state.conduct||[];if(currentUser?.role?.startsWith('to'))a=a.filter(x=>state.students.find(s=>s.id===x.studentId)?.group==currentUser.role.replace('to',''));a=a.filter(x=>(!q||`${x.content} ${state.students.find(s=>s.id===x.studentId)?.name||''}`.toLowerCase().includes(q))&&(!st||x.status===st));document.getElementById('conductBody').innerHTML=a.length?a.slice().reverse().map(x=>{const s=state.students.find(s=>s.id===x.studentId)||{};return `<tr><td>${fmtDate(x.date)}</td><td>${esc(s.name||'')}</td><td>${esc(x.type)}</td><td>${esc(x.content)}</td><td><b>${Number(x.points).toFixed(1)}</b></td><td>${esc(x.by)}</td><td><span class="badge ${x.status==='approved'?'b-green':'b-yellow'}">${x.status==='approved'?'Đã duyệt':'Chờ duyệt'}</span></td><td>${canEditConductRecord(x)?`<button class="btn small secondary" onclick="editConduct('${x.id}')">✏️ Sửa</button>`:''} ${isAdmin()&&x.status==='pending'?`<button class="btn small success" onclick="approveConduct('${x.id}')">Duyệt</button>`:''} ${isAdmin()?`<button class="btn small danger" onclick="deleteConduct('${x.id}')">Xóa</button>`:''}</td></tr>`}).join(''):'<tr><td colspan="8" class="empty">Chưa có bản ghi.</td></tr>'}
 async function approveConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN được duyệt rèn luyện.');return}const x=state.conduct.find(x=>x.id===id);if(x){x.status='approved';saveData();await pushCloud();log('GVCN duyệt một bản ghi rèn luyện');renderAll()}}
 async function deleteConduct(id){if(!isAdmin()){alert('🔒 Chỉ GVCN được xóa bản ghi rèn luyện.');return}const record=(state.conduct||[]).find(x=>x.id===id);if(record?.source==='attendance_auto'){alert('🔒 Bản ghi này được đồng bộ từ điểm danh. Hãy sửa trạng thái điểm danh để hệ thống tự cập nhật điểm rèn luyện.');return}if(!confirm('Xóa bản ghi này?'))return;state.conduct=state.conduct.filter(x=>x.id!==id);saveData();await pushCloud();renderAll()}
 function conductPoints(sid){return (state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved').reduce((a,x)=>a+Number(x.points||0),0)}
@@ -1896,6 +1910,112 @@ function conductWeeklyScore(sid,weekStart){
  return getConductRules().base+(state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved'&&x.date>=ws&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0);
 }
 function getConductRules(){const r=state?.settings?.conductRules||{};let base=Number.isFinite(Number(r.base))?Number(r.base):100;let good=Number.isFinite(Number(r.good))?Number(r.good):96;let fair=Number.isFinite(Number(r.fair))?Number(r.fair):90;let pass=Number.isFinite(Number(r.pass))?Number(r.pass):85;if(good<fair)good=fair;if(fair<pass)fair=pass;return{base,good,fair,pass}}
+// Bảng gợi ý điểm cộng/trừ rèn luyện: nguồn dùng chung cho (1) bảng hướng dẫn ở trang Rèn luyện,
+// (2) danh sách chọn nhanh trong modal Ghi nhận rèn luyện, và (3) khối chỉnh sửa ở trang Cài đặt.
+// Sửa ở Cài đặt sẽ ghi vào state.settings.conductGuide; nơi nào chưa từng lưu (chưa có dữ liệu)
+// thì dùng nguyên bộ mặc định bên dưới để không phá vỡ dữ liệu cũ.
+function defaultConductGuide(){
+  return {
+    deduct:[
+      {group:'Nền nếp & chuyên cần',label:'Nghỉ học có phép',points:-2},
+      {group:'Nền nếp & chuyên cần',label:'Nghỉ học không phép',points:-10},
+      {group:'Nền nếp & chuyên cần',label:'Đi học muộn',points:-5},
+      {group:'Nền nếp & chuyên cần',label:'Bỏ tiết / Trốn tiết',points:-15},
+      {group:'Trang phục & tác phong',label:'Không đeo thẻ học sinh',points:-5},
+      {group:'Trang phục & tác phong',label:'Đi dép lê (không quai hậu)',points:-5},
+      {group:'Trang phục & tác phong',label:'Không mặc đúng đồng phục',points:-5},
+      {group:'Trang phục & tác phong',label:'Mặc quần rách, áo không cổ',points:-5},
+      {group:'Học tập & ý thức lớp',label:'Không học bài / Không làm bài',points:-5},
+      {group:'Học tập & ý thức lớp',label:'Mất trật tự trong giờ học',points:-5},
+      {group:'Học tập & ý thức lớp',label:'Sử dụng điện thoại không phép',points:-10},
+      {group:'An toàn & pháp luật',label:'Vi phạm an toàn giao thông',points:-50}
+    ],
+    bonus:[
+      {label:'Thành tích đột xuất (giải HSG, năng khiếu, thể thao cấp Trường/Tỉnh)',points:20,unit:''},
+      {label:'Làm việc tốt (nhặt được của rơi trả lại, giúp đỡ bạn bè, bảo vệ tài sản chung)',points:10,unit:''},
+      {label:'Tích cực hoạt động tập thể (văn nghệ, thể thao, phong trào Đoàn)',points:5,unit:'/ sự kiện'},
+      {label:'Đạt điểm 9, 10 trong giờ học',points:5,unit:'/ điểm tốt'},
+      {label:'Tuần học tốt (cá nhân không vi phạm bất kỳ lỗi nào trong tuần)',points:5,unit:''}
+    ]
+  };
+}
+function getConductGuide(){
+  const g=state?.settings?.conductGuide,d=defaultConductGuide();
+  const deduct=(g&&Array.isArray(g.deduct)&&g.deduct.length)?g.deduct:d.deduct;
+  const bonus=(g&&Array.isArray(g.bonus)&&g.bonus.length)?g.bonus:d.bonus;
+  return {deduct,bonus};
+}
+// ---- Render bảng hướng dẫn (trang Rèn luyện) từ dữ liệu getConductGuide() ----
+function renderConductGuideTable(){
+  const g=getConductGuide();
+  const db=document.getElementById('guideDeductBody');
+  if(db)db.innerHTML=g.deduct.length?g.deduct.map(x=>`<tr><td>${esc(x.group||'')}</td><td>${esc(x.label||'')}</td><td><b>${Number(x.points)}</b></td></tr>`).join(''):'<tr><td colspan="3" class="empty">Chưa có nội dung gợi ý.</td></tr>';
+  const bb=document.getElementById('guideBonusBody');
+  if(bb)bb.innerHTML=g.bonus.length?g.bonus.map(x=>`<tr><td>${esc(x.label||'')}</td><td><b>+${Number(x.points)}${x.unit?' '+esc(x.unit):''}</b></td></tr>`).join(''):'<tr><td colspan="2" class="empty">Chưa có nội dung gợi ý.</td></tr>';
+}
+// ---- Danh sách chọn nhanh trong modal Ghi nhận rèn luyện ----
+function renderConductContentPresetOptions(){
+  const sel=document.getElementById('cContentPreset');if(!sel)return;
+  const g=getConductGuide();
+  const dg=document.getElementById('cContentPresetDeductGroup'),bg=document.getElementById('cContentPresetBonusGroup');
+  if(dg)dg.innerHTML=g.deduct.map((x,i)=>`<option value="deduct|${i}">${esc(x.label)} (${Number(x.points)})</option>`).join('');
+  if(bg)bg.innerHTML=g.bonus.map((x,i)=>`<option value="bonus|${i}">${esc(x.label)} (+${Number(x.points)}${x.unit?' '+esc(x.unit):''})</option>`).join('');
+}
+function applyConductPreset(){
+  const sel=document.getElementById('cContentPreset');const val=sel?.value||'custom';
+  if(val==='custom')return;
+  const [type,idxStr]=val.split('|'),idx=Number(idxStr);
+  const g=getConductGuide();const item=(type==='deduct'?g.deduct:g.bonus)[idx];
+  if(!item)return;
+  const contentEl=document.getElementById('cContent'),pointsEl=document.getElementById('cPoints'),typeEl=document.getElementById('cType');
+  if(contentEl)contentEl.value=item.label;
+  if(pointsEl)pointsEl.value=Math.abs(Number(item.points)||0);
+  if(typeEl)typeEl.value=Number(item.points)<0?'Điểm trừ':'Điểm cộng';
+}
+// ---- Khối chỉnh sửa/thêm/xóa bảng gợi ý ở trang Cài đặt ----
+function conductGuideRowHTML(type,item){
+  item=item||(type==='deduct'?{group:'',label:'',points:-5}:{label:'',points:5,unit:''});
+  if(type==='deduct'){
+    return `<div class="conduct-guide-row" data-type="deduct"><input class="cg-group" placeholder="Nhóm (VD: Nền nếp & chuyên cần)" value="${esc(item.group||'')}"><input class="cg-label" placeholder="Hành vi vi phạm" value="${esc(item.label||'')}"><input class="cg-points" type="number" step="0.5" placeholder="Điểm (số âm)" value="${Number(item.points)||0}"><button class="btn danger small" type="button" onclick="removeConductGuideRow(this)" title="Xóa dòng này">🗑</button></div>`;
+  }
+  return `<div class="conduct-guide-row" data-type="bonus"><input class="cg-label" placeholder="Nội dung khen thưởng" value="${esc(item.label||'')}"><input class="cg-points" type="number" step="0.5" placeholder="Điểm" value="${Number(item.points)||0}"><input class="cg-unit" placeholder="Đơn vị (VD: / sự kiện)" value="${esc(item.unit||'')}"><button class="btn danger small" type="button" onclick="removeConductGuideRow(this)" title="Xóa dòng này">🗑</button></div>`;
+}
+function renderConductGuideSettings(){
+  const g=getConductGuide();
+  const dRoot=document.getElementById('guideDeductRows'),bRoot=document.getElementById('guideBonusRows');
+  if(dRoot)dRoot.innerHTML=g.deduct.map(x=>conductGuideRowHTML('deduct',x)).join('');
+  if(bRoot)bRoot.innerHTML=g.bonus.map(x=>conductGuideRowHTML('bonus',x)).join('');
+}
+function addConductGuideRow(type){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN được chỉnh sửa bảng gợi ý.');return}
+  const root=document.getElementById(type==='deduct'?'guideDeductRows':'guideBonusRows');
+  if(root)root.insertAdjacentHTML('beforeend',conductGuideRowHTML(type));
+}
+function removeConductGuideRow(btn){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN được chỉnh sửa bảng gợi ý.');return}
+  const row=btn.closest('.conduct-guide-row');
+  if(row)row.remove();
+}
+async function saveConductGuideSettings(){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN được chỉnh sửa bảng gợi ý.');return}
+  const deduct=[...document.querySelectorAll('#guideDeductRows .conduct-guide-row')].map(r=>({group:r.querySelector('.cg-group')?.value.trim()||'',label:r.querySelector('.cg-label')?.value.trim()||'',points:Number(r.querySelector('.cg-points')?.value)})).filter(x=>x.label&&Number.isFinite(x.points));
+  const bonus=[...document.querySelectorAll('#guideBonusRows .conduct-guide-row')].map(r=>({label:r.querySelector('.cg-label')?.value.trim()||'',points:Number(r.querySelector('.cg-points')?.value),unit:r.querySelector('.cg-unit')?.value.trim()||''})).filter(x=>x.label&&Number.isFinite(x.points));
+  if(!deduct.length&&!bonus.length){alert('⚠️ Cần ít nhất một nội dung gợi ý (điểm trừ hoặc điểm cộng).');return}
+  state.settings=state.settings||{};state.settings.conductGuide={deduct,bonus};
+  saveData();const ok=await pushCloud();
+  renderConductGuideSettings();renderConductGuideTable();renderConductContentPresetOptions();
+  const st=document.getElementById('conductGuideStatus');
+  if(st){st.style.display='block';st.className='notice '+(ok===false?'':'ok');st.textContent=ok===false?'⚠️ Đã lưu trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã lưu bảng gợi ý chấm điểm rèn luyện.'}
+}
+async function resetConductGuideSettings(){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN được chỉnh sửa bảng gợi ý.');return}
+  if(!confirm('Khôi phục bảng gợi ý mặc định của hệ thống? Các chỉnh sửa hiện tại sẽ mất.'))return;
+  state.settings=state.settings||{};state.settings.conductGuide=defaultConductGuide();
+  saveData();renderConductGuideSettings();renderConductGuideTable();renderConductContentPresetOptions();
+  const ok=await pushCloud();
+  const st=document.getElementById('conductGuideStatus');
+  if(st){st.style.display='block';st.className='notice ok';st.textContent=ok===false?'⚠️ Đã khôi phục trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã khôi phục bảng gợi ý mặc định.'}
+}
 function conductLabel(score){return gradeFromScore(score)}
 function gradeFromScore(score){score=Number(score||0);const r=getConductRules();if(score>=r.good)return'Tốt';if(score>=r.fair)return'Khá';if(score>=r.pass)return'Đạt';return'Chưa đạt'}
 function periodRange(period,detail){
@@ -3387,7 +3507,7 @@ async function loadGuestDashboard(){
 // Không lưu service_role key trong index.html.
 </script>
 <script id="bibi-conduct-rules-report-init">
-window.addEventListener('load',function(){setTimeout(function(){try{renderConductRulesSettings();populateReportSelectors()}catch(e){console.warn(e)}},200)});
+window.addEventListener('load',function(){setTimeout(function(){try{renderConductRulesSettings();renderConductGuideSettings();renderConductGuideTable();populateReportSelectors()}catch(e){console.warn(e)}},200)});
 </script>
 
 <button id="cmPwaInstallButton" class="cm-pwa-install" type="button" aria-label="Cài đặt ứng dụng lên màn hình chính" title="Cài đặt ứng dụng"><svg class="cm-install-svg" viewBox="0 0 96 96" role="img" aria-hidden="true"><defs><linearGradient id="cmInstallBody" x1="18" y1="10" x2="78" y2="86" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#a7f3d0"/><stop offset=".4" stop-color="#34d399"/><stop offset=".75" stop-color="#10b981"/><stop offset="1" stop-color="#0f766e"/></linearGradient><linearGradient id="cmInstallFace" x1="25" y1="28" x2="72" y2="73" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f8fffb"/><stop offset="1" stop-color="#d1fae5"/></linearGradient><linearGradient id="cmInstallSide" x1="8" y1="38" x2="25" y2="61" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6ee7b7"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs><g class="cm-install-bob"><ellipse cx="48" cy="82" rx="27" ry="6" fill="#064e3b" opacity=".18"/><path d="M30 16 48 8l18 8-18 8Z" fill="#0f766e" stroke="#064e3b" stroke-width="1.5"/><path d="M30 16v6c0 3 8 5 18 5s18-2 18-5v-6" fill="none" stroke="#0f766e" stroke-width="2"/><rect x="18" y="19" width="60" height="54" rx="19" fill="url(#cmInstallBody)" stroke="#065f46" stroke-width="2"/><rect x="25" y="28" width="46" height="37" rx="14" fill="url(#cmInstallFace)" stroke="#6ee7b7" stroke-width="2"/><rect x="11" y="39" width="13" height="20" rx="6" fill="url(#cmInstallSide)" stroke="#065f46" stroke-width="2"/><rect x="72" y="39" width="13" height="20" rx="6" fill="url(#cmInstallSide)" stroke="#065f46" stroke-width="2"/><circle class="cm-install-eye" cx="38" cy="45" r="4.5" fill="#065f46"/><circle class="cm-install-eye" cx="58" cy="45" r="4.5" fill="#065f46"/><circle cx="36.5" cy="43.5" r="1.4" fill="#fff"/><circle cx="56.5" cy="43.5" r="1.4" fill="#fff"/><path d="M39 55.5c3 3.7 9 3.7 12 0" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/></g></svg><span class="cm-install-badge" aria-hidden="true">⬇️</span><span class="cm-install-label">Cài đặt ứng dụng</span></button>
