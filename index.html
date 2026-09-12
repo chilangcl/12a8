@@ -435,7 +435,9 @@ body{background-image:radial-gradient(circle at 10% 10%,rgba(79,70,229,.08),tran
 @media(max-width:680px){.report-period-box{display:grid!important;grid-template-columns:1fr}.report-period-box .field{min-width:0!important;width:100%}.conduct-rules-settings .actions .btn{flex:1 1 180px}}
 .conduct-guide-row{display:grid;gap:6px;margin-bottom:6px;align-items:center}
 .conduct-guide-row[data-type="deduct"]{grid-template-columns:1fr 2fr 90px 36px}
-.conduct-guide-row[data-type="bonus"]{grid-template-columns:2fr 90px 110px 36px}
+.conduct-guide-row[data-type="bonus"]{grid-template-columns:2fr 90px 110px 34px 36px}
+.cg-weekly-auto-wrap{display:flex;align-items:center;justify-content:center;gap:2px;font-size:15px;color:#f59e0b;cursor:pointer;user-select:none}
+.cg-weekly-auto-wrap input{width:auto!important;padding:0!important;margin:0}
 .conduct-guide-row input{padding:8px 9px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:13px;width:100%}
 .conduct-guide-row .btn{padding:6px}
 .conduct-guide-editor{margin-bottom:8px}
@@ -910,8 +912,9 @@ select option{background:#fff!important;color:#202124!important}
         <div class="page-head"><div><h2>Chuyên cần</h2><div class="muted">Theo dõi hằng ngày và tự động tổng hợp</div></div><div class="actions"><button class="btn" id="attSaveBtn" onclick="saveAttendance()">💾 Lưu điểm danh</button><button class="btn warning admin-only" id="attLockBtn" onclick="toggleAttendanceLock()">🔒 Khóa điểm danh</button></div></div>
         <div class="toolbar"><label style="display:flex;align-items:center;gap:6px">Ngày <input type="date" id="attDate" onchange="renderAttendance()"></label><label style="display:flex;align-items:center;gap:6px">Buổi <select id="attSession" onchange="renderAttendance()"><option value="sang">🌅 Học sáng</option><option value="chieu">🌇 Học chiều</option></select></label><select id="attStatusFilter" onchange="renderAttendance()"><option value="">Tất cả</option><option value="present">Đúng giờ</option><option value="late">Đi muộn</option><option value="excused">Nghỉ phép</option><option value="absent">Nghỉ không phép</option></select></div>
         <div id="attLockNotice" class="notice hidden"></div>
-        <div class="notice">Hệ thống tự động mặc định tất cả học sinh là <b>"Có mặt"</b>; thầy/cô chỉ cần chọn lại trạng thái với học sinh nghỉ/đi muộn. Điểm danh được tính riêng theo buổi Sáng/Chiều và dùng cho báo cáo tuần/tháng/HKI/HKII/cả năm. GVCN khóa điểm danh vào cuối mỗi buổi học để chốt số liệu.</div>
-        <div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Mã HS</th><th>Họ tên</th><th>Tổ</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead><tbody id="attendanceBody"></tbody></table></div>
+        <div id="attNoScheduleNotice" class="notice hidden" style="border-color:#f59e0b;background:#fffbeb"></div>
+        <div class="notice">Hệ thống tự động mặc định tất cả học sinh là <b>"Có mặt"</b>; thầy/cô chỉ cần chọn lại trạng thái với học sinh nghỉ/đi muộn. Điểm danh được tính riêng theo buổi Sáng/Chiều và dùng cho báo cáo tuần/tháng/HKI/HKII/cả năm. GVCN khóa điểm danh vào cuối mỗi buổi học để chốt số liệu. Buổi nào lớp không có lịch học (cấu hình ở Cài đặt) sẽ tự động không điểm danh.</div>
+        <div class="table-wrap" id="attendanceTableWrap"><table class="table"><thead><tr><th>STT</th><th>Mã HS</th><th>Họ tên</th><th>Tổ</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead><tbody id="attendanceBody"></tbody></table></div>
       </section>
 
       
@@ -1056,7 +1059,7 @@ select option{background:#fff!important;color:#202124!important}
         <div class="card conduct-rules-settings" style="margin-top:16px"><h3>⚙️ Nguyên tắc xếp hạnh kiểm / rèn luyện</h3><p class="muted">GVCN/Admin có thể thay đổi ngưỡng điểm và điểm khởi đầu. Thi đua, Báo cáo tổng hợp và các phần xếp loại sẽ dùng chung các chỉ số này.</p><div class="form-grid"><div class="field"><label>Điểm từ mức Tốt</label><input id="setGoodScore" type="number" step="0.1" value="96"></div><div class="field"><label>Điểm từ mức Khá</label><input id="setFairScore" type="number" step="0.1" value="90"></div><div class="field"><label>Điểm từ mức Đạt</label><input id="setPassScore" type="number" step="0.1" value="85"></div><div class="field"><label>Điểm khởi đầu mỗi tuần</label><input id="setConductBase" type="number" step="0.1" value="100"></div></div><div class="actions" style="margin-top:12px"><button class="btn" type="button" onclick="saveConductRules()">💾 Lưu nguyên tắc</button><button class="btn secondary" type="button" onclick="resetConductRules()">↩ Khôi phục mặc định</button></div><div id="conductRulesStatus" class="notice" style="display:none;margin-top:12px"></div></div>
         <div class="card conduct-rules-settings" id="conductGuideSettingsCard" style="margin-top:16px">
           <h3>🎯 Quản lý bảng gợi ý chấm điểm rèn luyện</h3>
-          <p class="muted">Chỉnh sửa/Thêm/Xóa nội dung và điểm cộng/trừ gợi ý. Sau khi lưu, bảng gợi ý ở trang Rèn luyện và danh sách chọn nhanh khi ghi nhận sẽ tự cập nhật theo.</p>
+          <p class="muted">Chỉnh sửa/Thêm/Xóa nội dung và điểm cộng/trừ gợi ý. Sau khi lưu, bảng gợi ý ở trang Rèn luyện và danh sách chọn nhanh khi ghi nhận sẽ tự cập nhật theo. Cột <b>★</b> ở phần điểm cộng dùng để chọn ĐÚNG MỘT tiêu chí sẽ được hệ thống tự động cộng điểm mỗi cuối tuần (sau ngày Thứ Bảy) cho học sinh không có vi phạm nào trong tuần — mặc định là "Tuần học tốt...". Thêm tiêu chí thi đua mới vào bảng không làm thay đổi tiêu chí ★ đang chọn.</p>
           <div class="grid two">
             <div>
               <h4 style="margin:6px 0 8px">🔻 Điểm trừ vi phạm</h4>
@@ -1067,10 +1070,27 @@ select option{background:#fff!important;color:#202124!important}
               <h4 style="margin:6px 0 8px">🔺 Điểm cộng khen thưởng</h4>
               <div id="guideBonusRows" class="conduct-guide-editor"></div>
               <button class="btn secondary small" type="button" onclick="addConductGuideRow('bonus')">+ Thêm nội dung khen thưởng</button>
+              <div id="weeklyAutoHint" class="hint" style="margin-top:8px"></div>
             </div>
           </div>
           <div class="actions" style="margin-top:12px"><button class="btn" type="button" onclick="saveConductGuideSettings()">💾 Lưu bảng gợi ý</button><button class="btn secondary" type="button" onclick="resetConductGuideSettings()">↩ Khôi phục mặc định</button></div>
           <div id="conductGuideStatus" class="notice" style="display:none;margin-top:12px"></div>
+        </div>
+        <div class="card" id="weekScheduleCard" style="margin-top:16px">
+          <h3>📅 Lịch học theo tuần (buổi Sáng/Chiều)</h3>
+          <p class="muted">Tích chọn các buổi lớp <b>CÓ</b> đi học trong tuần được chọn, theo đúng thời khóa biểu thực tế của nhà trường tuần đó. Bỏ tích buổi nào thì buổi đó được coi là <b>"Lớp không có lịch học"</b>: hệ thống sẽ không điểm danh, không tính vào báo cáo chuyên cần, và không tự tạo điểm trừ đi muộn/vắng cho buổi đó. Mặc định mọi tuần chưa cấu hình đều học đủ Sáng + Chiều, Thứ 2 đến Thứ 7.</p>
+          <div class="field" style="max-width:340px">
+            <label>Chọn tuần muốn cấu hình</label>
+            <select id="scheduleWeekSelect" onchange="renderWeekScheduleEditor()"></select>
+          </div>
+          <div class="table-wrap" style="margin-top:10px">
+            <table class="table">
+              <thead><tr><th>Thứ</th><th style="text-align:center">Sáng</th><th style="text-align:center">Chiều</th></tr></thead>
+              <tbody id="weekScheduleBody"></tbody>
+            </table>
+          </div>
+          <div class="actions" style="margin-top:12px"><button class="btn" type="button" onclick="saveWeekSchedule()">💾 Lưu lịch học tuần này</button><button class="btn secondary" type="button" onclick="resetWeekSchedule()">↩ Đặt lại học đủ (mặc định)</button></div>
+          <div id="weekScheduleStatus" class="notice" style="display:none;margin-top:12px"></div>
         </div>
         <div class="card" style="margin-top:16px;border:1px solid #f59e0b;background:#fffbeb"><h3>🔄 Bắt đầu năm học mới</h3><p class="muted">Xóa riêng toàn bộ dữ liệu <strong>điểm danh</strong> (có mặt, đi muộn, nghỉ có phép, nghỉ không phép) để bắt đầu lại. Danh sách học sinh, tài khoản, rèn luyện, hạnh kiểm và cài đặt lớp vẫn được giữ nguyên.</p><button class="btn" style="background:#f59e0b;color:#fff" onclick="resetAttendanceOnly()">🔄 Reset điểm danh năm học</button></div>
         <div class="card" style="margin-top:16px"><h3>⚠️ Xóa toàn bộ dữ liệu</h3><p class="muted">Chỉ dùng khi thực sự muốn xóa toàn bộ dữ liệu của lớp. Hãy sao lưu trước.</p><button class="btn danger" onclick="resetAll()">Xóa toàn bộ dữ liệu</button></div>
@@ -1146,7 +1166,7 @@ let currentClass=null, currentStateKey='12A8-2026-2027', cloudWriteQueue=Promise
 // Yêu cầu cột `version` trên bảng class_state — xem file migration supabase_migration_stability.sql.
 let currentStateVersion=0;
 let state=seed(), currentUser=null, editingStudent=null, availableClasses=[];
-function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4,conductRules:{base:100,good:96,fair:90,pass:85},conductGuide:defaultConductGuide()},students:[],attendance:{},attendanceLocks:{},scores:{},conduct:[],activity:[],auditLog:[],notifications:[]}}
+function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4,conductRules:{base:100,good:96,fair:90,pass:85},conductGuide:defaultConductGuide(),weekSchedule:{}},students:[],attendance:{},attendanceLocks:{},scores:{},conduct:[],activity:[],auditLog:[],notifications:[]}}
 function dataKey(){return DATA_PREFIX+(currentStateKey||'12A8-2026-2027')}
 function loadLocalFallback(){try{return JSON.parse(localStorage.getItem(dataKey()))||seed()}catch(e){return seed()}}
 function saveLocal(){localStorage.setItem(dataKey(),JSON.stringify(state))}
@@ -1300,6 +1320,7 @@ async function enterSelectedClass(){
   setSidebarHidden(true);
   document.getElementById('attDate').value=today();document.getElementById('cDate').value=today();
   renderAll();showPage('dashboard');
+  try{processWeeklyAutoBonus()}catch(e){console.warn(e)}
   setSidebarHidden(true);
 }
 function cancelClassEntry(){
@@ -1420,7 +1441,7 @@ function showPage(name){updateProfile360Access();
  }if(name==='reports')renderReports();if(name==='profile'){
    try{renderProfileSelectors();setTimeout(()=>{try{renderProfile()}catch(err){console.error('Lỗi Hồ sơ 360°:',err)}},0)}
    catch(err){console.error('Lỗi khởi tạo Hồ sơ 360°:',err);const box=document.getElementById('profileContent');if(box)box.innerHTML='<div class="empty">Không thể khởi tạo Hồ sơ 360°. Vui lòng chọn lại học sinh.</div>';}
-}if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule(); if(name==='settings'){try{renderConductRulesSettings();renderConductGuideSettings()}catch(e){console.warn(e)}}
+}if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule(); if(name==='settings'){try{renderConductRulesSettings();renderConductGuideSettings();populateScheduleWeekSelect()}catch(e){console.warn(e)}}
 }
 function openTodayAttendance(){const dateInput=document.getElementById('attDate');if(dateInput)dateInput.value=today();showPage('attendance')}
 const CM_UTILITY_CATALOG={
@@ -1651,10 +1672,12 @@ function getStudentAlerts(){
 }
 function studentPeriodConduct(id,mode){const rules=getConductRules();const rows=(state.conduct||[]).filter(x=>x.studentId===id&&x.status==='approved');let filtered=rows;if(mode==='week'){const d=new Date(), from=new Date(d);from.setDate(d.getDate()-6);filtered=rows.filter(x=>new Date(x.date)>=from)}const score=rules.base+filtered.reduce((t,x)=>t+Number(x.points||0),0);return {score,label:conductLabel(score)}}
 function attendanceTodaySessionSummary(list,recs,sessionKey,date){
+ const scheduled=isClassSessionScheduled(date,sessionKey);
+ const out={total:list.length,present:[],late:[],excused:[],absent:[],pending:[],scheduled};
+ if(!scheduled)return out; // buổi này lớp không có lịch học -> không cần phân loại điểm danh
  const byStudent=new Map();
  recs.forEach(r=>{if((r.session||'sang')!==sessionKey)return;byStudent.set(String(r.studentId||r.id||''),r)});
- const out={total:list.length,present:[],late:[],excused:[],absent:[],pending:[]};
- list.forEach(s=>{const r=byStudent.get(String(s.id));const status=r?.status||(isSchoolDay(date)?'present':'');if(status==='present')out.present.push(s);else if(status==='late')out.late.push(s);else if(status==='excused')out.excused.push(s);else if(status==='absent')out.absent.push(s);else out.pending.push(s)});
+ list.forEach(s=>{const r=byStudent.get(String(s.id));const status=r?.status||'present';if(status==='present')out.present.push(s);else if(status==='late')out.late.push(s);else if(status==='excused')out.excused.push(s);else if(status==='absent')out.absent.push(s);else out.pending.push(s)});
  return out;
 }
 function attendanceTodaySummary(students,attendance,date=today()){
@@ -1664,8 +1687,10 @@ function attendanceTodaySummary(students,attendance,date=today()){
 }
 function attendanceNames(list,escapeFn){return list.length?list.map(s=>`${escapeFn(s.name||s.code||'Học sinh')} <span class="mini">(Tổ ${escapeFn(s.group||'—')})</span>`).join('<br>'):'<span class="today-attendance-empty">Không có</span>'}
 function attendanceTodaySessionBlockMarkup(session,summary,escapeFn){
+ const title=session==='chieu'?'🌙 Điểm danh buổi chiều':'🌤️ Điểm danh buổi sáng';
+ if(!summary.scheduled)return `<div class="today-attendance-session-block"><div class="today-session-title">${title}</div><div class="today-attendance-item pending" style="grid-column:1/-1"><div class="today-label">📭 Lớp không có lịch học</div><div class="today-detail">Theo lịch học tuần này (cấu hình ở Cài đặt), lớp không có tiết học buổi ${session==='chieu'?'chiều':'sáng'} hôm nay nên hệ thống không điểm danh.</div></div></div>`;
  const absent=[...summary.excused,...summary.absent];
- return `<div class="today-attendance-session-block"><div class="today-session-title">${session==='chieu'?'🌙 Điểm danh buổi chiều':'🌤️ Điểm danh buổi sáng'}</div><div class="today-attendance-grid"><div class="today-attendance-item total"><div class="today-label">👥 Sĩ số lớp</div><div class="today-number">${summary.total}</div><div class="today-detail">Tổng số học sinh</div></div><div class="today-attendance-item present"><div class="today-label">✅ Đúng giờ</div><div class="today-number">${summary.present.length}</div><div class="today-detail">Đã xác nhận đi học</div></div><div class="today-attendance-item late"><div class="today-label">⏰ Đi muộn</div><div class="today-number">${summary.late.length}</div><div class="today-detail">${attendanceNames(summary.late,escapeFn)}</div></div><div class="today-attendance-item absent"><div class="today-label">🏠 Vắng mặt</div><div class="today-number">${absent.length}</div><div class="today-detail"><b>Có phép ${summary.excused.length} · Không phép ${summary.absent.length}</b><br>${attendanceNames(summary.excused,escapeFn)}${summary.excused.length&&summary.absent.length?'<br>':''}${attendanceNames(summary.absent,escapeFn)}</div></div><div class="today-attendance-item pending"><div class="today-label">📝 Chưa điểm danh</div><div class="today-number">${summary.pending.length}</div><div class="today-detail">${attendanceNames(summary.pending,escapeFn)}</div></div></div></div>`;
+ return `<div class="today-attendance-session-block"><div class="today-session-title">${title}</div><div class="today-attendance-grid"><div class="today-attendance-item total"><div class="today-label">👥 Sĩ số lớp</div><div class="today-number">${summary.total}</div><div class="today-detail">Tổng số học sinh</div></div><div class="today-attendance-item present"><div class="today-label">✅ Đúng giờ</div><div class="today-number">${summary.present.length}</div><div class="today-detail">Đã xác nhận đi học</div></div><div class="today-attendance-item late"><div class="today-label">⏰ Đi muộn</div><div class="today-number">${summary.late.length}</div><div class="today-detail">${attendanceNames(summary.late,escapeFn)}</div></div><div class="today-attendance-item absent"><div class="today-label">🏠 Vắng mặt</div><div class="today-number">${absent.length}</div><div class="today-detail"><b>Có phép ${summary.excused.length} · Không phép ${summary.absent.length}</b><br>${attendanceNames(summary.excused,escapeFn)}${summary.excused.length&&summary.absent.length?'<br>':''}${attendanceNames(summary.absent,escapeFn)}</div></div><div class="today-attendance-item pending"><div class="today-label">📝 Chưa điểm danh</div><div class="today-number">${summary.pending.length}</div><div class="today-detail">${attendanceNames(summary.pending,escapeFn)}</div></div></div></div>`;
 }
 function attendanceTodayPanelMarkup(summary,escapeFn=esc){
  const dateLabel=fmtDate(summary.date), isSunday=new Date(`${summary.date}T00:00:00`).getDay()===0;
@@ -1769,10 +1794,28 @@ function attLockKey(date,session){return date+'_'+session}
 function isAttendanceLocked(date,session){state.attendanceLocks=state.attendanceLocks&&typeof state.attendanceLocks==='object'?state.attendanceLocks:{};return !!state.attendanceLocks[attLockKey(date,session)]}
 /* Mặc định học từ Thứ 2 đến Thứ 7: không lưu "Có mặt" để giảm dữ liệu, nhưng mọi báo cáo vẫn hiểu đó là có mặt. */
 function isSchoolDay(date){const d=new Date(`${date}T00:00:00`);return !Number.isNaN(d.getTime())&&d.getDay()!==0}
+// ============================================================
+// LỊCH HỌC THEO TUẦN (buổi Sáng/Chiều) — do GVCN/Admin cấu hình trong Cài đặt, có thể khác nhau
+// từng tuần theo thời khóa biểu thực tế của nhà trường (VD: nghỉ chiều Thứ 5 do có kế hoạch
+// trường, nghỉ cả ngày Thứ 7...). Mặc định (chưa cấu hình) là học đủ Sáng+Chiều, Thứ 2 - Thứ 7.
+// Dữ liệu lưu ở state.settings.weekSchedule = { "<số tuần>": { mon:{sang,chieu}, tue:{...}, ... sat:{...} } }
+// ============================================================
+const WEEK_SCHEDULE_DAY_KEYS=['sun','mon','tue','wed','thu','fri','sat'];
+function classWeekDayKey(date){const d=new Date(`${date}T00:00:00`);return Number.isNaN(d.getTime())?null:WEEK_SCHEDULE_DAY_KEYS[d.getDay()]}
+function getWeekScheduleOverride(weekNumber){const raw=state?.settings?.weekSchedule?.[String(weekNumber)];return raw&&typeof raw==='object'?raw:null}
+function isClassSessionScheduled(date,session){
+  if(!isSchoolDay(date))return false; // Chủ nhật luôn không có lịch học
+  const wk=academicWeekNumber(date);
+  if(!wk)return true; // ngoài phạm vi năm học đã thiết lập -> coi như học bình thường, không phá vỡ dữ liệu cũ
+  const dayKey=classWeekDayKey(date),ov=getWeekScheduleOverride(wk);
+  if(!dayKey||!ov||!ov[dayKey]||typeof ov[dayKey][session]!=='boolean')return true; // mặc định có học nếu chưa cấu hình
+  return ov[dayKey][session];
+}
 function attendanceRecordKey(date,session,studentId){return `${date}_${session}_${studentId}`}
-function attendanceStatusFor(studentId,date,session){const r=state.attendance?.[attendanceRecordKey(date,session,studentId)];return r?.status||(isSchoolDay(date)?'present':'')}
+function attendanceStatusFor(studentId,date,session){if(!isClassSessionScheduled(date,session))return 'no_school';const r=state.attendance?.[attendanceRecordKey(date,session,studentId)];return r?.status||'present'}
 const ATTENDANCE_CONDUCT_RULES={excused:{points:-2,label:'Nghỉ học có phép'},absent:{points:-10,label:'Nghỉ học không phép'},late:{points:-3,label:'Đi học muộn'}};
 function syncAttendanceConduct(date,session,studentId,status){
+ if(!isClassSessionScheduled(date,session))return; // buổi không có lịch học -> không tạo điểm trừ tự động
  const key=attendanceRecordKey(date,session,studentId),rule=ATTENDANCE_CONDUCT_RULES[status];
  state.conduct=Array.isArray(state.conduct)?state.conduct:[];
  const index=state.conduct.findIndex(x=>x?.source==='attendance_auto'&&x.attendanceKey===key);
@@ -1782,20 +1825,32 @@ function syncAttendanceConduct(date,session,studentId,status){
 }
 function renderAttendance(){
  const date=document.getElementById('attDate').value||today(),session=currentAttSession(),filter=document.getElementById('attStatusFilter').value||'',a=visibleStudents();
+ const saveBtn=document.getElementById('attSaveBtn'),lockBtn=document.getElementById('attLockBtn'),tableWrap=document.getElementById('attendanceTableWrap'),noScheduleNotice=document.getElementById('attNoScheduleNotice'),lockNotice=document.getElementById('attLockNotice');
+ if(!isClassSessionScheduled(date,session)){
+   if(noScheduleNotice){noScheduleNotice.classList.remove('hidden');noScheduleNotice.textContent=`📭 Lớp không có lịch học buổi ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)} (theo lịch học tuần đã cấu hình ở Cài đặt). Không thể điểm danh cho buổi này.`;}
+   if(tableWrap)tableWrap.classList.add('hidden');
+   if(saveBtn){saveBtn.disabled=true;saveBtn.style.opacity='0.55';}
+   if(lockBtn){lockBtn.disabled=true;lockBtn.style.opacity='0.55';}
+   if(lockNotice){lockNotice.classList.add('hidden');lockNotice.textContent='';}
+   return;
+ }
+ if(noScheduleNotice)noScheduleNotice.classList.add('hidden');
+ if(tableWrap)tableWrap.classList.remove('hidden');
+ if(lockBtn){lockBtn.disabled=false;lockBtn.style.opacity='1';}
  const locked=isAttendanceLocked(date,session);
  const rows=a.map((s,i)=>{const key=attendanceRecordKey(date,session,s.id),r=state.attendance[key]||{status:attendanceStatusFor(s.id,date,session),note:''};return {s,i,r}}).filter(x=>!filter||x.r.status===filter);
  document.getElementById('attendanceBody').innerHTML=rows.length?rows.map(x=>`<tr><td>${x.i+1}</td><td>${esc(x.s.code)}</td><td><b>${esc(x.s.name)}</b></td><td>${x.s.group}</td><td><select data-att="${x.s.id}" class="attSel" onchange="saveAttendance(true)" ${locked?'disabled':''}><option value="present" ${x.r.status==='present'?'selected':''}>Đúng giờ</option><option value="late" ${x.r.status==='late'?'selected':''}>Đi muộn</option><option value="excused" ${x.r.status==='excused'?'selected':''}>Nghỉ có phép</option><option value="absent" ${x.r.status==='absent'?'selected':''}>Nghỉ không phép</option></select></td><td><input data-note="${x.s.id}" value="${esc(x.r.note||'')}" placeholder="Ghi chú" ${locked?'disabled':''} style="padding:7px;border:1px solid var(--border);border-radius:8px"></td></tr>`).join(''):'<tr><td colspan="6" class="empty">Không có dữ liệu phù hợp.</td></tr>';
- const saveBtn=document.getElementById('attSaveBtn');if(saveBtn){saveBtn.disabled=locked;saveBtn.style.opacity=locked?'0.55':'1'}
- const lockBtn=document.getElementById('attLockBtn');if(lockBtn)lockBtn.textContent=locked?'🔓 Mở khóa điểm danh':'🔒 Khóa điểm danh';
- const notice=document.getElementById('attLockNotice');
- if(notice){
-   if(locked){const info=state.attendanceLocks[attLockKey(date,session)]||{};notice.classList.remove('hidden');notice.textContent=`🔒 Điểm danh ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)} đã được GVCN khóa${info.by?' bởi '+info.by:''}${info.at?' lúc '+new Date(info.at).toLocaleString('vi-VN'):''}. Không thể chỉnh sửa.`;}
-   else{notice.classList.add('hidden');notice.textContent='';}
+ if(saveBtn){saveBtn.disabled=locked;saveBtn.style.opacity=locked?'0.55':'1'}
+ if(lockBtn)lockBtn.textContent=locked?'🔓 Mở khóa điểm danh':'🔒 Khóa điểm danh';
+ if(lockNotice){
+   if(locked){const info=state.attendanceLocks[attLockKey(date,session)]||{};lockNotice.classList.remove('hidden');lockNotice.textContent=`🔒 Điểm danh ${attSessionLabel(session).toLowerCase()} ngày ${fmtDate(date)} đã được GVCN khóa${info.by?' bởi '+info.by:''}${info.at?' lúc '+new Date(info.at).toLocaleString('vi-VN'):''}. Không thể chỉnh sửa.`;}
+   else{lockNotice.classList.add('hidden');lockNotice.textContent='';}
  }
 }
 async function saveAttendance(silent=false){
  if(!roleCanEdit()){alert('🔒 Tài khoản học sinh chỉ được xem chuyên cần; chỉ GVCN hoặc cán bộ lớp được điểm danh.');return}
  const date=document.getElementById('attDate').value||today(), session=currentAttSession();
+ if(!isClassSessionScheduled(date,session)){alert('📭 Lớp không có lịch học buổi này theo lịch tuần đã cấu hình, không thể lưu điểm danh.');return}
  if(isAttendanceLocked(date,session)){alert('🔒 Điểm danh buổi này đã được GVCN khóa, không thể chỉnh sửa.');return}
  const rows=[...document.querySelectorAll('.attSel')];
  if(!rows.length){alert('⚠️ Không có học sinh nào đang hiển thị để lưu. Hãy bỏ bộ lọc hoặc kiểm tra danh sách lớp.');return}
@@ -1838,7 +1893,7 @@ async function saveLearning(){
 }
 function openConduct(){document.getElementById('cEditId').value='';document.getElementById('conductModalTitle').textContent='Ghi nhận rèn luyện';document.getElementById('cDate').value=today();document.getElementById('cContent').value='';document.getElementById('cPoints').value=1;document.getElementById('cType').value='Điểm cộng';document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');renderConductContentPresetOptions();const cp=document.getElementById('cContentPreset');if(cp)cp.value='custom';resetConductSaveButton();document.getElementById('conductModal').classList.add('show')}
 function resetConductSaveButton(){conductSaving=false;const btn=document.getElementById('cSaveBtn');if(btn){btn.disabled=false;btn.textContent='Lưu';}}
-function canEditConductRecord(x){if(!x||x.source==='attendance_auto')return false;if(isAdmin())return true;return isClassOfficer()&&x.status==='pending'}
+function canEditConductRecord(x){if(!x||x.source==='attendance_auto'||x.source==='weekly_auto_bonus')return false;if(isAdmin())return true;return isClassOfficer()&&x.status==='pending'}
 function editConduct(id){
  const x=(state.conduct||[]).find(x=>x.id===id);
  if(!x){alert('Không tìm thấy bản ghi.');return}
@@ -1905,6 +1960,50 @@ function academicWeekStart(dateStr){
 function academicWeekNumber(dateStr){const ws=academicWeekStart(dateStr);if(!ws)return null;return Math.min(40,Math.floor((ws-dateObj(BIBI_ACADEMIC_START))/86400000/7)+1)}
 function academicWeekRange(n){const start=dateObj(BIBI_ACADEMIC_START);if(!start||!n)return null;const s=new Date(start.getTime()+(Number(n)-1)*7*86400000);const e=new Date(s.getTime()+6*86400000);return {start:s,end:e,number:Number(n)}}
 function allAcademicWeeks(){const out=[];for(let n=1;n<=40;n++){const r=academicWeekRange(n);if(!r)break;out.push(r)}return out}
+// ============================================================
+// TỰ ĐỘNG CỘNG ĐIỂM "TUẦN KHÔNG VI PHẠM" — cuối mỗi tuần (sau khi hết ngày Thứ Bảy),
+// nếu học sinh không bị ghi nhận bất kỳ điểm trừ nào trong tuần (kể cả điểm trừ tự động
+// từ điểm danh), hệ thống tự cộng điểm theo ĐÚNG tiêu chí điểm cộng đã được ĐÁNH DẤU ★ là
+// "tiêu chí tự động cộng điểm cuối tuần" trong bảng gợi ý (mục "🎯 Quản lý bảng gợi ý" ở
+// Cài đặt) — mặc định là dòng "Tuần học tốt...". Việc này KHÔNG phụ thuộc vào thứ tự hay
+// số lượng dòng gợi ý khác trong bảng: dù sau này bổ sung thêm tiêu chí thi đua mới ở cuối
+// bảng, hệ thống vẫn chỉ tự cộng điểm theo đúng dòng đã đánh dấu ★ (GVCN có thể đổi dấu ★
+// sang dòng khác trong Cài đặt nếu muốn).
+// Lưu ý: đây là ứng dụng web thuần phía trình duyệt, không có máy chủ/cron chạy nền lúc không
+// ai mở app, nên không thể tự chạy đúng khoảnh khắc 24h00 Thứ Bảy khi không có ai online. Hàm
+// này được gọi (1) ngay khi vào lớp và (2) định kỳ mỗi 30 phút trong lúc app đang mở, để việc
+// cộng điểm được thực hiện ngay trong lần đầu tiên có người mở lại ứng dụng sau khi Thứ Bảy đã
+// kết thúc — tức thực chất vẫn tính đúng theo tuần Thứ Bảy, chỉ là thời điểm ghi có thể trễ vài
+// giờ nếu không ai mở ứng dụng đúng lúc.
+function processWeeklyAutoBonus(){
+  if(!state||!Array.isArray(state.students)||!state.students.length)return;
+  const targetBonus=getWeeklyAutoBonusCriterion();
+  if(!targetBonus||!(Number(targetBonus.points)>0))return;
+  const now=new Date();
+  state.conduct=Array.isArray(state.conduct)?state.conduct:[];
+  let changed=false;
+  allAcademicWeeks().forEach(w=>{
+    const satEnd=new Date(w.start.getTime()+5*86400000);satEnd.setHours(23,59,59,999);
+    if(now<=satEnd)return; // tuần chưa kết thúc hết ngày Thứ Bảy -> chưa xét
+    const weekStartIso=isoDate(w.start),satIso=isoDate(new Date(w.start.getTime()+5*86400000));
+    state.students.forEach(s=>{
+      const alreadyAuto=state.conduct.some(x=>x&&x.source==='weekly_auto_bonus'&&x.studentId===s.id&&x.weekNumber===w.number);
+      if(alreadyAuto)return; // tuần này của học sinh này đã được xét rồi
+      const hasViolation=state.conduct.some(x=>x&&x.studentId===s.id&&Number(x.points)<0&&x.date>=weekStartIso&&x.date<=satIso);
+      if(hasViolation)return; // có ít nhất 1 điểm trừ trong tuần -> không cộng
+      const alreadyManualSame=state.conduct.some(x=>x&&x.studentId===s.id&&x.date>=weekStartIso&&x.date<=satIso&&Number(x.points)>0&&typeof x.content==='string'&&x.content.includes(targetBonus.label));
+      if(alreadyManualSame)return; // cán bộ lớp đã lỡ ghi tay nội dung tương tự -> tránh cộng trùng
+      state.conduct.push({id:crypto.randomUUID(),date:satIso,studentId:s.id,type:'Điểm cộng',content:`🤖 Tự động: ${targetBonus.label} (Tuần ${w.number})`,points:Math.abs(Number(targetBonus.points)||0),by:'Hệ thống (tự động)',status:'approved',source:'weekly_auto_bonus',weekNumber:w.number,createdAt:new Date().toISOString()});
+      changed=true;
+    });
+  });
+  if(changed){
+    saveData();
+    if(typeof pushCloud==='function')Promise.resolve(pushCloud()).catch(()=>{});
+    if(typeof log==='function')log('Hệ thống tự động cộng điểm rèn luyện cho học sinh không vi phạm trong tuần.');
+    if(typeof renderAll==='function')renderAll();
+  }
+}
 function conductWeeklyScore(sid,weekStart){
  const ws=isoDate(weekStart), end=new Date(weekStart.getTime()+6*86400000), es=isoDate(end);
  return getConductRules().base+(state.conduct||[]).filter(x=>x.studentId===sid&&x.status==='approved'&&x.date>=ws&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0);
@@ -1935,16 +2034,22 @@ function defaultConductGuide(){
       {label:'Làm việc tốt (nhặt được của rơi trả lại, giúp đỡ bạn bè, bảo vệ tài sản chung)',points:10,unit:''},
       {label:'Tích cực hoạt động tập thể (văn nghệ, thể thao, phong trào Đoàn)',points:5,unit:'/ sự kiện'},
       {label:'Đạt điểm 9, 10 trong giờ học',points:5,unit:'/ điểm tốt'},
-      {label:'Tuần học tốt (cá nhân không vi phạm bất kỳ lỗi nào trong tuần)',points:5,unit:''}
+      {label:'Tuần học tốt (cá nhân không vi phạm bất kỳ lỗi nào trong tuần)',points:5,unit:'',weeklyAuto:true}
     ]
   };
 }
 function getConductGuide(){
   const g=state?.settings?.conductGuide,d=defaultConductGuide();
   const deduct=(g&&Array.isArray(g.deduct)&&g.deduct.length)?g.deduct:d.deduct;
-  const bonus=(g&&Array.isArray(g.bonus)&&g.bonus.length)?g.bonus:d.bonus;
+  let bonus=(g&&Array.isArray(g.bonus)&&g.bonus.length)?g.bonus:d.bonus;
+  let seen=false;
+  bonus=bonus.map(x=>{const on=!!x.weeklyAuto&&!seen;if(on)seen=true;return {...x,weeklyAuto:on}});
   return {deduct,bonus};
 }
+// Tiêu chí dùng để tự động cộng điểm cuối tuần: là dòng gợi ý điểm cộng ĐƯỢC ĐÁNH DẤU ★ (weeklyAuto:true)
+// trong bảng gợi ý — KHÔNG phải dòng cuối cùng của danh sách — để sau này thêm tiêu chí thi đua mới
+// vào cuối bảng cũng không làm đổi tiêu chí đang dùng để tự động cộng điểm.
+function getWeeklyAutoBonusCriterion(){const g=getConductGuide();return (g.bonus||[]).find(x=>x&&x.weeklyAuto)||null}
 // ---- Render bảng hướng dẫn (trang Rèn luyện) từ dữ liệu getConductGuide() ----
 function renderConductGuideTable(){
   const g=getConductGuide();
@@ -1974,17 +2079,27 @@ function applyConductPreset(){
 }
 // ---- Khối chỉnh sửa/thêm/xóa bảng gợi ý ở trang Cài đặt ----
 function conductGuideRowHTML(type,item){
-  item=item||(type==='deduct'?{group:'',label:'',points:-5}:{label:'',points:5,unit:''});
+  item=item||(type==='deduct'?{group:'',label:'',points:-5}:{label:'',points:5,unit:'',weeklyAuto:false});
   if(type==='deduct'){
     return `<div class="conduct-guide-row" data-type="deduct"><input class="cg-group" placeholder="Nhóm (VD: Nền nếp & chuyên cần)" value="${esc(item.group||'')}"><input class="cg-label" placeholder="Hành vi vi phạm" value="${esc(item.label||'')}"><input class="cg-points" type="number" step="0.5" placeholder="Điểm (số âm)" value="${Number(item.points)||0}"><button class="btn danger small" type="button" onclick="removeConductGuideRow(this)" title="Xóa dòng này">🗑</button></div>`;
   }
-  return `<div class="conduct-guide-row" data-type="bonus"><input class="cg-label" placeholder="Nội dung khen thưởng" value="${esc(item.label||'')}"><input class="cg-points" type="number" step="0.5" placeholder="Điểm" value="${Number(item.points)||0}"><input class="cg-unit" placeholder="Đơn vị (VD: / sự kiện)" value="${esc(item.unit||'')}"><button class="btn danger small" type="button" onclick="removeConductGuideRow(this)" title="Xóa dòng này">🗑</button></div>`;
+  return `<div class="conduct-guide-row" data-type="bonus"><input class="cg-label" placeholder="Nội dung khen thưởng" value="${esc(item.label||'')}"><input class="cg-points" type="number" step="0.5" placeholder="Điểm" value="${Number(item.points)||0}"><input class="cg-unit" placeholder="Đơn vị (VD: / sự kiện)" value="${esc(item.unit||'')}"><label class="cg-weekly-auto-wrap" title="Chọn dòng này làm tiêu chí tự động cộng điểm cuối tuần cho học sinh không vi phạm"><input type="radio" name="cgWeeklyAuto" class="cg-weekly-auto" ${item.weeklyAuto?'checked':''} onchange="updateWeeklyAutoHint()">★</label><button class="btn danger small" type="button" onclick="removeConductGuideRow(this)" title="Xóa dòng này">🗑</button></div>`;
 }
 function renderConductGuideSettings(){
   const g=getConductGuide();
   const dRoot=document.getElementById('guideDeductRows'),bRoot=document.getElementById('guideBonusRows');
   if(dRoot)dRoot.innerHTML=g.deduct.map(x=>conductGuideRowHTML('deduct',x)).join('');
   if(bRoot)bRoot.innerHTML=g.bonus.map(x=>conductGuideRowHTML('bonus',x)).join('');
+  updateWeeklyAutoHint();
+}
+// Dòng chữ nhắc GVCN biết hiện tại tiêu chí ★ nào đang được dùng để tự động cộng điểm cuối tuần —
+// đọc trực tiếp từ các radio ★ đang hiển thị trên form (kể cả khi CHƯA bấm Lưu) để không gây nhầm lẫn.
+function updateWeeklyAutoHint(){
+  const el=document.getElementById('weeklyAutoHint');if(!el)return;
+  const rows=[...document.querySelectorAll('#guideBonusRows .conduct-guide-row')];
+  const picked=rows.find(r=>r.querySelector('.cg-weekly-auto')?.checked);
+  const label=picked?(picked.querySelector('.cg-label')?.value.trim()||'(chưa đặt tên)'):'';
+  el.textContent=picked?`✅ Đang khóa vào tiêu chí: "${label}" — mỗi cuối tuần (sau ngày Thứ Bảy), học sinh không vi phạm sẽ được tự động cộng đúng nội dung/điểm của dòng này.`:'⚠️ Chưa chọn dòng nào làm tiêu chí ★ tự động cộng điểm cuối tuần — hãy tick chọn ở cột ★ rồi bấm Lưu, nếu không hệ thống sẽ KHÔNG tự cộng điểm cuối tuần.';
 }
 function addConductGuideRow(type){
   if(!isAdmin()){alert('🔒 Chỉ GVCN được chỉnh sửa bảng gợi ý.');return}
@@ -1995,12 +2110,14 @@ function removeConductGuideRow(btn){
   if(!isAdmin()){alert('🔒 Chỉ GVCN được chỉnh sửa bảng gợi ý.');return}
   const row=btn.closest('.conduct-guide-row');
   if(row)row.remove();
+  updateWeeklyAutoHint();
 }
 async function saveConductGuideSettings(){
   if(!isAdmin()){alert('🔒 Chỉ GVCN được chỉnh sửa bảng gợi ý.');return}
   const deduct=[...document.querySelectorAll('#guideDeductRows .conduct-guide-row')].map(r=>({group:r.querySelector('.cg-group')?.value.trim()||'',label:r.querySelector('.cg-label')?.value.trim()||'',points:Number(r.querySelector('.cg-points')?.value)})).filter(x=>x.label&&Number.isFinite(x.points));
-  const bonus=[...document.querySelectorAll('#guideBonusRows .conduct-guide-row')].map(r=>({label:r.querySelector('.cg-label')?.value.trim()||'',points:Number(r.querySelector('.cg-points')?.value),unit:r.querySelector('.cg-unit')?.value.trim()||''})).filter(x=>x.label&&Number.isFinite(x.points));
+  const bonus=[...document.querySelectorAll('#guideBonusRows .conduct-guide-row')].map(r=>({label:r.querySelector('.cg-label')?.value.trim()||'',points:Number(r.querySelector('.cg-points')?.value),unit:r.querySelector('.cg-unit')?.value.trim()||'',weeklyAuto:!!r.querySelector('.cg-weekly-auto')?.checked})).filter(x=>x.label&&Number.isFinite(x.points));
   if(!deduct.length&&!bonus.length){alert('⚠️ Cần ít nhất một nội dung gợi ý (điểm trừ hoặc điểm cộng).');return}
+  if(bonus.length&&!bonus.some(x=>x.weeklyAuto)&&!confirm('Bạn chưa chọn tiêu chí ★ nào để tự động cộng điểm cuối tuần. Hệ thống sẽ KHÔNG tự cộng điểm cuối tuần cho tới khi bạn chọn. Vẫn lưu?'))return;
   state.settings=state.settings||{};state.settings.conductGuide={deduct,bonus};
   saveData();const ok=await pushCloud();
   renderConductGuideSettings();renderConductGuideTable();renderConductContentPresetOptions();
@@ -2015,6 +2132,56 @@ async function resetConductGuideSettings(){
   const ok=await pushCloud();
   const st=document.getElementById('conductGuideStatus');
   if(st){st.style.display='block';st.className='notice ok';st.textContent=ok===false?'⚠️ Đã khôi phục trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã khôi phục bảng gợi ý mặc định.'}
+}
+// ============================================================
+// Cài đặt "Lịch học theo tuần" (buổi Sáng/Chiều) — GVCN/Admin tích chọn buổi có học cho từng tuần.
+// ============================================================
+const WEEK_SCHEDULE_EDIT_DAYS=[['mon','Thứ 2'],['tue','Thứ 3'],['wed','Thứ 4'],['thu','Thứ 5'],['fri','Thứ 6'],['sat','Thứ 7']];
+function populateScheduleWeekSelect(){
+  const sel=document.getElementById('scheduleWeekSelect');if(!sel)return;
+  const weeks=allAcademicWeeks();if(!weeks.length)return;
+  const old=sel.value;
+  sel.innerHTML=weeks.map(w=>`<option value="${w.number}">Tuần ${String(w.number).padStart(2,'0')} · ${fmtDate(isoDate(w.start))}–${fmtDate(isoDate(w.end))}</option>`).join('');
+  const cur=academicWeekNumber(today())||1;
+  sel.value=old&&weeks.some(w=>String(w.number)===old)?old:String(cur);
+  renderWeekScheduleEditor();
+}
+function renderWeekScheduleEditor(){
+  const sel=document.getElementById('scheduleWeekSelect'),body=document.getElementById('weekScheduleBody');
+  if(!sel||!body||!sel.value)return;
+  const wk=Number(sel.value)||academicWeekNumber(today())||1;
+  const ov=getWeekScheduleOverride(wk)||{};
+  body.innerHTML=WEEK_SCHEDULE_EDIT_DAYS.map(([key,label])=>{
+    const sang=typeof ov[key]?.sang==='boolean'?ov[key].sang:true;
+    const chieu=typeof ov[key]?.chieu==='boolean'?ov[key].chieu:true;
+    return `<tr data-day="${key}"><td><b>${label}</b></td><td style="text-align:center"><input type="checkbox" class="ws-sang" ${sang?'checked':''}></td><td style="text-align:center"><input type="checkbox" class="ws-chieu" ${chieu?'checked':''}></td></tr>`;
+  }).join('');
+}
+async function saveWeekSchedule(){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN được chỉnh sửa lịch học.');return}
+  const sel=document.getElementById('scheduleWeekSelect');const wk=Number(sel?.value);
+  if(!wk){alert('⚠️ Vui lòng chọn tuần cần cấu hình.');return}
+  const rows=[...document.querySelectorAll('#weekScheduleBody tr')];
+  const schedule={};
+  rows.forEach(r=>{const day=r.getAttribute('data-day');if(!day)return;schedule[day]={sang:!!r.querySelector('.ws-sang')?.checked,chieu:!!r.querySelector('.ws-chieu')?.checked}});
+  state.settings=state.settings||{};
+  state.settings.weekSchedule=state.settings.weekSchedule&&typeof state.settings.weekSchedule==='object'?state.settings.weekSchedule:{};
+  state.settings.weekSchedule[String(wk)]=schedule;
+  saveData();const ok=await pushCloud();
+  renderAll();
+  const st=document.getElementById('weekScheduleStatus');
+  if(st){st.style.display='block';st.className='notice '+(ok===false?'':'ok');st.textContent=ok===false?'⚠️ Đã lưu trên thiết bị nhưng chưa đồng bộ Supabase.':`✅ Đã lưu lịch học Tuần ${wk}.`}
+}
+async function resetWeekSchedule(){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN được chỉnh sửa lịch học.');return}
+  const sel=document.getElementById('scheduleWeekSelect');const wk=Number(sel?.value);
+  if(!wk)return;
+  if(!confirm(`Đặt lại Tuần ${wk} về học đủ Sáng + Chiều, Thứ 2 đến Thứ 7?`))return;
+  if(state.settings?.weekSchedule)delete state.settings.weekSchedule[String(wk)];
+  saveData();renderWeekScheduleEditor();renderAll();
+  const ok=await pushCloud();
+  const st=document.getElementById('weekScheduleStatus');
+  if(st){st.style.display='block';st.className='notice ok';st.textContent=ok===false?'⚠️ Đã đặt lại trên thiết bị nhưng chưa đồng bộ Supabase.':`✅ Đã đặt lại Tuần ${wk} về mặc định.`}
 }
 function conductLabel(score){return gradeFromScore(score)}
 function gradeFromScore(score){score=Number(score||0);const r=getConductRules();if(score>=r.good)return'Tốt';if(score>=r.fair)return'Khá';if(score>=r.pass)return'Đạt';return'Chưa đạt'}
@@ -2111,7 +2278,7 @@ function renderReports(){
 function attendanceCountsInRange(sid,range){
  const o={present:0,late:0,excused:0,absent:0},start=dateObj(range?.start),end=dateObj(range?.end),latest=dateObj(today());
  if(!start||!end)return o;const last=end>latest?latest:end;
- for(let d=new Date(start);d<=last;d.setDate(d.getDate()+1)){const date=isoDate(d);if(!isSchoolDay(date))continue;['sang','chieu'].forEach(session=>{const status=attendanceStatusFor(sid,date,session);if(Object.prototype.hasOwnProperty.call(o,status))o[status]++;});}
+ for(let d=new Date(start);d<=last;d.setDate(d.getDate()+1)){const date=isoDate(d);['sang','chieu'].forEach(session=>{if(!isClassSessionScheduled(date,session))return;const status=attendanceStatusFor(sid,date,session);if(Object.prototype.hasOwnProperty.call(o,status))o[status]++;});}
  return o;
 }
 function printSelectedReport(){renderReports();setTimeout(()=>window.print(),50)}
@@ -3507,7 +3674,10 @@ async function loadGuestDashboard(){
 // Không lưu service_role key trong index.html.
 </script>
 <script id="bibi-conduct-rules-report-init">
-window.addEventListener('load',function(){setTimeout(function(){try{renderConductRulesSettings();renderConductGuideSettings();renderConductGuideTable();populateReportSelectors()}catch(e){console.warn(e)}},200)});
+window.addEventListener('load',function(){setTimeout(function(){try{renderConductRulesSettings();renderConductGuideSettings();renderConductGuideTable();populateScheduleWeekSelect();populateReportSelectors()}catch(e){console.warn(e)}},200)});
+// Kiểm tra định kỳ mỗi 30 phút trong lúc ứng dụng đang mở, để bắt kịp mốc "hết ngày Thứ Bảy"
+// ngay cả khi không ai đăng nhập lại (áp dụng khi tab vẫn đang mở sẵn qua đêm Thứ Bảy).
+setInterval(function(){try{if(typeof processWeeklyAutoBonus==='function')processWeeklyAutoBonus();}catch(e){console.warn(e);}},30*60*1000);
 </script>
 
 <button id="cmPwaInstallButton" class="cm-pwa-install" type="button" aria-label="Cài đặt ứng dụng lên màn hình chính" title="Cài đặt ứng dụng"><svg class="cm-install-svg" viewBox="0 0 96 96" role="img" aria-hidden="true"><defs><linearGradient id="cmInstallBody" x1="18" y1="10" x2="78" y2="86" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#a7f3d0"/><stop offset=".4" stop-color="#34d399"/><stop offset=".75" stop-color="#10b981"/><stop offset="1" stop-color="#0f766e"/></linearGradient><linearGradient id="cmInstallFace" x1="25" y1="28" x2="72" y2="73" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f8fffb"/><stop offset="1" stop-color="#d1fae5"/></linearGradient><linearGradient id="cmInstallSide" x1="8" y1="38" x2="25" y2="61" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#6ee7b7"/><stop offset="1" stop-color="#0f766e"/></linearGradient></defs><g class="cm-install-bob"><ellipse cx="48" cy="82" rx="27" ry="6" fill="#064e3b" opacity=".18"/><path d="M30 16 48 8l18 8-18 8Z" fill="#0f766e" stroke="#064e3b" stroke-width="1.5"/><path d="M30 16v6c0 3 8 5 18 5s18-2 18-5v-6" fill="none" stroke="#0f766e" stroke-width="2"/><rect x="18" y="19" width="60" height="54" rx="19" fill="url(#cmInstallBody)" stroke="#065f46" stroke-width="2"/><rect x="25" y="28" width="46" height="37" rx="14" fill="url(#cmInstallFace)" stroke="#6ee7b7" stroke-width="2"/><rect x="11" y="39" width="13" height="20" rx="6" fill="url(#cmInstallSide)" stroke="#065f46" stroke-width="2"/><rect x="72" y="39" width="13" height="20" rx="6" fill="url(#cmInstallSide)" stroke="#065f46" stroke-width="2"/><circle class="cm-install-eye" cx="38" cy="45" r="4.5" fill="#065f46"/><circle class="cm-install-eye" cx="58" cy="45" r="4.5" fill="#065f46"/><circle cx="36.5" cy="43.5" r="1.4" fill="#fff"/><circle cx="56.5" cy="43.5" r="1.4" fill="#fff"/><path d="M39 55.5c3 3.7 9 3.7 12 0" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round"/></g></svg><span class="cm-install-badge" aria-hidden="true">⬇️</span><span class="cm-install-label">Cài đặt ứng dụng</span></button>
