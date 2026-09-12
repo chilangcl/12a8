@@ -252,16 +252,39 @@ document.addEventListener('click',function(e){
   .seat-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px;overflow:hidden}.seat-stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto auto;gap:10px 12px;align-items:center}.seat-map-wrap{grid-column:1/4;overflow-x:auto;padding:2px 0 4px}.seat-layout{display:grid!important;grid-template-columns:1fr!important;gap:6px;min-width:0;width:100%;max-width:100%}.seat-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr)) 54px repeat(4,minmax(0,1fr))!important;grid-auto-flow:row;gap:6px;min-height:48px;width:100%;align-items:stretch}.seat-row-label{display:flex;align-items:center;justify-content:center;font-weight:900;font-style:italic;font-size:12px;color:#0f172a;white-space:nowrap}.seat{border:1px solid #111827;border-radius:2px;background:#fff;padding:3px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:2px;min-width:0;cursor:grab;touch-action:none;user-select:none}.seat.occupied{background:#fff}.empty-seat{background:#fff;border-style:dashed}.seat.drag-over{outline:2px solid #2563eb;transform:scale(1.02)}.seat-no{font-size:7px;color:#64748b;font-weight:700}.seat-name{font-size:12px;font-weight:800;line-height:1.05;overflow-wrap:anywhere}.seat-bottom-side{min-height:64px;display:flex;align-items:center;justify-content:center}.seat-special{min-height:54px;min-width:110px;padding:6px 12px;border:2px solid #3158a5;border-radius:10px;background:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;font-weight:800;font-size:12px;cursor:grab;touch-action:none;user-select:none}.seat-special.door{border-radius:0;border-color:#3158a5;min-width:120px}.blackboard{height:48px;border:2px solid #3158a5;border-radius:2px;background:#fff;color:#111827;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-weight:900;font-size:15px}.seat-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.seat-legend{font-size:12px;color:#64748b;margin-top:8px}.side-drag-over{outline:2px dashed #2563eb;border-radius:10px;background:#eff6ff}.guest-seat-card{overflow-x:auto}.guest-seat-layout{display:grid;grid-template-columns:1fr;gap:6px;min-width:560px}.guest-seat-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr)) 54px repeat(4,minmax(0,1fr))!important;grid-auto-flow:row;gap:6px;min-height:48px;width:100%;align-items:stretch}.guest-seat-bottom{display:grid;grid-template-columns:1fr 1.8fr 1fr;gap:12px;align-items:center;margin-top:10px}.guest-seat-special{border:2px solid #3158a5;background:#fff;padding:10px;text-align:center;font-weight:900}.guest-seat-door{border:2px solid #3158a5;padding:10px;text-align:center;font-weight:900}.guest-seat-board{border:2px solid #3158a5;padding:10px;text-align:center;font-family:Georgia,serif;font-weight:900}@media(max-width:680px){.seat-card{padding:8px}.seat-layout,.guest-seat-layout{gap:4px;min-width:520px}.seat-row,.guest-seat-row{grid-template-columns:repeat(4,minmax(0,1fr)) 42px repeat(4,minmax(0,1fr))!important;gap:4px;min-height:42px}.seat-name{font-size:10px}.seat-no{font-size:6px}.seat-special{min-height:48px;min-width:86px;font-size:10px;padding:5px 7px}.seat-special.door{min-width:90px}.blackboard{height:40px;font-size:12px}.seat-controls .btn{flex:1 1 130px}.seat-legend{font-size:11px}.guest-seat-bottom{grid-template-columns:90px minmax(140px,1fr) 90px;gap:6px}.guest-seat-special,.guest-seat-door,.guest-seat-board{font-size:10px;padding:8px}}
 
   @media print{
-    body{background:#fff!important}
-    .sidebar,.topbar,.page-head .actions,.report-period-box,.admin-only,.menu-toggle{display:none!important}
+    @page{size:A4 portrait;margin:9mm 8mm}
+    html,body{background:#fff!important;height:auto!important;min-height:0!important;overflow:visible!important;margin:0!important;padding:0!important;padding-top:0!important}
+    *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
+    /* Ẩn toàn bộ khung điều hướng / nổi / popup — không chỉ sidebar+topbar cũ mà cả thanh brand, bottom-nav, nút AI nổi, PWA, modal... vốn trước đây bị bỏ sót nên vẫn lọt vào bản in */
+    .sidebar,.topbar,.app-brand-banner,.cm-bottom-nav,.menu-toggle,.ai-floating-btn,
+    .cm-pwa-install,.modal,.cm-account-panel,.cm-today-attendance-modal,.lai-module-overlay,
+    #guestScreen,.guest-top,.guest-back,.competition-picker-menu,
+    .page-head .actions,.report-period-box,.admin-only,.footer-note,.app-copyright{display:none!important}
+    .layout{display:block!important;min-height:0!important}
     .main{margin-left:0!important}
-    .content{padding:0!important}
+    .content{padding:0!important;margin:0!important;max-width:100%!important}
     .page{display:none!important}
     #page-reports{display:block!important}
-    .report-title-print{display:block!important;margin-bottom:14px}
-    .card{box-shadow:none!important;border:1px solid #ddd!important}
-    .table-wrap{overflow:visible!important}
-    .table{min-width:0!important}
+    .report-title-print{display:block!important;margin:0 0 8px;font-size:15px;line-height:1.3}
+    /* Khối thẻ chỉ số (Sĩ số, Có mặt, Tốt...) : cố định số cột + không cho vỡ đôi giữa 2 trang */
+    #page-reports .grid.cards{display:grid!important;grid-template-columns:repeat(5,1fr)!important;gap:5px!important;margin-bottom:8px!important}
+    #page-reports .card{box-shadow:none!important;border:1px solid #cbd5e1!important;border-radius:6px!important;padding:5px 7px!important;break-inside:avoid;page-break-inside:avoid}
+    #page-reports .stat .label{font-size:8.5px!important;margin:0}
+    #page-reports .stat .value{font-size:15px!important;margin-top:1px!important}
+    /* Bảng tổng hợp học sinh: hiện đầy đủ, căn lề gọn, dãn dòng vừa phải để tối ưu số trang (ưu tiên gói vừa 1 trang A4 với sĩ số phổ biến ~40-45 HS) */
+    #page-reports .table-wrap{overflow:visible!important;border:none!important;box-shadow:none!important}
+    #page-reports .table{width:100%!important;min-width:0!important;border-collapse:collapse!important;font-size:10px!important;table-layout:fixed}
+    #page-reports .table th,#page-reports .table td{padding:3px 4px!important;border:1px solid #cbd5e1!important;line-height:1.15!important;overflow-wrap:anywhere}
+    #page-reports .table th{background:#f1f5f9!important;font-size:9.5px!important}
+    /* Căn cột cân đối: cột "Học sinh" rộng hơn, các cột số liệu đều nhau */
+    #page-reports .table th:nth-child(1),#page-reports .table td:nth-child(1){width:5%;text-align:center}
+    #page-reports .table th:nth-child(2),#page-reports .table td:nth-child(2){width:24%;text-align:left}
+    #page-reports .table th:nth-child(n+3):nth-child(-n+7),#page-reports .table td:nth-child(n+3):nth-child(-n+7){width:10%;text-align:center}
+    #page-reports .table th:nth-child(8),#page-reports .table td:nth-child(8){width:11%;text-align:center}
+    #page-reports thead{display:table-header-group}
+    #page-reports tfoot{display:table-footer-group}
+    #page-reports tbody tr{break-inside:avoid;page-break-inside:avoid}
+    #page-reports .badge{padding:2px 6px!important;font-size:9.5px!important;border-radius:999px!important}
   }
 </style>
 
