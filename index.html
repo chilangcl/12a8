@@ -1671,8 +1671,8 @@ function getStudentAlerts(){
   return [...board.high,...board.watch].map(x=>({s:x.s,reasons:x.reasons,severity:x.level==='high'?'high':'medium'}));
 }
 function studentPeriodConduct(id,mode){const rules=getConductRules();const rows=(state.conduct||[]).filter(x=>x.studentId===id&&x.status==='approved');let filtered=rows;if(mode==='week'){const d=new Date(), from=new Date(d);from.setDate(d.getDate()-6);filtered=rows.filter(x=>new Date(x.date)>=from)}const score=rules.base+filtered.reduce((t,x)=>t+Number(x.points||0),0);return {score,label:conductLabel(score)}}
-function attendanceTodaySessionSummary(list,recs,sessionKey,date){
- const scheduled=isClassSessionScheduled(date,sessionKey);
+function attendanceTodaySessionSummary(list,recs,sessionKey,date,settingsSource){
+ const scheduled=isClassSessionScheduled(date,sessionKey,settingsSource);
  const out={total:list.length,present:[],late:[],excused:[],absent:[],pending:[],scheduled};
  if(!scheduled)return out; // buổi này lớp không có lịch học -> không cần phân loại điểm danh
  const byStudent=new Map();
@@ -1680,10 +1680,10 @@ function attendanceTodaySessionSummary(list,recs,sessionKey,date){
  list.forEach(s=>{const r=byStudent.get(String(s.id));const status=r?.status||'present';if(status==='present')out.present.push(s);else if(status==='late')out.late.push(s);else if(status==='excused')out.excused.push(s);else if(status==='absent')out.absent.push(s);else out.pending.push(s)});
  return out;
 }
-function attendanceTodaySummary(students,attendance,date=today()){
+function attendanceTodaySummary(students,attendance,date=today(),settingsSource){
  const list=Array.isArray(students)?students:[], ids=new Set(list.map(s=>String(s.id)));
  const recs=Object.values(attendance&&typeof attendance==='object'?attendance:{}).filter(r=>r&&r.date===date&&ids.has(String(r.studentId||r.id||'')));
- return {date,total:list.length,sang:attendanceTodaySessionSummary(list,recs,'sang',date),chieu:attendanceTodaySessionSummary(list,recs,'chieu',date)};
+ return {date,total:list.length,sang:attendanceTodaySessionSummary(list,recs,'sang',date,settingsSource),chieu:attendanceTodaySessionSummary(list,recs,'chieu',date,settingsSource)};
 }
 function attendanceNames(list,escapeFn){return list.length?list.map(s=>`${escapeFn(s.name||s.code||'Học sinh')} <span class="mini">(Tổ ${escapeFn(s.group||'—')})</span>`).join('<br>'):'<span class="today-attendance-empty">Không có</span>'}
 function attendanceTodaySessionBlockMarkup(session,summary,escapeFn){
@@ -1802,12 +1802,15 @@ function isSchoolDay(date){const d=new Date(`${date}T00:00:00`);return !Number.i
 // ============================================================
 const WEEK_SCHEDULE_DAY_KEYS=['sun','mon','tue','wed','thu','fri','sat'];
 function classWeekDayKey(date){const d=new Date(`${date}T00:00:00`);return Number.isNaN(d.getTime())?null:WEEK_SCHEDULE_DAY_KEYS[d.getDay()]}
-function getWeekScheduleOverride(weekNumber){const raw=state?.settings?.weekSchedule?.[String(weekNumber)];return raw&&typeof raw==='object'?raw:null}
-function isClassSessionScheduled(date,session){
+// settingsSource (tuỳ chọn): dùng khi cần tra lịch học của MỘT lớp cụ thể không phải lớp đang đăng
+// nhập (VD: trang Guest xem công khai) — truyền object settings của lớp đó vào; bỏ trống thì lấy
+// theo lớp đang đăng nhập (state.settings) như bình thường.
+function getWeekScheduleOverride(weekNumber,settingsSource){const src=settingsSource||state?.settings;const raw=src?.weekSchedule?.[String(weekNumber)];return raw&&typeof raw==='object'?raw:null}
+function isClassSessionScheduled(date,session,settingsSource){
   if(!isSchoolDay(date))return false; // Chủ nhật luôn không có lịch học
   const wk=academicWeekNumber(date);
   if(!wk)return true; // ngoài phạm vi năm học đã thiết lập -> coi như học bình thường, không phá vỡ dữ liệu cũ
-  const dayKey=classWeekDayKey(date),ov=getWeekScheduleOverride(wk);
+  const dayKey=classWeekDayKey(date),ov=getWeekScheduleOverride(wk,settingsSource);
   if(!dayKey||!ov||!ov[dayKey]||typeof ov[dayKey][session]!=='boolean')return true; // mặc định có học nếu chưa cấu hình
   return ov[dayKey][session];
 }
@@ -3483,7 +3486,7 @@ async function loadGuestDashboard(){
         <div class="badge b-green">🟢 Dữ liệu trực tuyến</div>
       </div>
 
-      ${attendanceTodayPanelMarkup(attendanceTodaySummary(students,attendance,today()),guestEsc)}
+      ${attendanceTodayPanelMarkup(attendanceTodaySummary(students,attendance,today(),settings),guestEsc)}
 
       <div class="grid two">
         <div class="guest-card"><h3>📅 Nền nếp & chuyên cần</h3><div class="kpi-list">
