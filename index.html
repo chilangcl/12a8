@@ -1688,7 +1688,7 @@ function attendanceTodaySummary(students,attendance,date=today(),settingsSource)
 function attendanceNames(list,escapeFn){return list.length?list.map(s=>`${escapeFn(s.name||s.code||'Học sinh')} <span class="mini">(Tổ ${escapeFn(s.group||'—')})</span>`).join('<br>'):'<span class="today-attendance-empty">Không có</span>'}
 function attendanceTodaySessionBlockMarkup(session,summary,escapeFn){
  const title=session==='chieu'?'🌙 Điểm danh buổi chiều':'🌤️ Điểm danh buổi sáng';
- if(!summary.scheduled)return `<div class="today-attendance-session-block"><div class="today-session-title">${title}</div><div class="today-attendance-item pending" style="grid-column:1/-1"><div class="today-label">📭 Lớp không có lịch học</div><div class="today-detail">Theo lịch học tuần này, lớp không có tiết học buổi ${session==='chieu'?'chiều':'sáng'} hôm nay nên hệ thống không điểm danh.</div></div></div>`;
+ if(!summary.scheduled)return `<div class="today-attendance-session-block"><div class="today-session-title">${title}</div><div class="today-attendance-item pending" style="grid-column:1/-1"><div class="today-label">📭 Lớp không có lịch học</div><div class="today-detail">Theo lịch học tuần này (cấu hình ở Cài đặt), lớp không có tiết học buổi ${session==='chieu'?'chiều':'sáng'} hôm nay nên hệ thống không điểm danh.</div></div></div>`;
  const absent=[...summary.excused,...summary.absent];
  return `<div class="today-attendance-session-block"><div class="today-session-title">${title}</div><div class="today-attendance-grid"><div class="today-attendance-item total"><div class="today-label">👥 Sĩ số lớp</div><div class="today-number">${summary.total}</div><div class="today-detail">Tổng số học sinh</div></div><div class="today-attendance-item present"><div class="today-label">✅ Đúng giờ</div><div class="today-number">${summary.present.length}</div><div class="today-detail">Đã xác nhận đi học</div></div><div class="today-attendance-item late"><div class="today-label">⏰ Đi muộn</div><div class="today-number">${summary.late.length}</div><div class="today-detail">${attendanceNames(summary.late,escapeFn)}</div></div><div class="today-attendance-item absent"><div class="today-label">🏠 Vắng mặt</div><div class="today-number">${absent.length}</div><div class="today-detail"><b>Có phép ${summary.excused.length} · Không phép ${summary.absent.length}</b><br>${attendanceNames(summary.excused,escapeFn)}${summary.excused.length&&summary.absent.length?'<br>':''}${attendanceNames(summary.absent,escapeFn)}</div></div><div class="today-attendance-item pending"><div class="today-label">📝 Chưa điểm danh</div><div class="today-number">${summary.pending.length}</div><div class="today-detail">${attendanceNames(summary.pending,escapeFn)}</div></div></div></div>`;
 }
@@ -1816,10 +1816,32 @@ function isClassSessionScheduled(date,session,settingsSource){
 }
 function attendanceRecordKey(date,session,studentId){return `${date}_${session}_${studentId}`}
 function attendanceStatusFor(studentId,date,session){if(!isClassSessionScheduled(date,session))return 'no_school';const r=state.attendance?.[attendanceRecordKey(date,session,studentId)];return r?.status||'present'}
-const ATTENDANCE_CONDUCT_RULES={excused:{points:-2,label:'Nghỉ học có phép'},absent:{points:-10,label:'Nghỉ học không phép'},late:{points:-3,label:'Đi học muộn'}};
+// FIX: trước đây bảng này là số điểm CỐ ĐỊNH, không đồng bộ với "Quản lý bảng gợi ý chấm điểm rèn luyện"
+// ở trang Cài đặt (VD: GVCN đặt "Đi học muộn" = -5 nhưng hệ thống điểm danh vẫn tự trừ -3).
+// Nay điểm trừ tự động luôn được LẤY TRỰC TIẾP từ getConductGuide() (tức state.settings.conductGuide) —
+// khớp theo nội dung dòng "Nghỉ học có phép / Nghỉ học không phép / Đi học muộn" (không phân biệt hoa
+// thường/dấu), để khi GVCN sửa điểm ở bảng gợi ý thì điểm danh tự động cập nhật theo ngay, không lệch nữa.
+// Chỉ khi bảng gợi ý không có dòng nào khớp mới dùng về giá trị mặc định dưới đây làm phương án dự phòng.
+const ATTENDANCE_CONDUCT_FALLBACK={excused:{points:-2,label:'Nghỉ học có phép'},absent:{points:-10,label:'Nghỉ học không phép'},late:{points:-3,label:'Đi học muộn'}};
+function normalizeConductLabel(s){return String(s||'').toLowerCase().replace(/đ/g,'d').normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();}
+function getAttendanceConductRule(status){
+ const fallback=ATTENDANCE_CONDUCT_FALLBACK[status];
+ if(!fallback)return null;
+ const guide=(typeof getConductGuide==='function')?getConductGuide():null;
+ const rows=(guide&&Array.isArray(guide.deduct))?guide.deduct:[];
+ const match=rows.find(r=>{
+   const l=normalizeConductLabel(r.label);
+   if(status==='late')return l.includes('muon');
+   if(status==='absent')return l.includes('khong phep');
+   if(status==='excused')return l.includes('phep')&&!l.includes('khong phep');
+   return false;
+ });
+ if(match&&Number.isFinite(Number(match.points)))return {points:Number(match.points),label:match.label||fallback.label};
+ return fallback;
+}
 function syncAttendanceConduct(date,session,studentId,status){
  if(!isClassSessionScheduled(date,session))return; // buổi không có lịch học -> không tạo điểm trừ tự động
- const key=attendanceRecordKey(date,session,studentId),rule=ATTENDANCE_CONDUCT_RULES[status];
+ const key=attendanceRecordKey(date,session,studentId),rule=getAttendanceConductRule(status);
  state.conduct=Array.isArray(state.conduct)?state.conduct:[];
  const index=state.conduct.findIndex(x=>x?.source==='attendance_auto'&&x.attendanceKey===key);
  if(!rule){if(index>=0)state.conduct.splice(index,1);return;}
