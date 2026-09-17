@@ -54,11 +54,25 @@ function closeModal(id){
   const modal=document.getElementById(id);
   if(!modal)return false;
   modal.classList.remove('show');
-  modal.style.display='none';
+  // KHÔNG đặt style.display='none' ở đây. Style inline có độ ưu tiên cao hơn CSS class,
+  // nên nếu để lại 'none' thì lần mở sau (chỉ thêm class 'show') sẽ KHÔNG hiện được hộp thoại
+  // — đây là nguyên nhân phải F5 lại trang mới ghi nhận tiếp được.
+  // Xóa hẳn thuộc tính inline để CSS mặc định (.modal{display:none} / .modal.show{display:flex}) điều khiển.
+  modal.style.removeProperty('display');
   modal.setAttribute('aria-hidden','true');
   document.body.style.overflow='';
   return false;
 }
+/* Mở hộp thoại một cách an toàn: luôn dọn sạch style inline còn sót lại từ lần đóng trước. */
+function openModal(id){
+  const modal=document.getElementById(id);
+  if(!modal)return false;
+  modal.style.removeProperty('display');
+  modal.removeAttribute('aria-hidden');
+  modal.classList.add('show');
+  return true;
+}
+window.closeModal=closeModal;window.openModal=openModal;
 function closeAllModals(){
   document.querySelectorAll('.modal.show').forEach(m=>closeModal(m.id));
   document.body.style.overflow='';
@@ -1298,7 +1312,7 @@ function showClassChooser(){
   yearSel.onchange=renderClassesForYear;
   classSel.onchange=updateClassChooserInfo;
   renderClassesForYear();
-  document.getElementById('classChooser').classList.add('show');
+  openModal('classChooser');
 }
 function updateClassChooserInfo(){
   const id=document.getElementById('loginClassSelect')?.value;
@@ -1631,7 +1645,7 @@ function openCompetitionHistory(studentId,mode,detail){
   document.getElementById('competitionHistoryTitle').textContent=`${s.code||''} – ${s.name||''}`;
   const rows=result.events.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
   document.getElementById('competitionHistoryContent').innerHTML=`<div class="muted">Biến động điểm · ${competitionPeriodLabel(mode,detail)}</div><div class="history-score">Điểm hiện tại: ${result.score.toFixed(1)} · ${conductLabel(result.score)}</div>${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Điểm</th></tr></thead><tbody>${rows.map(x=>`<tr class="${Number(x.points)>=0?'positive-row':'negative-row'}"><td>${fmtDate(x.date)}</td><td>${esc(x.content||x.type||'')}</td><td><b>${Number(x.points)>=0?'+':''}${Number(x.points).toFixed(1)}</b></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">Chưa có biến động điểm trong giai đoạn này.</div>`}`;
-  document.getElementById('competitionHistoryModal').classList.add('show');
+  openModal('competitionHistoryModal');
 }
 function recentScoreTrend(studentId){
   const events=(state.conduct||[]).filter(x=>x.studentId===studentId&&x.status==='approved'&&x.date).slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
@@ -1739,7 +1753,7 @@ function renderStudents(){
 }
 function openStudent(id=''){if(!canManageStudents()){alert('🔒 Chỉ GVCN được thêm hoặc sửa hồ sơ học sinh.');return}editingStudent=id||null;const s=state.students.find(x=>x.id===id)||{};document.getElementById('studentModalTitle').textContent=id?'Sửa học sinh':'Thêm học sinh';
  [['sCode',s.code],['sName',s.name],['sDob',s.dob],['sEthnic',s.ethnic],['sPhone',s.phone],['sEmail',s.email],['sParent',s.parent],['sParentPhone',s.parentPhone],['sAddress',s.address],['sNote',s.note]].forEach(([id,v])=>document.getElementById(id).value=v||'');
- document.getElementById('sGender').value=s.gender||'Nam';document.getElementById('sGroup').value=s.group||'1';document.getElementById('sRole').value=s.role||'';document.getElementById('studentModal').classList.add('show')}
+ document.getElementById('sGender').value=s.gender||'Nam';document.getElementById('sGroup').value=s.group||'1';document.getElementById('sRole').value=s.role||'';openModal('studentModal')}
 async function saveStudent(){
  const code=document.getElementById('sCode').value.trim(),name=document.getElementById('sName').value.trim();if(!code||!name){alert('Mã HS và họ tên là bắt buộc.');return}
  const obj={id:editingStudent||crypto.randomUUID(),code,name,dob:document.getElementById('sDob').value,gender:document.getElementById('sGender').value,ethnic:document.getElementById('sEthnic').value,group:document.getElementById('sGroup').value,phone:document.getElementById('sPhone').value,email:document.getElementById('sEmail').value,parent:document.getElementById('sParent').value,parentPhone:document.getElementById('sParentPhone').value,address:document.getElementById('sAddress').value,role:document.getElementById('sRole').value,note:document.getElementById('sNote').value};
@@ -1916,7 +1930,7 @@ function renderLearning(){
 async function saveLearning(){
  const term=document.getElementById('scoreTerm').value;document.querySelectorAll('.scoreInp').forEach(inp=>{const key=term+'_'+inp.dataset.sid;state.scores[key]=state.scores[key]||{};state.scores[key][inp.dataset.key]=inp.value===''?'':Number(inp.value)});saveData();await pushCloud();log(`Cập nhật điểm học tập ${term}`);alert('Đã lưu điểm.');renderDashboard();
 }
-function openConduct(){document.getElementById('cEditId').value='';document.getElementById('conductModalTitle').textContent='Ghi nhận rèn luyện';document.getElementById('cDate').value=today();document.getElementById('cContent').value='';document.getElementById('cPoints').value=1;document.getElementById('cType').value='Điểm cộng';document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');renderConductContentPresetOptions();const cp=document.getElementById('cContentPreset');if(cp)cp.value='custom';resetConductSaveButton();document.getElementById('conductModal').classList.add('show')}
+function openConduct(){document.getElementById('cEditId').value='';document.getElementById('conductModalTitle').textContent='Ghi nhận rèn luyện';document.getElementById('cDate').value=today();document.getElementById('cContent').value='';document.getElementById('cPoints').value=1;document.getElementById('cType').value='Điểm cộng';document.getElementById('cStudent').innerHTML=visibleStudents().map(s=>`<option value="${s.id}">${esc(s.code)} - ${esc(s.name)}</option>`).join('');renderConductContentPresetOptions();const cp=document.getElementById('cContentPreset');if(cp)cp.value='custom';resetConductSaveButton();openModal('conductModal')}
 function resetConductSaveButton(){conductSaving=false;const btn=document.getElementById('cSaveBtn');if(btn){btn.disabled=false;btn.textContent='Lưu';}}
 function canEditConductRecord(x){if(!x||x.source==='attendance_auto'||x.source==='weekly_auto_bonus')return false;if(isAdmin())return true;return isClassOfficer()&&x.status==='pending'}
 function editConduct(id){
@@ -1933,7 +1947,7 @@ function editConduct(id){
  document.getElementById('cContent').value=x.content||'';
  renderConductContentPresetOptions();const cp=document.getElementById('cContentPreset');if(cp)cp.value='custom';
  resetConductSaveButton();
- document.getElementById('conductModal').classList.add('show');
+ openModal('conductModal');
 }
 // Chống lưu trùng lặp: nếu người dùng bấm "Lưu" nhiều lần liên tiếp (double-click, tap kép
 // trên điện thoại, hoặc chờ mạng chậm rồi bấm lại), mỗi lần bấm trước đây tạo ra MỘT bản ghi
@@ -3831,9 +3845,9 @@ setInterval(function(){try{if(typeof processWeeklyAutoBonus==='function')process
 </style>
 <style id="cm-auth-navigation-visibility-v1">#app.hidden~.cm-bottom-nav{display:none!important}</style>
 <script id="cm-account-panel-js-v1">
-window.openAccountPanel=function(){const p=document.getElementById('cmAccountPanel');if(!p)return;const u=typeof currentUser!=='undefined'?currentUser:null,c=typeof currentClass!=='undefined'?currentClass:null;const name=u?.name||u?.username||'Giáo viên',role=u?.role==='admin'?'Giáo viên chủ nhiệm · Quản trị viên':(u?.roleLabel||u?.role||'Thành viên lớp');document.getElementById('cmAccountName').textContent=name;document.getElementById('cmAccountRole').textContent=role;document.getElementById('cmAccountUsername').textContent=u?.username||u?.email||'—';document.getElementById('cmAccountClass').textContent=c?.class_name?(c.class_name+(c.year?' · '+c.year:'')):'—';document.getElementById('cmAccountInitial').textContent=name.split(/\s+/).filter(Boolean).slice(-2).map(x=>x[0]).join('').toUpperCase()||'GV';p.classList.add('show')};
+window.openAccountPanel=function(){const p=document.getElementById('cmAccountPanel');if(!p)return;const u=typeof currentUser!=='undefined'?currentUser:null,c=typeof currentClass!=='undefined'?currentClass:null;const name=u?.name||u?.username||'Giáo viên',role=u?.role==='admin'?'Giáo viên chủ nhiệm · Quản trị viên':(u?.roleLabel||u?.role||'Thành viên lớp');document.getElementById('cmAccountName').textContent=name;document.getElementById('cmAccountRole').textContent=role;document.getElementById('cmAccountUsername').textContent=u?.username||u?.email||'—';document.getElementById('cmAccountClass').textContent=c?.class_name?(c.class_name+(c.year?' · '+c.year:'')):'—';document.getElementById('cmAccountInitial').textContent=name.split(/\s+/).filter(Boolean).slice(-2).map(x=>x[0]).join('').toUpperCase()||'GV';openModal('cmAccountPanel')};
 window.closeAccountPanel=function(){document.getElementById('cmAccountPanel')?.classList.remove('show')};
-window.openTodayAttendanceSummary=function(){const panel=document.getElementById('cmTodayAttendancePanel'),content=document.getElementById('cmTodayAttendanceContent'),title=document.getElementById('cmTodayAttendanceTitle');if(!panel||!content)return;const date=typeof today==='function'?today():new Date().toISOString().slice(0,10),students=Array.isArray(state?.students)?state.students:[],attendance=state?.attendance||{};if(title)title.textContent='🗓️ Điểm danh hôm nay ('+(typeof fmtDate==='function'?fmtDate(date):date.split('-').reverse().join('/'))+')';if(typeof attendanceTodaySummary==='function'&&typeof attendanceTodayPanelMarkup==='function'){content.innerHTML=attendanceTodayPanelMarkup(attendanceTodaySummary(students,attendance,date));}else{content.innerHTML='<div class="empty">Không thể tải dữ liệu điểm danh hôm nay.</div>';}panel.classList.add('show');};
+window.openTodayAttendanceSummary=function(){const panel=document.getElementById('cmTodayAttendancePanel'),content=document.getElementById('cmTodayAttendanceContent'),title=document.getElementById('cmTodayAttendanceTitle');if(!panel||!content)return;const date=typeof today==='function'?today():new Date().toISOString().slice(0,10),students=Array.isArray(state?.students)?state.students:[],attendance=state?.attendance||{};if(title)title.textContent='🗓️ Điểm danh hôm nay ('+(typeof fmtDate==='function'?fmtDate(date):date.split('-').reverse().join('/'))+')';if(typeof attendanceTodaySummary==='function'&&typeof attendanceTodayPanelMarkup==='function'){content.innerHTML=attendanceTodayPanelMarkup(attendanceTodaySummary(students,attendance,date));}else{content.innerHTML='<div class="empty">Không thể tải dữ liệu điểm danh hôm nay.</div>';}openModal('cmTodayAttendancePanel');};
 window.closeTodayAttendanceSummary=function(){document.getElementById('cmTodayAttendancePanel')?.classList.remove('show')};
 </script>
 <!-- Keep this final cascade last: older mobile styles above must not move the Lai navigation. -->
