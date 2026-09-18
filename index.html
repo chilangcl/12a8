@@ -3792,7 +3792,7 @@ setInterval(function(){try{if(typeof processWeeklyAutoBonus==='function')process
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',restoreRememberedLogin,{once:true});else restoreRememberedLogin();
 })();
 </script>
-<!-- ===================== XUẤT SỔ ĐIỂM DANH THÁNG (VnEdu) v1 ===================== -->
+<!-- ===================== XUẤT SỔ ĐIỂM DANH THÁNG (VnEdu) v2 ===================== -->
 <style id="vnedu-export-css">
 #vneduExportModal .modal-card{max-width:1180px;width:min(1180px,96vw)}
 .vnedu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin-bottom:12px}
@@ -3800,7 +3800,6 @@ setInterval(function(){try{if(typeof processWeeklyAutoBonus==='function')process
 .vnedu-grid .field input,.vnedu-grid .field select{width:100%;padding:8px 9px;border:1px solid var(--border,#dbe4ee);border-radius:9px;font:inherit;background:#fff}
 .vnedu-opts{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:10px;font-size:13px}
 .vnedu-opts label{display:flex;align-items:center;gap:6px;cursor:pointer}
-.vnedu-opts input[type=number]{width:70px;padding:5px 6px;border:1px solid var(--border,#dbe4ee);border-radius:8px}
 .vnedu-legend{font-size:12.5px;line-height:1.65;background:#f1f8ff;border:1px solid #cfe6fb;border-radius:12px;padding:10px 12px;margin-bottom:12px;color:#14324f}
 .vnedu-legend b{color:#0b57a4}
 .vnedu-preview-wrap{overflow:auto;max-height:52vh;border:1px solid #d7e3ee;border-radius:12px;background:#fff}
@@ -3834,15 +3833,9 @@ table.vnedu-sheet td.vnedu-total{background:#fbfdff;font-weight:800;color:#0f3b6
       <option value="chieu">1 buổi/ngày — học chiều</option>
       <option value="ca">2 buổi/ngày — cả tuần (T2–T7)</option>
     </select></div>
-    <div class="field"><label>Định dạng file</label><select id="vneduFormat">
-      <option value="xls">.xls chuẩn VnEdu (khuyến nghị để đồng bộ)</option>
-      <option value="xml">.xls có kẻ khung đầy đủ (để in / lưu hồ sơ)</option>
-    </select></div>
   </div>
 
   <div class="vnedu-opts">
-    <label><input type="checkbox" id="vneduLateSkip" onchange="vneduRenderPreview()"> Quy đổi <b>“Đi muộn”</b> thành bỏ tiết</label>
-    <label>Tiết bỏ khi đi muộn: <input type="text" id="vneduLatePeriods" maxlength="5" value="1" oninput="vneduRenderPreview()"></label>
     <label><input type="checkbox" id="vneduSortName" onchange="vneduRenderPreview()"> Sắp xếp theo tên A→Z (chuẩn sổ)</label>
     <button class="btn secondary" type="button" onclick="vneduClearOverrides()" style="margin-left:auto">↺ Xóa sửa tay tháng này</button>
   </div>
@@ -3851,28 +3844,139 @@ table.vnedu-sheet td.vnedu-total{background:#fbfdff;font-weight:800;color:#0f3b6
     <b>Cách nhập / ký hiệu trong bảng (có thể sửa trực tiếp từng ô dưới đây trước khi xuất):</b><br>
     • <b>Lớp học 1 buổi/ngày:</b> Nghỉ có phép cả ngày: <b>P</b> · Nghỉ không phép cả ngày: <b>K</b> · Bỏ tiết: <b>1 2 3 4 5</b> (VD: nhập <b>345</b> tức bỏ tiết 3, 4, 5).<br>
     • <b>Lớp học 2 buổi/ngày:</b> Nghỉ phép cả ngày <b>SPCP</b> · Sáng <b>SP</b> · Chiều <b>CP</b> · Không phép cả ngày <b>SKCK</b> · Sáng <b>SK</b> · Chiều <b>CK</b> · Sáng phép–chiều không phép <b>SPCK</b> · Sáng không phép–chiều phép <b>SKCP</b>.<br>
-    • <b>Bỏ tiết:</b> <b>C124</b> = chiều bỏ tiết 1,2,4 · <b>S12C34</b> = sáng bỏ tiết 1,2 và chiều bỏ tiết 3,4 · <b>SKC34</b> = sáng nghỉ không phép, chiều bỏ tiết 3,4.
+    • <b>Bỏ tiết:</b> <b>C124</b> = chiều bỏ tiết 1,2,4 · <b>S12C34</b> = sáng bỏ tiết 1,2 và chiều bỏ tiết 3,4 · <b>SKC34</b> = sáng nghỉ không phép, chiều bỏ tiết 3,4.<br>
+    • Học sinh <b>đi học muộn</b> vẫn tính là có mặt, không ghi ký hiệu nào vào sổ; muốn ghi bỏ tiết thì thầy/cô gõ trực tiếp vào ô tương ứng.
   </div>
 
   <div id="vneduPreview" class="vnedu-preview-wrap"></div>
   <div class="vnedu-foot-note" id="vneduSummary"></div>
 
   <div class="actions" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
-    <button class="btn" type="button" onclick="vneduExport()">📥 Xuất file Excel</button>
+    <button class="btn" type="button" onclick="vneduExport()">📥 Xuất file Excel (.xls)</button>
     <button class="btn secondary" type="button" onclick="closeModal('vneduExportModal')">Đóng</button>
   </div>
 </div></div>
+
+<script id="vnedu-biff8-js">
+/* ============================================================================
+   BỘ GHI FILE .xls (BIFF8) CÓ ĐỊNH DẠNG — font, kẻ khung, gộp ô, căn lề,
+   độ rộng cột, chiều cao dòng. Viết riêng vì SheetJS bản miễn phí chỉ ghi được
+   dữ liệu, không ghi được định dạng. Chỉ dùng XLSX.CFB (đóng gói file OLE2).
+   ============================================================================ */
+window.vneduBuildXls=(function(){
+  'use strict';
+  function Buf(){this.a=[]}
+  Buf.prototype.u8=function(v){this.a.push(v&0xff);return this};
+  Buf.prototype.u16=function(v){this.a.push(v&0xff,(v>>>8)&0xff);return this};
+  Buf.prototype.u32=function(v){this.a.push(v&0xff,(v>>>8)&0xff,(v>>>16)&0xff,(v>>>24)&0xff);return this};
+  Buf.prototype.f64=function(v){const b=new Uint8Array(8);new DataView(b.buffer).setFloat64(0,v,true);for(let i=0;i<8;i++)this.a.push(b[i]);return this};
+  Buf.prototype.bytes=function(arr){for(let i=0;i<arr.length;i++)this.a.push(arr[i]&0xff);return this};
+  Buf.prototype.ascii=function(s){for(let i=0;i<s.length;i++)this.a.push(s.charCodeAt(i)&0xff);return this};
+  Buf.prototype.utf16=function(s){for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);this.a.push(c&0xff,(c>>>8)&0xff)}return this};
+
+  function rec(id,payload){const b=new Buf();b.u16(id).u16(payload.length).bytes(payload);return b.a}
+  function uniStr16(s){const b=new Buf();b.u16(s.length).u8(0x01).utf16(s);return b.a}
+  function uniStr8(s){const b=new Buf();b.u8(s.length).u8(0x01).utf16(s);return b.a}
+
+  const R={BOF:0x0809,EOF:0x000A,CODEPAGE:0x0042,WINDOW1:0x003D,FONT:0x0031,XF:0x00E0,STYLE:0x0293,
+           BOUNDSHEET:0x0085,DIMENSIONS:0x0200,COLINFO:0x007D,ROW:0x0208,LABEL:0x0204,NUMBER:0x0203,
+           BLANK:0x0201,MERGEDCELLS:0x00E5,WINDOW2:0x023E,DEFCOLWIDTH:0x0055,DEFROWHEIGHT:0x0225,SETUP:0x00A1};
+
+  function bof(dt){const b=new Buf();b.u16(0x0600).u16(dt).u16(0x0DBB).u16(0x07CC).u32(0x000080C9).u32(0x00000606);return rec(R.BOF,b.a)}
+  function font(bold){const b=new Buf();
+    b.u16(200)                 // 10pt
+     .u16(bold?0x0001:0x0000)  // grbit (bit0 = in đậm)
+     .u16(0x7FFF)              // màu tự động
+     .u16(bold?700:400)        // độ đậm
+     .u16(0).u8(0).u8(0).u8(0).u8(0)
+     .u8(5).u8(0).ascii('Arial');
+    return rec(R.FONT,b.a)}
+  /* o = {font, halign, valign, wrap, style, border:[trên, dưới, trái, phải]}
+     kiểu đường kẻ: 0 = không kẻ, 1 = nét mảnh (thin), 7 = nét tóc (hair) — đúng như file mẫu */
+  function xf(o){
+    o=o||{};const b=new Buf(),bd=o.border||[0,0,0,0],icv=8; // 8 = màu đen
+    b.u16(o.font||0).u16(0);
+    b.u16(o.style?(0x0005|(0xFFF<<4)):0x0001);
+    b.u8((o.halign||0)|((o.wrap?1:0)<<3)|((o.valign===undefined?1:o.valign)<<4));
+    b.u8(0).u8(0).u8(0xFC);
+    b.u32((bd[2]&15)|((bd[3]&15)<<4)|((bd[0]&15)<<8)|((bd[1]&15)<<12)|(icv<<16)|(icv<<23));
+    b.u32(icv|(icv<<7));
+    b.u16(64|(65<<7));
+    return rec(R.XF,b.a);
+  }
+
+  /* model = {rows:[[{v,s}]], styles:{tên:{...}}, merges:[{s:{r,c},e:{r,c}}],
+              cols:[bề rộng 1/256 ký tự], rowHeights:{dòng:twips}} */
+  return function build(model){
+    const G=[];
+    G.push(...bof(0x0005));
+    G.push(...rec(R.CODEPAGE,new Buf().u16(0x04B0).a));
+    G.push(...rec(R.WINDOW1,new Buf().u16(0x01E0).u16(0x005A).u16(0x3FCF).u16(0x2A4E).u16(0x0038).u16(0).u16(0).u16(1).u16(0x0258).a));
+    G.push(...font(false),...font(false),...font(false),...font(false),...font(true));
+    const FONT_BOLD=5;                       // chỉ số 4 bị bỏ theo chuẩn BIFF8
+    for(let i=0;i<15;i++)G.push(...xf({style:true}));
+    const S={};let n=15;
+    const add=o=>{G.push(...xf(o));return n++};
+    S.NORMAL=add({});
+    Object.keys(model.styles||{}).forEach(k=>{
+      const o=Object.assign({},model.styles[k]);
+      if(o.bold)o.font=FONT_BOLD;
+      S[k]=add(o);
+    });
+    G.push(...rec(R.STYLE,new Buf().u16(0x8000).u8(0x00).u8(0xFF).a));
+    const boundAt=G.length;
+    G.push(...rec(R.BOUNDSHEET,new Buf().u32(0).u16(0x0000).bytes(uniStr8('Sheet1')).a));
+    G.push(...rec(R.EOF,[]));
+
+    const W=[],rows=model.rows,nR=rows.length,nC=model.cols.length;
+    W.push(...bof(0x0010));
+    W.push(...rec(R.DEFCOLWIDTH,new Buf().u16(8).a));
+    W.push(...rec(R.DEFROWHEIGHT,new Buf().u16(0).u16(255).a));
+    W.push(...rec(R.DIMENSIONS,new Buf().u32(0).u32(nR).u16(0).u16(nC).u16(0).a));
+    model.cols.forEach((dx,i)=>W.push(...rec(R.COLINFO,new Buf().u16(i).u16(i).u16(dx).u16(S.NORMAL).u16(0x0000).u16(0).a)));
+    for(let r=0;r<nR;r++){
+      const h=(model.rowHeights&&model.rowHeights[r])||255;
+      W.push(...rec(R.ROW,new Buf().u16(r).u16(0).u16(nC).u16(h).u16(0).u16(0).u32(0x00000140|(S.NORMAL<<16)).a));
+    }
+    for(let r=0;r<nR;r++){
+      const row=rows[r]||[];
+      for(let c=0;c<nC;c++){
+        const cell=row[c],key=(cell&&cell.s)||'NORMAL',s=S[key]!==undefined?S[key]:S.NORMAL,v=cell?cell.v:'';
+        if(typeof v==='number')W.push(...rec(R.NUMBER,new Buf().u16(r).u16(c).u16(s).f64(v).a));
+        else if(v!==''&&v!==null&&v!==undefined)W.push(...rec(R.LABEL,new Buf().u16(r).u16(c).u16(s).bytes(uniStr16(String(v))).a));
+        else W.push(...rec(R.BLANK,new Buf().u16(r).u16(c).u16(s).a));
+      }
+    }
+    if(model.merges&&model.merges.length){
+      const b=new Buf();b.u16(model.merges.length);
+      model.merges.forEach(m=>b.u16(m.s.r).u16(m.e.r).u16(m.s.c).u16(m.e.c));
+      W.push(...rec(R.MERGEDCELLS,b.a));
+    }
+    W.push(...rec(R.SETUP,new Buf().u16(9).u16(70).u16(1).u16(1).u16(1).u16(0x0002).u16(600).u16(600).f64(0.4).f64(0.4).u16(1).a)); // A4, in ngang, thu nhỏ 70%
+    W.push(...rec(R.WINDOW2,new Buf().u16(0x06B6).u16(0).u16(0).u32(0x40).u16(0).u16(0).u32(0).a));
+    W.push(...rec(R.EOF,[]));
+
+    const stream=new Uint8Array(G.length+W.length);
+    stream.set(G,0);stream.set(W,G.length);
+    new DataView(stream.buffer).setUint32(boundAt+4,G.length,true); // vá vị trí bảng tính vào BOUNDSHEET
+    const cfb=XLSX.CFB.utils.cfb_new({root:'Workbook'});
+    XLSX.CFB.utils.cfb_add(cfb,'/Workbook',Array.from(stream));
+    return XLSX.CFB.write(cfb,{type:'array'});
+  };
+})();
+</script>
 
 <script id="vnedu-export-js">
 /* ============================================================================
    XUẤT SỔ ĐIỂM DANH THÁNG THEO MẪU VnEdu
    - Lấy dữ liệu từ state.students + state.attendance (key: date_session_studentId)
-   - Quy đổi trạng thái (present/late/excused/absent) sang ký hiệu VnEdu:
-       1 buổi/ngày : P (phép) · K (không phép) · 1..9 (bỏ tiết)
-       2 buổi/ngày : S/C + P|K|tiết  →  SP, CK, SPCP, SKCP, S12C34, SKC34...
-   - Cho phép GVCN sửa tay từng ô trước khi xuất (lưu ở state.settings.vneduOverrides)
-   - Xuất file .xls giữ nguyên khung mẫu: 39 cột (A..AM), merge tiêu đề, cột ngày 1..31,
-     cột TS buổi nghỉ (TS/P/K) và cột TS bỏ tiết — đúng vị trí ô của mẫu VnEdu.
+   - Quy đổi trạng thái sang ký hiệu VnEdu:
+       1 buổi/ngày : P (nghỉ có phép) · K (nghỉ không phép)
+       2 buổi/ngày : S/C + P|K  →  SP, CK, SPCP, SKCP, SPCK, SKCK
+     (Đi học muộn KHÔNG quy đổi — vẫn tính là có mặt, để trống ô.)
+   - GVCN sửa tay được từng ô (kể cả ghi bỏ tiết: 345, C124, S12C34, SKC34...)
+   - Xuất .xls giữ nguyên khung mẫu: 39 cột (A..AM), gộp ô tiêu đề, kẻ khung,
+     căn lề, độ rộng cột và chiều cao dòng đúng như file mẫu VnEdu.
    ============================================================================ */
 (function(){
   'use strict';
@@ -3884,7 +3988,7 @@ table.vnedu-sheet td.vnedu-total{background:#fbfdff;font-weight:800;color:#0f3b6
   function cfgStore(){
     if(typeof state==='undefined'||!state)return null;
     state.settings=state.settings||{};
-    state.settings.vnedu=Object.assign({so:SO_DEFAULT,truong:TRUONG_DEFAULT,mode:'auto',lateSkip:true,latePeriods:'1',sortName:true,format:'xls'},state.settings.vnedu||{});
+    state.settings.vnedu=Object.assign({so:SO_DEFAULT,truong:TRUONG_DEFAULT,mode:'auto',sortName:true},state.settings.vnedu||{});
     return state.settings.vnedu;
   }
   function overrideStore(){
@@ -3932,19 +4036,18 @@ table.vnedu-sheet td.vnedu-total{background:#fbfdff;font-weight:800;color:#0f3b6
     const key=(typeof attendanceRecordKey==='function')?attendanceRecordKey(dateStr,session,sid):`${dateStr}_${session}_${sid}`;
     return state?.attendance?.[key]?.status||'present';
   }
-  function token(prefix,status,cfg){
+  /* Đi học muộn coi như có mặt -> không sinh ký hiệu */
+  function token(prefix,status){
     if(status==='excused')return prefix+'P';
     if(status==='absent')return prefix+'K';
-    if(status==='late'&&cfg.lateSkip){const p=String(cfg.latePeriods||'1').replace(/[^1-9]/g,'')||'1';return prefix+p}
     return '';
   }
-  /* Sinh ký hiệu tự động cho 1 ô (1 học sinh - 1 ngày) */
   function autoCell(sid,dateStr,cfg){
     const s=sessionsFor(dateStr,cfg.mode);
     if(!s.sang&&!s.chieu)return '';
-    if(s.sang&&s.chieu)return token('S',statusOf(sid,dateStr,'sang'),cfg)+token('C',statusOf(sid,dateStr,'chieu'),cfg);
+    if(s.sang&&s.chieu)return token('S',statusOf(sid,dateStr,'sang'))+token('C',statusOf(sid,dateStr,'chieu'));
     const only=s.sang?'sang':'chieu';
-    return token('',statusOf(sid,dateStr,only),cfg);
+    return token('',statusOf(sid,dateStr,only));
   }
   /* Đếm buổi nghỉ P/K và số tiết bỏ từ ký hiệu trong ô */
   function countsOf(cell){
@@ -3979,41 +4082,35 @@ table.vnedu-sheet td.vnedu-total{background:#fbfdff;font-weight:800;color:#0f3b6
     delete st[mk];if(typeof saveData==='function')saveData();vneduRenderPreview();
   };
 
-  /* ---------- đọc cấu hình từ form ---------- */
+  /* ---------- đọc cấu hình ---------- */
   function readCfg(){
-    const c=cfgStore()||{};
-    const g=id=>document.getElementById(id);
+    const c=cfgStore()||{},g=id=>document.getElementById(id);
     const cfg={
       so:(g('vneduSo')?.value||SO_DEFAULT).trim(),
       truong:(g('vneduTruong')?.value||TRUONG_DEFAULT).trim(),
       khoi:(g('vneduKhoi')?.value||'').trim(),
       lop:(g('vneduLop')?.value||'').trim(),
       mode:g('vneduMode')?.value||'auto',
-      lateSkip:!!g('vneduLateSkip')?.checked,
-      latePeriods:(g('vneduLatePeriods')?.value||'1').replace(/[^1-9]/g,'')||'1',
       sortName:!!g('vneduSortName')?.checked,
-      format:g('vneduFormat')?.value||'xls',
       month:g('vneduMonth')?.value||''
     };
-    Object.assign(c,{so:cfg.so,truong:cfg.truong,mode:cfg.mode,lateSkip:cfg.lateSkip,latePeriods:cfg.latePeriods,sortName:cfg.sortName,format:cfg.format});
+    Object.assign(c,{so:cfg.so,truong:cfg.truong,mode:cfg.mode,sortName:cfg.sortName});
     if(typeof saveData==='function')saveData();
     return cfg;
   }
 
-  /* ---------- dựng mô hình bảng (dùng chung cho xem trước & xuất file) ---------- */
+  /* ---------- dựng mô hình bảng ---------- */
   function buildModel(cfg){
     const [ys,ms]=String(cfg.month||'').split('-');
     const y=Number(ys)||new Date().getFullYear(),m=Number(ms)||(new Date().getMonth()+1);
     const daysInMonth=new Date(y,m,0).getDate();
-    const students=studentList(cfg.sortName);
-    const days=[];
+    const students=studentList(cfg.sortName),days=[];
     for(let d=1;d<=31;d++){
-      const dt=new Date(y,m-1,d); // ngày 31 của tháng thiếu sẽ tự nhảy sang tháng sau (giống mẫu)
+      const dt=new Date(y,m-1,d); // ngày 31 của tháng thiếu tự nhảy sang tháng sau (giống mẫu)
       days.push({day:d,inMonth:d<=daysInMonth,dow:DOW[dt.getDay()],iso:isoOf(dt.getFullYear(),dt.getMonth()+1,dt.getDate())});
     }
     const rows=students.map((s,i)=>{
-      const nm=splitName(s.name);
-      const cells=[];let P=0,K=0,T=0;
+      const nm=splitName(s.name),cells=[];let P=0,K=0,T=0;
       days.forEach(dd=>{
         let v='',auto='';
         if(dd.inMonth){
@@ -4023,7 +4120,7 @@ table.vnedu-sheet td.vnedu-total{background:#fbfdff;font-weight:800;color:#0f3b6
         }
         const c=countsOf(v);P+=c.p;K+=c.k;T+=c.t;
         const ss=dd.inMonth?sessionsFor(dd.iso,cfg.mode):{sang:false,chieu:false};
-        cells.push({v,auto,edited:dd.inMonth&&getOverride(s.id,dd.day)!==undefined,offday:!ss.sang&&!ss.chieu});
+        cells.push({v,auto,offday:!ss.sang&&!ss.chieu});
       });
       return {stt:i+1,id:s.id,code:s.code||'',ho:nm.ho,ten:nm.ten,name:s.name||'',cells,P,K,TS:P+K,T};
     });
@@ -4031,7 +4128,7 @@ table.vnedu-sheet td.vnedu-total{background:#fbfdff;font-weight:800;color:#0f3b6
       title:`Tháng ${m} năm ${y} - Khối ${cfg.khoi||gradeOf()} - Lớp ${cfg.lop||classNameOf()}`};
   }
 
-  /* ---------- xem trước (có thể sửa tay) ---------- */
+  /* ---------- xem trước (sửa tay được) ---------- */
   window.vneduRenderPreview=function(){
     const host=document.getElementById('vneduPreview');if(!host)return;
     const cfg=readCfg(),M=buildModel(cfg);
@@ -4062,28 +4159,7 @@ table.vnedu-sheet td.vnedu-total{background:#fbfdff;font-weight:800;color:#0f3b6
     document.getElementById('vneduSummary').textContent=`📊 ${M.rows.length} học sinh · ${M.daysInMonth} ngày · Tổng buổi nghỉ có phép: ${tP} · không phép: ${tK} · tổng tiết bỏ: ${tT}. Ô nền xám là ngày lớp không có lịch học.`;
   };
 
-  /* ---------- dựng AOA đúng khung mẫu VnEdu ---------- */
-  function buildAOA(cfg,M){
-    const W=39,blank=()=>new Array(W).fill('');
-    const aoa=[];
-    let r0=blank();r0[0]=cfg.so||SO_DEFAULT;r0[3]='CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM';aoa.push(r0);
-    let r1=blank();r1[0]=cfg.truong||TRUONG_DEFAULT;r1[3]='Độc lập - Tự do - Hạnh phúc';aoa.push(r1);
-    let r2=blank();r2[0]='SỐ ĐIỂM DANH';aoa.push(r2);
-    let r3=blank();r3[0]=M.title;aoa.push(r3);
-    aoa.push(blank());
-    let r5=blank();r5[0]='STT';r5[1]='Mã học sinh';r5[2]='Họ và tên';
-    M.days.forEach((d,i)=>r5[4+i]=d.day);
-    r5[35]='TS Buổi nghỉ';r5[38]='TS\nbỏ\ntiết';aoa.push(r5);
-    let r6=blank();M.days.forEach((d,i)=>r6[4+i]=d.dow);
-    r6[35]='TS';r6[36]='P';r6[37]='K';aoa.push(r6);
-    M.rows.forEach(r=>{
-      const row=blank();row[0]=r.stt;row[1]=r.code;row[2]=r.ho;row[3]=r.ten;
-      r.cells.forEach((c,i)=>row[4+i]=c.v||'');
-      row[35]=String(r.TS);row[36]=String(r.P);row[37]=String(r.K);row[38]=String(r.T);
-      aoa.push(row);
-    });
-    return aoa;
-  }
+  /* ---------- khung file đúng mẫu VnEdu ---------- */
   const MERGES=[
     {s:{r:0,c:0},e:{r:0,c:2}},{s:{r:0,c:3},e:{r:0,c:38}},
     {s:{r:1,c:0},e:{r:1,c:2}},{s:{r:1,c:3},e:{r:1,c:38}},
@@ -4091,74 +4167,51 @@ table.vnedu-sheet td.vnedu-total{background:#fbfdff;font-weight:800;color:#0f3b6
     {s:{r:5,c:35},e:{r:5,c:37}},
     {s:{r:5,c:0},e:{r:6,c:0}},{s:{r:5,c:1},e:{r:6,c:1}},{s:{r:5,c:2},e:{r:6,c:3}},{s:{r:5,c:38},e:{r:6,c:38}}
   ];
-  /* wch = (độ rộng mẫu)/256 - 0.83 để file xuất ra có bề rộng cột trùng khít mẫu VnEdu */
-  const COLS=[{wch:4.90},{wch:10.62},{wch:18.17},{wch:7.17}].concat(Array.from({length:35},()=>({wch:3.90})));
+  const COLS=[1466,2932,4864,2048].concat(Array.from({length:35},()=>1210)); // đơn vị 1/256 ký tự, đúng mẫu
+  const ROW_HEIGHTS={0:345,1:345,2:510,3:255,4:255,5:390,6:390};
 
-  function fileName(M,cfg,ext){
-    const lop=String(cfg.lop||classNameOf()||'lop').toLowerCase().replace(/[^a-z0-9]+/g,'');
-    return `so_diem_danh_${lop}_${M.m}_${M.y}.${ext}`;
-  }
-
-  /* ---------- xuất .xls chuẩn (BIFF8 qua SheetJS) ---------- */
-  function exportBiff8(cfg,M){
-    if(typeof XLSX==='undefined'){alert('⚠️ Chưa tải được thư viện Excel (XLSX). Hãy kiểm tra kết nối mạng rồi thử lại.');return}
-    const ws=XLSX.utils.aoa_to_sheet(buildAOA(cfg,M));
-    ws['!merges']=MERGES.map(m=>({s:{...m.s},e:{...m.e}}));
-    ws['!cols']=COLS.map(c=>({...c}));
-    const wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,'Sheet1');
-    XLSX.writeFile(wb,fileName(M,cfg,'xls'),{bookType:'xls'});
-  }
-
-  /* ---------- xuất .xls có kẻ khung (SpreadsheetML 2003) ---------- */
-  function xmlEsc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
-  function exportXML(cfg,M){
-    const aoa=buildAOA(cfg,M);
-    const mergeAt=(r,c)=>MERGES.find(m=>m.s.r===r&&m.s.c===c);
-    const covered=(r,c)=>MERGES.some(m=>r>=m.s.r&&r<=m.e.r&&c>=m.s.c&&c<=m.e.c&&!(r===m.s.r&&c===m.s.c));
-    const styleOf=(r,c)=>{
-      if(r<=4)return r===0?'sPlain':(r<=3?'sTitle':'sPlain');
-      if(r<=6)return 'sHead';
-      if(c===2||c===3)return 'sLeft';
-      return 'sCell';
+  /* Dựng bảng đúng khung mẫu: kẻ khung (nét mảnh ở viền bảng, nét tóc ở lưới trong),
+     căn lề (STT/Mã HS căn giữa, Họ và tên căn trái, cột ngày căn mặc định) như file mẫu. */
+  function buildSheet(cfg,M){
+    const W=39,styles={},key=o=>{
+      const k='s_'+(o.bold?'b':'')+(o.wrap?'w':'')+(o.halign||0)+'_'+(o.border||[0,0,0,0]).join('');
+      if(!styles[k])styles[k]=o;return k;
     };
-    let x='<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n'+
-      '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40">\n<Styles>\n'+
-      '<Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10"/></Style>\n'+
-      '<Style ss:ID="sPlain"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10"/></Style>\n'+
-      '<Style ss:ID="sTitle"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10" ss:Bold="1"/></Style>\n'+
-      '<Style ss:ID="sHead"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/><Font ss:FontName="Arial" ss:Size="10" ss:Bold="1"/><Interior ss:Color="#EAF3FB" ss:Pattern="Solid"/><Borders>'+
-      '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/></Borders></Style>\n'+
-      '<Style ss:ID="sCell"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10"/><Borders>'+
-      '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/></Borders></Style>\n'+
-      '<Style ss:ID="sLeft"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10"/><Borders>'+
-      '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/></Borders></Style>\n'+
-      '</Styles>\n<Worksheet ss:Name="Sheet1"><Table>\n';
-    const wpx=[44,88,146,61].concat(Array.from({length:35},()=>36));
-    wpx.forEach(w=>{x+=`<Column ss:AutoFitWidth="0" ss:Width="${w}"/>\n`});
-    aoa.forEach((row,r)=>{
-      const hgt=r===2?26:(r<=1?18:(r<=6?22:17));
-      x+=`<Row ss:Height="${hgt}">`;
-      let lastWritten=-1;
-      row.forEach((val,c)=>{
-        if(covered(r,c))return;
-        const mg=mergeAt(r,c);
-        const across=mg?mg.e.c-mg.s.c:0,down=mg?mg.e.r-mg.s.r:0;
-        const isNum=typeof val==='number';
-        if(val===''&&!mg&&r<5)return;
-        let attrs=` ss:StyleID="${styleOf(r,c)}"`;
-        if(c!==lastWritten+1)attrs+=` ss:Index="${c+1}"`;
-        if(across)attrs+=` ss:MergeAcross="${across}"`;
-        if(down)attrs+=` ss:MergeDown="${down}"`;
-        x+=`<Cell${attrs}>`+(val===''?'':`<Data ss:Type="${isNum?'Number':'String'}">${xmlEsc(val)}</Data>`)+'</Cell>';
-        lastWritten=c+across;
-      });
-      x+='</Row>\n';
+    const PLAIN=key({halign:2}),TITLE=key({halign:2,bold:1});
+    const HEAD=key({halign:2,bold:1,border:[1,1,1,1]});
+    const HEADW=key({halign:2,bold:1,wrap:1,border:[1,1,1,1]});
+    const SUB=key({halign:0,border:[1,1,1,1]}),SUBC=key({halign:2,border:[1,1,1,1]});
+    const line=st=>Array.from({length:W},()=>({v:'',s:st}));
+    const rows=[];
+    let r=line(PLAIN);r[0]={v:cfg.so||SO_DEFAULT,s:PLAIN};r[3]={v:'CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM',s:PLAIN};rows.push(r);
+    r=line(TITLE);r[0]={v:cfg.truong||TRUONG_DEFAULT,s:TITLE};r[3]={v:'Độc lập - Tự do - Hạnh phúc',s:TITLE};rows.push(r);
+    r=line(TITLE);r[0]={v:'SỐ ĐIỂM DANH',s:TITLE};rows.push(r);
+    r=line(TITLE);r[0]={v:M.title,s:TITLE};rows.push(r);
+    rows.push(line(PLAIN));
+    r=line(HEAD);r[0]={v:'STT',s:HEAD};r[1]={v:'Mã học sinh',s:HEAD};r[2]={v:'Họ và tên',s:HEAD};
+    M.days.forEach((d,i)=>r[4+i]={v:d.day,s:HEAD});
+    r[35]={v:'TS Buổi nghỉ',s:HEAD};r[38]={v:'TS\nbỏ\ntiết',s:HEADW};rows.push(r);
+    r=line(HEAD);M.days.forEach((d,i)=>r[4+i]={v:d.dow,s:SUB});
+    r[35]={v:'TS',s:SUBC};r[36]={v:'P',s:SUBC};r[37]={v:'K',s:SUBC};r[38]={v:'',s:HEAD};rows.push(r);
+    const nData=M.rows.length;
+    M.rows.forEach((x,ri)=>{
+      const top=ri===0?1:7, bot=ri===nData-1?1:7;   // 1 = nét mảnh (viền bảng), 7 = nét tóc (lưới trong)
+      /* viền phải dày hơn ở cuối mỗi tuần (cột Chủ nhật) — đúng như mẫu */
+      const sunday=c=>c>=4&&c<=34&&M.days[c-4]&&M.days[c-4].dow==='CN';
+      const st=(c,halign)=>key({halign:halign,border:[top,bot,(c===0||c>=35)?1:7,(c<=3||c===38||sunday(c))?1:7]});
+      const row=Array.from({length:W},(_,c)=>({v:'',s:st(c,c<=1?2:(c<=3?1:0))}));
+      row[0]={v:x.stt,s:st(0,2)};row[1]={v:x.code,s:st(1,2)};row[2]={v:x.ho,s:st(2,1)};row[3]={v:x.ten,s:st(3,1)};
+      x.cells.forEach((c,i)=>row[4+i]={v:c.v||'',s:st(4+i,0)});
+      row[35]={v:String(x.TS),s:st(35,0)};row[36]={v:String(x.P),s:st(36,0)};
+      row[37]={v:String(x.K),s:st(37,0)};row[38]={v:String(x.T),s:st(38,0)};
+      rows.push(row);
     });
-    x+='</Table><WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><PageSetup><Layout x:Orientation="Landscape"/><PageMargins x:Bottom="0.4" x:Left="0.3" x:Right="0.3" x:Top="0.4"/></PageSetup><FreezePanes/><FrozenNoSplit/><SplitHorizontal>7</SplitHorizontal><TopRowBottomPane>7</TopRowBottomPane><SplitVertical>4</SplitVertical><LeftColumnRightPane>4</LeftColumnRightPane><ActivePane>0</ActivePane><Print><ValidPrinterInfo/><Scale>70</Scale><HorizontalResolution>600</HorizontalResolution></Print></WorksheetOptions></Worksheet></Workbook>';
-    const name=fileName(M,cfg,'xls');
-    if(typeof downloadBlob==='function')downloadBlob('\ufeff'+x,name,'application/vnd.ms-excel');
-    else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+x],{type:'application/vnd.ms-excel'}));a.download=name;a.click()}
+    return {rows,styles,merges:MERGES,cols:COLS,rowHeights:ROW_HEIGHTS};
+  }
+
+  function fileName(M,cfg){
+    const lop=String(cfg.lop||classNameOf()||'lop').toLowerCase().replace(/[^a-z0-9]+/g,'');
+    return `so_diem_danh_${lop}_${M.m}_${M.y}.xls`;
   }
 
   window.vneduExport=function(){
@@ -4166,8 +4219,12 @@ table.vnedu-sheet td.vnedu-total{background:#fbfdff;font-weight:800;color:#0f3b6
     if(!cfg.month){alert('⚠️ Hãy chọn tháng cần xuất.');return}
     const M=buildModel(cfg);
     if(!M.rows.length){alert('⚠️ Lớp chưa có học sinh.');return}
+    if(typeof XLSX==='undefined'||!XLSX.CFB){alert('⚠️ Chưa tải được thư viện Excel. Hãy kiểm tra kết nối mạng rồi thử lại.');return}
     try{
-      if(cfg.format==='xml')exportXML(cfg,M);else exportBiff8(cfg,M);
+      const bytes=window.vneduBuildXls(buildSheet(cfg,M)),name=fileName(M,cfg);
+      const blob=new Blob([new Uint8Array(bytes)],{type:'application/vnd.ms-excel'});
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),800);
       if(typeof log==='function')log(`Xuất sổ điểm danh tháng ${M.m}/${M.y} theo mẫu VnEdu (${M.rows.length} học sinh)`);
     }catch(e){console.error(e);alert('❌ Không xuất được file: '+(e?.message||e));}
   };
@@ -4175,18 +4232,14 @@ table.vnedu-sheet td.vnedu-total{background:#fbfdff;font-weight:800;color:#0f3b6
   /* ---------- mở hộp thoại ---------- */
   window.openVneduExport=function(){
     if(typeof state==='undefined'||!state?.students){alert('⚠️ Chưa có dữ liệu lớp. Hãy đăng nhập và chọn lớp trước.');return}
-    const c=cfgStore()||{};
+    const c=cfgStore()||{},g=id=>document.getElementById(id);
     const base=(document.getElementById('attDate')?.value||(typeof today==='function'?today():new Date().toISOString().slice(0,10))).slice(0,7);
-    const g=id=>document.getElementById(id);
     if(g('vneduMonth')&&!g('vneduMonth').value)g('vneduMonth').value=base;
     g('vneduSo').value=c.so||SO_DEFAULT;
     g('vneduTruong').value=c.truong||TRUONG_DEFAULT;
     g('vneduKhoi').value=gradeOf();
     g('vneduLop').value=classNameOf();
     g('vneduMode').value=c.mode||'auto';
-    g('vneduFormat').value=c.format||'xls';
-    g('vneduLateSkip').checked=c.lateSkip!==false;
-    g('vneduLatePeriods').value=c.latePeriods||'1';
     g('vneduSortName').checked=c.sortName!==false;
     vneduRenderPreview();
     if(typeof openModal==='function')openModal('vneduExportModal');else document.getElementById('vneduExportModal').classList.add('show');
