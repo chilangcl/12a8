@@ -3792,6 +3792,419 @@ setInterval(function(){try{if(typeof processWeeklyAutoBonus==='function')process
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',restoreRememberedLogin,{once:true});else restoreRememberedLogin();
 })();
 </script>
+<!-- ===================== XUẤT SỔ ĐIỂM DANH THÁNG (VnEdu) v1 ===================== -->
+<style id="vnedu-export-css">
+#vneduExportModal .modal-card{max-width:1180px;width:min(1180px,96vw)}
+.vnedu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin-bottom:12px}
+.vnedu-grid .field label{display:block;font-size:12px;font-weight:700;color:#475569;margin-bottom:4px}
+.vnedu-grid .field input,.vnedu-grid .field select{width:100%;padding:8px 9px;border:1px solid var(--border,#dbe4ee);border-radius:9px;font:inherit;background:#fff}
+.vnedu-opts{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;margin-bottom:10px;font-size:13px}
+.vnedu-opts label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.vnedu-opts input[type=number]{width:70px;padding:5px 6px;border:1px solid var(--border,#dbe4ee);border-radius:8px}
+.vnedu-legend{font-size:12.5px;line-height:1.65;background:#f1f8ff;border:1px solid #cfe6fb;border-radius:12px;padding:10px 12px;margin-bottom:12px;color:#14324f}
+.vnedu-legend b{color:#0b57a4}
+.vnedu-preview-wrap{overflow:auto;max-height:52vh;border:1px solid #d7e3ee;border-radius:12px;background:#fff}
+table.vnedu-sheet{border-collapse:collapse;font-size:11.5px;white-space:nowrap}
+table.vnedu-sheet th,table.vnedu-sheet td{border:1px solid #c7d6e4;padding:2px 4px;text-align:center;height:24px}
+table.vnedu-sheet thead th{position:sticky;top:0;background:#eaf3fb;z-index:3;font-weight:800;color:#12395e}
+table.vnedu-sheet thead tr:nth-child(2) th{top:26px}
+table.vnedu-sheet td.vnedu-name{text-align:left;font-weight:600;position:sticky;left:0;background:#fff;z-index:2;min-width:170px}
+table.vnedu-sheet th.vnedu-name{position:sticky;left:0;z-index:4;min-width:170px}
+table.vnedu-sheet td.vnedu-sun{background:#f6f7f9;color:#94a3b8}
+table.vnedu-sheet td.vnedu-day input{width:42px;border:0;background:transparent;text-align:center;font:inherit;text-transform:uppercase;padding:2px 0;border-radius:5px;color:#b91c1c;font-weight:700}
+table.vnedu-sheet td.vnedu-day input:focus{outline:2px solid #2563eb;background:#fff}
+table.vnedu-sheet td.vnedu-sun input{color:#94a3b8}
+table.vnedu-sheet td.vnedu-total{background:#fbfdff;font-weight:800;color:#0f3b63}
+.vnedu-foot-note{font-size:12px;color:#64748b;margin-top:8px}
+@media(max-width:680px){#vneduExportModal .modal-card{width:98vw}.vnedu-preview-wrap{max-height:44vh}}
+</style>
+
+<div id="vneduExportModal" class="modal" style="z-index:1500"><div class="modal-card">
+  <div class="modal-head"><h3>📤 Xuất sổ điểm danh tháng (mẫu VnEdu)</h3><button class="x" onclick="closeModal('vneduExportModal')">×</button></div>
+
+  <div class="vnedu-grid">
+    <div class="field"><label>Tháng xuất</label><input type="month" id="vneduMonth" onchange="vneduRenderPreview()"></div>
+    <div class="field"><label>Sở GD&amp;ĐT</label><input id="vneduSo" oninput="vneduRenderPreview()"></div>
+    <div class="field"><label>Trường</label><input id="vneduTruong" oninput="vneduRenderPreview()"></div>
+    <div class="field"><label>Khối</label><input id="vneduKhoi" oninput="vneduRenderPreview()"></div>
+    <div class="field"><label>Lớp</label><input id="vneduLop" oninput="vneduRenderPreview()"></div>
+    <div class="field"><label>Số buổi học / ngày</label><select id="vneduMode" onchange="vneduRenderPreview()">
+      <option value="auto">Tự động theo lịch học tuần (khuyến nghị)</option>
+      <option value="sang">1 buổi/ngày — học sáng</option>
+      <option value="chieu">1 buổi/ngày — học chiều</option>
+      <option value="ca">2 buổi/ngày — cả tuần (T2–T7)</option>
+    </select></div>
+    <div class="field"><label>Định dạng file</label><select id="vneduFormat">
+      <option value="xls">.xls chuẩn VnEdu (khuyến nghị để đồng bộ)</option>
+      <option value="xml">.xls có kẻ khung đầy đủ (để in / lưu hồ sơ)</option>
+    </select></div>
+  </div>
+
+  <div class="vnedu-opts">
+    <label><input type="checkbox" id="vneduLateSkip" onchange="vneduRenderPreview()"> Quy đổi <b>“Đi muộn”</b> thành bỏ tiết</label>
+    <label>Tiết bỏ khi đi muộn: <input type="text" id="vneduLatePeriods" maxlength="5" value="1" oninput="vneduRenderPreview()"></label>
+    <label><input type="checkbox" id="vneduSortName" onchange="vneduRenderPreview()"> Sắp xếp theo tên A→Z (chuẩn sổ)</label>
+    <button class="btn secondary" type="button" onclick="vneduClearOverrides()" style="margin-left:auto">↺ Xóa sửa tay tháng này</button>
+  </div>
+
+  <div class="vnedu-legend">
+    <b>Cách nhập / ký hiệu trong bảng (có thể sửa trực tiếp từng ô dưới đây trước khi xuất):</b><br>
+    • <b>Lớp học 1 buổi/ngày:</b> Nghỉ có phép cả ngày: <b>P</b> · Nghỉ không phép cả ngày: <b>K</b> · Bỏ tiết: <b>1 2 3 4 5</b> (VD: nhập <b>345</b> tức bỏ tiết 3, 4, 5).<br>
+    • <b>Lớp học 2 buổi/ngày:</b> Nghỉ phép cả ngày <b>SPCP</b> · Sáng <b>SP</b> · Chiều <b>CP</b> · Không phép cả ngày <b>SKCK</b> · Sáng <b>SK</b> · Chiều <b>CK</b> · Sáng phép–chiều không phép <b>SPCK</b> · Sáng không phép–chiều phép <b>SKCP</b>.<br>
+    • <b>Bỏ tiết:</b> <b>C124</b> = chiều bỏ tiết 1,2,4 · <b>S12C34</b> = sáng bỏ tiết 1,2 và chiều bỏ tiết 3,4 · <b>SKC34</b> = sáng nghỉ không phép, chiều bỏ tiết 3,4.
+  </div>
+
+  <div id="vneduPreview" class="vnedu-preview-wrap"></div>
+  <div class="vnedu-foot-note" id="vneduSummary"></div>
+
+  <div class="actions" style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn" type="button" onclick="vneduExport()">📥 Xuất file Excel</button>
+    <button class="btn secondary" type="button" onclick="closeModal('vneduExportModal')">Đóng</button>
+  </div>
+</div></div>
+
+<script id="vnedu-export-js">
+/* ============================================================================
+   XUẤT SỔ ĐIỂM DANH THÁNG THEO MẪU VnEdu
+   - Lấy dữ liệu từ state.students + state.attendance (key: date_session_studentId)
+   - Quy đổi trạng thái (present/late/excused/absent) sang ký hiệu VnEdu:
+       1 buổi/ngày : P (phép) · K (không phép) · 1..9 (bỏ tiết)
+       2 buổi/ngày : S/C + P|K|tiết  →  SP, CK, SPCP, SKCP, S12C34, SKC34...
+   - Cho phép GVCN sửa tay từng ô trước khi xuất (lưu ở state.settings.vneduOverrides)
+   - Xuất file .xls giữ nguyên khung mẫu: 39 cột (A..AM), merge tiêu đề, cột ngày 1..31,
+     cột TS buổi nghỉ (TS/P/K) và cột TS bỏ tiết — đúng vị trí ô của mẫu VnEdu.
+   ============================================================================ */
+(function(){
+  'use strict';
+  const DOW=['CN','T2','T3','T4','T5','T6','T7'];
+  const SO_DEFAULT='SỞ GIÁO DỤC VÀ ĐÀO TẠO LẠNG SƠN', TRUONG_DEFAULT='TRƯỜNG THPT CHI LĂNG';
+  const pad2=n=>String(n).padStart(2,'0');
+  const isoOf=(y,m,d)=>`${y}-${pad2(m)}-${pad2(d)}`;
+
+  function cfgStore(){
+    if(typeof state==='undefined'||!state)return null;
+    state.settings=state.settings||{};
+    state.settings.vnedu=Object.assign({so:SO_DEFAULT,truong:TRUONG_DEFAULT,mode:'auto',lateSkip:true,latePeriods:'1',sortName:true,format:'xls'},state.settings.vnedu||{});
+    return state.settings.vnedu;
+  }
+  function overrideStore(){
+    state.settings=state.settings||{};
+    if(!state.settings.vneduOverrides||typeof state.settings.vneduOverrides!=='object')state.settings.vneduOverrides={};
+    return state.settings.vneduOverrides;
+  }
+
+  /* ---------- dữ liệu lớp ---------- */
+  function classNameOf(){return (typeof currentClass!=='undefined'&&currentClass?.class_name)||state?.settings?.className||''}
+  function gradeOf(){
+    const g=(typeof currentClass!=='undefined'&&currentClass?.grade)||state?.settings?.grade;
+    if(g)return String(g);
+    const m=String(classNameOf()).match(/\d{1,2}/);return m?m[0]:'';
+  }
+  function splitName(full){
+    const t=String(full||'').trim().replace(/\s+/g,' ').split(' ');
+    if(t.length<=1)return {ho:'',ten:t[0]||''};
+    return {ho:t.slice(0,-1).join(' '),ten:t[t.length-1]};
+  }
+  function studentList(sortName){
+    const a=(state?.students||[]).slice();
+    if(sortName){
+      a.sort((x,y)=>{
+        const nx=splitName(x.name),ny=splitName(y.name);
+        return nx.ten.localeCompare(ny.ten,'vi')||nx.ho.localeCompare(ny.ho,'vi')||String(x.code||'').localeCompare(String(y.code||''),'vi');
+      });
+    }
+    return a;
+  }
+
+  /* ---------- lịch học & trạng thái ---------- */
+  function scheduled(dateStr,session){
+    if(typeof isClassSessionScheduled==='function')return !!isClassSessionScheduled(dateStr,session);
+    const d=new Date(dateStr+'T00:00:00');return !isNaN(d)&&d.getDay()!==0;
+  }
+  function notSunday(dateStr){const d=new Date(dateStr+'T00:00:00');return !isNaN(d)&&d.getDay()!==0}
+  function sessionsFor(dateStr,mode){
+    if(mode==='sang')return {sang:notSunday(dateStr),chieu:false};
+    if(mode==='chieu')return {sang:false,chieu:notSunday(dateStr)};
+    if(mode==='ca')return {sang:notSunday(dateStr),chieu:notSunday(dateStr)};
+    return {sang:scheduled(dateStr,'sang'),chieu:scheduled(dateStr,'chieu')};
+  }
+  function statusOf(sid,dateStr,session){
+    const key=(typeof attendanceRecordKey==='function')?attendanceRecordKey(dateStr,session,sid):`${dateStr}_${session}_${sid}`;
+    return state?.attendance?.[key]?.status||'present';
+  }
+  function token(prefix,status,cfg){
+    if(status==='excused')return prefix+'P';
+    if(status==='absent')return prefix+'K';
+    if(status==='late'&&cfg.lateSkip){const p=String(cfg.latePeriods||'1').replace(/[^1-9]/g,'')||'1';return prefix+p}
+    return '';
+  }
+  /* Sinh ký hiệu tự động cho 1 ô (1 học sinh - 1 ngày) */
+  function autoCell(sid,dateStr,cfg){
+    const s=sessionsFor(dateStr,cfg.mode);
+    if(!s.sang&&!s.chieu)return '';
+    if(s.sang&&s.chieu)return token('S',statusOf(sid,dateStr,'sang'),cfg)+token('C',statusOf(sid,dateStr,'chieu'),cfg);
+    const only=s.sang?'sang':'chieu';
+    return token('',statusOf(sid,dateStr,only),cfg);
+  }
+  /* Đếm buổi nghỉ P/K và số tiết bỏ từ ký hiệu trong ô */
+  function countsOf(cell){
+    const c=String(cell||'').trim().toUpperCase();const r={p:0,k:0,t:0};
+    if(!c)return r;
+    if(/^[SC]/.test(c)){
+      (c.match(/[SC][^SC]*/g)||[]).forEach(seg=>{
+        const b=seg.slice(1);
+        if(b==='P')r.p++;else if(b==='K')r.k++;else r.t+=(b.match(/[1-9]/g)||[]).length;
+      });
+    }else if(c==='P')r.p=1;
+    else if(c==='K')r.k=1;
+    else r.t=(c.match(/[1-9]/g)||[]).length;
+    return r;
+  }
+
+  /* ---------- sửa tay ---------- */
+  const monthKey=()=>document.getElementById('vneduMonth')?.value||'';
+  function getOverride(sid,day){return overrideStore()?.[monthKey()]?.[sid]?.[String(day)]}
+  function setOverride(sid,day,val){
+    const st=overrideStore(),mk=monthKey();
+    st[mk]=st[mk]||{};st[mk][sid]=st[mk][sid]||{};
+    if(val==='')delete st[mk][sid][String(day)];else st[mk][sid][String(day)]=val;
+    if(!Object.keys(st[mk][sid]).length)delete st[mk][sid];
+    if(!Object.keys(st[mk]).length)delete st[mk];
+    if(typeof saveData==='function')saveData();
+  }
+  window.vneduClearOverrides=function(){
+    const st=overrideStore(),mk=monthKey();
+    if(!st[mk]){alert('Tháng này chưa có ô nào được sửa tay.');return}
+    if(!confirm('Xóa toàn bộ các ô đã sửa tay của tháng này và lấy lại số liệu tự động từ điểm danh?'))return;
+    delete st[mk];if(typeof saveData==='function')saveData();vneduRenderPreview();
+  };
+
+  /* ---------- đọc cấu hình từ form ---------- */
+  function readCfg(){
+    const c=cfgStore()||{};
+    const g=id=>document.getElementById(id);
+    const cfg={
+      so:(g('vneduSo')?.value||SO_DEFAULT).trim(),
+      truong:(g('vneduTruong')?.value||TRUONG_DEFAULT).trim(),
+      khoi:(g('vneduKhoi')?.value||'').trim(),
+      lop:(g('vneduLop')?.value||'').trim(),
+      mode:g('vneduMode')?.value||'auto',
+      lateSkip:!!g('vneduLateSkip')?.checked,
+      latePeriods:(g('vneduLatePeriods')?.value||'1').replace(/[^1-9]/g,'')||'1',
+      sortName:!!g('vneduSortName')?.checked,
+      format:g('vneduFormat')?.value||'xls',
+      month:g('vneduMonth')?.value||''
+    };
+    Object.assign(c,{so:cfg.so,truong:cfg.truong,mode:cfg.mode,lateSkip:cfg.lateSkip,latePeriods:cfg.latePeriods,sortName:cfg.sortName,format:cfg.format});
+    if(typeof saveData==='function')saveData();
+    return cfg;
+  }
+
+  /* ---------- dựng mô hình bảng (dùng chung cho xem trước & xuất file) ---------- */
+  function buildModel(cfg){
+    const [ys,ms]=String(cfg.month||'').split('-');
+    const y=Number(ys)||new Date().getFullYear(),m=Number(ms)||(new Date().getMonth()+1);
+    const daysInMonth=new Date(y,m,0).getDate();
+    const students=studentList(cfg.sortName);
+    const days=[];
+    for(let d=1;d<=31;d++){
+      const dt=new Date(y,m-1,d); // ngày 31 của tháng thiếu sẽ tự nhảy sang tháng sau (giống mẫu)
+      days.push({day:d,inMonth:d<=daysInMonth,dow:DOW[dt.getDay()],iso:isoOf(dt.getFullYear(),dt.getMonth()+1,dt.getDate())});
+    }
+    const rows=students.map((s,i)=>{
+      const nm=splitName(s.name);
+      const cells=[];let P=0,K=0,T=0;
+      days.forEach(dd=>{
+        let v='',auto='';
+        if(dd.inMonth){
+          auto=autoCell(s.id,dd.iso,cfg);
+          const ov=getOverride(s.id,dd.day);
+          v=(ov===undefined||ov===null)?auto:String(ov).toUpperCase();
+        }
+        const c=countsOf(v);P+=c.p;K+=c.k;T+=c.t;
+        const ss=dd.inMonth?sessionsFor(dd.iso,cfg.mode):{sang:false,chieu:false};
+        cells.push({v,auto,edited:dd.inMonth&&getOverride(s.id,dd.day)!==undefined,offday:!ss.sang&&!ss.chieu});
+      });
+      return {stt:i+1,id:s.id,code:s.code||'',ho:nm.ho,ten:nm.ten,name:s.name||'',cells,P,K,TS:P+K,T};
+    });
+    return {y,m,daysInMonth,days,rows,
+      title:`Tháng ${m} năm ${y} - Khối ${cfg.khoi||gradeOf()} - Lớp ${cfg.lop||classNameOf()}`};
+  }
+
+  /* ---------- xem trước (có thể sửa tay) ---------- */
+  window.vneduRenderPreview=function(){
+    const host=document.getElementById('vneduPreview');if(!host)return;
+    const cfg=readCfg(),M=buildModel(cfg);
+    if(!M.rows.length){host.innerHTML='<div class="empty" style="padding:22px">Lớp chưa có học sinh để xuất sổ điểm danh.</div>';document.getElementById('vneduSummary').textContent='';return}
+    let h='<table class="vnedu-sheet"><thead><tr><th class="vnedu-name">Họ và tên</th>';
+    M.days.forEach(d=>h+=`<th${d.inMonth?'':' style="color:#b6c2ce"'}>${d.day}</th>`);
+    h+='<th colspan="3">TS buổi nghỉ</th><th>TS bỏ tiết</th></tr><tr><th class="vnedu-name"></th>';
+    M.days.forEach(d=>h+=`<th>${d.dow}</th>`);
+    h+='<th>TS</th><th>P</th><th>K</th><th></th></tr></thead><tbody>';
+    M.rows.forEach(r=>{
+      h+=`<tr><td class="vnedu-name">${r.stt}. ${esc(r.name)}</td>`;
+      r.cells.forEach((c,idx)=>{
+        const d=M.days[idx];
+        if(!d.inMonth){h+='<td class="vnedu-sun"></td>';return}
+        h+=`<td class="vnedu-day${c.offday?' vnedu-sun':''}"><input value="${esc(c.v)}" data-sid="${esc(r.id)}" data-day="${d.day}" title="${c.offday?'Không có lịch học':'Tự động: '+(c.auto||'(trống)')}"></td>`;
+      });
+      h+=`<td class="vnedu-total">${r.TS}</td><td class="vnedu-total">${r.P}</td><td class="vnedu-total">${r.K}</td><td class="vnedu-total">${r.T}</td></tr>`;
+    });
+    h+='</tbody></table>';
+    host.innerHTML=h;
+    host.querySelectorAll('input[data-sid]').forEach(inp=>{
+      inp.addEventListener('change',()=>{
+        setOverride(inp.dataset.sid,inp.dataset.day,String(inp.value||'').trim().toUpperCase());
+        vneduRenderPreview();
+      });
+    });
+    const tP=M.rows.reduce((s,r)=>s+r.P,0),tK=M.rows.reduce((s,r)=>s+r.K,0),tT=M.rows.reduce((s,r)=>s+r.T,0);
+    document.getElementById('vneduSummary').textContent=`📊 ${M.rows.length} học sinh · ${M.daysInMonth} ngày · Tổng buổi nghỉ có phép: ${tP} · không phép: ${tK} · tổng tiết bỏ: ${tT}. Ô nền xám là ngày lớp không có lịch học.`;
+  };
+
+  /* ---------- dựng AOA đúng khung mẫu VnEdu ---------- */
+  function buildAOA(cfg,M){
+    const W=39,blank=()=>new Array(W).fill('');
+    const aoa=[];
+    let r0=blank();r0[0]=cfg.so||SO_DEFAULT;r0[3]='CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM';aoa.push(r0);
+    let r1=blank();r1[0]=cfg.truong||TRUONG_DEFAULT;r1[3]='Độc lập - Tự do - Hạnh phúc';aoa.push(r1);
+    let r2=blank();r2[0]='SỐ ĐIỂM DANH';aoa.push(r2);
+    let r3=blank();r3[0]=M.title;aoa.push(r3);
+    aoa.push(blank());
+    let r5=blank();r5[0]='STT';r5[1]='Mã học sinh';r5[2]='Họ và tên';
+    M.days.forEach((d,i)=>r5[4+i]=d.day);
+    r5[35]='TS Buổi nghỉ';r5[38]='TS\nbỏ\ntiết';aoa.push(r5);
+    let r6=blank();M.days.forEach((d,i)=>r6[4+i]=d.dow);
+    r6[35]='TS';r6[36]='P';r6[37]='K';aoa.push(r6);
+    M.rows.forEach(r=>{
+      const row=blank();row[0]=r.stt;row[1]=r.code;row[2]=r.ho;row[3]=r.ten;
+      r.cells.forEach((c,i)=>row[4+i]=c.v||'');
+      row[35]=String(r.TS);row[36]=String(r.P);row[37]=String(r.K);row[38]=String(r.T);
+      aoa.push(row);
+    });
+    return aoa;
+  }
+  const MERGES=[
+    {s:{r:0,c:0},e:{r:0,c:2}},{s:{r:0,c:3},e:{r:0,c:38}},
+    {s:{r:1,c:0},e:{r:1,c:2}},{s:{r:1,c:3},e:{r:1,c:38}},
+    {s:{r:2,c:0},e:{r:2,c:38}},{s:{r:3,c:0},e:{r:3,c:38}},{s:{r:4,c:0},e:{r:4,c:38}},
+    {s:{r:5,c:35},e:{r:5,c:37}},
+    {s:{r:5,c:0},e:{r:6,c:0}},{s:{r:5,c:1},e:{r:6,c:1}},{s:{r:5,c:2},e:{r:6,c:3}},{s:{r:5,c:38},e:{r:6,c:38}}
+  ];
+  /* wch = (độ rộng mẫu)/256 - 0.83 để file xuất ra có bề rộng cột trùng khít mẫu VnEdu */
+  const COLS=[{wch:4.90},{wch:10.62},{wch:18.17},{wch:7.17}].concat(Array.from({length:35},()=>({wch:3.90})));
+
+  function fileName(M,cfg,ext){
+    const lop=String(cfg.lop||classNameOf()||'lop').toLowerCase().replace(/[^a-z0-9]+/g,'');
+    return `so_diem_danh_${lop}_${M.m}_${M.y}.${ext}`;
+  }
+
+  /* ---------- xuất .xls chuẩn (BIFF8 qua SheetJS) ---------- */
+  function exportBiff8(cfg,M){
+    if(typeof XLSX==='undefined'){alert('⚠️ Chưa tải được thư viện Excel (XLSX). Hãy kiểm tra kết nối mạng rồi thử lại.');return}
+    const ws=XLSX.utils.aoa_to_sheet(buildAOA(cfg,M));
+    ws['!merges']=MERGES.map(m=>({s:{...m.s},e:{...m.e}}));
+    ws['!cols']=COLS.map(c=>({...c}));
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,'Sheet1');
+    XLSX.writeFile(wb,fileName(M,cfg,'xls'),{bookType:'xls'});
+  }
+
+  /* ---------- xuất .xls có kẻ khung (SpreadsheetML 2003) ---------- */
+  function xmlEsc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+  function exportXML(cfg,M){
+    const aoa=buildAOA(cfg,M);
+    const mergeAt=(r,c)=>MERGES.find(m=>m.s.r===r&&m.s.c===c);
+    const covered=(r,c)=>MERGES.some(m=>r>=m.s.r&&r<=m.e.r&&c>=m.s.c&&c<=m.e.c&&!(r===m.s.r&&c===m.s.c));
+    const styleOf=(r,c)=>{
+      if(r<=4)return r===0?'sPlain':(r<=3?'sTitle':'sPlain');
+      if(r<=6)return 'sHead';
+      if(c===2||c===3)return 'sLeft';
+      return 'sCell';
+    };
+    let x='<?xml version="1.0"?>\n<?mso-application progid="Excel.Sheet"?>\n'+
+      '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet" xmlns:html="http://www.w3.org/TR/REC-html40">\n<Styles>\n'+
+      '<Style ss:ID="Default" ss:Name="Normal"><Alignment ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10"/></Style>\n'+
+      '<Style ss:ID="sPlain"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10"/></Style>\n'+
+      '<Style ss:ID="sTitle"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10" ss:Bold="1"/></Style>\n'+
+      '<Style ss:ID="sHead"><Alignment ss:Horizontal="Center" ss:Vertical="Center" ss:WrapText="1"/><Font ss:FontName="Arial" ss:Size="10" ss:Bold="1"/><Interior ss:Color="#EAF3FB" ss:Pattern="Solid"/><Borders>'+
+      '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/></Borders></Style>\n'+
+      '<Style ss:ID="sCell"><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10"/><Borders>'+
+      '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/></Borders></Style>\n'+
+      '<Style ss:ID="sLeft"><Alignment ss:Horizontal="Left" ss:Vertical="Center"/><Font ss:FontName="Arial" ss:Size="10"/><Borders>'+
+      '<Border ss:Position="Top" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Left" ss:LineStyle="Continuous" ss:Weight="1"/><Border ss:Position="Right" ss:LineStyle="Continuous" ss:Weight="1"/></Borders></Style>\n'+
+      '</Styles>\n<Worksheet ss:Name="Sheet1"><Table>\n';
+    const wpx=[44,88,146,61].concat(Array.from({length:35},()=>36));
+    wpx.forEach(w=>{x+=`<Column ss:AutoFitWidth="0" ss:Width="${w}"/>\n`});
+    aoa.forEach((row,r)=>{
+      const hgt=r===2?26:(r<=1?18:(r<=6?22:17));
+      x+=`<Row ss:Height="${hgt}">`;
+      let lastWritten=-1;
+      row.forEach((val,c)=>{
+        if(covered(r,c))return;
+        const mg=mergeAt(r,c);
+        const across=mg?mg.e.c-mg.s.c:0,down=mg?mg.e.r-mg.s.r:0;
+        const isNum=typeof val==='number';
+        if(val===''&&!mg&&r<5)return;
+        let attrs=` ss:StyleID="${styleOf(r,c)}"`;
+        if(c!==lastWritten+1)attrs+=` ss:Index="${c+1}"`;
+        if(across)attrs+=` ss:MergeAcross="${across}"`;
+        if(down)attrs+=` ss:MergeDown="${down}"`;
+        x+=`<Cell${attrs}>`+(val===''?'':`<Data ss:Type="${isNum?'Number':'String'}">${xmlEsc(val)}</Data>`)+'</Cell>';
+        lastWritten=c+across;
+      });
+      x+='</Row>\n';
+    });
+    x+='</Table><WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><PageSetup><Layout x:Orientation="Landscape"/><PageMargins x:Bottom="0.4" x:Left="0.3" x:Right="0.3" x:Top="0.4"/></PageSetup><FreezePanes/><FrozenNoSplit/><SplitHorizontal>7</SplitHorizontal><TopRowBottomPane>7</TopRowBottomPane><SplitVertical>4</SplitVertical><LeftColumnRightPane>4</LeftColumnRightPane><ActivePane>0</ActivePane><Print><ValidPrinterInfo/><Scale>70</Scale><HorizontalResolution>600</HorizontalResolution></Print></WorksheetOptions></Worksheet></Workbook>';
+    const name=fileName(M,cfg,'xls');
+    if(typeof downloadBlob==='function')downloadBlob('\ufeff'+x,name,'application/vnd.ms-excel');
+    else{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+x],{type:'application/vnd.ms-excel'}));a.download=name;a.click()}
+  }
+
+  window.vneduExport=function(){
+    const cfg=readCfg();
+    if(!cfg.month){alert('⚠️ Hãy chọn tháng cần xuất.');return}
+    const M=buildModel(cfg);
+    if(!M.rows.length){alert('⚠️ Lớp chưa có học sinh.');return}
+    try{
+      if(cfg.format==='xml')exportXML(cfg,M);else exportBiff8(cfg,M);
+      if(typeof log==='function')log(`Xuất sổ điểm danh tháng ${M.m}/${M.y} theo mẫu VnEdu (${M.rows.length} học sinh)`);
+    }catch(e){console.error(e);alert('❌ Không xuất được file: '+(e?.message||e));}
+  };
+
+  /* ---------- mở hộp thoại ---------- */
+  window.openVneduExport=function(){
+    if(typeof state==='undefined'||!state?.students){alert('⚠️ Chưa có dữ liệu lớp. Hãy đăng nhập và chọn lớp trước.');return}
+    const c=cfgStore()||{};
+    const base=(document.getElementById('attDate')?.value||(typeof today==='function'?today():new Date().toISOString().slice(0,10))).slice(0,7);
+    const g=id=>document.getElementById(id);
+    if(g('vneduMonth')&&!g('vneduMonth').value)g('vneduMonth').value=base;
+    g('vneduSo').value=c.so||SO_DEFAULT;
+    g('vneduTruong').value=c.truong||TRUONG_DEFAULT;
+    g('vneduKhoi').value=gradeOf();
+    g('vneduLop').value=classNameOf();
+    g('vneduMode').value=c.mode||'auto';
+    g('vneduFormat').value=c.format||'xls';
+    g('vneduLateSkip').checked=c.lateSkip!==false;
+    g('vneduLatePeriods').value=c.latePeriods||'1';
+    g('vneduSortName').checked=c.sortName!==false;
+    vneduRenderPreview();
+    if(typeof openModal==='function')openModal('vneduExportModal');else document.getElementById('vneduExportModal').classList.add('show');
+  };
+
+  /* ---------- gắn nút vào trang Chuyên cần & Báo cáo ---------- */
+  function addButtons(){
+    const mk=()=>{const b=document.createElement('button');b.type='button';b.className='btn secondary';b.textContent='📤 Xuất Excel VnEdu';b.onclick=()=>window.openVneduExport();return b};
+    document.querySelectorAll('#page-attendance .page-head .actions, #page-reports .page-head .actions').forEach(host=>{
+      if(host.querySelector('[data-vnedu-btn]'))return;
+      const b=mk();b.dataset.vneduBtn='1';host.appendChild(b);
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',addButtons);else addButtons();
+})();
+</script>
+<!-- =================== HẾT KHỐI XUẤT SỔ ĐIỂM DANH VnEdu =================== -->
+
 </body>
 </html>
 
