@@ -721,6 +721,7 @@ select option{background:#fff!important;color:#202124!important}
   }
 }
 </style>
+<style id="guest-class-gate-css">#guestScreen.guest-await .guest-wrap{display:none!important}</style>
 </head>
 <body>
 
@@ -745,6 +746,16 @@ select option{background:#fff!important;color:#202124!important}
     <div class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</div>
   </div>
 </div>
+
+<div id="guestClassChooser" class="modal" style="z-index:2000"><div class="modal-card" style="max-width:620px">
+  <div class="modal-head"><h3>👀 Chọn năm học và lớp cần xem</h3><button class="x" onclick="guestGateCancel()">×</button></div>
+  <p class="muted">Vui lòng chọn năm học và lớp để xem thông tin công khai của lớp.</p>
+  <div class="form-grid" style="margin-top:12px">
+    <div class="field"><label>Năm học</label><select id="guestGateYear"></select></div>
+    <div class="field"><label>Lớp</label><select id="guestGateClass"></select></div>
+  </div>
+  <div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="btn secondary" onclick="guestGateCancel()">↩ Quay lại đăng nhập</button><button class="btn" onclick="guestGateConfirm()">👀 Xem lớp</button></div>
+</div></div>
 
 <div id="guestScreen" class="guest-screen hidden">
   <div class="guest-top">
@@ -3335,6 +3346,8 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
     document.getElementById('loginScreen')?.classList.add('hidden');
     document.getElementById('app')?.classList.add('hidden');
     document.getElementById('guestScreen')?.classList.remove('hidden');
+    document.getElementById('guestScreen')?.classList.add('guest-await');
+    document.getElementById('guestClassChooser')?.classList.remove('show');
     const box=document.getElementById('guestContent');
     box.innerHTML='<div class="guest-loading">⏳ Đang tải danh sách lớp công khai...</div>';
 
@@ -3344,6 +3357,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       guestClasses=Array.isArray(data)?data:(data?.classes||[]);
 
       if(!guestClasses.length){
+        document.getElementById('guestScreen')?.classList.remove('guest-await');
         box.innerHTML='<div class="guest-card"><div class="empty">Chưa có lớp được công khai. GVCN cần bật chế độ Guest trong Supabase.</div></div>';
         return;
       }
@@ -3361,14 +3375,48 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
 
       y.onchange=fill;
       fill();
-      await loadGuestDashboard();
+
+      // Yêu cầu chọn Năm học + Lớp trước khi hiển thị nội dung
+      const gy=document.getElementById('guestGateYear');
+      const gc=document.getElementById('guestGateClass');
+      gy.innerHTML=y.innerHTML;
+      function gateFill(){
+        const list=guestClasses.filter(x=>x.year===gy.value);
+        gc.innerHTML=list.map(x=>`<option value="${guestEsc(x.state_key)}">${guestEsc(x.class_name)} · Khối ${guestEsc(x.grade||'')}</option>`).join('');
+      }
+      gy.onchange=gateFill;
+      gateFill();
+      box.innerHTML='<div class="guest-loading">⏳ Vui lòng chọn năm học và lớp để xem...</div>';
+      document.getElementById('guestClassChooser')?.classList.add('show');
     }catch(e){
       console.error(e);
+      document.getElementById('guestScreen')?.classList.remove('guest-await');
+      document.getElementById('guestClassChooser')?.classList.remove('show');
       box.innerHTML=`<div class="guest-card"><div class="notice danger">❌ Không tải được dữ liệu công khai: ${guestEsc(e.message||e)}</div></div>`;
     }
   }
 
+  async function guestGateConfirm(){
+    const gy=document.getElementById('guestGateYear');
+    const gc=document.getElementById('guestGateClass');
+    if(!gy?.value||!gc?.value){alert('Vui lòng chọn Năm học và Lớp cần xem.');return;}
+    const y=document.getElementById('guestYearSelect');
+    const c=document.getElementById('guestClassSelect');
+    y.value=gy.value;
+    if(typeof y.onchange==='function')y.onchange();
+    c.value=gc.value;
+    document.getElementById('guestClassChooser')?.classList.remove('show');
+    document.getElementById('guestScreen')?.classList.remove('guest-await');
+    await loadGuestDashboard();
+  }
+
+  function guestGateCancel(){
+    document.getElementById('guestClassChooser')?.classList.remove('show');
+    closeGuestMode();
+  }
+
   function closeGuestMode(){
+    document.getElementById('guestClassChooser')?.classList.remove('show');
     document.getElementById('guestScreen')?.classList.add('hidden');
     document.getElementById('loginScreen')?.classList.remove('hidden');
   }
@@ -3579,6 +3627,9 @@ async function loadGuestDashboard(){
 
   window.openGuestMode=openGuestMode;
   window.closeGuestMode=closeGuestMode;
+  window.guestGateConfirm=guestGateConfirm;
+  window.guestGateCancel=guestGateCancel;
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){const g=document.getElementById('guestScreen');if(g&&!g.classList.contains('hidden')&&g.classList.contains('guest-await'))guestGateCancel();}});
   window.loadGuestDashboard=loadGuestDashboard;
 })();
 </script>
