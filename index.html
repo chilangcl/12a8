@@ -24,7 +24,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.toolbar input,.toolbar select{padding:9px 10px;border:1px solid var(--border);border-radius:9px;background:#fff}
 .notice{padding:12px 14px;border-radius:10px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;margin-bottom:14px}.ok{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
 .modal{position:fixed;inset:0;background:#0f172a88;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.show{display:flex}.modal-card{width:min(720px,100%);max-height:90vh;overflow:auto;background:white;border-radius:18px;padding:22px}.modal-head{display:flex;justify-content:space-between;align-items:center}.modal-head h3{margin:0}.x{border:0;background:#f1f5f9;border-radius:50%;width:34px;height:34px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.span2{grid-column:1/-1}.footer-note{font-size:12px;color:var(--muted);margin-top:18px}
-.contact-list{display:grid;gap:10px}.contact-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:#f8fafc}.contact-row .mini{color:var(--muted);font-size:12px;margin-top:2px}a.btn{display:inline-block;text-decoration:none;white-space:nowrap;text-align:center}
+.contact-list{display:grid;gap:10px}.contact-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:#f8fafc;flex-wrap:wrap}.contact-row .mini{color:var(--muted);font-size:12px;margin-top:2px}.contact-row-actions{display:flex;gap:6px;flex-wrap:wrap}a.btn{display:inline-block;text-decoration:none;white-space:nowrap;text-align:center}
 .progress{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden}.progress span{display:block;height:100%;background:var(--primary)}
 .kpi-list{display:grid;gap:10px}.kpi-row{display:flex;justify-content:space-between;align-items:center}.kpi-row strong{font-size:13px}.mini{font-size:12px;color:var(--muted)}
 .today-attendance-panel{margin:0 0 18px;padding:20px;border:2px solid #2563eb;border-radius:18px;background:linear-gradient(135deg,#eff6ff 0%,#fff 52%,#ecfdf5 100%);box-shadow:0 8px 22px rgba(37,99,235,.13)}
@@ -1781,7 +1781,33 @@ function viewStudent(id){
 }
 // Chuẩn hóa số điện thoại về dạng dùng được cho liên kết tel: (giữ dấu + đầu số quốc tế nếu có, bỏ khoảng trắng/dấu gạch).
 function telHref(phone){return 'tel:'+String(phone||'').trim().replace(/[^0-9+]/g,'')}
-// Mở hộp thoại "Liên lạc": liệt kê SĐT học sinh và SĐT phụ huynh, bấm vào sẽ dùng trình gọi điện của máy/điện thoại để quay số.
+// Chuẩn hóa số điện thoại về dạng nội địa (0xxxxxxxxx) để tạo liên kết Zalo — zalo.me chỉ nhận đúng định dạng này.
+function zaloDigits(phone){
+  let d=String(phone||'').trim().replace(/[^0-9+]/g,'');
+  if(d.startsWith('+84'))d='0'+d.slice(3);
+  else if(d.startsWith('84')&&d.length>9)d='0'+d.slice(2);
+  return d;
+}
+function zaloHref(phone){return 'https://zalo.me/'+zaloDigits(phone)}
+// Sao chép số điện thoại vào bộ nhớ tạm — dùng làm phương án chắc chắn hoạt động khi không có ứng dụng gọi nào phù hợp
+// (ví dụ máy tính không cài Zalo, hoặc trình duyệt đưa ra hộp thoại "Mở bằng" với các ứng dụng không hỗ trợ gọi số điện thoại như Zoom).
+async function copyPhoneNumber(phone,btn){
+  const text=String(phone||'').trim();
+  if(!text)return;
+  try{
+    if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(text)}
+    else{
+      const ta=document.createElement('textarea');
+      ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.focus();ta.select();
+      document.execCommand('copy');document.body.removeChild(ta);
+    }
+    if(btn){const old=btn.textContent;btn.textContent='✅ Đã chép';setTimeout(()=>{btn.textContent=old},1500)}
+  }catch(e){alert('Không sao chép được. Số điện thoại: '+text)}
+}
+window.copyPhoneNumber=copyPhoneNumber;
+// Mở hộp thoại "Liên lạc": liệt kê SĐT học sinh và SĐT phụ huynh, cho phép Gọi (trình quay số máy/điện thoại),
+// mở Zalo tới đúng số đó, hoặc sao chép số để dán vào ứng dụng khác.
 function openContactMenu(id){
   if(!isAdmin()){alert('🔒 Chỉ GVCN được sử dụng tính năng liên lạc.');return}
   const s=(state.students||[]).find(x=>String(x.id)===String(id));
@@ -1794,8 +1820,8 @@ function openContactMenu(id){
   body.innerHTML=`<div class="mini" style="margin-bottom:10px">${esc(s.name||'')} · ${esc(s.code||'')}</div><div class="contact-list">${rows.map(r=>{
     const phone=String(r.phone||'').trim();
     if(!phone)return `<div class="contact-row"><div><b>${esc(r.label)}</b><div class="mini">Chưa cập nhật số điện thoại</div></div></div>`;
-    return `<div class="contact-row"><div><b>${esc(r.label)}</b><div class="mini">${esc(phone)}</div></div><a class="btn" href="${esc(telHref(phone))}" onclick="closeModal('contactModal')">📞 Gọi</a></div>`;
-  }).join('')}</div>${(!s.phone&&!s.parentPhone)?'<div class="footer-note">Thầy/cô có thể bổ sung số điện thoại ở màn hình Sửa học sinh.</div>':''}`;
+    return `<div class="contact-row"><div><b>${esc(r.label)}</b><div class="mini">${esc(phone)}</div><div class="contact-row-actions"><a class="btn small" href="${esc(telHref(phone))}" onclick="closeModal('contactModal')">📞 Gọi</a><a class="btn secondary small" href="${esc(zaloHref(phone))}" target="_blank" rel="noopener">💬 Zalo</a><button class="btn secondary small" type="button" onclick="copyPhoneNumber('${esc(phone)}',this)">📋 Chép số</button></div></div></div>`;
+  }).join('')}</div>${(!s.phone&&!s.parentPhone)?'<div class="footer-note">Thầy/cô có thể bổ sung số điện thoại ở màn hình Sửa học sinh.</div>':'<div class="footer-note">Nút "📞 Gọi" dùng trình quay số của máy/điện thoại. Nếu trình duyệt hiện hộp thoại "Mở bằng" và chọn một ứng dụng không hỗ trợ gọi điện (ví dụ Zoom) không có phản hồi, hãy dùng nút "💬 Zalo" hoặc "📋 Chép số" rồi dán vào ứng dụng gọi mà thầy/cô muốn dùng.</div>'}`;
   openModal('contactModal');
 }
 window.openContactMenu=openContactMenu;
@@ -2546,11 +2572,10 @@ function renderProfile(){
           <p class="muted">${esc(s.code||'')} · Tổ ${esc(s.group||'Chưa phân tổ')} · ${esc(s.role||'Học sinh')}</p>
           <p>🎂 ${fmtDate(s.dob||'')||'Chưa cập nhật ngày sinh'} · ${esc(s.gender||'Chưa cập nhật')}</p>
           <p>👪 ${esc(s.parent||'Chưa cập nhật phụ huynh')} · ${esc(s.parentPhone||'')}</p>
-          ${isAdmin()?`<div class="profile-contact-actions" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
-            ${s.phone?`<a class="btn small" href="${esc(telHref(s.phone))}">📞 Gọi học sinh</a>`:''}
-            ${s.parentPhone?`<a class="btn secondary small" href="${esc(telHref(s.parentPhone))}">📞 Gọi phụ huynh</a>`:''}
-            ${(!s.phone&&!s.parentPhone)?'<span class="mini">Chưa có số điện thoại để liên lạc.</span>':''}
+          ${isAdmin()&&(s.phone||s.parentPhone)?`<div class="profile-contact-actions" style="margin-top:8px">
+            <button class="btn small" type="button" onclick="openContactMenu('${esc(s.id)}')">📞 Liên lạc học sinh/phụ huynh</button>
           </div>`:''}
+          ${isAdmin()&&!s.phone&&!s.parentPhone?'<div class="mini" style="margin-top:8px">Chưa có số điện thoại để liên lạc.</div>':''}
         </div>
         <div>
           <h3>📌 Trạng thái 360°</h3>
