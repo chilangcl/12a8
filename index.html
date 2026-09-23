@@ -24,6 +24,7 @@ button,input,select,textarea{font:inherit}button{cursor:pointer}
 .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.toolbar input,.toolbar select{padding:9px 10px;border:1px solid var(--border);border-radius:9px;background:#fff}
 .notice{padding:12px 14px;border-radius:10px;background:#fffbeb;border:1px solid #fde68a;color:#92400e;margin-bottom:14px}.ok{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
 .modal{position:fixed;inset:0;background:#0f172a88;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}.modal.show{display:flex}.modal-card{width:min(720px,100%);max-height:90vh;overflow:auto;background:white;border-radius:18px;padding:22px}.modal-head{display:flex;justify-content:space-between;align-items:center}.modal-head h3{margin:0}.x{border:0;background:#f1f5f9;border-radius:50%;width:34px;height:34px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.span2{grid-column:1/-1}.footer-note{font-size:12px;color:var(--muted);margin-top:18px}
+.contact-list{display:grid;gap:10px}.contact-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--border);border-radius:14px;background:#f8fafc}.contact-row .mini{color:var(--muted);font-size:12px;margin-top:2px}a.btn{display:inline-block;text-decoration:none;white-space:nowrap;text-align:center}
 .progress{height:9px;background:#e2e8f0;border-radius:99px;overflow:hidden}.progress span{display:block;height:100%;background:var(--primary)}
 .kpi-list{display:grid;gap:10px}.kpi-row{display:flex;justify-content:space-between;align-items:center}.kpi-row strong{font-size:13px}.mini{font-size:12px;color:var(--muted)}
 .today-attendance-panel{margin:0 0 18px;padding:20px;border:2px solid #2563eb;border-radius:18px;background:linear-gradient(135deg,#eff6ff 0%,#fff 52%,#ecfdf5 100%);box-shadow:0 8px 22px rgba(37,99,235,.13)}
@@ -1156,6 +1157,10 @@ select option{background:#fff!important;color:#202124!important}
   <div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="btn secondary" onclick="closeModal('studentModal')">Hủy</button><button class="btn" onclick="saveStudent()">Lưu</button></div>
 </div></div>
 
+<div id="contactModal" class="modal"><div class="modal-card" style="max-width:440px">
+  <div class="modal-head"><h3>📞 Liên lạc học sinh/phụ huynh</h3><button class="x" onclick="closeModal('contactModal')">×</button></div>
+  <div id="contactModalBody" style="margin-top:12px"></div>
+</div></div>
 <div id="conductModal" class="modal"><div class="modal-card">
   <div class="modal-head"><h3 id="conductModalTitle">Ghi nhận rèn luyện</h3><button class="x" onclick="closeModal('conductModal')">×</button></div>
   <input type="hidden" id="cEditId" value="">
@@ -1356,16 +1361,14 @@ function cancelClassEntry(){
 async function loadCloudState(){
   try{
     if(currentClass?.id)await assertClassAccess(currentClass.id);
-    const localBefore=loadLocalFallback();
     const {data,error}=await sb.from('class_state').select('data,updated_at,version').eq('class_id',currentStateKey).maybeSingle();
     if(error)throw error;
     state=data?.data||seed();
     currentStateVersion=Number(data?.version)||0;
-    if(!(Array.isArray(state.notifications)&&state.notifications.length) && Array.isArray(localBefore.notifications)&&localBefore.notifications.length){
-      state.notifications=localBefore.notifications;
-      saveLocal();
-      await pushCloud();
-    }
+    // LƯU Ý: KHÔNG khôi phục thông báo từ localStorage của trình duyệt vào đây nữa.
+    // Máy chủ (cloud) luôn là nguồn dữ liệu đúng sau khi đăng nhập; nếu GVCN đã xóa thông báo
+    // và cloud đang là mảng rỗng, việc "phục hồi" từ bộ nhớ đệm cũ trên máy/điện thoại sẽ khiến
+    // thông báo đã xóa hiện lại mỗi lần đăng nhập — đây chính là lỗi đã xảy ra và đã được sửa.
     state.settings={...seed().settings,...(state.settings||{}),conductRules:{...seed().settings.conductRules,...(state.settings?.conductRules||{})},conductGuide:(state.settings?.conductGuide&&(state.settings.conductGuide.deduct||state.settings.conductGuide.bonus))?state.settings.conductGuide:seed().settings.conductGuide,className:currentClass?.class_name||state.settings?.className||'12A8',year:currentClass?.year||state.settings?.year||'2026-2027',groups:currentClass?.group_count||state.settings?.groups||4};
     saveLocal();
     subscribeClassRealtime();
@@ -1760,7 +1763,7 @@ function log(text){
 function renderStudents(){
  const q=(document.getElementById('studentSearch')?.value||'').toLowerCase(),g=document.getElementById('studentGroup')?.value||'',sex=document.getElementById('studentGender')?.value||'';
  let a=visibleStudents().filter(s=>(!q||`${s.code} ${s.name}`.toLowerCase().includes(q))&&(!g||String(s.group)===g)&&(!sex||s.gender===sex));
- document.getElementById('studentsBody').innerHTML=a.length?a.map((s,i)=>`<tr><td>${i+1}</td><td><b>${esc(s.code)}</b></td><td>${esc(s.name)}</td><td>${fmtDate(s.dob)}</td><td>${esc(s.gender)}</td><td>${esc(s.group)}</td><td>${esc(s.role)}</td><td>${esc(s.parentPhone)}</td><td class="student-row-actions">${isAdmin()?`<button class="btn small" onclick="openStudent('${esc(s.id)}')">✏️ Sửa</button><button class="btn secondary small" onclick="viewStudent('${esc(s.id)}')">👤 Hồ sơ 360°</button><button class="btn danger small" onclick="deleteStudent('${esc(s.id)}')">🗑️ Xóa</button>`:`<button class="btn secondary small" onclick="viewStudent('${esc(s.id)}')">👤 Hồ sơ 360°</button>`}</td></tr>`).join(''):`<tr><td colspan="9" class="empty">Chưa có học sinh. Thầy có thể tải mẫu Excel rồi nhập danh sách.</td></tr>`;
+ document.getElementById('studentsBody').innerHTML=a.length?a.map((s,i)=>`<tr><td>${i+1}</td><td><b>${esc(s.code)}</b></td><td>${esc(s.name)}</td><td>${fmtDate(s.dob)}</td><td>${esc(s.gender)}</td><td>${esc(s.group)}</td><td>${esc(s.role)}</td><td>${esc(s.parentPhone)}</td><td class="student-row-actions">${isAdmin()?`<button class="btn small" onclick="openStudent('${esc(s.id)}')">✏️ Sửa</button><button class="btn secondary small" onclick="viewStudent('${esc(s.id)}')">👤 Hồ sơ 360°</button><button class="btn secondary small" onclick="openContactMenu('${esc(s.id)}')">📞 Liên lạc</button><button class="btn danger small" onclick="deleteStudent('${esc(s.id)}')">🗑️ Xóa</button>`:`<button class="btn secondary small" onclick="viewStudent('${esc(s.id)}')">👤 Hồ sơ 360°</button>`}</td></tr>`).join(''):`<tr><td colspan="9" class="empty">Chưa có học sinh. Thầy có thể tải mẫu Excel rồi nhập danh sách.</td></tr>`;
 }
 function openStudent(id=''){if(!canManageStudents()){alert('🔒 Chỉ GVCN được thêm hoặc sửa hồ sơ học sinh.');return}editingStudent=id||null;const s=state.students.find(x=>x.id===id)||{};document.getElementById('studentModalTitle').textContent=id?'Sửa học sinh':'Thêm học sinh';
  [['sCode',s.code],['sName',s.name],['sDob',s.dob],['sEthnic',s.ethnic],['sPhone',s.phone],['sEmail',s.email],['sParent',s.parent],['sParentPhone',s.parentPhone],['sAddress',s.address],['sNote',s.note]].forEach(([id,v])=>document.getElementById(id).value=v||'');
@@ -1776,6 +1779,26 @@ function viewStudent(id){
   showPage('profile');
   renderProfileSelectors(id);
 }
+// Chuẩn hóa số điện thoại về dạng dùng được cho liên kết tel: (giữ dấu + đầu số quốc tế nếu có, bỏ khoảng trắng/dấu gạch).
+function telHref(phone){return 'tel:'+String(phone||'').trim().replace(/[^0-9+]/g,'')}
+// Mở hộp thoại "Liên lạc": liệt kê SĐT học sinh và SĐT phụ huynh, bấm vào sẽ dùng trình gọi điện của máy/điện thoại để quay số.
+function openContactMenu(id){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN được sử dụng tính năng liên lạc.');return}
+  const s=(state.students||[]).find(x=>String(x.id)===String(id));
+  const body=document.getElementById('contactModalBody');
+  if(!s||!body){alert('Không tìm thấy dữ liệu học sinh.');return}
+  const rows=[
+    {label:'📱 Học sinh',name:s.name||'',phone:s.phone||''},
+    {label:'👪 Phụ huynh'+(s.parent?' · '+esc(s.parent):''),name:s.parent||s.name||'',phone:s.parentPhone||''}
+  ];
+  body.innerHTML=`<div class="mini" style="margin-bottom:10px">${esc(s.name||'')} · ${esc(s.code||'')}</div><div class="contact-list">${rows.map(r=>{
+    const phone=String(r.phone||'').trim();
+    if(!phone)return `<div class="contact-row"><div><b>${esc(r.label)}</b><div class="mini">Chưa cập nhật số điện thoại</div></div></div>`;
+    return `<div class="contact-row"><div><b>${esc(r.label)}</b><div class="mini">${esc(phone)}</div></div><a class="btn" href="${esc(telHref(phone))}" onclick="closeModal('contactModal')">📞 Gọi</a></div>`;
+  }).join('')}</div>${(!s.phone&&!s.parentPhone)?'<div class="footer-note">Thầy/cô có thể bổ sung số điện thoại ở màn hình Sửa học sinh.</div>':''}`;
+  openModal('contactModal');
+}
+window.openContactMenu=openContactMenu;
 async function deleteStudent(id){
   if(!isAdmin()){alert('Chỉ GVCN/Admin được phép xóa học sinh.');return}
   const s=state.students.find(x=>x.id===id);
@@ -2523,6 +2546,11 @@ function renderProfile(){
           <p class="muted">${esc(s.code||'')} · Tổ ${esc(s.group||'Chưa phân tổ')} · ${esc(s.role||'Học sinh')}</p>
           <p>🎂 ${fmtDate(s.dob||'')||'Chưa cập nhật ngày sinh'} · ${esc(s.gender||'Chưa cập nhật')}</p>
           <p>👪 ${esc(s.parent||'Chưa cập nhật phụ huynh')} · ${esc(s.parentPhone||'')}</p>
+          ${isAdmin()?`<div class="profile-contact-actions" style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+            ${s.phone?`<a class="btn small" href="${esc(telHref(s.phone))}">📞 Gọi học sinh</a>`:''}
+            ${s.parentPhone?`<a class="btn secondary small" href="${esc(telHref(s.parentPhone))}">📞 Gọi phụ huynh</a>`:''}
+            ${(!s.phone&&!s.parentPhone)?'<span class="mini">Chưa có số điện thoại để liên lạc.</span>':''}
+          </div>`:''}
         </div>
         <div>
           <h3>📌 Trạng thái 360°</h3>
