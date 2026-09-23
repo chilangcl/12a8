@@ -899,6 +899,15 @@ select option{background:#fff!important;color:#202124!important}
         <div class="page-head"><div><h2>🤖 Trợ lý AI</h2><div class="muted">Phân tích dữ liệu lớp và trả lời câu hỏi dựa trên dữ liệu thực tế của lớp đang chọn.</div></div><span class="ai-badge">🔐 Chỉ GVCN</span></div>
         <div class="notice ok">AI chỉ hỗ trợ phân tích và gợi ý. Điểm danh, điểm rèn luyện, hạnh kiểm và các quyết định giáo dục vẫn do GVCN thực hiện.</div>
         <div class="card ai-page">
+          <div id="aiEarlyBox" style="border:1px solid #fecaca;background:#fff7f7;border-radius:14px;padding:14px;display:grid;gap:10px">
+            <h3 style="margin:0">🚨 Cảnh báo sớm &amp; phân tích học sinh</h3>
+            <div class="mini">Hệ thống tự tính tín hiệu (vượt ngưỡng, sát ngưỡng, xu hướng gần đây, mẫu hình lặp lại). AI thật (Gemini) chỉ diễn giải, xếp ưu tiên và đề xuất việc làm.</div>
+            <div class="actions"><button class="btn" type="button" onclick="askAIEarlyWarning()">🚨 Lập cảnh báo sớm cho cả lớp</button></div>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center">
+              <select id="aiStudentSelect" aria-label="Chọn học sinh cần phân tích" style="padding:10px;border:1px solid var(--border);border-radius:10px;min-width:0"><option value="">— Chọn học sinh —</option></select>
+              <button class="btn secondary" type="button" onclick="askAIStudent()">🔎 Phân tích học sinh</button>
+            </div>
+          </div>
           <div><h3 style="margin:0 0 8px">⚡ Gợi ý nhanh</h3><div class="ai-quick">
             <button onclick="askAIQuick('Phân tích tình hình chung của lớp hiện tại và nêu 5 điểm đáng chú ý nhất.')">📊 Phân tích lớp</button>
             <button onclick="askAIQuick('Phân tích chuyên cần của lớp: có mặt, đi muộn, nghỉ có phép, nghỉ không phép và những học sinh cần lưu ý.')">📅 Phân tích chuyên cần</button>
@@ -1052,7 +1061,7 @@ select option{background:#fff!important;color:#202124!important}
         <div class="page-head"><div><h2>Tài khoản & phân quyền</h2><div class="muted">GVCN quản lý tài khoản và cấp quyền đúng theo lớp.</div></div></div>
         <div class="card" style="margin-bottom:16px">
           <h3>➕ Tạo tài khoản GVCN / cán bộ lớp</h3>
-          <div class="muted" style="margin-bottom:12px">Chỉ tài khoản Admin mới có thể mở chức năng này. Tài khoản được tạo qua Edge Function và ghi quyền lớp ở phía máy chủ.</div>
+          <div class="muted" style="margin-bottom:12px">Chỉ tài khoản GVCN mới có thể mở chức năng này. Tài khoản được tạo qua Edge Function và ghi quyền lớp ở phía máy chủ.</div>
           <div class="form-grid">
             <div class="field"><label>Tài khoản *</label><input id="newUsername" placeholder="gvcn12a8" autocomplete="off"></div>
             <div class="field"><label>Họ và tên *</label><input id="newName" placeholder="Nguyễn Văn A"></div>
@@ -1982,7 +1991,7 @@ async function toggleAttendanceLock(){
  saveData();await pushCloud();renderAttendance();
 }
 function scoreObj(id,term){return state.scores[term+'_'+id]||{}}
-function avgScore(id,term=document.getElementById('scoreTerm')?.value||'HKI'){const s=scoreObj(id,term), vals=['tx1','tx2','tx3','mid','final'].map(k=>Number(s[k])).filter(x=>Number.isFinite(x)&&x>=0&&x<=10);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null}
+function avgScore(id,term=document.getElementById('scoreTerm')?.value||'HKI'){const s=scoreObj(id,term), vals=['tx1','tx2','tx3','mid','final'].map(k=>s[k]).filter(v=>v!==''&&v!==null&&v!==undefined).map(Number).filter(x=>Number.isFinite(x)&&x>=0&&x<=10);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null}
 function renderLearning(){
  const term=document.getElementById('scoreTerm').value,q=(document.getElementById('scoreSearch').value||'').toLowerCase();const a=visibleStudents().filter(s=>`${s.code} ${s.name}`.toLowerCase().includes(q));
  document.getElementById('learningBody').innerHTML=a.length?a.map((s,i)=>{const v=scoreObj(s.id,term);return `<tr><td>${i+1}</td><td>${esc(s.code)}</td><td><b>${esc(s.name)}</b></td>${['tx1','tx2','tx3','mid','final'].map(k=>`<td><input class="scoreInp" data-sid="${s.id}" data-key="${k}" type="number" min="0" max="10" step=".1" value="${v[k]??''}" ${canEditLearning()?'':'disabled'} style="width:65px;padding:7px;border:1px solid var(--border);border-radius:7px"></td>`).join('')}<td><b>${avgScore(s.id,term)?.toFixed(2)??'—'}</b></td></tr>`}).join(''):'<tr><td colspan="9" class="empty">Chưa có học sinh.</td></tr>';
@@ -2865,7 +2874,20 @@ function looksTruncatedAIAnswer(text){
   if(/(?:^|\\n)\\s*(?:\\d+\\.|[IVX]+\\.|Phần\\s+\\d+|Thống kê chung)\\s*$/i.test(t))return true;
   return false;
 }
-function formatAIErrorMessage(error,httpStatus=''){const raw=String(error||'').trim();const lower=raw.toLowerCase();if(httpStatus==='429'||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota|retry in/i.test(raw)){const m=raw.match(/retry in\s+([0-9]+(?:\.[0-9]+)?)s/i);const wait=m?Math.ceil(Number(m[1])):null;return `<div class="ai-error-card"><strong>⚠️ Gemini đang tạm hết lượt sử dụng</strong><div>Đây là giới hạn quota của API Gemini, không phải lỗi hiển thị trên điện thoại.</div>${wait?`<div class="ai-retry-note">Thầy có thể thử lại sau khoảng ${wait} giây.</div>`:'<div class="ai-retry-note">Thầy hãy thử lại sau một lúc hoặc kiểm tra quota/billing của Gemini.</div>'}</div>`;}if(/failed to fetch|networkerror|load failed/i.test(lower))return `<div class="ai-error-card"><strong>🌐 Không kết nối được Trợ lý AI</strong><div>Thầy kiểm tra Internet rồi bấm Hỏi AI lại.</div></div>`;return `<div class="ai-error-card"><strong>❌ Trợ lý AI chưa thể trả lời</strong><div>${esc(raw||'Đã xảy ra lỗi không xác định.')}</div></div>`;}
+function formatAIErrorMessage(error,httpStatus='',code=''){
+  const raw=String(error||'').trim(),lower=raw.toLowerCase();
+  const card=(title,body,extra='')=>`<div class="ai-error-card"><strong>${title}</strong><div>${esc(body)}</div>${extra}</div>`;
+  // Lỗi do rate limit NỘI BỘ của hệ thống (không phải quota Gemini).
+  if(/^RATE_LIMIT|^BUSY$/.test(code))return card('⏳ Chưa gửi được lúc này',raw);
+  if(code==='GEMINI_QUOTA'||(!code&&(httpStatus==='429'||/quota exceeded|quota_exceeded|rate.?limit|too many requests|current quota|retry in/i.test(raw)))){const m=raw.match(/retry in\s+([0-9]+(?:\.[0-9]+)?)s/i);const wait=m?Math.ceil(Number(m[1])):null;return `<div class="ai-error-card"><strong>⚠️ Gemini đang tạm hết lượt sử dụng</strong><div>${esc(code==='GEMINI_QUOTA'&&raw?raw:'Đây là giới hạn quota của API Gemini, không phải lỗi hiển thị trên điện thoại.')}</div>${wait?`<div class="ai-retry-note">Thầy có thể thử lại sau khoảng ${wait} giây.</div>`:'<div class="ai-retry-note">Thầy hãy thử lại sau một lúc hoặc kiểm tra quota/billing của Gemini.</div>'}</div>`;}
+  if(code==='GEMINI_RATE')return card('⏳ Gemini đang giới hạn tốc độ',raw);
+  if(code==='GEMINI_OVERLOADED')return card('⚠️ Gemini đang quá tải',raw);
+  if(code==='GEMINI_AUTH'||code==='GEMINI_MODEL'||code==='NO_API_KEY')return card('🔧 Cấu hình AI cần kiểm tra',raw);
+  if(code==='GEMINI_BLOCKED')return card('🛡️ Nội dung bị bộ lọc chặn',raw);
+  if(code==='GEMINI_TIMEOUT'||code==='CLIENT_TIMEOUT')return card('⌛ AI phản hồi quá chậm',raw||'Thầy thử lại hoặc hỏi ngắn gọn, cụ thể hơn.');
+  if(/failed to fetch|networkerror|load failed/i.test(lower))return card('🌐 Không kết nối được Trợ lý AI','Thầy kiểm tra Internet rồi bấm Hỏi AI lại.');
+  return card('❌ Trợ lý AI chưa thể trả lời',raw||'Đã xảy ra lỗi không xác định.');
+}
 // (đã xoá bản askAI cũ trùng lặp — xem ghi chú phía trên)
 
 document.getElementById('loginPass')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();login()}});
@@ -2909,6 +2931,18 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
 
   function isForcedComplex(t){return hasAny(t,COMPLEX_SIGNALS);}
 
+  // Câu hỏi về cảnh báo sớm / phân tích học sinh: LUÔN dùng AI thật (Gemini) — rule-based chỉ làm dự phòng.
+  const AI_FIRST_SIGNALS=['canh bao','nguy co','dau hieu','can quan tam','can luu y','can theo doi','bien dong','xu huong','ket hop','xuong cap','sa sut','theo doi som','tinh hinh hoc sinh','phan tich hoc sinh','danh gia hoc sinh'];
+  const STUDENT_AI_SIGNALS=['phan tich','danh gia','nhan xet','tinh hinh','ho tro','xu huong','bien dong','canh bao','nguy co','goi y','the nao','lam sao'];
+  function isAIFirst(t){return hasAny(t,AI_FIRST_SIGNALS);}
+  // Tìm MỘT học sinh được nêu đầy đủ họ tên trong câu hỏi (trùng tên/không thấy -> null).
+  function findStudentInQuestion(question){
+    const t=' '+normVN(question).replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ')+' ';
+    const list=(typeof visibleStudents==='function')?visibleStudents():(state.students||[]);
+    const hits=list.filter(s=>{const n=normVN(s.name||'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();return n.split(' ').filter(Boolean).length>=2&&t.includes(' '+n+' ');});
+    return hits.length===1?{id:hits[0].id,name:hits[0].name,code:hits[0].code||''}:null;
+  }
+
   // Tóm tắt tổng quan lớp — dùng cho cả câu hỏi "tóm tắt lớp" lẫn khi cần
   // fallback tự động lúc Gemini lỗi/hết quota.
   function overviewText(context){
@@ -2944,10 +2978,15 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
     }
   }
 
-  function ruleBasedAnswer(question,context){
+  // opts.force=true: dùng khi AI thật lỗi -> bỏ qua "nhường cho AI" để vẫn trả được số liệu tương ứng.
+  function ruleBasedAnswer(question,context,opts){
+    opts=opts||{};
     const t=normVN(question);
     if(!t)return null;
-    if(isForcedComplex(t))return null; // câu hỏi cần suy luận -> để AI thật xử lý
+    if(!opts.force){
+      if(isForcedComplex(t)||isAIFirst(t))return null; // cần suy luận / cảnh báo sớm -> để AI thật xử lý
+      if(hasAny(t,STUDENT_AI_SIGNALS)&&findStudentInQuestion(question))return null; // phân tích 1 học sinh -> AI thật
+    }
 
     try{
       const c=context;
@@ -2956,7 +2995,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       const students=(typeof visibleStudents==='function')?visibleStudents():(state.students||[]);
 
       // 1) Tra cứu 1 học sinh cụ thể theo tên (ưu tiên cao nhất, tránh nhầm lẫn)
-      if(hasAny(t,['chuyen can','ren luyen','hanh kiem','diem','thong tin','vang','di tre','di muon'])){
+      if(hasAny(t,['chuyen can','ren luyen','hanh kiem','diem','thong tin','vang','di tre','di muon','phan tich','tinh hinh','danh gia'])){
         const matches=students.filter(s=>{
           const n=normVN(s.name||'');
           if(!n||n.split(' ').filter(Boolean).length<2)return false;
@@ -2985,7 +3024,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       }
 
       // 3) So sánh / phân tích các tổ
-      if(hasAny(t,['so sanh cac to','so sanh giua cac to','phan tich to','phan tich cac to','so sanh to'])){
+      if(hasAny(t,['so sanh cac to','so sanh giua cac to','phan tich to','phan tich cac to','so sanh to'])||(t.includes('cac to')&&hasAny(t,['so sanh','phan tich','khac biet','noi bat']))){
         if(typeof competitionGroupRanking==='function'&&typeof attendanceCounts==='function'&&typeof normalizeGenderValue==='function'){
           const rankings=competitionGroupRanking('year');
           const groups={};
@@ -3006,7 +3045,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       }
 
       // 4) Học sinh cần quan tâm / cần lưu ý
-      if(hasAny(t,['can quan tam','can luu y','can theo doi'])){
+      if(hasAny(t,['can quan tam','can luu y','can theo doi','canh bao','nguy co','dau hieu'])||/can (gvcn )?(quan tam|luu y|theo doi)/.test(t)){
         if(typeof getAttentionBoard==='function'){
           const board=getAttentionBoard();
           const fmtList=arr=>arr.slice(0,10).map((x,i)=>`${i+1}. ${x.s.name} - ${x.reasons.join('; ')||('Điểm rèn luyện '+x.score.toFixed(1))}`).join('\n');
@@ -3093,124 +3132,147 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   }
 
   window.ruleBasedAnswer=ruleBasedAnswer;
+  window.findStudentInQuestion=findStudentInQuestion;
   window.ruleBasedFallbackOverview=ruleBasedFallbackOverview;
 })();
 </script>
 
 <script id="ai-reliability-client-v2">
-/* Lớp ổn định phía giao diện. Edge Function vẫn là nơi giữ API key và gọi Gemini.
-   Rule-based (ai-rule-based-engine) luôn được thử trước để tiết kiệm quota;
-   Gemini chỉ được gọi cho câu hỏi phức tạp hoặc khi rule-based không khớp mẫu,
-   và nếu Gemini lỗi/hết quota, hệ thống tự động hiển thị dữ liệu tổng hợp dự
-   phòng từ rule-based thay vì chỉ báo lỗi. */
+/* Client Trợ lý AI (v3).
+   - Client CHỈ gửi câu hỏi thô + gợi ý (mode/studentId). Server tự dựng dữ liệu từ DB, tự tính tín hiệu cảnh báo
+     sớm và gọi Gemini (giữ API key). Không còn gửi prompt dài/ngữ cảnh lớn (trước đây bị cắt ở 1200 ký tự).
+   - Rule-based chỉ trả lời câu thống kê đơn giản; cảnh báo sớm & phân tích học sinh luôn đi qua Gemini.
+   - Không retry theo mã HTTP (server đã tự retry Gemini); chỉ retry khi lỗi mạng, hoặc khi server báo chờ vài giây. */
 (()=>{
-  let activeRequest=0;
-  // Rate limit phía client: chặn bấm dồn dập gọi AI thật (Gemini), bổ sung cho rate limit
-  // phía server trong Edge Function. Không áp dụng cho câu trả lời rule-based (miễn phí, tức thì).
-  let realCooldownUntil=0;
-  const REAL_AI_COOLDOWN_MS=8000;
+  let activeRequest=0,cooldownUntil=0;
+  const COOLDOWN_MS=6000,TIMEOUT_MS=60000;
   const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-  // Chọn maxOutputTokens linh hoạt theo độ phức tạp câu hỏi: trần vẫn là 2048 (đủ cho câu hỏi
-  // phân tích/liệt kê dài), nhưng câu hỏi đơn giản (1 con số/tên/ngày) chỉ xin ngân sách nhỏ để
-  // đỡ tốn quota. Nếu Gemini vẫn bị cắt giữa chừng (finishReason=MAX_TOKENS), luồng gọi tiếp theo
-  // (continuation) đã tự động xin đủ 2048 để hoàn tất câu trả lời, nên không lo mất nội dung.
-  const AI_TOKEN_SIMPLE=300,AI_TOKEN_SHORT=500,AI_TOKEN_MEDIUM=900,AI_TOKEN_MAX=2048;
-  function estimateAIMaxTokens(question){
-    const q=String(question||'').trim().toLowerCase();
-    if(!q)return AI_TOKEN_SIMPLE;
-    const len=q.length;
-    // Dấu hiệu cần liệt kê/phân tích/tổng hợp nhiều ý -> luôn xin trần tối đa.
-    const complexHints=/(phân tích|tổng hợp|nhận xét|đánh giá|so sánh|danh sách|liệt kê|báo cáo|đề xuất|xu hướng|nguyên nhân|giải pháp|toàn bộ lớp|tất cả (học sinh|bạn|tổ))/;
-    const multiPart=(q.match(/\?/g)||[]).length>1||/(và|,).*(và|,).*(và|,)/.test(q);
-    if(complexHints.test(q)||multiPart||len>160)return AI_TOKEN_MAX;
-    // Dấu hiệu câu hỏi đơn giản: chỉ hỏi 1 con số/tên/ngày/đúng-sai, ngắn gọn.
-    const simpleHints=/(bao nhiêu|mấy (bạn|học sinh|em|điểm)|là ai|tên là gì|ngày nào|khi nào|có (mặt|nghỉ) (hay không|không)|đúng hay sai|xếp loại gì)/;
-    if(simpleHints.test(q)&&len<=80)return AI_TOKEN_SIMPLE;
-    if(len<=50)return AI_TOKEN_SHORT;
-    return AI_TOKEN_MEDIUM; // câu hỏi không rõ ràng -> mức an toàn ở giữa
-  }
-  const transient=(status,message)=>status===408||status===429||status>=500||/failed to fetch|networkerror|network request failed|timeout|temporar/i.test(String(message||''));
-  const readBody=async res=>{const raw=await res.text();try{return raw?JSON.parse(raw):{}}catch(e){return {error:raw||`Phản hồi AI không đúng định dạng (HTTP ${res.status}).`}}};
+  const readBody=async res=>{const raw=await res.text();try{return raw?JSON.parse(raw):{}}catch(e){return {error:raw?String(raw).slice(0,300):`Phản hồi AI không đúng định dạng (HTTP ${res.status}).`}}};
   const textOf=body=>typeof body?.answer==='string'?body.answer:(body?.answer?.text||body?.answer?.content||body?.text||'');
-  async function requestAI(url,token,payload,requestId){
-    let lastError='';
-    for(let attempt=0;attempt<3;attempt++){
-      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),55000);
+  const MODE_LABEL={early_warning:'Cảnh báo sớm',student:'Phân tích học sinh',period:'Phân tích giai đoạn',ask:'Hỏi đáp'};
+  async function getToken(){let s=null;try{const r=await sb.auth.getSession();s=r?.data?.session||null;}catch(e){s=null;}return s?.access_token||'';}
+
+  // Gọi Edge Function. Trả về body khi thành công; ném Error có .code/.status/.retryAfter khi lỗi.
+  async function requestAI(extra){
+    const token=await getToken();
+    if(!token){const e=new Error('Phiên đăng nhập với backend AI đã hết hoặc chưa đăng nhập.');e.code='NO_SESSION';throw e;}
+    const payload={stateKey:currentStateKey,clientRequestId:`ai_${Date.now()}_${Math.random().toString(36).slice(2)}`,...extra};
+    const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';
+    let netRetried=false,intervalRetried=false;
+    for(;;){
+      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),TIMEOUT_MS);
+      let res;
       try{
-        const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token,'X-Client-Request-Id':requestId},body:JSON.stringify(payload),signal:controller.signal});
-        clearTimeout(timer);const body=await readBody(res);const message=body?.error||body?.message||'';
-        if(res.ok)return {res,body,attempt};
-        lastError=message||`AI trả về lỗi HTTP ${res.status}`;
-        if(!transient(res.status,lastError)||attempt===2)return {res,body,attempt};
-      }catch(e){clearTimeout(timer);const timedOut=e?.name==='AbortError';lastError=timedOut?'Yêu cầu AI quá thời gian chờ.':(e?.message||String(e));if((!timedOut&&!transient(0,lastError))||attempt===2)throw new Error(lastError);}
-      await wait((700*(2**attempt))+Math.floor(Math.random()*350));
+        res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(payload),signal:controller.signal});
+      }catch(e){
+        clearTimeout(timer);
+        if(e?.name==='AbortError'){const err=new Error('Yêu cầu AI quá thời gian chờ.');err.code='CLIENT_TIMEOUT';throw err;}
+        if(!netRetried){netRetried=true;await wait(1200);continue;}
+        throw new Error(e?.message||'Không kết nối được Trợ lý AI.');
+      }
+      clearTimeout(timer);
+      const body=await readBody(res);
+      if(res.ok)return body;
+      const err=new Error(body?.error||body?.message||`AI trả về lỗi HTTP ${res.status}`);
+      err.status=res.status;err.code=body?.code||'';err.retryAfter=Number(body?.retryAfterSeconds)||0;
+      if(err.code==='RATE_LIMIT_INTERVAL'&&!intervalRetried&&err.retryAfter>0&&err.retryAfter<=8){intervalRetried=true;await wait(err.retryAfter*1000+300);continue;}
+      throw err;
     }
-    throw new Error(lastError||'Không thể kết nối Trợ lý AI.');
   }
-  // Hiển thị thông báo lỗi Gemini + kèm bản tóm tắt dự phòng từ rule-based,
-  // để GVCN vẫn có dữ liệu dùng ngay dù AI thật đang lỗi/hết quota/mất phiên.
-  function renderErrorWithFallback(ans,meta,err,status,context,metaFallbackNote){
-    const errCard=formatAIErrorMessage(err,String(status||''));
-    let fbText='';
-    try{fbText=(typeof window.ruleBasedFallbackOverview==='function')?window.ruleBasedFallbackOverview(context):'';}catch(e){fbText='';}
-    if(ans){
-      ans.innerHTML=errCard+(fbText?`<div class="ai-fallback-note" style="margin-top:10px;padding-top:10px;border-top:1px dashed #e2e8f0"><strong>📋 Dữ liệu tổng hợp dự phòng (rule-based, không dùng quota AI):</strong><div style="white-space:pre-wrap;margin-top:6px">${esc(fbText)}</div></div>`:'');
-    }
-    if(meta)meta.textContent=metaFallbackNote;
+  window.requestAssistantAI=requestAI;
+  window.assistantAnswerText=textOf;
+
+  // Số liệu dự phòng (rule-based) đúng theo câu hỏi, để GVCN vẫn có thông tin khi AI thật lỗi.
+  function fallbackText(question,context){
+    try{if(typeof window.ruleBasedAnswer==='function'){const r=window.ruleBasedAnswer(question,context,{force:true});if(r&&r.text)return `${r.label}\n${r.text}`;}}catch(e){}
+    try{return (typeof window.ruleBasedFallbackOverview==='function')?window.ruleBasedFallbackOverview(context):'';}catch(e){return '';}
   }
-  window.askAI=async function(){
+  function renderErrorWithFallback(ans,meta,err,question,context,note){
+    const errCard=formatAIErrorMessage(err?.message||err,String(err?.status||''),err?.code||'');
+    const fb=context?fallbackText(question,context):'';
+    if(ans)ans.innerHTML=errCard+(fb?`<div class="ai-fallback-note" style="margin-top:10px;padding-top:10px;border-top:1px dashed #e2e8f0"><strong>📋 Số liệu dự phòng (rule-based, không dùng quota AI):</strong><div style="white-space:pre-wrap;margin-top:6px">${esc(fb)}</div></div>`:'');
+    if(meta)meta.textContent=note;
+  }
+
+  // opts (tuỳ chọn): {mode:'early_warning'|'student'|'ask', studentId}. Có mode => bỏ qua rule-based, gọi thẳng AI.
+  window.askAI=async function(opts){
+    const o=(opts&&typeof opts==='object'&&typeof opts.mode==='string')?opts:{};
     const q=document.getElementById('aiQuestion'),ans=document.getElementById('aiAnswer'),meta=document.getElementById('aiMeta'),btn=document.getElementById('aiAskBtn');
-    const question=(q?.value||'').trim();if(!question){renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}if(!isAdmin()){renderAIAnswer('🔒 Chỉ GVCN/Admin mới được sử dụng Trợ lý AI.');return;}
-    const requestId=`ai_${Date.now()}_${Math.random().toString(36).slice(2)}`,requestNo=++activeRequest;stopAISpeech(false);btn.disabled=true;btn.classList.add('ai-busy');renderAIAnswer('⏳ Đang xử lý câu hỏi...');if(meta)meta.textContent='Đang kiểm tra bằng rule-based trước khi dùng đến AI thật...';
+    const question=(q?.value||'').trim();
+    if(!question){renderAIAnswer('Thầy hãy nhập câu hỏi cho AI.');return;}
+    if(!isAdmin()){renderAIAnswer('🔒 Chỉ GVCN/Admin mới được sử dụng Trợ lý AI.');return;}
+    const requestNo=++activeRequest;
+    stopAISpeech(false);btn.disabled=true;btn.classList.add('ai-busy');
+    renderAIAnswer('⏳ Đang xử lý câu hỏi...');
+    let context=null;
     try{
-      const context=buildAIContext();
-      // Bước 1 — Rule-based trước tiên (miễn phí, tức thì, không cần đăng nhập
-      // backend AI, không tốn quota Gemini). Chỉ khi không khớp mẫu (câu hỏi
-      // phức tạp cần suy luận) mới chuyển sang AI thật ở bước 2.
-      if(isGenderCountQuestion(question)){renderAIAnswer(buildGenderCountAnswer(context));if(meta)meta.textContent=`⚡ Thống kê trực tiếp (rule-based) · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}
-      const rb=(typeof window.ruleBasedAnswer==='function')?window.ruleBasedAnswer(question,context):null;
-      if(rb){renderAIAnswer(rb.text);if(meta)meta.textContent=`⚡ ${rb.label} · Rule-based, không dùng quota AI · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}
-      // Bước 2 — Câu hỏi phức tạp / không khớp rule-based: dùng AI thật (Gemini).
-      const nowTs=Date.now();
-      if(nowTs<realCooldownUntil){
-        const remain=Math.ceil((realCooldownUntil-nowTs)/1000);
-        renderAIAnswer(`⏳ Vui lòng đợi khoảng ${remain} giây trước khi gửi tiếp câu hỏi cho AI thật (tránh gọi dồn dập, tốn quota Gemini). Rule-based vẫn dùng được ngay lập tức cho các câu hỏi thống kê.`);
-        if(meta)meta.textContent='Đang trong thời gian chờ giữa các lượt gọi AI thật (client-side rate limit).';
+      context=buildAIContext(); // chỉ dùng cho rule-based/dự phòng tại trình duyệt — KHÔNG gửi lên server
+      // Bước 1 — câu thống kê đơn giản: rule-based (miễn phí, tức thì). Cảnh báo sớm/phân tích học sinh không đi đường này.
+      if(!o.mode){
+        if(isGenderCountQuestion(question)){renderAIAnswer(buildGenderCountAnswer(context));if(meta)meta.textContent=`⚡ Thống kê trực tiếp (rule-based) · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}
+        const rb=(typeof window.ruleBasedAnswer==='function')?window.ruleBasedAnswer(question,context):null;
+        if(rb){renderAIAnswer(rb.text);if(meta)meta.textContent=`⚡ ${rb.label} · Rule-based, không dùng quota AI · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}
+      }
+      // Bước 2 — AI thật (Gemini)
+      const now=Date.now();
+      if(now<cooldownUntil){
+        const remain=Math.ceil((cooldownUntil-now)/1000);
+        renderAIAnswer(`⏳ Vui lòng đợi khoảng ${remain} giây trước khi gửi câu hỏi tiếp theo cho AI thật.`);
+        if(meta)meta.textContent='Đang trong thời gian chờ giữa hai lượt gọi AI.';
         return;
       }
-      if(meta)meta.textContent='Câu hỏi cần phân tích sâu, đang chuyển sang AI thật (Gemini)...';
+      if(meta)meta.textContent=o.mode==='early_warning'?'Đang tổng hợp tín hiệu cảnh báo sớm và gửi cho AI (Gemini)...':'Đang chuyển sang AI thật (Gemini) để phân tích dữ liệu lớp...';
       renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');
-      let session=null;
-      try{const s=await sb.auth.getSession();session=s?.data?.session||null;}catch(e){session=null;}
-      if(!session?.access_token){renderErrorWithFallback(ans,meta,'Phiên đăng nhập với backend AI đã hết hoặc chưa đăng nhập.','',context,'⚠️ Chưa kết nối được AI thật (Gemini) — đã hiển thị dữ liệu tổng hợp dự phòng bằng rule-based.');return;}
-      const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';
-      const payload={question:buildAIPrompt(question,context),stateKey:currentStateKey,context,clientRequestId:requestId,requestOptions:{maxOutputTokens:estimateAIMaxTokens(question),temperature:0.35,requireCompleteAnswer:true}};
-      const first=await requestAI(url,session.access_token,payload,requestId);
-      realCooldownUntil=Date.now()+REAL_AI_COOLDOWN_MS; // đã thật sự gọi Gemini -> bắt đầu thời gian chờ, dù thành công hay lỗi
+      const named=(!o.mode&&typeof window.findStudentInQuestion==='function')?window.findStudentInQuestion(question):null;
+      const extra={question};
+      if(o.mode)extra.mode=o.mode;                                  // chỉ gửi mode khi chỉ định rõ; còn lại để server tự nhận diện
+      const sid=o.studentId||(named&&named.id)||'';
+      if(sid)extra.studentId=String(sid);
+      const body=await requestAI(extra);
       if(requestNo!==activeRequest)return;
-      if(!first.res.ok){
-        const err=first.body?.error||first.body?.message||`AI trả về lỗi HTTP ${first.res.status}`;
-        renderErrorWithFallback(ans,meta,err,first.res.status,context,'⚠️ Gemini đang lỗi/hết quota — đã hiển thị dữ liệu tổng hợp dự phòng bằng rule-based.');
-        return;
-      }
-      let answer=textOf(first.body),finishReason=first.body?.finishReason||first.body?.finish_reason||first.body?.meta?.finishReason||'';
-      if(String(finishReason).toUpperCase()==='MAX_TOKENS'&&answer){
-        if(meta)meta.textContent='AI đang hoàn tất phần còn lại của câu trả lời...';
-        const continuation=`Hãy viết tiếp phần trả lời còn dang dở cho câu hỏi gốc. Không lặp lại nội dung đã có; bắt đầu ngay tại ý còn thiếu và kết thúc bằng câu hoàn chỉnh. Câu hỏi gốc: ${question}\n\nPhần đã trả lời: ${answer.slice(-1800)}`;
-        const next=await requestAI(url,session.access_token,{...payload,question:continuation,requestOptions:{...payload.requestOptions,maxOutputTokens:AI_TOKEN_MAX},clientRequestId:requestId+'_continue'},requestId+'_continue');
-        if(next.res.ok){const tail=textOf(next.body);if(tail)answer=`${answer.trim()}\n${tail.trim()}`;finishReason=next.body?.finishReason||next.body?.finish_reason||finishReason;}
-      }
+      cooldownUntil=Date.now()+COOLDOWN_MS;
+      let answer=textOf(body);
+      if(body.complete===false&&answer)answer=answer.trim()+'\n\n⚠️ Câu trả lời có thể chưa đầy đủ do đạt giới hạn độ dài. Thầy hỏi cụ thể hơn (ví dụ theo từng tổ) hoặc bấm Hỏi AI lại.';
       renderAIAnswer(answer||'AI chưa trả về nội dung.');
-      const stamp=new Date().toLocaleString('vi-VN');if(meta)meta.textContent=`🤖 Gemini · ${stamp} · Lớp ${context.class.name}${finishReason?` · ${finishReason}`:''}${first.attempt?` · đã tự thử lại ${first.attempt} lần`:''}`;
+      const stamp=new Date().toLocaleString('vi-VN');
+      const parts=[`🤖 ${body.model||'Gemini'}`,MODE_LABEL[body.mode]||'',body.focusStudent||'',stamp,`Lớp ${body.className||context.class.name}`,body.dataAsOf?`dữ liệu đến ${body.dataAsOf}`:''].filter(Boolean);
+      if(meta)meta.textContent=parts.join(' · ');
     }catch(e){
       if(requestNo!==activeRequest)return;
-      console.error(e);
-      let context=null;try{context=buildAIContext();}catch(e2){context=null;}
-      renderErrorWithFallback(ans,meta,e?.message||e,'',context,'⚠️ Trợ lý AI thật tạm thời không thể kết nối — đã hiển thị dữ liệu tổng hợp dự phòng bằng rule-based.');
-    }
-    finally{if(requestNo===activeRequest){btn.classList.remove('ai-busy');btn.disabled=false;}}
+      console.warn('Trợ lý AI lỗi:',e);
+      if(!context){try{context=buildAIContext();}catch(e2){context=null;}}
+      renderErrorWithFallback(ans,meta,e,question,context,'⚠️ Trợ lý AI thật tạm thời chưa trả lời được — đã hiển thị số liệu dự phòng bằng rule-based.');
+    }finally{if(requestNo===activeRequest){btn.classList.remove('ai-busy');btn.disabled=false;}}
   };
   window.askAIQuick=async q=>{const input=document.getElementById('aiQuestion');if(input)input.value=q;return window.askAI();};
+
+  // Nút "Cảnh báo sớm cho cả lớp"
+  window.askAIEarlyWarning=function(){
+    const input=document.getElementById('aiQuestion');
+    if(input)input.value='Lập báo cáo cảnh báo sớm cho lớp: những học sinh đã vượt ngưỡng hoặc có dấu hiệu sớm về chuyên cần, rèn luyện, học tập; nêu căn cứ số liệu và việc GVCN nên làm trong tuần này.';
+    return window.askAI({mode:'early_warning'});
+  };
+  // Nút "Phân tích học sinh"
+  window.askAIStudent=function(){
+    const sel=document.getElementById('aiStudentSelect'),sid=sel?.value||'';
+    if(!sid){alert('Thầy hãy chọn một học sinh cần phân tích.');return;}
+    const st=(state.students||[]).find(x=>String(x.id)===String(sid));
+    const input=document.getElementById('aiQuestion');
+    if(input)input.value=`Phân tích học sinh ${st?.name||''}${st?.code?` (${st.code})`:''}: chuyên cần, rèn luyện, học tập, xu hướng gần đây và các dấu hiệu cần GVCN quan tâm sớm.`;
+    return window.askAI({mode:'student',studentId:sid});
+  };
+  window.populateAIStudentSelect=function(){
+    const sel=document.getElementById('aiStudentSelect');if(!sel)return;
+    const prev=sel.value,list=(typeof visibleStudents==='function')?visibleStudents():(state.students||[]);
+    sel.innerHTML='<option value="">— Chọn học sinh —</option>'+list.map(s=>`<option value="${esc(s.id)}">${esc(s.code||'')} · ${esc(s.name||'')}</option>`).join('');
+    if(prev&&list.some(s=>String(s.id)===prev))sel.value=prev;
+  };
+  // Nạp danh sách học sinh mỗi khi mở trang Trợ lý AI
+  const originalShowPage=window.showPage;
+  if(typeof originalShowPage==='function'&&!originalShowPage.__aiWrapped){
+    const wrapped=function(name){const r=originalShowPage.apply(this,arguments);if(name==='ai'){try{window.populateAIStudentSelect();}catch(e){}}return r;};
+    wrapped.__aiWrapped=true;window.showPage=wrapped;
+  }
 })();
 </script>
 
@@ -3720,16 +3782,24 @@ async function loadGuestDashboard(){
   // Rate limit phía client dùng chung cho cả 3 nút AI của "Phân tích thông minh" — bổ sung
   // cho rate limit phía server trong Edge Function, tránh bấm dồn dập tốn quota Gemini.
   let smartAiCooldownUntil=0;
-  const SMART_AI_COOLDOWN_MS=8000;
-  async function callAIForPhase(question,targetId){
+  const SMART_AI_COOLDOWN_MS=6000;
+  async function callAIForPhase(question,opts){
     if(!isAdmin())throw new Error('Chỉ GVCN/Admin được sử dụng AI.');
     const now=Date.now();
-    if(now<smartAiCooldownUntil)throw new Error(`Vui lòng đợi khoảng ${Math.ceil((smartAiCooldownUntil-now)/1000)} giây trước khi gọi AI thật tiếp (client-side rate limit).`);
-    const context=buildAIContext();const {data:{session}}=await sb.auth.getSession();if(!session?.access_token)throw new Error('Phiên đăng nhập đã hết.');const prompt=buildAIPrompt(question,context)+'\n\nYÊU CẦU BỔ SUNG: Trả lời tự nhiên, không Markdown, không dấu *, không JSON. Nêu kết quả chính trước, sau đó mới phân tích.';
-    let res;
-    try{res=await fetch(SUPABASE_URL+'/functions/v1/ai-class-assistant',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({question:prompt,stateKey:currentStateKey,context})});}
-    finally{smartAiCooldownUntil=Date.now()+SMART_AI_COOLDOWN_MS;}
-    const body=await res.json().catch(()=>({}));if(!res.ok)throw new Error(body.error||body.message||`HTTP ${res.status}`);return cleanAIText(typeof body.answer==='string'?body.answer:(body.answer?.text||body.answer?.content||''));}
+    if(now<smartAiCooldownUntil)throw new Error(`Vui lòng đợi khoảng ${Math.ceil((smartAiCooldownUntil-now)/1000)} giây trước khi gọi AI thật tiếp.`);
+    const o=typeof opts==='string'?{studentId:opts}:(opts||{});
+    // Chỉ gửi câu hỏi thô + gợi ý; server tự dựng dữ liệu & prompt (trước đây prompt dài bị cắt ở 1200 ký tự).
+    const extra={question:question+' Trả lời bằng văn bản thuần, không Markdown, nêu kết quả chính trước rồi mới phân tích.',mode:o.mode||'ask'};
+    if(o.studentId)extra.studentId=String(o.studentId);
+    if(o.period)extra.period=o.period;
+    try{
+      const body=await window.requestAssistantAI(extra);
+      smartAiCooldownUntil=Date.now()+SMART_AI_COOLDOWN_MS;
+      return cleanAIText(window.assistantAnswerText(body));
+    }catch(e){
+      const err=new Error(e?.message||String(e));err.code=e?.code;throw err;
+    }
+  }
 
   /* ---- Rule-based dự phòng cho "Phân tích thông minh" (không Supabase, không API key, không tốn phí) ----
      Dùng khi Gemini lỗi/hết quota/mất phiên đăng nhập, để GVCN vẫn có số liệu dùng ngay. */
@@ -3788,9 +3858,9 @@ async function loadGuestDashboard(){
     return lines.join('\n');
   }
 
-  window.runPeriodAI=async function(period){const host=document.getElementById('periodAIResult');if(!host)return;host.textContent='⏳ Đang kiểm tra AI thật (Gemini)...';try{const label=periodLabel(period),range=rangeFor(period);const data=range?{range,students:visibleStudents().length,conduct:recordsInRange(range).length,attendance:attendanceInRange(range).length}:{};const q=`Hãy phân tích ${label} của lớp đang chọn dựa trên dữ liệu thực tế. Nêu 1) kết quả nổi bật, 2) học sinh cần quan tâm, 3) điểm mạnh, 4) điểm cần cải thiện, 5) ba việc GVCN nên ưu tiên. Không bịa nguyên nhân. Thời gian phân tích: ${JSON.stringify(data)}.`;host.textContent=await callAIForPhase(q);log(`AI phân tích ${label}`);}catch(e){console.warn(e);host.textContent=`⚠️ AI thật hiện lỗi/hết quota/mất phiên đăng nhập (${e.message||e}). Đã hiển thị dữ liệu tổng hợp dự phòng:\n\n`+ruleBasedPeriodFallback(period);log(`AI phân tích ${periodLabel(period)} (dùng rule-based dự phòng)`)}};
-  window.generateAIComment=async function(){const host=document.getElementById('aiCommentResult'),sid=document.getElementById('commentStudent')?.value,type=document.getElementById('commentType')?.value||'general',s=state.students.find(x=>x.id===sid);if(!host||!s)return;host.textContent='⏳ Đang kiểm tra AI thật (Gemini)...';try{const q=`Viết nhận xét giáo dục cho học sinh ${s.name} (${s.code}). Loại nhận xét: ${type}. Dựa trên dữ liệu chuyên cần, rèn luyện và học tập của học sinh. Viết 1 đoạn ngắn, tích cực nhưng trung thực, phù hợp hồ sơ GVCN. Không bịa nguyên nhân.`;host.textContent=await callAIForPhase(q,sid);log(`AI viết nhận xét cho ${s.name}`);}catch(e){console.warn(e);host.textContent=`⚠️ AI thật hiện lỗi/hết quota/mất phiên đăng nhập (${e.message||e}). Đã hiển thị nhận xét mẫu dự phòng:\n\n`+ruleBasedCommentFallback(sid);log(`AI viết nhận xét cho ${s.name} (dùng rule-based dự phòng)`)}};
-  window.generateAIReport=async function(){const host=document.getElementById('aiReportResult'),type=document.getElementById('aiReportType')?.value||'week';if(!host)return;host.textContent='⏳ Đang kiểm tra AI thật (Gemini)...';try{const label=periodLabel(type);const q=`Hãy viết báo cáo ${label} cho GVCN lớp đang chọn. Cấu trúc: khái quát, sĩ số và giới tính, chuyên cần, rèn luyện, học sinh nổi bật, học sinh cần quan tâm, hoạt động gần đây, kiến nghị. Dùng số liệu thực tế từ context. Không Markdown, không dấu * và không bịa dữ liệu.`;host.textContent=await callAIForPhase(q);log(`AI tạo báo cáo ${label}`);}catch(e){console.warn(e);host.textContent=`⚠️ AI thật hiện lỗi/hết quota/mất phiên đăng nhập (${e.message||e}). Đã hiển thị báo cáo tổng hợp dự phòng:\n\n`+ruleBasedReportFallback(type);log(`AI tạo báo cáo ${periodLabel(type)} (dùng rule-based dự phòng)`)}};
+  window.runPeriodAI=async function(period){const host=document.getElementById('periodAIResult');if(!host)return;host.textContent='⏳ Đang kiểm tra AI thật (Gemini)...';try{const label=periodLabel(period),range=rangeFor(period);const data=range?{range,students:visibleStudents().length,conduct:recordsInRange(range).length,attendance:attendanceInRange(range).length}:{};const q=`Hãy phân tích ${label} của lớp đang chọn dựa trên dữ liệu thực tế. Nêu 1) kết quả nổi bật, 2) học sinh cần quan tâm, 3) điểm mạnh, 4) điểm cần cải thiện, 5) ba việc GVCN nên ưu tiên. Không bịa nguyên nhân. Thời gian phân tích: ${JSON.stringify(data)}.`;host.textContent=await callAIForPhase(q,{mode:'period',period});log(`AI phân tích ${label}`);}catch(e){console.warn(e);host.textContent=`⚠️ AI thật hiện lỗi/hết quota/mất phiên đăng nhập (${e.message||e}). Đã hiển thị dữ liệu tổng hợp dự phòng:\n\n`+ruleBasedPeriodFallback(period);log(`AI phân tích ${periodLabel(period)} (dùng rule-based dự phòng)`)}};
+  window.generateAIComment=async function(){const host=document.getElementById('aiCommentResult'),sid=document.getElementById('commentStudent')?.value,type=document.getElementById('commentType')?.value||'general',s=state.students.find(x=>x.id===sid);if(!host||!s)return;host.textContent='⏳ Đang kiểm tra AI thật (Gemini)...';try{const q=`Viết nhận xét giáo dục cho học sinh ${s.name} (${s.code}). Loại nhận xét: ${type}. Dựa trên dữ liệu chuyên cần, rèn luyện và học tập của học sinh. Viết 1 đoạn ngắn, tích cực nhưng trung thực, phù hợp hồ sơ GVCN. Không bịa nguyên nhân.`;host.textContent=await callAIForPhase(q,{mode:'student',studentId:sid});log(`AI viết nhận xét cho ${s.name}`);}catch(e){console.warn(e);host.textContent=`⚠️ AI thật hiện lỗi/hết quota/mất phiên đăng nhập (${e.message||e}). Đã hiển thị nhận xét mẫu dự phòng:\n\n`+ruleBasedCommentFallback(sid);log(`AI viết nhận xét cho ${s.name} (dùng rule-based dự phòng)`)}};
+  window.generateAIReport=async function(){const host=document.getElementById('aiReportResult'),type=document.getElementById('aiReportType')?.value||'week';if(!host)return;host.textContent='⏳ Đang kiểm tra AI thật (Gemini)...';try{const label=periodLabel(type);const q=`Hãy viết báo cáo ${label} cho GVCN lớp đang chọn. Cấu trúc: khái quát, sĩ số và giới tính, chuyên cần, rèn luyện, học sinh nổi bật, học sinh cần quan tâm, hoạt động gần đây, kiến nghị. Dùng số liệu thực tế từ context. Không Markdown, không dấu * và không bịa dữ liệu.`;host.textContent=await callAIForPhase(q,{mode:'ask'});log(`AI tạo báo cáo ${label}`);}catch(e){console.warn(e);host.textContent=`⚠️ AI thật hiện lỗi/hết quota/mất phiên đăng nhập (${e.message||e}). Đã hiển thị báo cáo tổng hợp dự phòng:\n\n`+ruleBasedReportFallback(type);log(`AI tạo báo cáo ${periodLabel(type)} (dùng rule-based dự phòng)`)}};
 
   window.renderDigitalModule=function(){if(!isAdmin())return;renderAuditLog();renderNotifications();renderActivityCalendar();const p=document.getElementById('activityDate');if(p&&!p.value)p.value=today();initPWA();};
   window.renderAuditLog=function(){const el=document.getElementById('auditLogList');if(!el)return;const rows=Array.isArray(state.auditLog)?state.auditLog.slice().reverse():[];el.innerHTML=rows.length?rows.slice(0,100).map(x=>`<div class="audit-item"><b>${esc(x.action||'Thao tác')}</b><span>${esc(x.actor||'')} · ${esc(x.role||'')} · ${esc(x.time||'')}</span><div class="mini">Lớp: ${esc(x.className||'')}</div></div>`).join(''):'<div class="empty">Chưa có audit log.</div>';};
