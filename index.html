@@ -2315,9 +2315,11 @@ function gradeFromScore(score){score=Number(score||0);const r=getConductRules();
 // tháng (không phải cộng điểm); Học kỳ/Năm được xét dựa trên XẾP LOẠI của từng tháng/học kỳ con,
 // theo cùng một bảng tiêu chuẩn, quy đổi theo tỉ lệ 75%/50% (tương đương "≥3/4 tuần" trong bảng gốc):
 //   - Tốt : ≥75% số kỳ con đạt Tốt, các kỳ còn lại không dưới mức Khá (không có Đạt/Chưa đạt).
-//   - Khá : ≥75% số kỳ con đạt Khá trở lên (tối đa 50% là Tốt), các kỳ còn lại không dưới mức Đạt
-//           (không có Chưa đạt) — ví dụ 2 Tốt+2 Khá, 1 Tốt+3 Khá, 4 Khá, 3 Khá+1 Đạt.
-//   - Đạt : ≥75% số kỳ con đạt Đạt trở lên (tối đa 1/4 kỳ Chưa đạt).
+//   - Khá : ≥75% số kỳ con đạt Khá trở lên (Tốt hoặc Khá), các kỳ còn lại không dưới mức Đạt
+//           (không có Chưa đạt) — ví dụ 2 Tốt+2 Khá, 1 Tốt+3 Khá, 4 Khá, 3 Khá+1 Đạt, 3 Tốt+1 Đạt.
+//           (Trường hợp đủ ≥75% Tốt nhưng còn lại toàn Khá đã được xếp Tốt ở bước trên rồi,
+//           nên bước này không cần giới hạn số tuần Tốt.)
+//   - Đạt : ≥75% số kỳ con đạt Đạt trở lên (tối đa 1/4 kỳ Chưa đạt) — ví dụ 3 Tốt+1 Chưa đạt.
 //   - Chưa đạt: các trường hợp còn lại.
 function aggregateConductGrade(subGrades){
   const list=(subGrades||[]).filter(Boolean);
@@ -2328,9 +2330,9 @@ function aggregateConductGrade(subGrades){
   const cDat=list.filter(g=>g==='Đạt').length;
   const cChua=n-cTot-cKha-cDat;
   const khaUp=cTot+cKha, datUp=cTot+cKha+cDat;
-  const need=Math.ceil(n*0.75), maxTot=Math.floor(n/2);
+  const need=Math.ceil(n*0.75);
   if(cTot>=need&&cDat===0&&cChua===0)return'Tốt';
-  if(khaUp>=need&&cTot<=maxTot&&cChua===0)return'Khá';
+  if(khaUp>=need&&cChua===0)return'Khá';
   if(datUp>=need)return'Đạt';
   return'Chưa đạt';
 }
