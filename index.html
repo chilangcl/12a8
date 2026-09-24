@@ -1651,7 +1651,20 @@ function conductEventsForPeriod(studentId,mode,detail){
 }
 function competitionStudentScore(studentId,mode,detail){
   const rules=getConductRules(),events=conductEventsForPeriod(studentId,mode,detail);
-  return {score:rules.base+events.reduce((sum,x)=>sum+Number(x.points||0),0),events};
+  if(mode==='month'){
+    const ym=String(detail||today().slice(0,7)),info=monthConductInfo(studentId,ym);
+    return {score:info.score,grade:info.grade,events,breakdown:info.weekly.map(w=>({label:`Tuần ${String(w.number).padStart(2,'0')}`,grade:w.grade,score:w.score}))};
+  }
+  if(mode==='semester'){
+    const which=detail||'hki',startWeek=which==='hkii'?19:1,endWeek=which==='hkii'?37:18,info=semesterConductInfo(studentId,startWeek,endWeek);
+    return {score:info.score,grade:info.grade,events,breakdown:info.monthly.map(m=>({label:`Tháng ${m.ym.split('-')[1]}/${m.ym.split('-')[0]}`,grade:m.grade,score:m.score}))};
+  }
+  if(mode==='year'){
+    const h1=semesterConductInfo(studentId,1,18),h2=semesterConductInfo(studentId,19,37),score=(h1.score+h2.score)/2,grade=aggregateConductGrade([h1.grade,h2.grade]);
+    return {score,grade,events,breakdown:[{label:'Học kì 1',grade:h1.grade,score:h1.score},{label:'Học kì 2',grade:h2.grade,score:h2.score}]};
+  }
+  const score=rules.base+events.reduce((sum,x)=>sum+Number(x.points||0),0);
+  return {score,grade:gradeFromScore(score),events,breakdown:null};
 }
 function competitionGroupRanking(mode,detail){
   const students=visibleStudents(),groups={}; students.forEach(s=>{const g=String(s.group||'Chưa phân tổ');if(!groups[g])groups[g]=[];groups[g].push(competitionStudentScore(s.id,mode,detail).score)});
@@ -1667,7 +1680,9 @@ function openCompetitionHistory(studentId,mode,detail){
   const s=state.students.find(x=>x.id===studentId); if(!s)return; const result=competitionStudentScore(studentId,mode,detail);
   document.getElementById('competitionHistoryTitle').textContent=`${s.code||''} – ${s.name||''}`;
   const rows=result.events.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)));
-  document.getElementById('competitionHistoryContent').innerHTML=`<div class="muted">Biến động điểm · ${competitionPeriodLabel(mode,detail)}</div><div class="history-score">Điểm hiện tại: ${result.score.toFixed(1)} · ${conductLabel(result.score)}</div>${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Điểm</th></tr></thead><tbody>${rows.map(x=>`<tr class="${Number(x.points)>=0?'positive-row':'negative-row'}"><td>${fmtDate(x.date)}</td><td>${esc(x.content||x.type||'')}</td><td><b>${Number(x.points)>=0?'+':''}${Number(x.points).toFixed(1)}</b></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">Chưa có biến động điểm trong giai đoạn này.</div>`}`;
+  const badgeCls=g=>g==='Tốt'?'b-green':g==='Khá'?'b-blue':g==='Đạt'?'b-yellow':'b-red';
+  const breakdownHtml=(result.breakdown&&result.breakdown.length)?`<div class="history-breakdown" style="margin:8px 0"><div class="muted">Cấu thành xếp loại (theo nguyên tắc tổng hợp từ các kỳ con, không cộng dồn điểm)</div><div class="kpi-list">${result.breakdown.map(b=>`<div class="kpi-row"><span>${esc(b.label)}</span><span class="badge ${badgeCls(b.grade)}">${b.grade} (${b.score.toFixed(1)})</span></div>`).join('')}</div></div>`:'';
+  document.getElementById('competitionHistoryContent').innerHTML=`<div class="muted">Biến động điểm · ${competitionPeriodLabel(mode,detail)}</div><div class="history-score">Điểm hiện tại: ${result.score.toFixed(1)} · ${result.grade}</div>${breakdownHtml}${rows.length?`<div class="table-wrap"><table class="table"><thead><tr><th>Ngày</th><th>Nội dung</th><th>Điểm</th></tr></thead><tbody>${rows.map(x=>`<tr class="${Number(x.points)>=0?'positive-row':'negative-row'}"><td>${fmtDate(x.date)}</td><td>${esc(x.content||x.type||'')}</td><td><b>${Number(x.points)>=0?'+':''}${Number(x.points).toFixed(1)}</b></td></tr>`).join('')}</tbody></table></div>`:`<div class="empty">Chưa có biến động điểm trong giai đoạn này.</div>`}`;
   openModal('competitionHistoryModal');
 }
 function recentScoreTrend(studentId){
@@ -2293,6 +2308,51 @@ async function resetWeekSchedule(){
 }
 function conductLabel(score){return gradeFromScore(score)}
 function gradeFromScore(score){score=Number(score||0);const r=getConductRules();if(score>=r.good)return'Tốt';if(score>=r.fair)return'Khá';if(score>=r.pass)return'Đạt';return'Chưa đạt'}
+// ===== Xếp loại thi đua Tháng / Học kỳ / Năm =====
+// Nguyên tắc: KHÔNG cộng dồn điểm trừ của toàn bộ giai đoạn (tuần/tháng con) lại với nhau nữa
+// (vì như vậy mới sang tuần 2-3 trong tháng đã bị âm điểm rất nhiều, dẫn tới "Chưa đạt" oan).
+// Thay vào đó: Tuần vẫn tính điểm như cũ; Tháng được xét dựa trên XẾP LOẠI của từng tuần trong
+// tháng (không phải cộng điểm); Học kỳ/Năm được xét dựa trên XẾP LOẠI của từng tháng/học kỳ con,
+// theo cùng một bảng tiêu chuẩn, quy đổi theo tỉ lệ 75%/50% (tương đương "≥3/4 tuần" trong bảng gốc):
+//   - Tốt : ≥75% số kỳ con đạt Tốt, các kỳ còn lại không dưới mức Khá (không có Đạt/Chưa đạt).
+//   - Khá : ≥75% số kỳ con đạt Khá trở lên (tối đa 50% là Tốt), các kỳ còn lại không dưới mức Đạt
+//           (không có Chưa đạt) — ví dụ 2 Tốt+2 Khá, 1 Tốt+3 Khá, 4 Khá, 3 Khá+1 Đạt.
+//   - Đạt : ≥75% số kỳ con đạt Đạt trở lên (tối đa 1/4 kỳ Chưa đạt).
+//   - Chưa đạt: các trường hợp còn lại.
+function aggregateConductGrade(subGrades){
+  const list=(subGrades||[]).filter(Boolean);
+  const n=list.length;
+  if(!n)return'Chưa đạt';
+  const cTot=list.filter(g=>g==='Tốt').length;
+  const cKha=list.filter(g=>g==='Khá').length;
+  const cDat=list.filter(g=>g==='Đạt').length;
+  const cChua=n-cTot-cKha-cDat;
+  const khaUp=cTot+cKha, datUp=cTot+cKha+cDat;
+  const need=Math.ceil(n*0.75), maxTot=Math.floor(n/2);
+  if(cTot>=need&&cDat===0&&cChua===0)return'Tốt';
+  if(khaUp>=need&&cTot<=maxTot&&cChua===0)return'Khá';
+  if(datUp>=need)return'Đạt';
+  return'Chưa đạt';
+}
+function weeklyConductInfo(sid,weekNumber){
+  const r=academicWeekRange(weekNumber);
+  const score=r?conductWeeklyScore(sid,r.start):getConductRules().base;
+  return {score,grade:gradeFromScore(score)};
+}
+function monthConductInfo(sid,ym){
+  const weeks=allAcademicWeeks().filter(w=>isoDate(w.start).slice(0,7)===ym);
+  const weekly=weeks.map(w=>({number:w.number,...weeklyConductInfo(sid,w.number)}));
+  const score=weekly.length?weekly.reduce((a,x)=>a+x.score,0)/weekly.length:getConductRules().base;
+  const grade=weekly.length?aggregateConductGrade(weekly.map(x=>x.grade)):'Chưa đạt';
+  return {score,grade,weekly};
+}
+function semesterConductInfo(sid,startWeek,endWeek){
+  const months=[...new Set(allAcademicWeeks().filter(w=>w.number>=startWeek&&w.number<=endWeek).map(w=>isoDate(w.start).slice(0,7)))];
+  const monthly=months.map(ym=>({ym,...monthConductInfo(sid,ym)}));
+  const score=monthly.length?monthly.reduce((a,x)=>a+x.score,0)/monthly.length:getConductRules().base;
+  const grade=monthly.length?aggregateConductGrade(monthly.map(x=>x.grade)):'Chưa đạt';
+  return {score,grade,monthly};
+}
 function periodRange(period,detail){
  if(period==='week'){const r=academicWeekRange(Number(detail)||academicWeekNumber(today())||1);return r?{start:isoDate(r.start),end:isoDate(r.end),label:`Tuần ${r.number} (${fmtDate(isoDate(r.start))}–${fmtDate(isoDate(r.end))})`}:null}
  if(period==='month'){const m=String(detail||today().slice(0,7));const [y,mo]=m.split('-').map(Number);if(!y||!mo)return null;const start=new Date(y,mo-1,1),end=new Date(y,mo,0);return{start:isoDate(start),end:isoDate(end),label:`Tháng ${String(mo).padStart(2,'0')}/${y}`}}
@@ -2301,31 +2361,26 @@ function periodRange(period,detail){
  const r1=academicWeekRange(1),r2=academicWeekRange(35);return{start:isoDate(r1.start),end:isoDate(r2.end),label:'Cả năm · Tuần 1–35'};
 }
 function monthConductResult(sid,ym){
- const weeks=allAcademicWeeks().filter(w=>isoDate(w.start).slice(0,7)===ym).slice(0,4);
- const scores=weeks.map(w=>conductWeeklyScore(sid,w.start));
- return scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:100;
+ return monthConductInfo(sid,ym).score;
 }
 function semesterConductResult(sid,semester){
- const start=semester==='hki'?1:20;
- const end=semester==='hki'?19:35;
- const weeks=allAcademicWeeks().filter(w=>w.number>=start&&w.number<=end);
- const scores=weeks.map(w=>conductWeeklyScore(sid,w.start));
- return scores.length?scores.reduce((a,b)=>a+b,0)/scores.length:100;
+ const start=semester==='hki'?1:20, end=semester==='hki'?19:35;
+ return semesterConductInfo(sid,start,end).score;
 }
 function conductResultForPeriod(sid,period,detail){
  if(period==='week'){
-   const r=academicWeekRange(Number(detail)||academicWeekNumber(today())||1);const score=r?conductWeeklyScore(sid,r.start):100;return{score,grade:gradeFromScore(score),weeks:1,weekly:[score]};
+   const info=weeklyConductInfo(sid,Number(detail)||academicWeekNumber(today())||1);return{score:info.score,grade:info.grade,weeks:1,weekly:[info.score]};
  }
  if(period==='month'){
-   const score=monthConductResult(sid,String(detail||today().slice(0,7)));return{score,grade:gradeFromScore(score),weeks:4,weekly:[]};
+   const ym=String(detail||today().slice(0,7));const info=monthConductInfo(sid,ym);return{score:info.score,grade:info.grade,weeks:info.weekly.length,weekly:info.weekly.map(w=>w.score)};
  }
  if(period==='hki'){
-   const score=semesterConductResult(sid,'hki');return{score,grade:gradeFromScore(score),weeks:20,weekly:[]};
+   const info=semesterConductInfo(sid,1,19);return{score:info.score,grade:info.grade,weeks:19,weekly:[]};
  }
  if(period==='hkii'){
-   const score=semesterConductResult(sid,'hkii');return{score,grade:gradeFromScore(score),weeks:20,weekly:[]};
+   const info=semesterConductInfo(sid,20,35);return{score:info.score,grade:info.grade,weeks:16,weekly:[]};
  }
- const h1=semesterConductResult(sid,'hki'),h2=semesterConductResult(sid,'hkii');const score=(h1+h2)/2;return{score,grade:gradeFromScore(score),weeks:40,weekly:[]};
+ const h1=semesterConductInfo(sid,1,19),h2=semesterConductInfo(sid,20,35);const score=(h1.score+h2.score)/2,grade=aggregateConductGrade([h1.grade,h2.grade]);return{score,grade,weeks:35,weekly:[]};
 }
 function populateReportSelectors(){
  const pEl=document.getElementById('reportPeriod'),m=document.getElementById('reportMonth');if(!pEl||!m)return;
@@ -2362,8 +2417,8 @@ function competitionSelectionLabel(mode,detail){return competitionPeriodLabel(mo
 function renderCompetition(){
   const students=visibleStudents().slice().sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''),undefined,{numeric:true,sensitivity:'base'}));
   const sel=competitionCurrentSelection(), mode=sel.mode, detail=sel.detail, rules=getConductRules();
-  const results=students.map(s=>{const x=competitionStudentScore(s.id,mode,detail);return {s,score:x.score,label:conductLabel(x.score),events:x.events};});
-  const summary={good:0,fair:0,pass:0,other:0}; results.forEach(x=>{if(x.score>=rules.good)summary.good++;else if(x.score>=rules.fair)summary.fair++;else if(x.score>=rules.pass)summary.pass++;else summary.other++;});
+  const results=students.map(s=>{const x=competitionStudentScore(s.id,mode,detail);return {s,score:x.score,label:x.grade,events:x.events};});
+  const summary={good:0,fair:0,pass:0,other:0}; results.forEach(x=>{if(x.label==='Tốt')summary.good++;else if(x.label==='Khá')summary.fair++;else if(x.label==='Đạt')summary.pass++;else summary.other++;});
   const ranking=competitionGroupRanking(mode,detail),medals=['🥇','🥈','🥉'],board=getAttentionBoard(),ar=getAttentionRules();
   const host=document.getElementById('competitionContent')||document.getElementById('competitionBody')?.parentElement?.parentElement; if(!host)return;
   const weeks=Array.from({length:40},(_,i)=>i+1);
@@ -3417,16 +3472,20 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       weeks.push({number:n,start:isoDate(s)});
     }
     const guestRules=(()=>{const r=rulesSource?.conductRules||{};return{base:Number.isFinite(Number(r.base))?Number(r.base):100,good:Number.isFinite(Number(r.good))?Number(r.good):96,fair:Number.isFinite(Number(r.fair))?Number(r.fair):90,pass:Number.isFinite(Number(r.pass))?Number(r.pass):85}})();const weekScore=(sid,w)=>{const e=new Date(w+'T00:00:00');e.setDate(e.getDate()+6);const es=isoDate(e);return guestRules.base+approved.filter(x=>x.studentId===sid&&x.date>=w&&x.date<=es).reduce((a,x)=>a+Number(x.points||0),0)};
-    const monthScore=(sid,ym)=>{const mw=weeks.filter(w=>w.start.slice(0,7)===ym).slice(0,4);const ss=mw.map(w=>weekScore(sid,w.start));return ss.length?ss.reduce((a,b)=>a+b,0)/ss.length:guestRules.base};
+    const weekGrade=(sid,w)=>{const sc=weekScore(sid,w);return sc>=guestRules.good?'Tốt':sc>=guestRules.fair?'Khá':sc>=guestRules.pass?'Đạt':'Chưa đạt'};
+    // Tháng/HK/Năm: xét theo XẾP LOẠI của từng kỳ con (không cộng dồn điểm), cùng công thức aggregateConductGrade dùng chung toàn hệ thống.
+    const monthScore=(sid,ym)=>{const mw=weeks.filter(w=>w.start.slice(0,7)===ym);const ss=mw.map(w=>weekScore(sid,w.start));return ss.length?ss.reduce((a,b)=>a+b,0)/ss.length:guestRules.base};
+    const monthGrade=(sid,ym)=>{const mw=weeks.filter(w=>w.start.slice(0,7)===ym);const gg=mw.map(w=>weekGrade(sid,w.start));return gg.length?aggregateConductGrade(gg):'Chưa đạt'};
     const semScore=(sid,sem)=>{const ms=sem==='hki'?['2026-09','2026-10','2026-11','2026-12','2027-01']:['2027-02','2027-03','2027-04','2027-05','2027-06'];const ss=ms.map(m=>monthScore(sid,m));return ss.reduce((a,b)=>a+b,0)/ss.length};
+    const semGrade=(sid,sem)=>{const ms=sem==='hki'?['2026-09','2026-10','2026-11','2026-12','2027-01']:['2027-02','2027-03','2027-04','2027-05','2027-06'];const gg=ms.map(m=>monthGrade(sid,m));return aggregateConductGrade(gg)};
     students.forEach(st=>{
-      let score=guestRules.base;
-      if(period==='week'){const target=detail?weeks.find(w=>String(w.number)===String(detail))?.start:currentWeek;score=target?weekScore(st.id,target):guestRules.base;}
-      else if(period==='month')score=monthScore(st.id,detail||currentMonth);
-      else if(period==='hki')score=semScore(st.id,'hki');
-      else if(period==='hkii')score=semScore(st.id,'hkii');
-      else score=(semScore(st.id,'hki')+semScore(st.id,'hkii'))/2;
-      byStudent[st.id]={score,grade:score>=guestRules.good?'Tốt':score>=guestRules.fair?'Khá':score>=guestRules.pass?'Đạt':'Chưa đạt'};
+      let score=guestRules.base, grade='Chưa đạt';
+      if(period==='week'){const target=detail?weeks.find(w=>String(w.number)===String(detail))?.start:currentWeek;score=target?weekScore(st.id,target):guestRules.base;grade=target?weekGrade(st.id,target):'Chưa đạt';}
+      else if(period==='month'){score=monthScore(st.id,detail||currentMonth);grade=monthGrade(st.id,detail||currentMonth);}
+      else if(period==='hki'){score=semScore(st.id,'hki');grade=semGrade(st.id,'hki');}
+      else if(period==='hkii'){score=semScore(st.id,'hkii');grade=semGrade(st.id,'hkii');}
+      else {score=(semScore(st.id,'hki')+semScore(st.id,'hkii'))/2;grade=aggregateConductGrade([semGrade(st.id,'hki'),semGrade(st.id,'hkii')]);}
+      byStudent[st.id]={score,grade};
     });
     return byStudent;
   }
