@@ -109,6 +109,7 @@ document.addEventListener('click',function(e){
     {id:'competition',icon:'🏆',label:'Thi đua',scope:'all'},
     {id:'students',icon:'👩‍🎓',label:'Học sinh',scope:'all'},
     {id:'reports',icon:'📊',label:'Báo cáo',scope:'all'},
+    {id:'parentmsg',icon:'📨',label:'Tin nhắn phụ huynh',scope:'admin'},
     {id:'ai',icon:'🤖',label:'Trợ lý AI',scope:'admin'},
     {id:'classes',icon:'🏫',label:'Quản lý lớp',scope:'admin'},
     {id:'smart',icon:'🧠',label:'Phân tích thông minh',scope:'admin'},
@@ -799,6 +800,7 @@ select option{background:#fff!important;color:#202124!important}
       <button data-page="competition" onclick="showPage('competition')">🏆 Thi đua</button>
       <div class="nav-title">Báo cáo</div>
       <button data-page="reports" onclick="showPage('reports')">📊 Báo cáo tổng hợp</button>
+      <button class="admin-only" data-page="parentmsg" onclick="showPage('parentmsg')">📨 Tin nhắn phụ huynh (Zalo)</button>
       <button class="admin-only smart-nav" data-page="smart" onclick="showPage('smart')">🧠 Phân tích thông minh</button>
       <button class="admin-only digital-nav" data-page="digital" onclick="showPage('digital')">🗂️ Số hóa & Nhật ký</button>
       <button class="member-only" data-page="profile" onclick="showPage('profile')">👤 Hồ sơ học sinh 360°</button>
@@ -864,6 +866,7 @@ select option{background:#fff!important;color:#202124!important}
             <button class="cm-utility-card pink cm-attendance-summary-card" type="button" onclick="useUtility('today-attendance')"><span class="cm-utility-icon">🗓️</span><span>Xem điểm danh hôm nay</span></button>
             <button class="cm-utility-card blue" type="button" onclick="useUtility('digital')"><span class="cm-utility-icon">💬</span><span>Thông báo lớp</span></button>
             <button class="cm-utility-card purple" type="button" onclick="useUtility('reports')"><span class="cm-utility-icon">📊</span><span>Báo cáo</span></button>
+            <button class="cm-utility-card lavender admin-only" type="button" onclick="useUtility('parentmsg')"><span class="cm-utility-icon">📨</span><span>Tin nhắn phụ huynh</span></button>
             <button class="cm-utility-card orange admin-only" type="button" onclick="useUtility('smart')"><span class="cm-utility-icon">🧠</span><span>Phân tích thông minh</span></button>
             <button class="cm-utility-card cyan" type="button" onclick="useUtility('competition')"><span class="cm-utility-icon">🏆</span><span>Thi đua</span></button>
             <button class="cm-utility-card lavender" type="button" onclick="useUtility('profile')"><span class="cm-utility-icon">📝</span><span>Hồ sơ 360°</span></button>
@@ -1010,6 +1013,37 @@ select option{background:#fff!important;color:#202124!important}
         <div class="report-title-print" id="reportPrintTitle"></div>
         <div class="grid cards" id="reportCards"></div>
         <div class="card" style="margin-top:16px"><h3>📈 Tổng hợp theo học sinh</h3><div class="table-wrap"><table class="table"><thead><tr><th>STT</th><th>Học sinh</th><th>Có mặt</th><th>Nghỉ phép</th><th>Nghỉ KP</th><th>Đi muộn</th><th>Điểm RL</th><th>Hạnh kiểm</th></tr></thead><tbody id="reportBody"></tbody></table></div></div>
+      </section>
+
+      <section id="page-parentmsg" class="page">
+        <div class="page-head"><div><h2>📨 Soạn tin nhắn phụ huynh (Zalo)</h2><div class="muted">Tự động tổng hợp tình hình chuyên cần và rèn luyện của lớp tại thời điểm mở trang để GVCN sao chép, gửi vào nhóm Zalo phụ huynh.</div></div><span class="ai-badge">🔐 Chỉ GVCN</span></div>
+        <div class="card pm-card">
+          <div class="form-grid">
+            <div class="field span2"><label for="pmPeriod">Giai đoạn thông báo</label><select id="pmPeriod" onchange="pmOptionChanged()"></select></div>
+            <div class="field span2">
+              <label>Nội dung đưa vào tin nhắn</label>
+              <div class="pm-opts">
+                <label class="pm-check"><input type="checkbox" id="pmOptViolations" checked onchange="pmOptionChanged()"><span>Nêu các nhóm nội dung nền nếp cần khắc phục <i>(chỉ nêu số lượt theo nhóm, không nêu tên học sinh)</i></span></label>
+                <label class="pm-check"><input type="checkbox" id="pmOptPraise" checked onchange="pmOptionChanged()"><span>Biểu dương học sinh có ghi nhận tích cực (chỉ nêu tên học sinh được khen) — số em tối đa: <select id="pmPraiseN" onchange="pmOptionChanged()"><option value="3">3</option><option value="5" selected>5</option><option value="8">8</option><option value="10">10</option></select></span></label>
+                <label class="pm-check"><input type="checkbox" id="pmOptNames" onchange="pmOptionChanged()"><span>Nêu tên học sinh nghỉ học / đi học muộn <i>(mặc định tắt; nên trao đổi riêng với phụ huynh từng em)</i></span></label>
+                <label class="pm-check"><input type="checkbox" id="pmOptRequest" checked onchange="pmOptionChanged()"><span>Kèm đề nghị phối hợp giữa gia đình và nhà trường</span></label>
+              </div>
+            </div>
+            <div class="field span2"><label for="pmExtra">Nội dung bổ sung của GVCN (không bắt buộc)</label><textarea id="pmExtra" rows="2" placeholder="Ví dụ: Kính mời Quý phụ huynh tham dự họp phụ huynh lúc 7h30 ngày..." oninput="pmOptionChanged()"></textarea></div>
+          </div>
+        </div>
+        <div class="grid cards" id="pmStats" style="margin-top:16px"></div>
+        <div id="pmNote" class="notice hidden" style="margin-top:16px"></div>
+        <div class="card pm-card" style="margin-top:16px">
+          <div class="pm-head"><h3 style="margin:0">💬 Nội dung tin nhắn</h3><span id="pmCounter" class="mini"></span></div>
+          <div class="mini" style="margin:6px 0 10px">Thầy/cô có thể chỉnh sửa trực tiếp trong khung dưới đây trước khi sao chép.</div>
+          <textarea id="pmText" class="pm-text" spellcheck="false" aria-label="Nội dung tin nhắn gửi nhóm Zalo phụ huynh" oninput="pmTextEdited()"></textarea>
+          <div class="actions" style="margin-top:12px">
+            <button class="btn success" type="button" id="pmCopyBtn" onclick="pmCopy(this)">📋 Sao chép nội dung</button>
+            <button class="btn secondary" type="button" onclick="pmRegenerate()">🔄 Cập nhật số liệu / Tạo lại</button>
+          </div>
+          <div class="footer-note">Số liệu chuyên cần lấy từ điểm danh; rèn luyện chỉ tính các ghi nhận đã được duyệt và chỉ tính các tuần đã diễn ra. Buổi học hôm nay chỉ được tính khi đã khóa điểm danh hoặc đã có ghi nhận điểm danh.</div>
+        </div>
       </section>
 
       <section id="page-profile" class="page">
@@ -1282,7 +1316,7 @@ function setUserUi(){
     }
   }
   // Sau khi đổi vai trò/lớp, bảo đảm không còn trang quản trị/AI bị mở.
-  if(!isAdmin() && ['ai','classes','profile','excel','users','settings','smart','digital'].some(n=>document.getElementById('page-'+n)?.classList.contains('active'))){showPage('dashboard');}
+  if(!isAdmin() && ['ai','classes','profile','excel','users','settings','smart','digital','parentmsg'].some(n=>document.getElementById('page-'+n)?.classList.contains('active'))){showPage('dashboard');}
 }
 const CM_LOGIN_GUARD_KEY='cm_login_guard_v1';
 function loginGuard(){try{const now=Date.now(),raw=JSON.parse(sessionStorage.getItem(CM_LOGIN_GUARD_KEY)||'{"count":0,"until":0}');if(raw.until>now)return {blocked:true,seconds:Math.ceil((raw.until-now)/1000)};if(now-(raw.first||now)>15*60*1000)return {count:0,first:now,until:0};return raw;}catch(e){return {count:0,first:Date.now(),until:0};}}
@@ -1458,9 +1492,9 @@ function toggleSidebar(){
  const hidden=sidebar.classList.contains('menu-hidden');
  setSidebarHidden(!hidden);
 }
-const titles={dashboard:'Trang chủ',ai:'Trợ lý AI',classes:'Quản lý lớp & năm học',students:'Học sinh',attendance:'Chuyên cần',conduct:'Rèn luyện',competition:'Thi đua & Theo dõi',reports:'Báo cáo tổng hợp',smart:'Phân tích thông minh',digital:'Số hóa & Nhật ký',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
+const titles={dashboard:'Trang chủ',ai:'Trợ lý AI',classes:'Quản lý lớp & năm học',students:'Học sinh',attendance:'Chuyên cần',conduct:'Rèn luyện',competition:'Thi đua & Theo dõi',reports:'Báo cáo tổng hợp',parentmsg:'Soạn tin nhắn phụ huynh',smart:'Phân tích thông minh',digital:'Số hóa & Nhật ký',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
 function showPage(name){updateProfile360Access();
- if(['excel','users','ai','classes','settings','smart','digital'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
+ if(['excel','users','ai','classes','settings','smart','digital','parentmsg'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
   if(name==='profile'&&!currentUser){alert('Vui lòng đăng nhập để xem Hồ sơ học sinh 360°.');return}
  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');
  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===name));
@@ -1478,7 +1512,7 @@ function showPage(name){updateProfile360Access();
  }if(name==='reports')renderReports();if(name==='profile'){
    try{renderProfileSelectors();setTimeout(()=>{try{renderProfile()}catch(err){console.error('Lỗi Hồ sơ 360°:',err)}},0)}
    catch(err){console.error('Lỗi khởi tạo Hồ sơ 360°:',err);const box=document.getElementById('profileContent');if(box)box.innerHTML='<div class="empty">Không thể khởi tạo Hồ sơ 360°. Vui lòng chọn lại học sinh.</div>';}
-}if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule(); if(name==='settings'){try{renderConductRulesSettings();renderConductGuideSettings();populateScheduleWeekSelect()}catch(e){console.warn(e)}}
+}if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule(); if(name==='parentmsg'){try{renderParentMsg()}catch(err){console.error('Lỗi Tin nhắn phụ huynh:',err)}} if(name==='settings'){try{renderConductRulesSettings();renderConductGuideSettings();populateScheduleWeekSelect()}catch(e){console.warn(e)}}
 }
 function openTodayAttendance(){const dateInput=document.getElementById('attDate');if(dateInput)dateInput.value=today();showPage('attendance')}
 const CM_UTILITY_CATALOG={
@@ -1488,6 +1522,7 @@ const CM_UTILITY_CATALOG={
  'today-attendance':{label:'Xem điểm danh hôm nay',icon:'🗓️',color:'pink'},
  'digital':{label:'Thông báo lớp',icon:'💬',color:'blue'},
  'reports':{label:'Báo cáo',icon:'📊',color:'purple'},
+ 'parentmsg':{label:'Tin nhắn phụ huynh',icon:'📨',color:'lavender'},
  'competition':{label:'Thi đua',icon:'🏆',color:'cyan'},
  'smart':{label:'Phân tích thông minh',icon:'🧠',color:'orange'},
  'profile':{label:'Hồ sơ 360°',icon:'📝',color:'lavender'},
@@ -1523,7 +1558,7 @@ function renderRecentUtilities(){
  let list=[];
  try{list=JSON.parse(localStorage.getItem(cmRecentUtilKey())||'[]');}catch(e){list=[]}
  if(!Array.isArray(list))list=[];
- list=list.filter(id=>CM_UTILITY_CATALOG[id]&&((id!=='auditlog'&&id!=='smart')||isAdmin()));
+ list=list.filter(id=>CM_UTILITY_CATALOG[id]&&((id!=='auditlog'&&id!=='smart'&&id!=='parentmsg')||isAdmin()));
  const defaults=['conduct','students','attendance'];
  defaults.forEach(id=>{if(list.length<3&&!list.includes(id))list.push(id)});
  list=list.slice(0,3);
@@ -4493,6 +4528,311 @@ window.vneduBuildXls=(function(){
 </script>
 <!-- =================== HẾT KHỐI XUẤT SỔ ĐIỂM DANH VnEdu =================== -->
 
+<style id="parentmsg-module-css">
+.pm-opts{display:grid;gap:10px}.pm-check{display:flex;align-items:flex-start;gap:9px;font-size:13px;font-weight:500;line-height:1.5;cursor:pointer}.pm-check input{margin-top:3px;flex:0 0 auto;width:auto}.pm-check i{color:var(--muted);font-style:normal}.pm-check select{padding:3px 6px;border:1px solid var(--border);border-radius:7px;width:auto}
+.pm-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.pm-text{width:100%;min-height:460px;padding:14px 16px;border:1px solid var(--border);border-radius:12px;background:#fff;font:inherit;font-size:14px;line-height:1.65;resize:vertical;outline:none}.pm-text:focus{border-color:var(--primary);box-shadow:0 0 0 3px #2563eb18}
+@media(max-width:680px){.pm-text{min-height:380px;font-size:14px}}
+</style>
+<script id="parentmsg-module-js">
+/* ============================================================
+   MODULE: SOẠN TIN NHẮN THÔNG BÁO CHUYÊN CẦN & RÈN LUYỆN GỬI NHÓM ZALO PHỤ HUYNH
+   - Chỉ GVCN/Admin. Số liệu lấy tại thời điểm mở trang (hoặc khi bấm "Cập nhật số liệu").
+   - Nguyên tắc sư phạm: tin nhắn gửi nhóm chỉ nêu số liệu tổng hợp của lớp; KHÔNG nêu tên học sinh vi phạm.
+     Chỉ nêu tên khi biểu dương; nêu tên học sinh nghỉ/muộn là tùy chọn (mặc định tắt).
+   - Rèn luyện chỉ tính các tuần ĐÃ diễn ra (khác trang Báo cáo tổng hợp, nơi tuần chưa diễn ra được tính 100 điểm).
+   ============================================================ */
+(function(){
+  'use strict';
+  const $=id=>document.getElementById(id);
+  const ROMAN=['I','II','III','IV','V','VI'];
+  const AUTO_SOURCES=['attendance_auto','weekly_auto_bonus'];
+  let pmEdited=false, pmKey=null;
+
+  const f1=n=>(Math.round(Number(n||0)*10)/10).toFixed(1).replace('.',',');
+  const pct=(a,b)=>b>0?(a/b*100):0;
+  const avg=arr=>arr.length?arr.reduce((a,x)=>a+x,0)/arr.length:0;
+
+  /* ---------- Giai đoạn ---------- */
+  function currentWeek(){
+    const t=today();let wk=academicWeekNumber(t);
+    if(!wk)wk=t<BIBI_ACADEMIC_START?1:35;
+    return wk;
+  }
+  function resolvePeriod(id){
+    const t=today(),wk=currentWeek(),yr=String(state?.settings?.year||'').replace('-','–');
+    if(id==='lastweek'&&wk>1){const r=periodRange('week',wk-1);return{id,mode:'week',detail:wk-1,range:r,title:r.label}}
+    if(id==='month'){const ym=t.slice(0,7),r=periodRange('month',ym);return{id,mode:'month',detail:ym,range:r,title:r.label}}
+    if(id==='sem'){const code=wk<=19?'hki':'hkii',r=periodRange(code,'');return{id,mode:'sem',detail:code,range:r,title:(code==='hki'?'Học kỳ I':'Học kỳ II')+', năm học '+yr}}
+    if(id==='year'){const r=periodRange('year','');return{id,mode:'year',detail:'',range:r,title:'Cả năm học '+yr}}
+    const r=periodRange('week',wk);return{id:'week',mode:'week',detail:wk,range:r,title:r.label};
+  }
+  function ensurePeriodOptions(){
+    const sel=$('pmPeriod');if(!sel)return;
+    const prev=sel.value||'week',wk=currentWeek();
+    const opts=[['week',`Tuần hiện tại (Tuần ${wk}) — tính đến thời điểm hiện tại`]];
+    if(wk>1)opts.push(['lastweek',`Tuần vừa kết thúc (Tuần ${wk-1})`]);
+    opts.push(['month','Tháng hiện tại'],['sem','Học kỳ hiện tại (từ đầu học kỳ đến nay)'],['year','Cả năm học (từ đầu năm học đến nay)']);
+    sel.innerHTML=opts.map(o=>`<option value="${o[0]}">${esc(o[1])}</option>`).join('');
+    sel.value=opts.some(o=>o[0]===prev)?prev:'week';
+  }
+
+  /* ---------- Chuyên cần ---------- */
+  function collectAttendance(students,range){
+    const t=today(),start=dateObj(range.start),end=dateObj(range.end),latest=dateObj(t);
+    const last=end&&latest&&end>latest?latest:end;
+    const per=new Map(students.map(s=>[s.id,{present:0,late:0,excused:0,absent:0}]));
+    const takenToday={};
+    Object.values(state.attendance||{}).forEach(r=>{if(r&&r.date===t)takenToday[r.session]=true});
+    let sessions=0;
+    if(start&&last&&start<=last){
+      for(let d=new Date(start);d<=last;d.setDate(d.getDate()+1)){
+        const date=isoDate(d);
+        for(const ss of ['sang','chieu']){
+          if(!isClassSessionScheduled(date,ss))continue;
+          if(date===t&&!isAttendanceLocked(date,ss)&&!takenToday[ss])continue; // buổi hôm nay chưa điểm danh
+          sessions++;
+          students.forEach(s=>{
+            const st=attendanceStatusFor(s.id,date,ss),o=per.get(s.id);
+            if(o&&Object.prototype.hasOwnProperty.call(o,st))o[st]++;
+          });
+        }
+      }
+    }
+    const tot={present:0,late:0,excused:0,absent:0},stu={late:0,excused:0,absent:0};let perfect=0;
+    per.forEach(o=>{
+      Object.keys(tot).forEach(k=>tot[k]+=o[k]);
+      ['late','excused','absent'].forEach(k=>{if(o[k]>0)stu[k]++});
+      if(o.late+o.excused+o.absent===0)perfect++;
+    });
+    const total=sessions*students.length;
+    return{sessions,per,tot,stu,perfect,total,rate:pct(tot.present+tot.late,total)};
+  }
+
+  /* ---------- Rèn luyện (chỉ tính các tuần đã diễn ra) ---------- */
+  function conductFor(sid,res,elapsed){
+    const base=getConductRules().base,dflt={score:base,grade:gradeFromScore(base)};
+    const monthInfo=(ym,from,to)=>{
+      const ws=elapsed.filter(w=>w.number>=from&&w.number<=to&&isoDate(w.start).slice(0,7)===ym);
+      if(!ws.length)return null;
+      const arr=ws.map(w=>weeklyConductInfo(sid,w.number));
+      return{score:avg(arr.map(x=>x.score)),grade:aggregateConductGrade(arr.map(x=>x.grade))};
+    };
+    const semInfo=(from,to)=>{
+      const months=[...new Set(elapsed.filter(w=>w.number>=from&&w.number<=to).map(w=>isoDate(w.start).slice(0,7)))];
+      const arr=months.map(m=>monthInfo(m,from,to)).filter(Boolean);
+      if(!arr.length)return null;
+      return{score:avg(arr.map(x=>x.score)),grade:aggregateConductGrade(arr.map(x=>x.grade))};
+    };
+    if(res.mode==='week')return weeklyConductInfo(sid,res.detail);
+    if(res.mode==='month')return monthInfo(res.detail,1,40)||dflt;
+    if(res.mode==='sem'){const b=res.detail==='hki'?[1,19]:[20,35];return semInfo(b[0],b[1])||dflt}
+    const arr=[semInfo(1,19),semInfo(20,35)].filter(Boolean);
+    return arr.length?{score:avg(arr.map(x=>x.score)),grade:aggregateConductGrade(arr.map(x=>x.grade))}:dflt;
+  }
+  function violationGroup(content,guide){
+    const c=normalizeConductLabel(content);
+    for(const r of (guide.deduct||[])){
+      const l=normalizeConductLabel(r.label);
+      if(l&&(c.includes(l)||(c.length>=6&&l.includes(c))))return String(r.group||'Các nội dung khác').replace(/\s*&\s*/g,' và ');
+    }
+    return 'Các nội dung khác';
+  }
+
+  /* ---------- Thu thập số liệu ---------- */
+  function collect(periodId){
+    const res=resolvePeriod(periodId),students=visibleStudents().slice(),N=students.length;
+    const ids=new Set(students.map(s=>s.id)),range=res.range;
+    const att=collectAttendance(students,range);
+    const elapsed=allAcademicWeeks().filter(w=>isoDate(w.start)<=today());
+    const grades={'Tốt':0,'Khá':0,'Đạt':0,'Chưa đạt':0},scores=[];
+    students.forEach(s=>{const c=conductFor(s.id,res,elapsed);scores.push(Number(c.score)||0);if(grades[c.grade]!==undefined)grades[c.grade]++});
+    const inRange=(state.conduct||[]).filter(x=>x&&x.date>=range.start&&x.date<=range.end&&ids.has(x.studentId));
+    const approved=inRange.filter(x=>x.status==='approved'),pending=inRange.filter(x=>x.status==='pending').length;
+    const guide=getConductGuide(),groups={},vioStudents=new Set();let vioCount=0;
+    approved.filter(x=>Number(x.points)<0&&!AUTO_SOURCES.includes(x.source)).forEach(x=>{
+      const g=violationGroup(x.content,guide);groups[g]=(groups[g]||0)+1;vioCount++;vioStudents.add(x.studentId);
+    });
+    const posMap=new Map();
+    approved.filter(x=>Number(x.points)>0&&!AUTO_SOURCES.includes(x.source)).forEach(x=>posMap.set(x.studentId,(posMap.get(x.studentId)||0)+Number(x.points)));
+    const praise=students.filter(s=>posMap.has(s.id)).map(s=>({s,pts:posMap.get(s.id)}))
+      .sort((a,b)=>b.pts-a.pts||String(a.s.name).localeCompare(String(b.s.name),'vi'));
+    return{res,students,N,att,grades,avgScore:avg(scores),vioGroups:Object.entries(groups).sort((a,b)=>b[1]-a[1]),vioCount,vioStudents:vioStudents.size,praise,pending};
+  }
+
+  /* ---------- Soạn nội dung ---------- */
+  function attendanceComment(d,o){
+    const a=d.att;if(!a.sessions||!d.N)return '';
+    if(a.tot.late+a.tot.excused+a.tot.absent===0)return 'Trong giai đoạn này, toàn bộ học sinh đều đi học đầy đủ và đúng giờ. Giáo viên chủ nhiệm ghi nhận và biểu dương tinh thần chấp hành tốt của các em.';
+    let s;
+    if(a.rate>=98)s='Nhìn chung, tình hình chuyên cần của lớp rất tốt, các em duy trì được nền nếp đi học đều đặn.';
+    else if(a.rate>=95)s='Nhìn chung, tình hình chuyên cần của lớp tốt; tuy nhiên vẫn còn một số trường hợp nghỉ học hoặc đi học muộn cần tiếp tục được nhắc nhở.';
+    else if(a.rate>=90)s='Tình hình chuyên cần của lớp ở mức khá; vẫn còn một số học sinh nghỉ học hoặc đi học muộn, rất mong Quý phụ huynh quan tâm, nhắc nhở các em.';
+    else s='Tình hình chuyên cần của lớp chưa thật sự ổn định; Giáo viên chủ nhiệm rất mong nhận được sự quan tâm, phối hợp chặt chẽ của Quý phụ huynh để các em đi học đầy đủ hơn.';
+    if(a.tot.absent>0&&!o.request)s+=' Đối với trường hợp nghỉ học không phép, kính đề nghị Quý phụ huynh báo cho Giáo viên chủ nhiệm biết lý do ngay trong ngày.';
+    return s;
+  }
+  function conductComment(d,o){
+    if(!d.N)return '';
+    const g=d.grades;
+    if(g['Chưa đạt']>0)return 'Một số học sinh chưa đạt yêu cầu về rèn luyện trong giai đoạn này; Giáo viên chủ nhiệm sẽ trao đổi riêng với phụ huynh các em để cùng phối hợp giáo dục.';
+    if(pct(g['Tốt'],d.N)>=80&&d.vioCount===0)return 'Lớp duy trì tốt nền nếp, phần lớn học sinh đạt xếp loại Tốt, thể hiện ý thức tự giác trong học tập và rèn luyện.';
+    if(g['Đạt']>0||d.vioCount>0)return 'Nhìn chung, lớp duy trì được nền nếp; vẫn còn một số vi phạm cần tiếp tục được nhắc nhở, uốn nắn.';
+    return 'Nhìn chung, nền nếp của lớp được duy trì tốt, các em có ý thức chấp hành nội quy nhà trường.';
+  }
+  function compose(d,o){
+    const L=[],st=state.settings||{},cls=st.className||'',yr=String(st.year||'').replace('-','–'),teacher=st.teacher||currentUser?.name||'';
+    const now=new Date(),hh=String(now.getHours()).padStart(2,'0'),mm=String(now.getMinutes()).padStart(2,'0');
+    const a=d.att,cnt=(luot,hs)=>luot>0?`${luot} lượt (${hs} học sinh)`:'không có';
+    L.push('THÔNG BÁO TÌNH HÌNH RÈN LUYỆN VÀ CHUYÊN CẦN');
+    L.push(`Lớp ${cls} – Năm học ${yr}`);
+    L.push(`Thời gian thống kê: ${d.res.title}`);
+    L.push(`Số liệu cập nhật lúc ${hh}:${mm}, ngày ${fmtDate(today())}`);
+    L.push('');
+    L.push(`Kính gửi Quý phụ huynh học sinh lớp ${cls},`);
+    L.push('');
+    L.push('Giáo viên chủ nhiệm xin thông báo đến Quý phụ huynh tình hình chuyên cần và rèn luyện của lớp như sau:');
+    let n=0;const head=t=>{L.push('');L.push(`${ROMAN[n++]}. ${t}`)};
+
+    head('TÌNH HÌNH CHUYÊN CẦN');
+    if(!d.N||!a.sessions){
+      L.push('- Trong giai đoạn này chưa có buổi học nào được thống kê chuyên cần.');
+    }else{
+      L.push(`- Sĩ số: ${d.N} học sinh; số buổi học đã thống kê: ${a.sessions} buổi (lượt tính theo từng buổi học của từng học sinh).`);
+      L.push(`- Tỷ lệ chuyên cần chung (học sinh có mặt tại lớp, kể cả đi học muộn): ${f1(a.rate)}%.`);
+      L.push(`- Đi học muộn: ${cnt(a.tot.late,a.stu.late)}.`);
+      L.push(`- Nghỉ học có phép: ${cnt(a.tot.excused,a.stu.excused)}.`);
+      L.push(`- Nghỉ học không phép: ${cnt(a.tot.absent,a.stu.absent)}.`);
+      L.push(`- Số học sinh đi học đầy đủ, đúng giờ: ${a.perfect}/${d.N} học sinh.`);
+      if(o.names){
+        const rows=d.students.map(s=>({s,x:a.per.get(s.id)})).filter(r=>r.x.late+r.x.excused+r.x.absent>0)
+          .sort((p,q)=>q.x.absent-p.x.absent||q.x.excused-p.x.excused||q.x.late-p.x.late||String(p.s.name).localeCompare(String(q.s.name),'vi'));
+        if(rows.length){
+          L.push('');L.push('Học sinh có phát sinh nghỉ học hoặc đi học muộn trong giai đoạn:');
+          rows.slice(0,12).forEach(r=>{
+            const p=[];
+            if(r.x.absent)p.push(`nghỉ không phép ${r.x.absent} buổi`);
+            if(r.x.excused)p.push(`nghỉ có phép ${r.x.excused} buổi`);
+            if(r.x.late)p.push(`đi học muộn ${r.x.late} lần`);
+            L.push(`- Em ${r.s.name}: ${p.join('; ')}.`);
+          });
+          if(rows.length>12)L.push(`- Và ${rows.length-12} học sinh khác.`);
+        }
+      }
+      const c=attendanceComment(d,o);if(c){L.push('');L.push('Nhận xét: '+c)}
+    }
+
+    head('TÌNH HÌNH RÈN LUYỆN');
+    if(!d.N){
+      L.push('- Chưa có dữ liệu rèn luyện để thống kê.');
+    }else{
+      L.push(`- Điểm rèn luyện trung bình của lớp: ${f1(d.avgScore)} điểm${d.res.mode==='week'?` (điểm khởi đầu mỗi tuần: ${getConductRules().base} điểm)`:''}.`);
+      const gr=['Tốt','Khá','Đạt','Chưa đạt'].filter(k=>d.grades[k]>0).map(k=>`${k}: ${d.grades[k]} học sinh`);
+      L.push(`- Kết quả xếp loại rèn luyện: ${gr.join('; ')}.`);
+      if(o.violations){
+        if(d.vioGroups.length)L.push(`- Nội dung nền nếp cần tiếp tục khắc phục: ${d.vioGroups.map(([g,c])=>`${g.charAt(0).toLowerCase()+g.slice(1)} (${c} lượt)`).join('; ')}.`);
+        else L.push('- Không phát sinh vi phạm nền nếp nào khác được ghi nhận.');
+      }
+      const c=conductComment(d,o);if(c){L.push('');L.push('Nhận xét: '+c)}
+    }
+
+    if(o.praise&&d.praise.length){
+      head('BIỂU DƯƠNG');
+      L.push('Giáo viên chủ nhiệm biểu dương các em có thành tích, việc làm tốt hoặc tích cực tham gia hoạt động tập thể trong giai đoạn này:');
+      d.praise.slice(0,o.praiseN).forEach(r=>L.push(`- Em ${r.s.name}`));
+      L.push('Mong các em tiếp tục phát huy.');
+    }
+
+    if(o.request){
+      head('ĐỀ NGHỊ PHỐI HỢP');
+      L.push('Để công tác giáo dục đạt hiệu quả, Giáo viên chủ nhiệm kính đề nghị Quý phụ huynh:');
+      L.push('1. Nhắc nhở con đi học đầy đủ, đúng giờ; khi con nghỉ học, xin báo ngay cho Giáo viên chủ nhiệm biết lý do.');
+      L.push('2. Nhắc nhở con chấp hành nội quy, mặc đồng phục và đeo thẻ học sinh đúng quy định.');
+      L.push('3. Thường xuyên trao đổi với con và liên hệ Giáo viên chủ nhiệm khi cần phối hợp.');
+    }
+
+    if(o.extra){L.push('');L.push('Lưu ý thêm của Giáo viên chủ nhiệm:');L.push(o.extra)}
+
+    L.push('');
+    L.push('Trân trọng cảm ơn sự quan tâm, đồng hành của Quý phụ huynh.');
+    L.push('Giáo viên chủ nhiệm');
+    if(teacher)L.push(teacher);
+    return L.join('\n');
+  }
+
+  /* ---------- Giao diện ---------- */
+  function readOptions(){
+    return{
+      violations:!!$('pmOptViolations')?.checked,
+      praise:!!$('pmOptPraise')?.checked,
+      praiseN:Number($('pmPraiseN')?.value)||5,
+      names:!!$('pmOptNames')?.checked,
+      request:!!$('pmOptRequest')?.checked,
+      extra:($('pmExtra')?.value||'').trim()
+    };
+  }
+  function renderStats(d){
+    const a=d.att,ok=d.grades['Tốt']+d.grades['Khá'];
+    const items=[['Sĩ số',d.N,'học sinh'],['Chuyên cần chung',a.sessions?f1(a.rate)+'%':'—',a.sessions?a.sessions+' buổi học':'chưa có buổi học'],['Nghỉ không phép',a.tot.absent,'lượt'],['Đi học muộn',a.tot.late,'lượt'],['Điểm rèn luyện TB',d.N?f1(d.avgScore):'—','điểm'],['Xếp loại Tốt + Khá',d.N?ok+'/'+d.N:'—','học sinh']];
+    $('pmStats').innerHTML=items.map(x=>`<div class="card stat"><div class="label">${esc(x[0])}</div><div class="value">${esc(x[1])}</div><div class="hint">${esc(x[2])}</div></div>`).join('');
+  }
+  function showNote(msg,ok){
+    const el=$('pmNote');if(!el)return;
+    if(!msg){el.classList.add('hidden');el.textContent='';return}
+    el.className='notice'+(ok?' ok':'');el.textContent=msg;
+  }
+  function updateCounter(){
+    const len=($('pmText')?.value||'').length,el=$('pmCounter');if(!el)return;
+    el.textContent=len.toLocaleString('vi-VN')+' ký tự'+(len>2000?' — khá dài, Zalo có thể giới hạn độ dài mỗi tin nhắn; nên tắt bớt mục hoặc chia thành hai tin':'');
+    el.style.color=len>2000?'#b45309':'';
+  }
+  function generate(){
+    if(!isAdmin())return;
+    ensurePeriodOptions();
+    const d=collect($('pmPeriod').value),o=readOptions();
+    renderStats(d);
+    $('pmText').value=compose(d,o);
+    pmEdited=false;updateCounter();
+    const notes=[];
+    if(!d.N)notes.push('Lớp chưa có học sinh nên chưa thể tổng hợp số liệu.');
+    if(d.pending>0)notes.push(`Có ${d.pending} ghi nhận rèn luyện trong giai đoạn này đang chờ duyệt — chưa được tính vào tin nhắn. Thầy/cô nên duyệt trước khi gửi.`);
+    if(o.praise&&!d.praise.length&&d.N)notes.push('Chưa có học sinh nào có ghi nhận tích cực đã duyệt trong giai đoạn này nên mục Biểu dương được bỏ qua.');
+    showNote(notes.join(' '),false);
+  }
+
+  window.renderParentMsg=function(){
+    if(!isAdmin())return;
+    if(pmKey!==currentStateKey){pmKey=currentStateKey;pmEdited=false}
+    if(pmEdited&&($('pmText')?.value||'').trim()){
+      ensurePeriodOptions();updateCounter();
+      showNote('Đang giữ bản thầy/cô đã chỉnh sửa. Bấm "Cập nhật số liệu / Tạo lại" để lấy số liệu mới nhất.',false);
+      return;
+    }
+    generate();
+  };
+  window.pmRegenerate=function(){
+    if(pmEdited&&!confirm('Nội dung đã chỉnh sửa sẽ được thay bằng bản tạo lại theo số liệu và lựa chọn hiện tại. Tiếp tục?'))return;
+    generate();
+  };
+  window.pmOptionChanged=function(){
+    if(!pmEdited){generate();return}
+    showNote('Đã thay đổi lựa chọn. Bấm "Cập nhật số liệu / Tạo lại" để áp dụng (nội dung chỉnh sửa tay sẽ bị thay thế).',false);
+  };
+  window.pmTextEdited=function(){pmEdited=true;updateCounter()};
+  window.pmCopy=async function(btn){
+    const ta=$('pmText');if(!ta||!ta.value.trim())return;
+    const done=()=>{if(btn){const old=btn.textContent;btn.textContent='✅ Đã sao chép';setTimeout(()=>{btn.textContent=old},1800)}};
+    try{
+      if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(ta.value)}
+      else{ta.focus();ta.select();if(!document.execCommand('copy'))throw new Error('copy failed');ta.setSelectionRange(0,0)}
+      done();
+    }catch(e){
+      ta.focus();ta.select();
+      alert('Trình duyệt không cho phép tự sao chép. Nội dung đã được bôi đen, thầy/cô vui lòng nhấn Ctrl+C (hoặc giữ và chọn Sao chép) rồi dán vào Zalo.');
+    }
+  };
+})();
+</script>
 </body>
 </html>
 
