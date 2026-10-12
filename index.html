@@ -1112,7 +1112,7 @@ select option{background:#fff!important;color:#202124!important}
           <div class="muted">Giao diện chỉ là lớp bảo vệ thứ nhất. Dữ liệu được khóa bằng RLS Supabase: tài khoản chỉ đọc/ghi các dòng thuộc lớp được cấp trong <b>class_user_roles</b>; Admin hệ thống quản trị toàn bộ; GVCN chỉ vào các lớp được cấp.</div>
           <div id="rbacAuditStatus" class="footer-note">Đang kiểm tra quyền của tài khoản...</div>
         </div>
-        <div class="table-wrap"><table class="table"><thead><tr><th>Tài khoản</th><th>Họ tên</th><th>Vai trò</th><th>Lớp</th><th>Trạng thái</th></tr></thead><tbody id="usersBody"></tbody></table></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Tài khoản</th><th>Họ tên</th><th>Vai trò</th><th>Lớp</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="usersBody"></tbody></table></div>
       </section>
 
       <section id="page-settings" class="page">
@@ -2507,9 +2507,9 @@ async function renderUsers(){
   if(error)throw error;
   const {data:assign}=await sb.from('class_user_roles').select('user_id,class_id,role,scope,classes(class_name,state_key,academic_years(name))');
   const rows=(data||[]).map(u=>{const a=(assign||[]).filter(x=>x.user_id===u.id);return a.length?a.map(x=>({u,x})):(isSystemAdmin()?[{u,x:null}]:[])});
-  el.innerHTML=rows.flat().map(o=>`<tr><td><b>${esc(o.u.username||'')}</b></td><td>${esc(o.u.name||'')}</td><td>${esc(o.x?.role_label||o.u.role_label||({admin:'Admin hệ thống',gvcn:'GVCN',loptruong:'Lớp trưởng',loppho:'Lớp phó',to1:'Tổ trưởng 1',to2:'Tổ trưởng 2',to3:'Tổ trưởng 3',to4:'Tổ trưởng 4'})[o.x?.role||o.u.role]||o.x?.role||o.u.role||'')}</td><td>${esc(o.x?.classes?.class_name||o.u.scope||'')}</td><td><span class="badge b-green">Hoạt động</span></td></tr>`).join('')||'<tr><td colspan="5">Chưa có tài khoản.</td></tr>';
+  el.innerHTML=rows.flat().map(o=>`<tr><td><b>${esc(o.u.username||'')}</b></td><td>${esc(o.u.name||'')}</td><td>${esc(o.x?.role_label||o.u.role_label||({admin:'Admin hệ thống',gvcn:'GVCN',loptruong:'Lớp trưởng',loppho:'Lớp phó',to1:'Tổ trưởng 1',to2:'Tổ trưởng 2',to3:'Tổ trưởng 3',to4:'Tổ trưởng 4'})[o.x?.role||o.u.role]||o.x?.role||o.u.role||'')}</td><td>${esc(o.x?.classes?.class_name||o.u.scope||'')}</td><td><span class="badge b-green">Hoạt động</span></td><td>${userActionButtons(o)}</td></tr>`).join('')||'<tr><td colspan="6">Chưa có tài khoản.</td></tr>';
   populateNewClassSelect();
- }catch(e){el.innerHTML=`<tr><td colspan="5">Không tải được danh sách tài khoản: ${esc(e.message||e)}</td></tr>`}
+ }catch(e){el.innerHTML=`<tr><td colspan="6">Không tải được danh sách tài khoản: ${esc(e.message||e)}</td></tr>`}
 }
 async function populateNewClassSelect(){
  const el=document.getElementById('newClassSelect');if(!el)return;
@@ -2532,6 +2532,41 @@ async function createClassUser(){
    userCreateNotice(`✅ Đã tạo ${role==='gvcn'?'tài khoản GVCN':'tài khoản cán bộ lớp'} ${username} cho ${targetClass.class_name}.`);
    document.getElementById('newUsername').value='';document.getElementById('newName').value='';document.getElementById('newPassword').value='';await renderUsers();
  }catch(e){console.error(e);userCreateNotice('❌ '+(e.message||String(e)),true)}
+}
+/* ===== Đổi mật khẩu / Xóa tài khoản (qua Edge Function manage-class-user) ===== */
+function canManageUserRow(u){
+  if(!u||!currentUser||u.id===currentUser.id||u.role==='admin')return false;
+  return isSystemAdmin()||!['admin','gvcn'].includes(u.role); // GVCN chỉ quản lý cán bộ lớp
+}
+function userActionButtons(o){
+  if(!canManageUserRow(o.u))return '<span class="muted">—</span>';
+  const id=esc(o.u.id),un=esc(o.u.username||''),cid=esc(o.x?.class_id||'');
+  return `<button class="btn small secondary" onclick="resetClassUserPassword('${id}','${un}')">🔑 Đổi mật khẩu</button> <button class="btn small danger" onclick="deleteClassUser('${id}','${un}','${cid}')">🗑️ Xóa</button>`;
+}
+async function callManageUser(payload){
+  const {data,error}=await sb.functions.invoke('manage-class-user',{body:payload});
+  if(error)throw error;
+  if(!data?.ok)throw new Error(data?.error||'Thao tác thất bại');
+  return data;
+}
+async function resetClassUserPassword(userId,username){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin mới được đổi mật khẩu.');return}
+  const pw=prompt(`Nhập mật khẩu mới cho tài khoản "${username}" (tối thiểu 8 ký tự):`);
+  if(pw===null)return;
+  if(pw.length<8){userCreateNotice('❌ Mật khẩu phải có ít nhất 8 ký tự.',true);return}
+  userCreateNotice('⏳ Đang đổi mật khẩu...');
+  try{const r=await callManageUser({action:'reset_password',user_id:userId,password:pw});userCreateNotice('✅ '+(r.message||'Đã đổi mật khẩu.'))}
+  catch(e){console.error(e);userCreateNotice('❌ '+(e.message||String(e)),true)}
+}
+async function deleteClassUser(userId,username,classId){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin mới được xóa tài khoản.');return}
+  const msg=isSystemAdmin()
+    ?`Xóa HẲN tài khoản "${username}" khỏi hệ thống?\nTài khoản này sẽ không đăng nhập được nữa. Không thể hoàn tác.`
+    :`Xóa tài khoản "${username}" khỏi lớp bạn chủ nhiệm?\nTài khoản sẽ không đăng nhập được nữa (nếu không còn thuộc lớp nào khác). Không thể hoàn tác.`;
+  if(!confirm(msg))return;
+  userCreateNotice('⏳ Đang xóa tài khoản...');
+  try{const r=await callManageUser({action:'delete',user_id:userId,class_id:classId||null});userCreateNotice('✅ '+(r.message||'Đã xóa tài khoản.'));await renderUsers()}
+  catch(e){console.error(e);userCreateNotice('❌ '+(e.message||String(e)),true)}
 }
 function csvCell(v){v=String(v??'');return `"${v.replace(/"/g,'""')}"`}
 function downloadTemplate(){
