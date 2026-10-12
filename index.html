@@ -111,18 +111,19 @@ document.addEventListener('click',function(e){
     {id:'reports',icon:'📊',label:'Báo cáo',scope:'all'},
     {id:'parentmsg',icon:'📨',label:'Tin nhắn phụ huynh',scope:'admin'},
     {id:'ai',icon:'🤖',label:'Trợ lý AI',scope:'admin'},
-    {id:'classes',icon:'🏫',label:'Quản lý lớp',scope:'admin'},
+    {id:'classes',icon:'🏫',label:'Quản lý lớp',scope:'system'},
     {id:'smart',icon:'🧠',label:'Phân tích thông minh',scope:'admin'},
     {id:'digital',icon:'🗂️',label:'Số hóa & Nhật ký',scope:'admin'},
     {id:'excel',icon:'📥',label:'Excel / Sao lưu',scope:'admin'},
-    {id:'users',icon:'🔐',label:'Tài khoản & quyền',scope:'admin'},
+    {id:'users',icon:'🔐',label:'Tài khoản & quyền',scope:'system'},
     {id:'settings',icon:'⚙️',label:'Cài đặt',scope:'admin'}
   ];
   let tab='all'; let overlay;
   function admin(){return typeof isAdmin==='function'&&isAdmin();}
-  function allowed(m){return m.scope==='all'||admin();}
+  function sysAdmin(){return typeof isSystemAdmin==='function'&&isSystemAdmin();}
+  function allowed(m){return m.scope==='all'||(m.scope==='system'?sysAdmin():admin());}
   function make(tag,cls,text){const e=document.createElement(tag);if(cls)e.className=cls;if(text!==undefined)e.textContent=text;return e;}
-  function render(){if(!overlay)return;const grid=overlay.querySelector('.lai-module-grid');grid.replaceChildren();let list=modules.filter(allowed);if(tab==='favorites')list=list.filter(m=>['dashboard','attendance','conduct','students'].includes(m.id));if(tab==='admin')list=list.filter(m=>m.scope==='admin');if(!list.length){grid.append(make('div','lai-module-empty','Không có chức năng phù hợp với quyền hiện tại.'));return;}list.forEach(m=>{const b=make('button','lai-module-card');b.type='button';b.setAttribute('aria-label','Mở '+m.label);b.append(make('span','lai-module-icon',m.icon),make('span','',m.label));b.addEventListener('click',()=>{close();if(typeof showPage==='function')showPage(m.id);});grid.append(b);});overlay.querySelectorAll('.lai-tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));}
+  function render(){if(!overlay)return;const grid=overlay.querySelector('.lai-module-grid');grid.replaceChildren();let list=modules.filter(allowed);if(tab==='favorites')list=list.filter(m=>['dashboard','attendance','conduct','students'].includes(m.id));if(tab==='admin')list=list.filter(m=>m.scope!=='all');if(!list.length){grid.append(make('div','lai-module-empty','Không có chức năng phù hợp với quyền hiện tại.'));return;}list.forEach(m=>{const b=make('button','lai-module-card');b.type='button';b.setAttribute('aria-label','Mở '+m.label);b.append(make('span','lai-module-icon',m.icon),make('span','',m.label));b.addEventListener('click',()=>{close();if(typeof showPage==='function')showPage(m.id);});grid.append(b);});overlay.querySelectorAll('.lai-tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===tab));}
   function close(){overlay?.classList.remove('show');document.body.style.overflow='';}
   function open(){if(!overlay)return;tab='all';render();overlay.classList.add('show');document.body.style.overflow='hidden';overlay.querySelector('.lai-close')?.focus();}
   function init(){
@@ -275,7 +276,7 @@ document.addEventListener('click',function(e){
     .sidebar,.topbar,.app-brand-banner,.cm-bottom-nav,.menu-toggle,.ai-floating-btn,
     .cm-pwa-install,.modal,.cm-account-panel,.cm-today-attendance-modal,.lai-module-overlay,
     #guestScreen,.guest-top,.guest-back,.competition-picker-menu,
-    .page-head .actions,.report-period-box,.admin-only,.footer-note,.app-copyright{display:none!important}
+    .page-head .actions,.report-period-box,.admin-only,.sysadmin-only,.footer-note,.app-copyright{display:none!important}
     .layout{display:block!important;min-height:0!important}
     .main{margin-left:0!important}
     .content{padding:0!important;margin:0!important;max-width:100%!important}
@@ -792,7 +793,7 @@ select option{background:#fff!important;color:#202124!important}
       <div class="nav-title">Tổng quan</div>
       <button data-page="dashboard" onclick="showPage('dashboard')">🏠 Trang chủ</button>
       <button class="admin-only ai-nav-btn" data-page="ai" onclick="showPage('ai')">🤖 Trợ lý AI <span class="ai-nav-badge">AI</span></button>
-       <button class="admin-only" data-page="classes" onclick="showPage('classes')">🏫 Quản lý lớp & năm học</button>
+       <button class="sysadmin-only" data-page="classes" onclick="showPage('classes')">🏫 Quản lý lớp & năm học</button>
       <button data-page="students" onclick="showPage('students')">👨‍🎓 Học sinh</button>
       <button data-page="attendance" onclick="showPage('attendance')">📅 Chuyên cần</button>
       
@@ -806,7 +807,7 @@ select option{background:#fff!important;color:#202124!important}
       <button class="member-only" data-page="profile" onclick="showPage('profile')">👤 Hồ sơ học sinh 360°</button>
       <div class="nav-title admin-only">Dữ liệu & hệ thống</div>
       <button class="admin-only" data-page="excel" onclick="showPage('excel')">📥 Excel / Sao lưu</button>
-      <button class="admin-only" data-page="users" onclick="showPage('users')">🔐 Tài khoản & phân quyền</button>
+      <button class="sysadmin-only" data-page="users" onclick="showPage('users')">🔐 Tài khoản & phân quyền</button>
       <button class="admin-only" data-page="settings" onclick="showPage('settings')">⚙️ Cài đặt</button>
     </div>
   </aside>
@@ -829,7 +830,7 @@ select option{background:#fff!important;color:#202124!important}
     <div class="content">
 
       <section id="page-classes" class="page">
-        <div class="page-head"><div><h2>🏫 Quản lý lớp & năm học</h2><div class="muted">Một tài khoản GVCN quản lý nhiều lớp và nhiều năm học.</div></div></div>
+        <div class="page-head"><div><h2>🏫 Quản lý lớp & năm học</h2><div class="muted">Tài khoản Admin hệ thống tạo, khóa và quản lý nhiều lớp, nhiều năm học.</div></div></div>
         <div class="grid two">
           <div class="card"><h3>➕ Tạo lớp học mới</h3>
             <div class="form-grid">
@@ -875,11 +876,11 @@ select option{background:#fff!important;color:#202124!important}
         </section>
 
         <section class="cm-utility-section admin-only" aria-label="Quản trị hệ thống">
-          <div class="cm-section-title"><h2>⚙️ Quản trị hệ thống</h2></div>
+          <div class="cm-section-title"><h2 id="cmAdminSectionTitle">⚙️ Quản trị hệ thống</h2></div>
           <div class="cm-utility-grid cm-admin-grid">
             <button class="cm-utility-card pink" type="button" onclick="useUtility('ai')"><span class="cm-utility-icon">🤖</span><span>Trợ lý AI</span></button>
-            <button class="cm-utility-card blue" type="button" onclick="useUtility('classes')"><span class="cm-utility-icon">🏫</span><span>Quản lý năm học & lớp</span></button>
-            <button class="cm-utility-card purple" type="button" onclick="useUtility('users')"><span class="cm-utility-icon">🔐</span><span>Quản lý tài khoản</span></button>
+            <button class="cm-utility-card blue sysadmin-only" type="button" onclick="useUtility('classes')"><span class="cm-utility-icon">🏫</span><span>Quản lý năm học & lớp</span></button>
+            <button class="cm-utility-card purple sysadmin-only" type="button" onclick="useUtility('users')"><span class="cm-utility-icon">🔐</span><span>Quản lý tài khoản</span></button>
             <button class="cm-utility-card cyan" type="button" onclick="useUtility('settings')"><span class="cm-utility-icon">⚙️</span><span>Cài đặt hệ thống</span></button>
           </div>
         </section>
@@ -1092,15 +1093,15 @@ select option{background:#fff!important;color:#202124!important}
       </section>
 
       <section id="page-users" class="page">
-        <div class="page-head"><div><h2>Tài khoản & phân quyền</h2><div class="muted">GVCN quản lý tài khoản và cấp quyền đúng theo lớp.</div></div></div>
+        <div class="page-head"><div><h2>Tài khoản & phân quyền</h2><div class="muted">Admin hệ thống tạo tài khoản và cấp quyền đúng theo lớp.</div></div></div>
         <div class="card" style="margin-bottom:16px">
           <h3>➕ Tạo tài khoản GVCN / cán bộ lớp</h3>
-          <div class="muted" style="margin-bottom:12px">Chỉ tài khoản GVCN mới có thể mở chức năng này. Tài khoản được tạo qua Edge Function và ghi quyền lớp ở phía máy chủ.</div>
+          <div class="muted" style="margin-bottom:12px">Chỉ tài khoản Admin hệ thống mới có thể mở chức năng này (tài khoản GVCN không nhìn thấy mục này). Tài khoản được tạo qua Edge Function và ghi quyền lớp ở phía máy chủ.</div>
           <div class="form-grid">
             <div class="field"><label>Tài khoản *</label><input id="newUsername" placeholder="gvcn12a8" autocomplete="off"></div>
             <div class="field"><label>Họ và tên *</label><input id="newName" placeholder="Nguyễn Văn A"></div>
             <div class="field"><label>Mật khẩu *</label><input id="newPassword" type="password" placeholder="Tối thiểu 8 ký tự"></div>
-            <div class="field"><label>Vai trò *</label><select id="newRole"><option value="admin">GVCN</option><option value="loptruong">Lớp trưởng</option><option value="loppho">Lớp phó</option><option value="to1">Tổ trưởng 1</option><option value="to2">Tổ trưởng 2</option><option value="to3">Tổ trưởng 3</option><option value="to4">Tổ trưởng 4</option></select></div>
+            <div class="field"><label>Vai trò *</label><select id="newRole"><option value="gvcn">GVCN (giáo viên chủ nhiệm)</option><option value="loptruong">Lớp trưởng</option><option value="loppho">Lớp phó</option><option value="to1">Tổ trưởng 1</option><option value="to2">Tổ trưởng 2</option><option value="to3">Tổ trưởng 3</option><option value="to4">Tổ trưởng 4</option></select></div>
             <div class="field span2"><label>Lớp được phép vào *</label><select id="newClassSelect"></select></div>
           </div>
           <div class="actions" style="margin-top:12px"><button class="btn" onclick="createClassUser()">🔐 Tạo tài khoản</button></div>
@@ -1108,7 +1109,7 @@ select option{background:#fff!important;color:#202124!important}
         </div>
         <div class="card" style="margin-bottom:16px;border:1px solid #a7f3d0;background:#ecfdf5">
           <h3>🛡️ Bảo vệ dữ liệu theo lớp</h3>
-          <div class="muted">Giao diện chỉ là lớp bảo vệ thứ nhất. Dữ liệu được khóa bằng RLS Supabase: tài khoản chỉ đọc/ghi các dòng thuộc lớp được cấp trong <b>class_user_roles</b>; GVCN/Admin mới có quyền quản trị toàn bộ.</div>
+          <div class="muted">Giao diện chỉ là lớp bảo vệ thứ nhất. Dữ liệu được khóa bằng RLS Supabase: tài khoản chỉ đọc/ghi các dòng thuộc lớp được cấp trong <b>class_user_roles</b>; Admin hệ thống quản trị toàn bộ; GVCN chỉ vào các lớp được cấp.</div>
           <div id="rbacAuditStatus" class="footer-note">Đang kiểm tra quyền của tài khoản...</div>
         </div>
         <div class="table-wrap"><table class="table"><thead><tr><th>Tài khoản</th><th>Họ tên</th><th>Vai trò</th><th>Lớp</th><th>Trạng thái</th></tr></thead><tbody id="usersBody"></tbody></table></div>
@@ -1116,7 +1117,7 @@ select option{background:#fff!important;color:#202124!important}
 
       <section id="page-settings" class="page">
         <div class="page-head"><div><h2>Cài đặt</h2><div class="muted">Thông tin lớp và tiện ích</div></div></div>
-        <div class="card">
+        <div class="card sysadmin-only">
           <div class="form-grid">
             <div class="field"><label>GVCN</label><input id="setTeacher" value="Nguyễn Văn Hoàng"></div>
             <div class="field"><label>Lớp</label><input id="setClass" value="12A8"></div>
@@ -1162,7 +1163,7 @@ select option{background:#fff!important;color:#202124!important}
           <div id="weekScheduleStatus" class="notice" style="display:none;margin-top:12px"></div>
         </div>
         <div class="card" style="margin-top:16px;border:1px solid #f59e0b;background:#fffbeb"><h3>🔄 Bắt đầu năm học mới</h3><p class="muted">Xóa riêng toàn bộ dữ liệu <strong>điểm danh</strong> (có mặt, đi muộn, nghỉ có phép, nghỉ không phép) để bắt đầu lại. Danh sách học sinh, tài khoản, rèn luyện, hạnh kiểm và cài đặt lớp vẫn được giữ nguyên.</p><button class="btn" style="background:#f59e0b;color:#fff" onclick="resetAttendanceOnly()">🔄 Reset điểm danh năm học</button></div>
-        <div class="card" style="margin-top:16px"><h3>⚠️ Xóa toàn bộ dữ liệu</h3><p class="muted">Chỉ dùng khi thực sự muốn xóa toàn bộ dữ liệu của lớp. Hãy sao lưu trước.</p><button class="btn danger" onclick="resetAll()">Xóa toàn bộ dữ liệu</button></div>
+        <div class="card sysadmin-only" style="margin-top:16px"><h3>⚠️ Xóa toàn bộ dữ liệu</h3><p class="muted">Chỉ dùng khi thực sự muốn xóa toàn bộ dữ liệu của lớp. Hãy sao lưu trước.</p><button class="btn danger" onclick="resetAll()">Xóa toàn bộ dữ liệu</button></div>
       </section>
 
     </div>
@@ -1244,11 +1245,19 @@ function dataKey(){return DATA_PREFIX+(currentStateKey||'12A8-2026-2027')}
 function loadLocalFallback(){try{return JSON.parse(localStorage.getItem(dataKey()))||seed()}catch(e){return seed()}}
 function saveLocal(){localStorage.setItem(dataKey(),JSON.stringify(state))}
 function saveData(){saveLocal()}
-function roleCanEdit(){return ['admin','loptruong','loppho','to1','to2','to3','to4'].includes(currentUser?.role)}
-function isAdmin(){return currentUser?.role==='admin'}
+function roleCanEdit(){return ['admin','gvcn','loptruong','loppho','to1','to2','to3','to4'].includes(currentUser?.role)}
+/* ===== PHÂN QUYỀN 2 CẤP =====
+   role 'admin' = Admin hệ thống: toàn quyền, thấy mọi lớp, tạo lớp/tài khoản.
+   role 'gvcn'  = Giáo viên chủ nhiệm: toàn quyền NGHIỆP VỤ trong các lớp được cấp (class_user_roles),
+                  KHÔNG thấy các mục quản trị hệ thống (Quản lý lớp & năm học, Tài khoản & phân quyền...).
+   isAdmin()       = quyền cấp GVCN (gồm cả Admin) -> dùng cho các thao tác nghiệp vụ lớp (điểm danh, rèn luyện, AI, tin nhắn...).
+   isSystemAdmin() = chỉ Admin hệ thống -> dùng cho quản trị hệ thống (lớp, năm học, tài khoản). */
+function isSystemAdmin(){return currentUser?.role==='admin'}
+function isGVCN(){return currentUser?.role==='gvcn'}
+function isAdmin(){return currentUser?.role==='admin'||currentUser?.role==='gvcn'}
 async function assertClassAccess(classId){
   if(!currentUser||!classId) throw new Error('Không xác định được tài khoản hoặc lớp.');
-  if(isAdmin()) return true;
+  if(isSystemAdmin()) return true;
   const {data,error}=await sb.from('class_user_roles').select('class_id').eq('user_id',currentUser.id).eq('class_id',classId).maybeSingle();
   if(error) throw error;
   if(!data) throw new Error('Tài khoản không được cấp quyền vào lớp này.');
@@ -1259,7 +1268,7 @@ async function runRBACAudit(){
   try{
     const {data,error}=await sb.from('class_user_roles').select('class_id,role,scope').eq('user_id',currentUser.id);
     if(error)throw error;
-    el.textContent=isAdmin()?`✅ Vai trò GVCN: quản trị ${availableClasses.length} lớp đang khả dụng.`:`✅ ${currentUser.name||currentUser.username}: được cấp ${data?.length||0} lớp; hệ thống chỉ cho phép truy cập lớp được cấp.`;
+    el.textContent=isSystemAdmin()?`✅ Vai trò Admin hệ thống: quản trị ${availableClasses.length} lớp đang khả dụng.`:isGVCN()?`✅ Vai trò GVCN: được cấp ${data?.length||0} lớp; hệ thống chỉ cho phép truy cập lớp được cấp.`:`✅ ${currentUser.name||currentUser.username}: được cấp ${data?.length||0} lớp; hệ thống chỉ cho phép truy cập lớp được cấp.`;
   }catch(e){el.textContent='⚠️ Không kiểm tra được quyền: '+(e.message||e);}
 }
 function isClassOfficer(){return roleCanEdit()&&!isAdmin()}
@@ -1273,7 +1282,8 @@ function setLoginStatus(message,type='info'){const el=document.getElementById('c
 function getCurrentUserRoleDisplay(){
   const role=String(currentUser?.role||'').toLowerCase();
   const name=currentUser?.name||currentUser?.username||'';
-  if(role==='admin') return `GVCN: ${name}`;
+  if(role==='admin') return `Quản trị viên: ${name}`;
+  if(role==='gvcn') return `GVCN: ${name}`;
   if(role==='loptruong') return `Lớp trưởng: ${name}`;
   if(role==='loppho') return `Lớp phó: ${name}`;
   const m=role.match(/^to([1-4])$/);
@@ -1288,11 +1298,14 @@ function openAIFloating(){
 }
 function setUserUi(){
   document.getElementById('userName').textContent=currentUser?.name||currentUser?.username||'';
-  const roleText=isAdmin()?'GVCN':(currentUser?.roleLabel||currentUser?.role||'');
+  const roleText=isSystemAdmin()?'Admin hệ thống':isGVCN()?'GVCN':(currentUser?.roleLabel||currentUser?.role||'');
   const scopeText=currentUser?.scope||currentClass?.class_name||'';
   document.getElementById('userRole').textContent=roleText+' · '+scopeText;
   document.getElementById('avatar').textContent=(currentUser?.name||currentUser?.username||'N').charAt(0).toUpperCase();
   document.querySelectorAll('.admin-only').forEach(x=>x.classList.toggle('hidden',!isAdmin()));
+  // Mục quản trị hệ thống: chỉ Admin nhìn thấy; tài khoản GVCN không thấy.
+  document.querySelectorAll('.sysadmin-only').forEach(x=>x.classList.toggle('hidden',!isSystemAdmin()));
+  const adminSecTitle=document.getElementById('cmAdminSectionTitle');if(adminSecTitle)adminSecTitle.textContent=isSystemAdmin()?'⚙️ Quản trị hệ thống':'🧰 Công cụ GVCN';
   document.querySelectorAll('.smart-nav,.digital-nav').forEach(x=>x.classList.toggle('hidden',!isAdmin()));
   // AI là chức năng tuyệt đối chỉ dành cho GVCN/Admin.
   document.querySelectorAll('.ai-nav-btn').forEach(x=>x.classList.toggle('hidden',!isAdmin()));
@@ -1307,7 +1320,7 @@ function setUserUi(){
     if(currentClass){
       // GVCN hiển thị GVCN; cán bộ lớp bắt buộc hiển thị đúng vai trò + họ tên học sinh.
       ctx.textContent=isAdmin()
-        ? `GVCN: ${currentUser?.name||state.settings?.teacher||''} · ${currentClass.class_name} · Năm học ${currentClass.year}`
+        ? `${isSystemAdmin()?'Quản trị viên':'GVCN'}: ${currentUser?.name||state.settings?.teacher||''} · ${currentClass.class_name} · Năm học ${currentClass.year}`
         : `${getCurrentUserRoleDisplay()} · ${currentClass.class_name} · Năm học ${currentClass.year}`;
       ctx.classList.add('show');
     }else{
@@ -1317,6 +1330,7 @@ function setUserUi(){
   }
   // Sau khi đổi vai trò/lớp, bảo đảm không còn trang quản trị/AI bị mở.
   if(!isAdmin() && ['ai','classes','profile','excel','users','settings','smart','digital','parentmsg'].some(n=>document.getElementById('page-'+n)?.classList.contains('active'))){showPage('dashboard');}
+  if(isAdmin() && !isSystemAdmin() && ['classes','users'].some(n=>document.getElementById('page-'+n)?.classList.contains('active'))){showPage('dashboard');}
 }
 const CM_LOGIN_GUARD_KEY='cm_login_guard_v1';
 function loginGuard(){try{const now=Date.now(),raw=JSON.parse(sessionStorage.getItem(CM_LOGIN_GUARD_KEY)||'{"count":0,"until":0}');if(raw.until>now)return {blocked:true,seconds:Math.ceil((raw.until-now)/1000)};if(now-(raw.first||now)>15*60*1000)return {count:0,first:now,until:0};return raw;}catch(e){return {count:0,first:Date.now(),until:0};}}
@@ -1346,7 +1360,7 @@ async function loadCloudUser(user){
 }
 async function loadAvailableClasses(userId){
   let q=sb.from('classes').select('id,class_name,grade,group_count,is_archived,state_key,homeroom_teacher_id,academic_years!inner(id,name,is_locked)').order('created_at',{ascending:false});
-  if(!isAdmin()){
+  if(!isSystemAdmin()){
     const {data:assign,error}=await sb.from('class_user_roles').select('class_id,role,scope').eq('user_id',userId);
     if(error)throw error;
     const ids=[...new Set((assign||[]).map(x=>x.class_id).filter(Boolean))];
@@ -1494,7 +1508,8 @@ function toggleSidebar(){
 }
 const titles={dashboard:'Trang chủ',ai:'Trợ lý AI',classes:'Quản lý lớp & năm học',students:'Học sinh',attendance:'Chuyên cần',conduct:'Rèn luyện',competition:'Thi đua & Theo dõi',reports:'Báo cáo tổng hợp',parentmsg:'Soạn tin nhắn phụ huynh',smart:'Phân tích thông minh',digital:'Số hóa & Nhật ký',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
 function showPage(name){updateProfile360Access();
- if(['excel','users','ai','classes','settings','smart','digital','parentmsg'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
+ if(['classes','users'].includes(name)&&!isSystemAdmin()){alert('🔒 Chức năng này chỉ dành cho Admin hệ thống.');return}
+ if(['excel','ai','settings','smart','digital','parentmsg'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
   if(name==='profile'&&!currentUser){alert('Vui lòng đăng nhập để xem Hồ sơ học sinh 360°.');return}
  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');
  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===name));
@@ -1583,7 +1598,7 @@ function renderAll(){
   try{renderCompetition()}catch(e){console.error('Thi đua:',e)}
   try{renderReports()}catch(e){console.error(e)}
   if(currentUser)try{renderProfileSelectors()}catch(e){console.error('Hồ sơ 360°:',e)}
-  if(isAdmin())try{renderUsers()}catch(e){console.error(e)}
+  if(isSystemAdmin())try{renderUsers()}catch(e){console.error(e)}
   if(isAdmin())try{renderSmartModule()}catch(e){console.error('Smart:',e)}
   if(isAdmin())try{renderDigitalModule()}catch(e){console.error('Digital:',e)}
   decorateResponsiveStudentTables(); setTimeout(()=>decorateResponsiveStudentTables(),80);
@@ -1794,8 +1809,8 @@ function renderDashboard(){
   const heroName=document.getElementById('cmHomeName'),heroAccount=document.getElementById('cmHomeAccount'),heroInitial=document.getElementById('cmHomeInitial'),heroScopeLabel=document.getElementById('cmHomeScopeLabel'),heroClass=document.getElementById('cmHomeClass'),heroYear=document.getElementById('cmHomeYear');
   const displayName=currentUser?.name||currentUser?.username||'Giáo viên chủ nhiệm',className=state?.settings?.className||'Lớp đang quản lý',schoolYear=state?.settings?.year||'Năm học hiện tại',roleCode=String(currentUser?.role||'').toLowerCase();
   let roleTitle='Thành viên lớp',scopeLabel='Lớp đang quản lý',scopeValue=className;
-  if(roleCode==='admin'){roleTitle='Giáo viên chủ nhiệm'}else if(roleCode==='loptruong'){roleTitle='Lớp trưởng'}else if(roleCode==='loppho'){roleTitle='Lớp phó'}else if(/^to[1-4]$/.test(roleCode)){roleTitle='Tổ trưởng';scopeLabel='Tổ đang quản lý';scopeValue=currentUser?.scope||('Tổ '+roleCode.slice(2))}
-  if(heroName)heroName.textContent=displayName;if(heroAccount)heroAccount.textContent=roleTitle;if(heroInitial)heroInitial.textContent=displayName.split(/\s+/).filter(Boolean).slice(-2).map(x=>x[0]).join('').toUpperCase()||'GV';if(heroScopeLabel)heroScopeLabel.textContent=scopeLabel;if(heroClass)heroClass.textContent=scopeValue;if(heroYear)heroYear.textContent=roleCode==='admin'||roleCode==='loptruong'||roleCode==='loppho'?schoolYear:'';
+  if(roleCode==='gvcn'){roleTitle='Giáo viên chủ nhiệm'}else if(roleCode==='admin'){roleTitle='Quản trị viên hệ thống'}else if(roleCode==='loptruong'){roleTitle='Lớp trưởng'}else if(roleCode==='loppho'){roleTitle='Lớp phó'}else if(/^to[1-4]$/.test(roleCode)){roleTitle='Tổ trưởng';scopeLabel='Tổ đang quản lý';scopeValue=currentUser?.scope||('Tổ '+roleCode.slice(2))}
+  if(heroName)heroName.textContent=displayName;if(heroAccount)heroAccount.textContent=roleTitle;if(heroInitial)heroInitial.textContent=displayName.split(/\s+/).filter(Boolean).slice(-2).map(x=>x[0]).join('').toUpperCase()||'GV';if(heroScopeLabel)heroScopeLabel.textContent=scopeLabel;if(heroClass)heroClass.textContent=scopeValue;if(heroYear)heroYear.textContent=roleCode==='admin'||roleCode==='gvcn'||roleCode==='loptruong'||roleCode==='loppho'?schoolYear:'';
   const recentCard=document.getElementById('recentActivityCard');
   if(recentCard)recentCard.style.display=currentUser&&!isAdmin()?'none':'';
   renderRecentUtilities();
@@ -2489,7 +2504,7 @@ async function renderUsers(){
   if(error)throw error;
   const {data:assign}=await sb.from('class_user_roles').select('user_id,class_id,role,scope,classes(class_name,state_key,academic_years(name))');
   const rows=(data||[]).map(u=>{const a=(assign||[]).filter(x=>x.user_id===u.id);return a.length?a.map(x=>({u,x})): [{u,x:null}]});
-  el.innerHTML=rows.flat().map(o=>`<tr><td><b>${esc(o.u.username||'')}</b></td><td>${esc(o.u.name||'')}</td><td>${esc(o.x?.role_label||o.u.role_label||o.x?.role||o.u.role||'')}</td><td>${esc(o.x?.classes?.class_name||o.u.scope||'')}</td><td><span class="badge b-green">Hoạt động</span></td></tr>`).join('')||'<tr><td colspan="5">Chưa có tài khoản.</td></tr>';
+  el.innerHTML=rows.flat().map(o=>`<tr><td><b>${esc(o.u.username||'')}</b></td><td>${esc(o.u.name||'')}</td><td>${esc(o.x?.role_label||o.u.role_label||({admin:'Admin hệ thống',gvcn:'GVCN',loptruong:'Lớp trưởng',loppho:'Lớp phó',to1:'Tổ trưởng 1',to2:'Tổ trưởng 2',to3:'Tổ trưởng 3',to4:'Tổ trưởng 4'})[o.x?.role||o.u.role]||o.x?.role||o.u.role||'')}</td><td>${esc(o.x?.classes?.class_name||o.u.scope||'')}</td><td><span class="badge b-green">Hoạt động</span></td></tr>`).join('')||'<tr><td colspan="5">Chưa có tài khoản.</td></tr>';
   populateNewClassSelect();
  }catch(e){el.innerHTML=`<tr><td colspan="5">Không tải được danh sách tài khoản: ${esc(e.message||e)}</td></tr>`}
 }
@@ -2499,9 +2514,10 @@ async function populateNewClassSelect(){
 }
 function userCreateNotice(msg,bad=false){const e=document.getElementById('userCreateStatus');if(!e)return;e.style.display='block';e.className='notice '+(bad?'danger':'ok');e.textContent=msg}
 async function createClassUser(){
- if(!isAdmin()){alert('🔒 Chỉ GVCN mới được tạo tài khoản.');return}
+ if(!isSystemAdmin()){alert('🔒 Chỉ Admin hệ thống mới được tạo tài khoản.');return}
  const username=document.getElementById('newUsername').value.trim().toLowerCase().replace(/\s+/g,''),name=document.getElementById('newName').value.trim(),password=document.getElementById('newPassword').value,role=document.getElementById('newRole').value,classId=document.getElementById('newClassSelect').value;
  if(!username||!name||!password||!classId){userCreateNotice('❌ Vui lòng nhập đủ thông tin.',true);return}
+ if(!['gvcn','loptruong','loppho','to1','to2','to3','to4'].includes(role)){userCreateNotice('❌ Vai trò không hợp lệ.',true);return}
  if(!/^[a-z0-9._-]{3,40}$/.test(username)){userCreateNotice('❌ Tài khoản chỉ gồm chữ thường, số, dấu chấm, gạch ngang hoặc gạch dưới.',true);return}
  if(password.length<8){userCreateNotice('❌ Mật khẩu phải có ít nhất 8 ký tự.',true);return}
  const targetClass=availableClasses.find(x=>x.id===classId);if(!targetClass){userCreateNotice('❌ Lớp không nằm trong danh sách được phép.',true);return}
@@ -2509,7 +2525,7 @@ async function createClassUser(){
  try{
    const {data,error}=await sb.functions.invoke('create-class-user',{body:{username,name,password,role,class_id:classId,scope:'Toàn lớp',created_by:currentUser.id}});
    if(error)throw error;if(!data?.ok)throw new Error(data?.error||'Không tạo được tài khoản');
-   userCreateNotice(`✅ Đã tạo ${role==='admin'?'tài khoản GVCN':'tài khoản cán bộ lớp'} ${username} cho ${targetClass.class_name}.`);
+   userCreateNotice(`✅ Đã tạo ${role==='gvcn'?'tài khoản GVCN':'tài khoản cán bộ lớp'} ${username} cho ${targetClass.class_name}.`);
    document.getElementById('newUsername').value='';document.getElementById('newName').value='';document.getElementById('newPassword').value='';await renderUsers();
  }catch(e){console.error(e);userCreateNotice('❌ '+(e.message||String(e)),true)}
 }
@@ -2750,7 +2766,7 @@ function renderConductRulesSettings(){
 }
 async function saveConductRules(){if(!isAdmin()){alert('🔒 Chỉ GVCN được thay đổi nguyên tắc.');return}const good=Number(document.getElementById('setGoodScore')?.value),fair=Number(document.getElementById('setFairScore')?.value),pass=Number(document.getElementById('setPassScore')?.value),base=Number(document.getElementById('setConductBase')?.value);if(![good,fair,pass,base].every(Number.isFinite)){alert('⚠️ Vui lòng nhập đủ các chỉ số hợp lệ.');return}if(!(good>=fair&&fair>=pass)){alert('⚠️ Ngưỡng phải theo thứ tự Tốt ≥ Khá ≥ Đạt.');return}if(base<0){alert('⚠️ Điểm khởi đầu không được âm.');return}state.settings=state.settings||{};state.settings.conductRules={base,good,fair,pass};saveData();const ok=await pushCloud();const st=document.getElementById('conductRulesStatus');if(st){st.style.display='block';st.className='notice '+(ok===false?'':'ok');st.textContent=ok===false?'⚠️ Đã lưu trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã lưu nguyên tắc xếp hạnh kiểm.'}renderAll()}
 async function resetConductRules(){if(!isAdmin())return;if(!confirm('Khôi phục mặc định: Tốt ≥96; Khá ≥90; Đạt ≥85; điểm khởi đầu 100?'))return;state.settings=state.settings||{};state.settings.conductRules={base:100,good:96,fair:90,pass:85};saveData();renderConductRulesSettings();const ok=await pushCloud();const st=document.getElementById('conductRulesStatus');if(st){st.style.display='block';st.className='notice ok';st.textContent=ok===false?'⚠️ Đã khôi phục trên thiết bị nhưng chưa đồng bộ Supabase.':'✅ Đã khôi phục mặc định.'}renderAll()}
-async function saveSettings(){if(!isAdmin()){alert('🔒 Chỉ GVCN được thay đổi cài đặt.');return}state.settings.teacher=document.getElementById('setTeacher').value;state.settings.className=document.getElementById('setClass').value;state.settings.year=document.getElementById('setYear').value;state.settings.groups=Number(document.getElementById('setGroups').value);state.settings.conductRules=getConductRules();saveData();await pushCloud();renderConductRulesSettings();alert('Đã lưu cài đặt.')}
+async function saveSettings(){if(!isSystemAdmin()){alert('🔒 Chỉ Admin hệ thống được thay đổi thông tin lớp.');return}state.settings.teacher=document.getElementById('setTeacher').value;state.settings.className=document.getElementById('setClass').value;state.settings.year=document.getElementById('setYear').value;state.settings.groups=Number(document.getElementById('setGroups').value);state.settings.conductRules=getConductRules();saveData();await pushCloud();renderConductRulesSettings();alert('Đã lưu cài đặt.')}
 async function resetAttendanceOnly(){
   if(!isAdmin()){alert('🔒 Chỉ GVCN được reset điểm danh.');return}
   const className=currentClass?.class_name||state.settings?.className||'lớp đang chọn';
@@ -2772,7 +2788,7 @@ async function resetAttendanceOnly(){
   renderAll();
   alert(`✅ Đã reset điểm danh của ${className}.\n\nDanh sách học sinh và các dữ liệu khác vẫn được giữ nguyên.`);
 }
-async function resetAll(){if(!isAdmin())return;if(confirm('XÓA TOÀN BỘ dữ liệu của lớp đang chọn? Hãy sao lưu trước.')){localStorage.removeItem(dataKey());state=seed();state.settings.className=currentClass?.class_name||state.settings.className;state.settings.year=currentClass?.year||state.settings.year;saveData();await pushCloud();renderAll();alert('Đã xóa dữ liệu của lớp đang chọn.')}}
+async function resetAll(){if(!isSystemAdmin())return;if(confirm('XÓA TOÀN BỘ dữ liệu của lớp đang chọn? Hãy sao lưu trước.')){localStorage.removeItem(dataKey());state=seed();state.settings.className=currentClass?.class_name||state.settings.className;state.settings.year=currentClass?.year||state.settings.year;saveData();await pushCloud();renderAll();alert('Đã xóa dữ liệu của lớp đang chọn.')}}
 function aiWeekStart(dateStr){
   const start=new Date('2026-09-07T00:00:00'); const d=new Date((dateStr||today())+'T00:00:00');
   if(Number.isNaN(d.getTime())||d<start)return isoDate(start);
@@ -3407,7 +3423,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   const cc=document.getElementById('myCurrentClass');if(cc)cc.innerHTML=currentClass?`<strong style="font-size:20px">${esc(currentClass.class_name)}</strong> – ${esc(currentClass.year)}<div class="muted">Khối ${esc(currentClass.grade||'')} · ${currentClass.group_count||4} tổ · ${currentClass.is_archived||currentClass.is_locked?'🔒 Đã khóa':'🟢 Đang hoạt động'}</div>`:'<span class="muted">Chưa chọn lớp.</span>';
  };
  window.myCreateClass=async function(){
-  if(!isAdmin()){alert('Chỉ GVCN/Admin mới được tạo lớp.');return}
+  if(!isSystemAdmin()){alert('Chỉ Admin hệ thống mới được tạo lớp.');return}
   const name=document.getElementById('myClassName')?.value.trim(),year=document.getElementById('myAcademicYear')?.value.trim(),grade=document.getElementById('myGrade')?.value||'',groups=Number(document.getElementById('myGroupCount')?.value||4);
   if(!name||!year){notice('❌ Vui lòng nhập Tên lớp và Năm học.',true);return}
   try{
@@ -3428,7 +3444,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   await loadCloudState();setUserUi();renderAll();myRefreshClasses();notice(`📌 Đang quản lý: ${x.class_name} – ${x.year}.`);showPage('dashboard');
  };
  window.myArchiveCurrentClass=async function(){
-  if(!isAdmin()){alert('Chỉ GVCN/Admin mới được khóa lớp.');return}
+  if(!isSystemAdmin()){alert('Chỉ Admin hệ thống mới được khóa lớp.');return}
   if(!currentClass){notice('Chưa chọn lớp.',true);return}
   if(!confirm(`Khóa ${currentClass.class_name} – ${currentClass.year}? Dữ liệu vẫn được giữ lại.`))return;
   try{const {error}=await sb.from('classes').update({is_archived:true,archived_at:new Date().toISOString()}).eq('id',currentClass.id);if(error)throw error;const yr=await sb.from('academic_years').update({is_locked:true,locked_at:new Date().toISOString()}).eq('id',currentClass.academic_years?.id);if(yr.error)console.warn(yr.error);currentClass.is_archived=true;currentClass.is_locked=true;myRefreshClasses();notice(`🔒 Đã khóa ${currentClass.class_name} – ${currentClass.year}.`)}catch(e){notice('❌ Không khóa được lớp: '+e.message,true)}
@@ -4886,7 +4902,7 @@ window.vneduBuildXls=(function(){
 </style>
 <style id="cm-auth-navigation-visibility-v1">#app.hidden~.cm-bottom-nav{display:none!important}</style>
 <script id="cm-account-panel-js-v1">
-window.openAccountPanel=function(){const p=document.getElementById('cmAccountPanel');if(!p)return;const u=typeof currentUser!=='undefined'?currentUser:null,c=typeof currentClass!=='undefined'?currentClass:null;const name=u?.name||u?.username||'Giáo viên',role=u?.role==='admin'?'Giáo viên chủ nhiệm · Quản trị viên':(u?.roleLabel||u?.role||'Thành viên lớp');document.getElementById('cmAccountName').textContent=name;document.getElementById('cmAccountRole').textContent=role;document.getElementById('cmAccountUsername').textContent=u?.username||u?.email||'—';document.getElementById('cmAccountClass').textContent=c?.class_name?(c.class_name+(c.year?' · '+c.year:'')):'—';document.getElementById('cmAccountInitial').textContent=name.split(/\s+/).filter(Boolean).slice(-2).map(x=>x[0]).join('').toUpperCase()||'GV';openModal('cmAccountPanel')};
+window.openAccountPanel=function(){const p=document.getElementById('cmAccountPanel');if(!p)return;const u=typeof currentUser!=='undefined'?currentUser:null,c=typeof currentClass!=='undefined'?currentClass:null;const name=u?.name||u?.username||'Giáo viên',role=u?.role==='gvcn'?'Giáo viên chủ nhiệm':u?.role==='admin'?'Quản trị viên hệ thống':(u?.roleLabel||u?.role||'Thành viên lớp');document.getElementById('cmAccountName').textContent=name;document.getElementById('cmAccountRole').textContent=role;document.getElementById('cmAccountUsername').textContent=u?.username||u?.email||'—';document.getElementById('cmAccountClass').textContent=c?.class_name?(c.class_name+(c.year?' · '+c.year:'')):'—';document.getElementById('cmAccountInitial').textContent=name.split(/\s+/).filter(Boolean).slice(-2).map(x=>x[0]).join('').toUpperCase()||'GV';openModal('cmAccountPanel')};
 window.closeAccountPanel=function(){document.getElementById('cmAccountPanel')?.classList.remove('show')};
 window.openTodayAttendanceSummary=function(){const panel=document.getElementById('cmTodayAttendancePanel'),content=document.getElementById('cmTodayAttendanceContent'),title=document.getElementById('cmTodayAttendanceTitle');if(!panel||!content)return;const date=typeof today==='function'?today():new Date().toISOString().slice(0,10),students=Array.isArray(state?.students)?state.students:[],attendance=state?.attendance||{};if(title)title.textContent='🗓️ Điểm danh hôm nay ('+(typeof fmtDate==='function'?fmtDate(date):date.split('-').reverse().join('/'))+')';if(typeof attendanceTodaySummary==='function'&&typeof attendanceTodayPanelMarkup==='function'){content.innerHTML=attendanceTodayPanelMarkup(attendanceTodaySummary(students,attendance,date));}else{content.innerHTML='<div class="empty">Không thể tải dữ liệu điểm danh hôm nay.</div>';}openModal('cmTodayAttendancePanel');};
 window.closeTodayAttendanceSummary=function(){document.getElementById('cmTodayAttendancePanel')?.classList.remove('show')};
