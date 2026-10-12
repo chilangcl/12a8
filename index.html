@@ -736,15 +736,19 @@ select option{background:#fff!important;color:#202124!important}
     <div class="field"><label>Lớp</label><select id="loginClassSelect"></select></div>
   </div>
   <div id="loginClassInfo" class="notice" style="margin-top:12px"></div>
+  <div id="cmBioOffer" class="notice" style="margin-top:12px;display:none"></div>
   <div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="btn secondary" onclick="cancelClassEntry()">Hủy</button><button class="btn" onclick="enterSelectedClass()">🚪 Vào lớp</button></div>
 </div></div>
 
 <div id="loginScreen" class="login">
   <div class="login-brand-banner"><div class="inner"><svg class="cm-brand-cap" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="cmCapRed" x1="12" y1="8" x2="52" y2="49" gradientUnits="userSpaceOnUse"><stop stop-color="#ff5a5f"/><stop offset=".42" stop-color="#e31b2f"/><stop offset="1" stop-color="#950b1c"/></linearGradient><linearGradient id="cmCapGold" x1="12" y1="18" x2="53" y2="39" gradientUnits="userSpaceOnUse"><stop stop-color="#fff3a1"/><stop offset=".48" stop-color="#ffd12a"/><stop offset="1" stop-color="#d69200"/></linearGradient></defs><path d="M3 22 32 8l29 14-29 14L3 22Z"/><path d="M16 29v13c0 7 32 7 32 0V29"/><path class="cm-cap-highlight" d="M13 21 32 12l14 6-20 9Z"/><path d="M57 24v17"/><circle cx="57" cy="43" r="3"/></svg><span>ClassManager Pro</span></div></div>
   <div class="login-card">
-    <div class="field"><label>Tài khoản</label><input id="loginUser" placeholder="Nhập tài khoản"></div>
-    <div class="field"><label>Mật khẩu</label><input id="loginPass" type="password" placeholder="Nhập mật khẩu"></div>
-    <button class="btn" style="width:100%;margin-top:6px" onclick="login()">Đăng nhập</button>
+    <form id="loginForm" method="post" autocomplete="on" onsubmit="event.preventDefault();login();return false">
+      <div class="field"><label for="loginUser">Tài khoản</label><input id="loginUser" name="username" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Nhập tài khoản"></div>
+      <div class="field"><label for="loginPass">Mật khẩu</label><input id="loginPass" name="password" type="password" autocomplete="current-password" placeholder="Nhập mật khẩu"></div>
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#475569;margin:6px 0 4px;cursor:pointer"><input id="loginRemember" type="checkbox" style="width:auto;margin-top:2px"><span>Ghi nhớ đăng nhập trên thiết bị này<br><small style="color:#94a3b8">Chỉ bật trên điện thoại/máy của riêng em, không bật trên máy dùng chung.</small></span></label>
+      <button class="btn" type="submit" style="width:100%;margin-top:6px">Đăng nhập</button>
+    </form>
     <button class="guest-btn" type="button" onclick="openGuestMode()">👀 Vào xem (Khách)</button>
     <div class="app-copyright">🎓 ClassManager Pro được phát triển bởi thầy Nguyễn Văn Hoàng, giáo viên Trường THPT Chi Lăng, Lạng Sơn</div>
   </div>
@@ -1095,12 +1099,13 @@ select option{background:#fff!important;color:#202124!important}
       <section id="page-users" class="page">
         <div class="page-head"><div><h2>Tài khoản & phân quyền</h2><div class="muted">Admin và GVCN tạo tài khoản cán bộ lớp, cấp quyền đúng theo lớp.</div></div></div>
         <div class="card" style="margin-bottom:16px">
-          <div class="form-grid">
-            <div class="field"><label>Tài khoản *</label><input id="newUsername" placeholder="tendangnhap" autocomplete="off"></div>
+           <div class="form-grid">
+            <div class="field"><label>Vai trò *</label><select id="newRole" onchange="onNewRoleChange()"><option value="gvcn">GVCN (giáo viên chủ nhiệm)</option><option value="loptruong" selected>Lớp trưởng</option><option value="loppho">Lớp phó</option><option value="totruong">Tổ trưởng</option></select><div id="newRoleHint" class="footer-note"></div></div>
+            <div class="field" id="newStudentField"><label>Chọn học sinh trong lớp đang quản lý *</label><select id="newStudentSelect" onchange="onNewStudentPick()"></select></div>
             <div class="field"><label>Họ và tên *</label><input id="newName" placeholder="Nguyễn Văn A"></div>
-            <div class="field"><label>Mật khẩu *</label><input id="newPassword" type="password" placeholder="Tối thiểu 8 ký tự"></div>
-            <div class="field"><label>Vai trò *</label><select id="newRole"><option value="gvcn">GVCN (giáo viên chủ nhiệm)</option><option value="loptruong">Lớp trưởng</option><option value="loppho">Lớp phó</option><option value="to1">Tổ trưởng 1</option><option value="to2">Tổ trưởng 2</option><option value="to3">Tổ trưởng 3</option><option value="to4">Tổ trưởng 4</option></select></div>
-            <div class="field span2"><label>Lớp được phép vào *</label><select id="newClassSelect"></select></div>
+            <div class="field"><label>Tài khoản *</label><input id="newUsername" placeholder="gvcn12a8" autocomplete="off" autocapitalize="none" oninput="this.dataset.auto='0'"></div>
+            <div class="field"><label>Mật khẩu *</label><input id="newPassword" type="password" placeholder="Tối thiểu 8 ký tự" autocomplete="new-password"></div>
+            <div class="field"><label>Lớp được phép vào *</label><select id="newClassSelect"></select></div>
           </div>
           <div class="actions" style="margin-top:12px"><button class="btn" onclick="createClassUser()">🔐 Tạo tài khoản</button></div>
           <div id="userCreateStatus" class="notice" style="display:none;margin-top:12px"></div>
@@ -1230,8 +1235,15 @@ const createClient = window.supabase?.createClient;
 let sb=null;
 try {
   if (!window.supabase || typeof window.supabase.createClient !== 'function') throw new Error('Không tải được thư viện Supabase. Hãy kiểm tra kết nối Internet hoặc CDN.');
-  // Keep auth tokens only for the current browser session; never leave them in persistent localStorage.
-  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:true,storage:window.sessionStorage,autoRefreshToken:true,detectSessionInUrl:false,flowType:'pkce'}});
+  // Mặc định token chỉ lưu trong phiên trình duyệt (sessionStorage) để an toàn trên máy dùng chung.
+  // Nếu người dùng chủ động tick "Ghi nhớ đăng nhập trên thiết bị này" thì lưu bền (localStorage).
+  window.CM_REMEMBER_KEY='cm_remember_device';
+  const cmAuthStorage={
+    getItem(k){try{const v=sessionStorage.getItem(k);return v!==null?v:localStorage.getItem(k)}catch(e){return null}},
+    setItem(k,v){try{if(localStorage.getItem('cm_remember_device')==='1'){localStorage.setItem(k,v);sessionStorage.removeItem(k)}else{sessionStorage.setItem(k,v);localStorage.removeItem(k)}}catch(e){}},
+    removeItem(k){try{sessionStorage.removeItem(k);localStorage.removeItem(k)}catch(e){}}
+  };
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:true,storage:cmAuthStorage,autoRefreshToken:true,detectSessionInUrl:false,flowType:'pkce'}});
 } catch (e) { console.error(e); window.__supabaseInitError=e; }
 let currentClass=null, currentStateKey='12A8-2026-2027', cloudWriteQueue=Promise.resolve();
 // Version của bản ghi class_state đang có trên máy (dùng để chống 2 thiết bị ghi đè dữ liệu của nhau).
@@ -1344,6 +1356,7 @@ async function login(){
   if(!u||!p){setLoginStatus('⚠️ Vui lòng nhập tài khoản và mật khẩu.');return}
   const email=u.includes('@')?u:`${u}@12a8.local`;
   setLoginStatus('⏳ Đang kiểm tra tài khoản...');
+  try{localStorage.setItem('cm_remember_device',document.getElementById('loginRemember')?.checked?'1':'0')}catch(e){}
   try{
     const {data,error}=await sb.auth.signInWithPassword({email,password:p});
     if(error){const until=recordLoginFailure();setLoginStatus(until?'⛔ Đăng nhập bị tạm khóa trong 15 phút do quá nhiều lần thử.':'❌ Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');return}
@@ -1352,6 +1365,7 @@ async function login(){
     await loadAvailableClasses(data.user.id);
     if(!availableClasses.length){await sb.auth.signOut({scope:'local'});throw new Error('Tài khoản chưa được cấp quyền vào lớp nào. Hãy liên hệ GVCN.')}
     showClassChooser();
+    try{window.cmBioRefreshOffer?.(data.user)}catch(e){console.warn(e)}
   }catch(e){console.error(e);setLoginStatus('❌ '+(e?.message||String(e)));}
 }
 async function loadCloudUser(user){
@@ -2505,31 +2519,90 @@ async function renderUsers(){
   if(error)throw error;
   const {data:assign}=await sb.from('class_user_roles').select('user_id,class_id,role,scope,classes(class_name,state_key,academic_years(name))');
   const rows=(data||[]).map(u=>{const a=(assign||[]).filter(x=>x.user_id===u.id);return a.length?a.map(x=>({u,x})):(isSystemAdmin()?[{u,x:null}]:[])});
-  el.innerHTML=rows.flat().map(o=>`<tr><td><b>${esc(o.u.username||'')}</b></td><td>${esc(o.u.name||'')}</td><td>${esc(o.x?.role_label||o.u.role_label||({admin:'Admin hệ thống',gvcn:'GVCN',loptruong:'Lớp trưởng',loppho:'Lớp phó',to1:'Tổ trưởng 1',to2:'Tổ trưởng 2',to3:'Tổ trưởng 3',to4:'Tổ trưởng 4'})[o.x?.role||o.u.role]||o.x?.role||o.u.role||'')}</td><td>${esc(o.x?.classes?.class_name||o.u.scope||'')}</td><td><span class="badge b-green">Hoạt động</span></td><td>${userActionButtons(o)}</td></tr>`).join('')||'<tr><td colspan="6">Chưa có tài khoản.</td></tr>';
+  window.cmUsersCache=rows.flat().filter(o=>o.x).map(o=>({name:o.u.name,username:o.u.username,role:o.x.role||o.u.role,class_id:o.x.class_id}));
+   el.innerHTML=rows.flat().map(o=>`<tr><td><b>${esc(o.u.username||'')}</b></td><td>${esc(o.u.name||'')}</td><td>${esc(cmRoleLabel(o))}</td><td>${esc(o.x?.classes?.class_name||o.u.scope||'')}</td><td><span class="badge b-green">Hoạt động</span></td><td>${userActionButtons(o)}</td></tr>`).join('')||'<tr><td colspan="6">Chưa có tài khoản.</td></tr>';
   populateNewClassSelect();
  }catch(e){el.innerHTML=`<tr><td colspan="6">Không tải được danh sách tài khoản: ${esc(e.message||e)}</td></tr>`}
 }
+/* ===== Tạo tài khoản cán sự: chọn học sinh từ danh sách lớp; Tổ trưởng theo tổ của học sinh ===== */
+const CM_STUDENT_ROLES=['loptruong','loppho','totruong'];
+function cmRoleLabel(o){
+  const r=o.x?.role||o.u.role;
+  const m={admin:'Admin hệ thống',gvcn:'GVCN',loptruong:'Lớp trưởng',loppho:'Lớp phó',to1:'Tổ trưởng tổ 1',to2:'Tổ trưởng tổ 2',to3:'Tổ trưởng tổ 3',to4:'Tổ trưởng tổ 4'};
+  return m[r]||o.x?.role_label||o.u.role_label||r||'';
+}
+function cmSlug(t){return String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'d').toLowerCase().replace(/[^a-z0-9]/g,'')}
+function cmGroupNum(st){const g=parseInt(String(st?.group??'').replace(/\D/g,''),10);return [1,2,3,4].includes(g)?g:0}
+function populateNewStudentSelect(){
+  const sel=document.getElementById('newStudentSelect');if(!sel)return;
+  const list=(state.students||[]).slice().sort((a,b)=>(cmGroupNum(a)||9)-(cmGroupNum(b)||9)||String(a.name||'').localeCompare(String(b.name||''),'vi'));
+  const cache=window.cmUsersCache||[],cid=currentClass?.id;
+  sel.innerHTML='<option value="">— Chọn học sinh —</option>'+list.map(s=>{
+    const has=cache.some(r=>r.class_id===cid&&String(r.name||'').trim().toLowerCase()===String(s.name||'').trim().toLowerCase());
+    return `<option value="${esc(s.id)}">${esc(s.name)}${s.code?' ('+esc(s.code)+')':''} · ${cmGroupNum(s)?'Tổ '+cmGroupNum(s):'chưa phân tổ'}${has?' · ✔ đã có tài khoản':''}</option>`;
+  }).join('');
+}
+function onNewRoleChange(){
+  const role=document.getElementById('newRole')?.value,studentRole=CM_STUDENT_ROLES.includes(role);
+  const f=document.getElementById('newStudentField');if(f)f.style.display=studentRole?'':'none';
+  const nm=document.getElementById('newName');if(nm){nm.readOnly=studentRole;nm.value=''}
+  const un=document.getElementById('newUsername');if(un){un.value='';un.dataset.auto='1'}
+  const cs=document.getElementById('newClassSelect');
+  if(cs){if(studentRole&&currentClass&&[...cs.options].some(o=>o.value===currentClass.id)){cs.value=currentClass.id;cs.disabled=true}else cs.disabled=false}
+  const hint=document.getElementById('newRoleHint');
+  if(hint)hint.textContent=role==='totruong'?'Học sinh thuộc tổ nào sẽ là Tổ trưởng của tổ đó.':studentRole?'Chọn học sinh trong danh sách lớp đang quản lý.':'';
+  populateNewStudentSelect();
+}
+function onNewStudentPick(){
+  const sid=document.getElementById('newStudentSelect')?.value,st=(state.students||[]).find(s=>String(s.id)===String(sid));
+  const nm=document.getElementById('newName'),un=document.getElementById('newUsername'),hint=document.getElementById('newRoleHint'),role=document.getElementById('newRole')?.value;
+  if(!st){if(nm)nm.value='';return}
+  if(nm)nm.value=st.name||'';
+  if(un&&(!un.value||un.dataset.auto==='1')){un.value=(cmSlug(st.name)+(currentClass?'.'+cmSlug(currentClass.class_name):'')).slice(0,40);un.dataset.auto='1'}
+  if(hint&&role==='totruong'){const g=cmGroupNum(st);hint.textContent=g?`➜ Sẽ tạo tài khoản Tổ trưởng tổ ${g}.`:'⚠️ Học sinh này chưa được phân tổ (1–4) trong danh sách lớp. Hãy phân tổ trước.'}
+}
 async function populateNewClassSelect(){
  const el=document.getElementById('newClassSelect');if(!el)return;
- try{await loadAvailableClasses(currentUser.id);el.innerHTML=availableClasses.map(x=>`<option value="${esc(x.id)}">${esc(x.class_name)} · ${esc(x.year)}</option>`).join('')}catch(e){el.innerHTML='<option value="">Không tải được lớp</option>'}
+ try{await loadAvailableClasses(currentUser.id);el.innerHTML=availableClasses.map(x=>`<option value="${esc(x.id)}">${esc(x.class_name)} · ${esc(x.year)}</option>`).join('');if(currentClass&&availableClasses.some(x=>x.id===currentClass.id))el.value=currentClass.id}catch(e){el.innerHTML='<option value="">Không tải được lớp</option>'}
+ try{onNewRoleChange()}catch(e){console.warn(e)}
 }
 function userCreateNotice(msg,bad=false){const e=document.getElementById('userCreateStatus');if(!e)return;e.style.display='block';e.className='notice '+(bad?'danger':'ok');e.textContent=msg}
 async function createClassUser(){
- if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin mới được tạo tài khoản.');return}
- const username=document.getElementById('newUsername').value.trim().toLowerCase().replace(/\s+/g,''),name=document.getElementById('newName').value.trim(),password=document.getElementById('newPassword').value,role=document.getElementById('newRole').value,classId=document.getElementById('newClassSelect').value;
- if(!username||!name||!password||!classId){userCreateNotice('❌ Vui lòng nhập đủ thông tin.',true);return}
- const allowedRoles=isSystemAdmin()?['gvcn','loptruong','loppho','to1','to2','to3','to4']:['loptruong','loppho','to1','to2','to3','to4'];
- if(!allowedRoles.includes(role)){userCreateNotice('❌ Vai trò không hợp lệ.',true);return}
- if(!/^[a-z0-9._-]{3,40}$/.test(username)){userCreateNotice('❌ Tài khoản chỉ gồm chữ thường, số, dấu chấm, gạch ngang hoặc gạch dưới.',true);return}
- if(password.length<8){userCreateNotice('❌ Mật khẩu phải có ít nhất 8 ký tự.',true);return}
- const targetClass=availableClasses.find(x=>x.id===classId);if(!targetClass){userCreateNotice('❌ Lớp không nằm trong danh sách được phép.',true);return}
- userCreateNotice('⏳ Đang tạo tài khoản ở phía máy chủ và gắn quyền lớp...');
- try{
-   const {data,error}=await sb.functions.invoke('create-class-user',{body:{username,name,password,role,class_id:classId,scope:'Toàn lớp',created_by:currentUser.id}});
-   if(error)throw error;if(!data?.ok)throw new Error(data?.error||'Không tạo được tài khoản');
-   userCreateNotice(`✅ Đã tạo ${role==='gvcn'?'tài khoản GVCN':'tài khoản cán bộ lớp'} ${username} cho ${targetClass.class_name}.`);
-   document.getElementById('newUsername').value='';document.getElementById('newName').value='';document.getElementById('newPassword').value='';await renderUsers();
- }catch(e){console.error(e);userCreateNotice('❌ '+(e.message||String(e)),true)}
+  if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin mới được tạo tài khoản.');return}
+  const g=id=>document.getElementById(id)?.value||'';
+  const roleChoice=g('newRole'),studentRole=CM_STUDENT_ROLES.includes(roleChoice);
+  let username=g('newUsername').trim().toLowerCase().replace(/\s+/g,''),name=g('newName').trim(),password=g('newPassword'),classId=g('newClassSelect'),role=roleChoice;
+  if(studentRole){
+    const st=(state.students||[]).find(s=>String(s.id)===String(g('newStudentSelect')));
+    if(!st){userCreateNotice('❌ Vui lòng chọn học sinh trong danh sách lớp.',true);return}
+    if(!currentClass||classId!==currentClass.id){userCreateNotice(`❌ Danh sách học sinh thuộc lớp đang quản lý${currentClass?' ('+currentClass.class_name+')':''}. Hãy chọn đúng lớp này.`,true);return}
+    name=st.name||name;
+    if(roleChoice==='totruong'){const gn=cmGroupNum(st);if(!gn){userCreateNotice('❌ Học sinh này chưa được phân tổ (1–4) trong danh sách lớp. Hãy phân tổ trước khi tạo tài khoản Tổ trưởng.',true);return}role='to'+gn}
+  }
+  if(!username||!name||!password||!classId){userCreateNotice('❌ Vui lòng nhập đủ thông tin.',true);return}
+  const allowedRoles=isSystemAdmin()?['gvcn','loptruong','loppho','to1','to2','to3','to4']:['loptruong','loppho','to1','to2','to3','to4'];
+  if(!allowedRoles.includes(role)){userCreateNotice('❌ Vai trò không hợp lệ.',true);return}
+  if(!/^[a-z0-9._-]{3,40}$/.test(username)){userCreateNotice('❌ Tài khoản chỉ gồm chữ thường, số, dấu chấm, gạch ngang hoặc gạch dưới.',true);return}
+  if(password.length<8){userCreateNotice('❌ Mật khẩu phải có ít nhất 8 ký tự.',true);return}
+  const targetClass=availableClasses.find(x=>x.id===classId);if(!targetClass){userCreateNotice('❌ Lớp không nằm trong danh sách được phép.',true);return}
+  if(studentRole){
+    const cache=window.cmUsersCache||[],sameName=cache.find(r=>r.class_id===classId&&String(r.name||'').trim().toLowerCase()===name.trim().toLowerCase());
+    const sameRole=role!=='loppho'?cache.find(r=>r.class_id===classId&&r.role===role):null;
+    const warn=[];
+    if(sameName)warn.push(`Học sinh "${name}" đã có tài khoản "${sameName.username}".`);
+    if(sameRole&&(!sameName||sameName.username!==sameRole.username))warn.push(`Lớp đã có ${role==='loptruong'?'lớp trưởng':'tổ trưởng '+role.replace('to','tổ ')} là "${sameRole.name}" (${sameRole.username}).`);
+    if(warn.length&&!confirm(warn.join('\n')+'\nVẫn tạo thêm tài khoản?'))return;
+  }
+  userCreateNotice('⏳ Đang tạo tài khoản ở phía máy chủ và gắn quyền lớp...');
+  try{
+    const {data,error}=await sb.functions.invoke('create-class-user',{body:{username,name,password,role,class_id:classId,scope:'Toàn lớp',created_by:currentUser.id}});
+    if(error)throw error;if(!data?.ok)throw new Error(data?.error||'Không tạo được tài khoản');
+    const roleText=role==='gvcn'?'tài khoản GVCN':role.startsWith('to')?`tài khoản Tổ trưởng tổ ${role.replace('to','')}`:role==='loptruong'?'tài khoản Lớp trưởng':role==='loppho'?'tài khoản Lớp phó':'tài khoản cán bộ lớp';
+    userCreateNotice(`✅ Đã tạo ${roleText} ${username} (${name}) cho ${targetClass.class_name}.`);
+    document.getElementById('newUsername').value='';document.getElementById('newUsername').dataset.auto='1';document.getElementById('newName').value='';document.getElementById('newPassword').value='';
+    const ss=document.getElementById('newStudentSelect');if(ss)ss.value='';
+    await renderUsers();
+  }catch(e){console.error(e);userCreateNotice('❌ '+(e.message||String(e)),true)}
 }
 /* ===== Đổi mật khẩu / Xóa tài khoản (qua Edge Function manage-class-user) ===== */
 function canManageUserRow(u){
@@ -4091,12 +4164,87 @@ setInterval(function(){try{if(typeof processWeeklyAutoBonus==='function')process
   };
 })();
 </script>
+<script id="cm-biometric-v1">
+/* Mở khóa bằng Face ID / vân tay / khuôn mặt (WebAuthn, xác thực sinh trắc học của chính thiết bị).
+   Đây là "khóa ứng dụng" trên thiết bị: phiên đăng nhập đã ghi nhớ chỉ được mở sau khi xác thực sinh trắc học.
+   Dữ liệu sinh trắc học không bao giờ rời khỏi điện thoại. Cần HTTPS. */
+(function(){
+  const enc=new TextEncoder();
+  const b64=buf=>btoa(String.fromCharCode(...new Uint8Array(buf)));
+  const unb64=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
+  const keyOf=uid=>'cm_bio_'+uid;
+  const cmBio={
+    async supported(){
+      try{return !!(window.isSecureContext&&window.PublicKeyCredential&&PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable&&await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable())}catch(e){return false}
+    },
+    isEnabled(uid){try{return !!localStorage.getItem(keyOf(uid))}catch(e){return false}},
+    disable(uid){try{localStorage.removeItem(keyOf(uid))}catch(e){}},
+    async enable(user){
+      const challenge=crypto.getRandomValues(new Uint8Array(32));
+      const uname=String(user.email||'').split('@')[0]||'hocsinh';
+      const cred=await navigator.credentials.create({publicKey:{
+        challenge,rp:{name:'Sổ Chủ Nhiệm Số'},
+        user:{id:enc.encode(user.id),name:uname,displayName:uname},
+        pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+        authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},
+        timeout:60000,attestation:'none'}});
+      if(!cred)throw new Error('Thiết bị không tạo được khóa sinh trắc học.');
+      localStorage.setItem(keyOf(user.id),b64(cred.rawId));
+    },
+    async verify(uid){
+      const raw=localStorage.getItem(keyOf(uid));if(!raw)throw new Error('Chưa bật mở khóa sinh trắc học.');
+      const a=await navigator.credentials.get({publicKey:{
+        challenge:crypto.getRandomValues(new Uint8Array(32)),
+        allowCredentials:[{type:'public-key',id:unb64(raw),transports:['internal']}],
+        userVerification:'required',timeout:60000}});
+      return !!a;
+    },
+    lock(user){
+      return new Promise(resolve=>{
+        const ov=document.createElement('div');ov.id='cmBioLock';
+        ov.style.cssText='position:fixed;inset:0;z-index:5000;background:linear-gradient(160deg,#0f3d6e,#0b57a4);display:flex;align-items:center;justify-content:center;padding:24px;font-family:inherit';
+        ov.innerHTML='<div style="background:#fff;border-radius:18px;max-width:380px;width:100%;padding:26px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35)"><div style="font-size:46px">🔐</div><h3 style="margin:8px 0 4px">Sổ Chủ Nhiệm Số</h3><p style="color:#475569;margin:0 0 16px;font-size:14px">Xác thực bằng Face ID / vân tay / khuôn mặt để tiếp tục.</p><button id="cmBioUnlockBtn" class="btn" type="button" style="width:100%">🔓 Mở khóa</button><div id="cmBioMsg" style="color:#b91c1c;font-size:13px;min-height:18px;margin:10px 0 4px"></div><button id="cmBioPwBtn" class="btn secondary" type="button" style="width:100%">Đăng nhập bằng mật khẩu</button></div>';
+        document.body.appendChild(ov);
+        const msg=ov.querySelector('#cmBioMsg');
+        ov.querySelector('#cmBioUnlockBtn').onclick=async()=>{
+          msg.textContent='';
+          try{const ok=await cmBio.verify(user.id);if(ok){ov.remove();resolve(true)}}
+          catch(e){msg.textContent='Không xác thực được. Hãy thử lại hoặc đăng nhập bằng mật khẩu.'}
+        };
+        ov.querySelector('#cmBioPwBtn').onclick=async()=>{
+          try{await sb.auth.signOut({scope:'local'})}catch(e){}
+          ov.remove();resolve(false);
+        };
+      });
+    }
+  };
+  window.cmBio=cmBio;
+  window.cmBioRefreshOffer=async function(user){
+    window.__cmBioUser=user;
+    const box=document.getElementById('cmBioOffer');if(!box)return;
+    const remember=localStorage.getItem('cm_remember_device')==='1';
+    if(!remember||!(await cmBio.supported())){box.style.display='none';return}
+    box.style.display='block';
+    box.innerHTML=cmBio.isEnabled(user.id)
+      ?'✅ Đã bật mở khóa bằng Face ID / vân tay trên thiết bị này. <button type="button" class="btn secondary" style="margin-left:6px" onclick="cmBioDisable()">Tắt</button>'
+      :'🔐 Lần sau mở app không cần nhập mật khẩu: <button type="button" class="btn" style="margin-left:6px" onclick="cmBioEnable()">Bật Face ID / vân tay</button>';
+  };
+  window.cmBioEnable=async function(){
+    const u=window.__cmBioUser;if(!u)return;
+    try{await cmBio.enable(u)}catch(e){console.warn(e);alert('Không bật được mở khóa sinh trắc học: '+(e?.message||e))}
+    cmBioRefreshOffer(u);
+  };
+  window.cmBioDisable=function(){const u=window.__cmBioUser;if(!u)return;cmBio.disable(u.id);cmBioRefreshOffer(u)};
+  document.addEventListener('DOMContentLoaded',()=>{try{const c=document.getElementById('loginRemember');if(c)c.checked=localStorage.getItem('cm_remember_device')==='1'}catch(e){}});
+})();
+</script>
 <script id="bibi-remember-login-v1">
 (function(){
  async function restoreRememberedLogin(){
   if(typeof sb==='undefined'||!sb||window.__supabaseInitError)return;
   try{
    const {data}=await sb.auth.getSession(); const user=data?.session?.user; if(!user)return;
+    if(window.cmBio&&cmBio.isEnabled(user.id)){const unlocked=await cmBio.lock(user);if(!unlocked)return;}
    await loadCloudUser(user); await loadAvailableClasses(user.id); if(!availableClasses.length)return;
    const savedId=localStorage.getItem('bibi_current_class_db_id'), savedKey=localStorage.getItem('bibi_current_class_key');
    const remembered=availableClasses.find(x=>x.id===savedId||x.state_key===savedKey)||availableClasses[0];
