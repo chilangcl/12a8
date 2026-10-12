@@ -115,7 +115,7 @@ document.addEventListener('click',function(e){
     {id:'smart',icon:'🧠',label:'Phân tích thông minh',scope:'admin'},
     {id:'digital',icon:'🗂️',label:'Số hóa & Nhật ký',scope:'admin'},
     {id:'excel',icon:'📥',label:'Excel / Sao lưu',scope:'admin'},
-    {id:'users',icon:'🔐',label:'Tài khoản & quyền',scope:'system'},
+    {id:'users',icon:'🔐',label:'Tài khoản & quyền',scope:'admin'},
     {id:'settings',icon:'⚙️',label:'Cài đặt',scope:'admin'}
   ];
   let tab='all'; let overlay;
@@ -807,7 +807,7 @@ select option{background:#fff!important;color:#202124!important}
       <button class="member-only" data-page="profile" onclick="showPage('profile')">👤 Hồ sơ học sinh 360°</button>
       <div class="nav-title admin-only">Dữ liệu & hệ thống</div>
       <button class="admin-only" data-page="excel" onclick="showPage('excel')">📥 Excel / Sao lưu</button>
-      <button class="sysadmin-only" data-page="users" onclick="showPage('users')">🔐 Tài khoản & phân quyền</button>
+      <button class="admin-only" data-page="users" onclick="showPage('users')">🔐 Tài khoản & phân quyền</button>
       <button class="admin-only" data-page="settings" onclick="showPage('settings')">⚙️ Cài đặt</button>
     </div>
   </aside>
@@ -880,7 +880,7 @@ select option{background:#fff!important;color:#202124!important}
           <div class="cm-utility-grid cm-admin-grid">
             <button class="cm-utility-card pink" type="button" onclick="useUtility('ai')"><span class="cm-utility-icon">🤖</span><span>Trợ lý AI</span></button>
             <button class="cm-utility-card blue sysadmin-only" type="button" onclick="useUtility('classes')"><span class="cm-utility-icon">🏫</span><span>Quản lý năm học & lớp</span></button>
-            <button class="cm-utility-card purple sysadmin-only" type="button" onclick="useUtility('users')"><span class="cm-utility-icon">🔐</span><span>Quản lý tài khoản</span></button>
+            <button class="cm-utility-card purple" type="button" onclick="useUtility('users')"><span class="cm-utility-icon">🔐</span><span>Quản lý tài khoản</span></button>
             <button class="cm-utility-card cyan" type="button" onclick="useUtility('settings')"><span class="cm-utility-icon">⚙️</span><span>Cài đặt hệ thống</span></button>
           </div>
         </section>
@@ -1093,10 +1093,10 @@ select option{background:#fff!important;color:#202124!important}
       </section>
 
       <section id="page-users" class="page">
-        <div class="page-head"><div><h2>Tài khoản & phân quyền</h2><div class="muted">Admin hệ thống tạo tài khoản và cấp quyền đúng theo lớp.</div></div></div>
+        <div class="page-head"><div><h2>Tài khoản & phân quyền</h2><div class="muted">Admin và GVCN tạo tài khoản cán bộ lớp, cấp quyền đúng theo lớp.</div></div></div>
         <div class="card" style="margin-bottom:16px">
           <h3>➕ Tạo tài khoản GVCN / cán bộ lớp</h3>
-          <div class="muted" style="margin-bottom:12px">Chỉ tài khoản Admin hệ thống mới có thể mở chức năng này (tài khoản GVCN không nhìn thấy mục này). Tài khoản được tạo qua Edge Function và ghi quyền lớp ở phía máy chủ.</div>
+          <div class="muted" style="margin-bottom:12px">Admin tạo được mọi vai trò; GVCN chỉ tạo tài khoản cán bộ lớp (lớp trưởng, lớp phó, tổ trưởng) cho lớp mình chủ nhiệm. Tài khoản được tạo qua Edge Function và ghi quyền lớp ở phía máy chủ.</div>
           <div class="form-grid">
             <div class="field"><label>Tài khoản *</label><input id="newUsername" placeholder="gvcn12a8" autocomplete="off"></div>
             <div class="field"><label>Họ và tên *</label><input id="newName" placeholder="Nguyễn Văn A"></div>
@@ -1305,6 +1305,9 @@ function setUserUi(){
   document.querySelectorAll('.admin-only').forEach(x=>x.classList.toggle('hidden',!isAdmin()));
   // Mục quản trị hệ thống: chỉ Admin nhìn thấy; tài khoản GVCN không thấy.
   document.querySelectorAll('.sysadmin-only').forEach(x=>x.classList.toggle('hidden',!isSystemAdmin()));
+  const gOpt=document.querySelector('#newRole option[value="gvcn"]');
+  if(gOpt){gOpt.hidden=!isSystemAdmin();gOpt.disabled=!isSystemAdmin();const nr=document.getElementById('newRole');if(!isSystemAdmin()&&nr&&nr.value==='gvcn')nr.value='loptruong';}
+  const usersH=document.querySelector('#page-users .page-head h2');if(usersH)usersH.textContent=isSystemAdmin()?'Tài khoản & phân quyền':'Tài khoản cán bộ lớp';
   const adminSecTitle=document.getElementById('cmAdminSectionTitle');if(adminSecTitle)adminSecTitle.textContent=isSystemAdmin()?'⚙️ Quản trị hệ thống':'🧰 Công cụ GVCN';
   document.querySelectorAll('.smart-nav,.digital-nav').forEach(x=>x.classList.toggle('hidden',!isAdmin()));
   // AI là chức năng tuyệt đối chỉ dành cho GVCN/Admin.
@@ -1330,7 +1333,7 @@ function setUserUi(){
   }
   // Sau khi đổi vai trò/lớp, bảo đảm không còn trang quản trị/AI bị mở.
   if(!isAdmin() && ['ai','classes','profile','excel','users','settings','smart','digital','parentmsg'].some(n=>document.getElementById('page-'+n)?.classList.contains('active'))){showPage('dashboard');}
-  if(isAdmin() && !isSystemAdmin() && ['classes','users'].some(n=>document.getElementById('page-'+n)?.classList.contains('active'))){showPage('dashboard');}
+  if(isAdmin() && !isSystemAdmin() && ['classes'].some(n=>document.getElementById('page-'+n)?.classList.contains('active'))){showPage('dashboard');}
 }
 const CM_LOGIN_GUARD_KEY='cm_login_guard_v1';
 function loginGuard(){try{const now=Date.now(),raw=JSON.parse(sessionStorage.getItem(CM_LOGIN_GUARD_KEY)||'{"count":0,"until":0}');if(raw.until>now)return {blocked:true,seconds:Math.ceil((raw.until-now)/1000)};if(now-(raw.first||now)>15*60*1000)return {count:0,first:now,until:0};return raw;}catch(e){return {count:0,first:Date.now(),until:0};}}
@@ -1508,8 +1511,8 @@ function toggleSidebar(){
 }
 const titles={dashboard:'Trang chủ',ai:'Trợ lý AI',classes:'Quản lý lớp & năm học',students:'Học sinh',attendance:'Chuyên cần',conduct:'Rèn luyện',competition:'Thi đua & Theo dõi',reports:'Báo cáo tổng hợp',parentmsg:'Soạn tin nhắn phụ huynh',smart:'Phân tích thông minh',digital:'Số hóa & Nhật ký',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
 function showPage(name){updateProfile360Access();
- if(['classes','users'].includes(name)&&!isSystemAdmin()){alert('🔒 Chức năng này chỉ dành cho Admin hệ thống.');return}
- if(['excel','ai','settings','smart','digital','parentmsg'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
+ if(name==='classes'&&!isSystemAdmin()){alert('🔒 Chức năng này chỉ dành cho Admin hệ thống.');return}
+ if(['excel','ai','settings','smart','digital','parentmsg','users'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
   if(name==='profile'&&!currentUser){alert('Vui lòng đăng nhập để xem Hồ sơ học sinh 360°.');return}
  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');
  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===name));
@@ -1598,7 +1601,7 @@ function renderAll(){
   try{renderCompetition()}catch(e){console.error('Thi đua:',e)}
   try{renderReports()}catch(e){console.error(e)}
   if(currentUser)try{renderProfileSelectors()}catch(e){console.error('Hồ sơ 360°:',e)}
-  if(isSystemAdmin())try{renderUsers()}catch(e){console.error(e)}
+  if(isAdmin())try{renderUsers()}catch(e){console.error(e)}
   if(isAdmin())try{renderSmartModule()}catch(e){console.error('Smart:',e)}
   if(isAdmin())try{renderDigitalModule()}catch(e){console.error('Digital:',e)}
   decorateResponsiveStudentTables(); setTimeout(()=>decorateResponsiveStudentTables(),80);
@@ -2503,7 +2506,7 @@ async function renderUsers(){
   const {data,error}=await sb.from('profiles').select('id,username,name,role,role_label,scope').order('username');
   if(error)throw error;
   const {data:assign}=await sb.from('class_user_roles').select('user_id,class_id,role,scope,classes(class_name,state_key,academic_years(name))');
-  const rows=(data||[]).map(u=>{const a=(assign||[]).filter(x=>x.user_id===u.id);return a.length?a.map(x=>({u,x})): [{u,x:null}]});
+  const rows=(data||[]).map(u=>{const a=(assign||[]).filter(x=>x.user_id===u.id);return a.length?a.map(x=>({u,x})):(isSystemAdmin()?[{u,x:null}]:[])});
   el.innerHTML=rows.flat().map(o=>`<tr><td><b>${esc(o.u.username||'')}</b></td><td>${esc(o.u.name||'')}</td><td>${esc(o.x?.role_label||o.u.role_label||({admin:'Admin hệ thống',gvcn:'GVCN',loptruong:'Lớp trưởng',loppho:'Lớp phó',to1:'Tổ trưởng 1',to2:'Tổ trưởng 2',to3:'Tổ trưởng 3',to4:'Tổ trưởng 4'})[o.x?.role||o.u.role]||o.x?.role||o.u.role||'')}</td><td>${esc(o.x?.classes?.class_name||o.u.scope||'')}</td><td><span class="badge b-green">Hoạt động</span></td></tr>`).join('')||'<tr><td colspan="5">Chưa có tài khoản.</td></tr>';
   populateNewClassSelect();
  }catch(e){el.innerHTML=`<tr><td colspan="5">Không tải được danh sách tài khoản: ${esc(e.message||e)}</td></tr>`}
@@ -2514,10 +2517,11 @@ async function populateNewClassSelect(){
 }
 function userCreateNotice(msg,bad=false){const e=document.getElementById('userCreateStatus');if(!e)return;e.style.display='block';e.className='notice '+(bad?'danger':'ok');e.textContent=msg}
 async function createClassUser(){
- if(!isSystemAdmin()){alert('🔒 Chỉ Admin hệ thống mới được tạo tài khoản.');return}
+ if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin mới được tạo tài khoản.');return}
  const username=document.getElementById('newUsername').value.trim().toLowerCase().replace(/\s+/g,''),name=document.getElementById('newName').value.trim(),password=document.getElementById('newPassword').value,role=document.getElementById('newRole').value,classId=document.getElementById('newClassSelect').value;
  if(!username||!name||!password||!classId){userCreateNotice('❌ Vui lòng nhập đủ thông tin.',true);return}
- if(!['gvcn','loptruong','loppho','to1','to2','to3','to4'].includes(role)){userCreateNotice('❌ Vai trò không hợp lệ.',true);return}
+ const allowedRoles=isSystemAdmin()?['gvcn','loptruong','loppho','to1','to2','to3','to4']:['loptruong','loppho','to1','to2','to3','to4'];
+ if(!allowedRoles.includes(role)){userCreateNotice('❌ Vai trò không hợp lệ.',true);return}
  if(!/^[a-z0-9._-]{3,40}$/.test(username)){userCreateNotice('❌ Tài khoản chỉ gồm chữ thường, số, dấu chấm, gạch ngang hoặc gạch dưới.',true);return}
  if(password.length<8){userCreateNotice('❌ Mật khẩu phải có ít nhất 8 ký tự.',true);return}
  const targetClass=availableClasses.find(x=>x.id===classId);if(!targetClass){userCreateNotice('❌ Lớp không nằm trong danh sách được phép.',true);return}
