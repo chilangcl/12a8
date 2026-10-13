@@ -846,9 +846,10 @@ select option{background:#fff!important;color:#202124!important}
             <div class="actions"><button class="btn" type="button" onclick="myCreateClass()">➕ Tạo lớp mới</button><button class="btn secondary" type="button" onclick="myRefreshClasses()">🔄 Làm mới</button></div>
             <div id="myClassStatus" class="notice" style="display:none;margin-top:12px"></div>
           </div>
-          <div class="card"><h3>📌 Lớp đang quản lý</h3><div id="myCurrentClass" class="empty">Chưa chọn lớp.</div><div class="actions"><button class="btn warning" type="button" onclick="myArchiveCurrentClass()">🔒 Khóa lớp/năm học</button></div></div>
+          <div class="card"><h3>📌 Lớp đang quản lý</h3><div id="myCurrentClass" class="empty">Chưa chọn lớp.</div><div class="actions"><button class="btn warning" type="button" onclick="myArchiveCurrentClass()">🔒 Khóa lớp/năm học</button><button class="btn danger" type="button" onclick="myDeleteClass()">🗑️ Xóa lớp này</button></div></div>
         </div>
         <div class="card" style="margin-top:16px"><h3>📚 Danh sách lớp & năm học</h3><div class="muted">Chọn lớp đang hoạt động để quản lý. Lớp đã khóa chỉ dùng để tra cứu.</div><div id="myClassList" class="multi-year-list"></div></div>
+        <div class="card" style="margin-top:16px"><h3>🗓️ Danh sách năm học</h3><div class="muted">Xóa một năm học sẽ xóa <strong>toàn bộ các lớp</strong> thuộc năm học đó cùng dữ liệu của các lớp (không thể hoàn tác).</div><div id="myYearList" class="multi-year-list"></div></div>
       </section>
 
       <section id="page-dashboard" class="page active dashboard-home">
@@ -956,7 +957,6 @@ select option{background:#fff!important;color:#202124!important}
         <div class="toolbar"><label style="display:flex;align-items:center;gap:6px">Ngày <input type="date" id="attDate" onchange="renderAttendance()"></label><label style="display:flex;align-items:center;gap:6px">Buổi <select id="attSession" onchange="renderAttendance()"><option value="sang">🌅 Học sáng</option><option value="chieu">🌇 Học chiều</option></select></label><select id="attStatusFilter" onchange="renderAttendance()"><option value="">Tất cả</option><option value="present">Đúng giờ</option><option value="late">Đi muộn</option><option value="excused">Nghỉ phép</option><option value="absent">Nghỉ không phép</option></select></div>
         <div id="attLockNotice" class="notice hidden"></div>
         <div id="attNoScheduleNotice" class="notice hidden" style="border-color:#f59e0b;background:#fffbeb"></div>
-        <div class="notice">Hệ thống tự động mặc định tất cả học sinh là <b>"Có mặt"</b>; thầy/cô chỉ cần chọn lại trạng thái với học sinh nghỉ/đi muộn. Điểm danh được tính riêng theo buổi Sáng/Chiều và dùng cho báo cáo tuần/tháng/HKI/HKII/cả năm. GVCN khóa điểm danh vào cuối mỗi buổi học để chốt số liệu. Buổi nào lớp không có lịch học (cấu hình ở Cài đặt) sẽ tự động không điểm danh.</div>
         <div class="table-wrap" id="attendanceTableWrap"><table class="table"><thead><tr><th>STT</th><th>Mã HS</th><th>Họ tên</th><th>Tổ</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead><tbody id="attendanceBody"></tbody></table></div>
       </section>
 
@@ -3529,7 +3529,8 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   try{await loadAvailableClasses(currentUser.id)}catch(e){notice('❌ Không tải được lớp: '+e.message,true);return}
   const list=document.getElementById('myClassList');if(!list)return;
   const id=currentClass?.id;
-  list.innerHTML=availableClasses.length?availableClasses.map(x=>`<div class="multi-year-item ${x.id===id?'active':''}"><div><strong>${esc(x.class_name)}</strong> – ${esc(x.year)}<div style="color:#64748b;font-size:12px">Khối ${esc(x.grade||'')} · ${x.group_count||4} tổ · ${x.is_archived||x.is_locked?'🔒 Đã khóa':'🟢 Đang hoạt động'}</div></div><button type="button" class="btn small ${x.id===id?'secondary':''}" onclick="mySwitchClass('${x.id}')">${x.id===id?'✓ Đang chọn':'Chọn lớp'}</button></div>`).join(''):'<div class="empty">Chưa có lớp.</div>';
+  list.innerHTML=availableClasses.length?availableClasses.map(x=>`<div class="multi-year-item ${x.id===id?'active':''}"><div><strong>${esc(x.class_name)}</strong> – ${esc(x.year)}<div style="color:#64748b;font-size:12px">Khối ${esc(x.grade||'')} · ${x.group_count||4} tổ · ${x.is_archived||x.is_locked?'🔒 Đã khóa':'🟢 Đang hoạt động'}</div></div><button type="button" class="btn small ${x.id===id?'secondary':''}" onclick="mySwitchClass('${x.id}')">${x.id===id?'✓ Đang chọn':'Chọn lớp'}</button> <button type="button" class="btn small danger" onclick="myDeleteClass('${x.id}')">🗑️ Xóa</button></div>`).join(''):'<div class="empty">Chưa có lớp.</div>';
+  if(typeof myRenderYearList==='function')myRenderYearList();
   const cc=document.getElementById('myCurrentClass');if(cc)cc.innerHTML=currentClass?`<strong style="font-size:20px">${esc(currentClass.class_name)}</strong> – ${esc(currentClass.year)}<div class="muted">Khối ${esc(currentClass.grade||'')} · ${currentClass.group_count||4} tổ · ${currentClass.is_archived||currentClass.is_locked?'🔒 Đã khóa':'🟢 Đang hoạt động'}</div>`:'<span class="muted">Chưa chọn lớp.</span>';
  };
  window.myCreateClass=async function(){
@@ -3552,6 +3553,96 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   if((x.is_archived||x.is_locked)&&!confirm('Lớp này đã khóa. Vào chế độ chỉ xem?'))return;
   currentClass=x;currentStateKey=x.state_key;localStorage.setItem('bibi_current_class_db_id',x.id);localStorage.setItem('bibi_current_class_key',x.id);
   await loadCloudState();setUserUi();renderAll();myRefreshClasses();notice(`📌 Đang quản lý: ${x.class_name} – ${x.year}.`);showPage('dashboard');
+ };
+
+ /* ===== XÓA LỚP / XÓA NĂM HỌC (chỉ Admin hệ thống) =====
+    Gọi hàm SQL admin_delete_class / admin_delete_academic_year (xem file supabase_xoa_lop_nam_hoc.sql).
+    Hàm SQL tự kiểm tra quyền Admin ở phía máy chủ, nên không thể bị lách bằng cách sửa code trình duyệt. */
+ window.myRenderYearList=function(){
+  const box=document.getElementById('myYearList');if(!box)return;
+  const map=new Map();
+  availableClasses.forEach(c=>{const yid=c.academic_years?.id;if(!yid)return;if(!map.has(yid))map.set(yid,{id:yid,name:c.year,locked:c.is_locked,classes:[]});map.get(yid).classes.push(c.class_name)});
+  const years=[...map.values()].sort((a,b)=>String(b.name).localeCompare(String(a.name)));
+  box.innerHTML=years.length?years.map(y=>`<div class="multi-year-item"><div><strong>Năm học ${esc(y.name)}</strong><div style="color:#64748b;font-size:12px">${y.classes.length} lớp: ${esc(y.classes.join(', '))} · ${y.locked?'🔒 Đã khóa':'🟢 Đang hoạt động'}</div></div><button type="button" class="btn small danger" onclick="myDeleteAcademicYear('${esc(y.id)}')">🗑️ Xóa năm học</button></div>`).join(''):'<div class="empty">Chưa có năm học.</div>';
+ };
+ /* Sau khi xóa: chọn lại một lớp còn tồn tại để app không trỏ vào lớp đã bị xóa */
+ async function afterDeleteReselect(deletedClassIds){
+  await loadAvailableClasses(currentUser.id);
+  if(currentClass&&deletedClassIds.includes(currentClass.id)){
+   const next=availableClasses.find(x=>!x.is_archived&&!x.is_locked)||availableClasses[0];
+   if(next){
+    currentClass=next;currentStateKey=next.state_key;
+    localStorage.setItem('bibi_current_class_db_id',next.id);localStorage.setItem('bibi_current_class_key',next.id);
+    await loadCloudState();setUserUi();renderAll();
+   }
+  }
+  myRefreshClasses();
+ }
+ /* Tài khoản (GVCN/cán sự) chỉ thuộc các lớp vừa xóa sẽ không đăng nhập vào lớp nào được nữa -> hỏi Admin có xóa luôn không */
+ async function offerDeleteOrphanUsers(userIds){
+  try{
+   if(!userIds.length)return 0;
+   const {data:still}=await sb.from('class_user_roles').select('user_id').in('user_id',userIds);
+   const keep=new Set((still||[]).map(r=>r.user_id));
+   const orphanIds=userIds.filter(id=>!keep.has(id)&&id!==currentUser.id);
+   if(!orphanIds.length)return 0;
+   const {data:profs}=await sb.from('profiles').select('id,username,name,role').in('id',orphanIds);
+   const list=(profs||[]).filter(u=>u.role!=='admin');
+   if(!list.length)return 0;
+   if(!confirm(`Có ${list.length} tài khoản không còn thuộc lớp nào sau khi xóa:\n\n${list.map(u=>'• '+(u.username||'')+' ('+(u.name||'')+')').join('\n')}\n\nXóa luôn các tài khoản này khỏi hệ thống? (Bấm Hủy để giữ lại)`))return 0;
+   let ok=0;
+   for(const u of list){try{await callManageUser({action:'delete',user_id:u.id,class_id:null});ok++}catch(e){console.warn('Không xóa được tài khoản',u.username,e)}}
+   return ok;
+  }catch(e){console.warn(e);return 0}
+ }
+ function friendlyDeleteError(e){
+  const m=String(e?.message||e||'');
+  if(/Could not find the function|does not exist|PGRST202/i.test(m))return 'Chưa cài hàm xóa trên Supabase. Hãy chạy file supabase_xoa_lop_nam_hoc.sql trong SQL Editor rồi thử lại.';
+  return m;
+ }
+ window.myDeleteClass=async function(classId){
+  if(!isSystemAdmin()){alert('Chỉ Admin hệ thống mới được xóa lớp.');return}
+  const x=classId?availableClasses.find(v=>v.id===classId):currentClass;
+  if(!x){notice('Chưa chọn lớp cần xóa.',true);return}
+  if(availableClasses.length<=1){alert('Không thể xóa lớp cuối cùng. Hãy tạo lớp mới trước rồi mới xóa lớp này.');return}
+  if(!confirm(`XÓA VĨNH VIỄN lớp ${x.class_name} – năm học ${x.year}?\n\nToàn bộ dữ liệu của lớp (học sinh, điểm danh, rèn luyện, thi đua, thông báo…) sẽ bị xóa khỏi Supabase và KHÔNG thể khôi phục.\nHãy sao lưu trước nếu cần.`))return;
+  const typed=prompt(`Để xác nhận, gõ đúng tên lớp: ${x.class_name}`);
+  if(typed===null)return;
+  if(typed.trim().toLowerCase()!==String(x.class_name).trim().toLowerCase()){notice('❌ Tên lớp nhập không khớp. Đã hủy xóa.',true);return}
+  notice('⏳ Đang xóa lớp...');
+  try{
+   const {data:roles}=await sb.from('class_user_roles').select('user_id').eq('class_id',x.id);
+   const userIds=[...new Set((roles||[]).map(r=>r.user_id).filter(Boolean))];
+   const {error}=await sb.rpc('admin_delete_class',{p_class_id:x.id});
+   if(error)throw error;
+   try{localStorage.removeItem(DATA_PREFIX+x.state_key)}catch(e){}
+   const removed=await offerDeleteOrphanUsers(userIds);
+   await afterDeleteReselect([x.id]);
+   notice(`✅ Đã xóa lớp ${x.class_name} – ${x.year}.`+(removed?` Đã xóa thêm ${removed} tài khoản không còn lớp.`:''));
+  }catch(e){console.error(e);notice('❌ Không xóa được lớp: '+friendlyDeleteError(e),true)}
+ };
+ window.myDeleteAcademicYear=async function(yearId){
+  if(!isSystemAdmin()){alert('Chỉ Admin hệ thống mới được xóa năm học.');return}
+  const classes=availableClasses.filter(c=>c.academic_years?.id===yearId);
+  if(!classes.length){notice('Không tìm thấy năm học này.',true);return}
+  const yname=classes[0].year;
+  if(availableClasses.length-classes.length<1){alert('Không thể xóa năm học này vì hệ thống sẽ không còn lớp nào. Hãy tạo lớp ở năm học khác trước.');return}
+  if(!confirm(`XÓA VĨNH VIỄN năm học ${yname}?\n\nSẽ xóa ${classes.length} lớp: ${classes.map(c=>c.class_name).join(', ')} cùng toàn bộ dữ liệu của các lớp này.\nKhông thể khôi phục. Hãy sao lưu trước nếu cần.`))return;
+  const typed=prompt(`Để xác nhận, gõ đúng năm học: ${yname}`);
+  if(typed===null)return;
+  if(typed.trim()!==String(yname).trim()){notice('❌ Năm học nhập không khớp. Đã hủy xóa.',true);return}
+  notice('⏳ Đang xóa năm học...');
+  try{
+   const ids=classes.map(c=>c.id);
+   const {data:roles}=await sb.from('class_user_roles').select('user_id').in('class_id',ids);
+   const userIds=[...new Set((roles||[]).map(r=>r.user_id).filter(Boolean))];
+   const {error}=await sb.rpc('admin_delete_academic_year',{p_year_id:yearId});
+   if(error)throw error;
+   classes.forEach(c=>{try{localStorage.removeItem(DATA_PREFIX+c.state_key)}catch(e){}});
+   const removed=await offerDeleteOrphanUsers(userIds);
+   await afterDeleteReselect(ids);
+   notice(`✅ Đã xóa năm học ${yname} (${classes.length} lớp).`+(removed?` Đã xóa thêm ${removed} tài khoản không còn lớp.`:''));
+  }catch(e){console.error(e);notice('❌ Không xóa được năm học: '+friendlyDeleteError(e),true)}
  };
  window.myArchiveCurrentClass=async function(){
   if(!isSystemAdmin()){alert('Chỉ Admin hệ thống mới được khóa lớp.');return}
