@@ -797,6 +797,10 @@ body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!i
 .ah-tile{display:flex;flex-direction:column;gap:6px;text-align:left;border:1px solid #e4edf5;background:#fff;border-radius:16px;padding:16px;cursor:pointer;transition:transform .15s,box-shadow .15s;font:inherit;color:inherit}
 .ah-tile:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(30,64,175,.12)}
 .ah-tile .ic{font-size:26px}.ah-tile strong{font-size:15px}.ah-tile small{color:#64748b;font-size:12.5px;line-height:1.4}
+.hub-nav{display:flex;gap:8px;overflow-x:auto;padding:0 0 12px;margin:0 0 14px;border-bottom:1px solid #e4edf5;-webkit-overflow-scrolling:touch}
+.hub-nav.hidden{display:none!important}
+.hub-nav button{flex:0 0 auto;border:1px solid #cbd5e1;background:#fff;border-radius:999px;padding:9px 16px;font:inherit;font-weight:700;font-size:13.5px;color:#475569;cursor:pointer;white-space:nowrap}
+.hub-nav button:hover{background:#eef4ff}.hub-nav button.active{background:#2563eb;border-color:#2563eb;color:#fff}
 .mc-tabs{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}
 .mc-tab{border:1px solid #cbd5e1;background:#fff;border-radius:999px;padding:9px 18px;font:inherit;font-weight:700;color:#475569;cursor:pointer}
 .mc-tab.active{background:#2563eb;border-color:#2563eb;color:#fff}
@@ -855,6 +859,13 @@ body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!i
       </div>
     </header>
     <div class="content">
+      <div id="hubNavBar" class="hub-nav hub-only hidden" role="navigation" aria-label="Điều hướng quản trị">
+        <button type="button" data-hub="adminhome" onclick="showPage('adminhome')">🛡️ Trang chủ Admin</button>
+        <button type="button" data-hub="years" onclick="adminHubGo('years')">🗓️ Năm học</button>
+        <button type="button" data-hub="classes" onclick="adminHubGo('classes')">🏫 Lớp</button>
+        <button type="button" data-hub="users" onclick="showPage('users')">🔐 Tài khoản & phân quyền</button>
+        <button type="button" onclick="adminHubOpenClassChooser()">🚪 Vào lớp làm việc</button>
+      </div>
 
       <section id="page-adminhome" class="page">
         <div class="ah-hero">
@@ -879,7 +890,7 @@ body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!i
       </section>
 
       <section id="page-classes" class="page">
-        <div class="page-head"><div><h2>🏫 Quản lý lớp & năm học</h2><div class="muted">Chỉ Admin hệ thống. Tách riêng hai phần: Năm học và Lớp.</div></div><div class="actions"><button class="btn secondary" type="button" onclick="myRefreshClasses()">🔄 Làm mới</button></div></div>
+        <div class="page-head"><div><h2>🏫 Quản lý lớp & năm học</h2><div class="muted">Chỉ Admin hệ thống. Tách riêng hai phần: Năm học và Lớp.</div></div><div class="actions"><button class="btn secondary hub-only hidden" type="button" onclick="showPage('adminhome')">← Trang chủ Admin</button><button class="btn secondary" type="button" onclick="myRefreshClasses()">🔄 Làm mới</button></div></div>
         <div class="mc-tabs">
           <button id="mcTabYears" type="button" class="mc-tab active" onclick="mySetManageTab('years')">🗓️ Năm học</button>
           <button id="mcTabClasses" type="button" class="mc-tab" onclick="mySetManageTab('classes')">🏫 Lớp</button>
@@ -1162,7 +1173,7 @@ body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!i
       </section>
 
       <section id="page-users" class="page">
-        <div class="page-head"><div><h2>Tài khoản & phân quyền</h2><div class="muted">Admin và GVCN tạo tài khoản cán bộ lớp, cấp quyền đúng theo lớp.</div></div></div>
+        <div class="page-head"><div><h2>Tài khoản & phân quyền</h2><div class="muted">Admin và GVCN tạo tài khoản cán bộ lớp, cấp quyền đúng theo lớp.</div></div><div class="actions"><button class="btn secondary hub-only hidden" type="button" onclick="showPage('adminhome')">← Trang chủ Admin</button></div></div>
         <div class="notice hub-only hidden" style="margin-bottom:12px">Tại trang quản trị, Admin tạo tài khoản <b>GVCN</b> và cấp quyền vào lớp. Tài khoản Lớp trưởng/Lớp phó/Tổ trưởng được tạo khi vào lớp (cần chọn học sinh trong lớp) hoặc để GVCN tự tạo.</div>
         <div class="card" style="margin-bottom:16px">
            <div class="form-grid">
@@ -1499,6 +1510,12 @@ function enterAdminHub(){
   showPage('adminhome');
 }
 function goAdminHub(){if(isSystemAdmin())enterAdminHub()}
+function hubNavSync(){
+  const bar=document.getElementById('hubNavBar');if(!bar)return;
+  const pg=(document.querySelector('.page.active')?.id||'').replace('page-','');
+  const tab=document.getElementById('mcTabClasses')?.classList.contains('active')?'classes':'years';
+  bar.querySelectorAll('button[data-hub]').forEach(b=>{const k=b.dataset.hub;b.classList.toggle('active',(k==='adminhome'&&pg==='adminhome')||(k==='users'&&pg==='users')||(pg==='classes'&&k===tab))});
+}
 function leaveHubMode(){
   adminHubMode=false;
   document.body.classList.remove('cm-admin-hub');
@@ -1643,7 +1660,7 @@ function showPage(name){updateProfile360Access();
    try{renderProfileSelectors();setTimeout(()=>{try{renderProfile()}catch(err){console.error('Lỗi Hồ sơ 360°:',err)}},0)}
    catch(err){console.error('Lỗi khởi tạo Hồ sơ 360°:',err);const box=document.getElementById('profileContent');if(box)box.innerHTML='<div class="empty">Không thể khởi tạo Hồ sơ 360°. Vui lòng chọn lại học sinh.</div>';}
 }if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule(); if(name==='parentmsg'){try{renderParentMsg()}catch(err){console.error('Lỗi Tin nhắn phụ huynh:',err)}} if(name==='settings'){try{renderConductRulesSettings();renderConductGuideSettings();populateScheduleWeekSelect()}catch(e){console.warn(e)}}
- if(name==='adminhome'){try{adminHubRender()}catch(e){console.error(e)}} if(name==='classes'){try{myRefreshClasses()}catch(e){console.error(e)}}
+ try{hubNavSync()}catch(e){} if(name==='adminhome'){try{adminHubRender()}catch(e){console.error(e)}} if(name==='classes'){try{myRefreshClasses()}catch(e){console.error(e)}}
 }
 function openTodayAttendance(){const dateInput=document.getElementById('attDate');if(dateInput)dateInput.value=today();showPage('attendance')}
 const CM_UTILITY_CATALOG={
@@ -3683,6 +3700,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   $('mcPaneClasses')?.classList.toggle('hidden',mcTab!=='classes');
   $('mcTabYears')?.classList.toggle('active',mcTab==='years');
   $('mcTabClasses')?.classList.toggle('active',mcTab==='classes');
+  try{hubNavSync()}catch(e){}
  };
  window.adminHubGo=function(tab){showPage('classes');mySetManageTab(tab)};
 
