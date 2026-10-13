@@ -784,6 +784,23 @@ select option{background:#fff!important;color:#202124!important}
   </div>
 </div>
 
+<style id="admin-hub-css">
+body.cm-admin-hub .nav>*:not(.hub-only){display:none!important}
+body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!important}
+.ah-hero{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:22px 24px;border-radius:20px;background:linear-gradient(135deg,#1d4ed8,#4f46e5 60%,#7c3aed);color:#fff;margin-bottom:16px}
+.ah-hero h2{margin:2px 0 4px;font-size:26px;color:#fff}.ah-hero p{margin:0;opacity:.9;font-size:13px}.ah-hello{font-size:13px;opacity:.85}
+.ah-hero .btn{background:#fff;color:#1d4ed8;font-weight:700}
+.ah-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.ah-stat{background:#fff;border:1px solid #e4edf5;border-radius:16px;padding:14px 16px}
+.ah-stat b{display:block;font-size:28px;line-height:1.1;color:#0f172a}.ah-stat span{font-size:12.5px;color:#64748b}
+.ah-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-bottom:18px}
+.ah-tile{display:flex;flex-direction:column;gap:6px;text-align:left;border:1px solid #e4edf5;background:#fff;border-radius:16px;padding:16px;cursor:pointer;transition:transform .15s,box-shadow .15s;font:inherit;color:inherit}
+.ah-tile:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(30,64,175,.12)}
+.ah-tile .ic{font-size:26px}.ah-tile strong{font-size:15px}.ah-tile small{color:#64748b;font-size:12.5px;line-height:1.4}
+.mc-tabs{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}
+.mc-tab{border:1px solid #cbd5e1;background:#fff;border-radius:999px;padding:9px 18px;font:inherit;font-weight:700;color:#475569;cursor:pointer}
+.mc-tab.active{background:#2563eb;border-color:#2563eb;color:#fff}
+</style>
 <div id="app" class="app hidden">
   <div class="app-brand-banner">
     <div class="app-brand-title"><svg class="cm-brand-cap" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="cmCapRed" x1="12" y1="8" x2="52" y2="49" gradientUnits="userSpaceOnUse"><stop stop-color="#ff5a5f"/><stop offset=".42" stop-color="#e31b2f"/><stop offset="1" stop-color="#950b1c"/></linearGradient><linearGradient id="cmCapGold" x1="12" y1="18" x2="53" y2="39" gradientUnits="userSpaceOnUse"><stop stop-color="#fff3a1"/><stop offset=".48" stop-color="#ffd12a"/><stop offset="1" stop-color="#d69200"/></linearGradient></defs><path d="M3 22 32 8l29 14-29 14L3 22Z"/><path d="M16 29v13c0 7 32 7 32 0V29"/><path class="cm-cap-highlight" d="M13 21 32 12l14 6-20 9Z"/><path d="M57 24v17"/><circle cx="57" cy="43" r="3"/></svg><span>ClassManager Pro</span></div>
@@ -794,7 +811,13 @@ select option{background:#fff!important;color:#202124!important}
   <aside class="sidebar" id="sidebar">
     <div class="brand"></div>
     <div class="nav">
+      <div class="nav-title hub-only hidden">Quản trị hệ thống</div>
+      <button class="hub-only hidden" data-page="adminhome" onclick="showPage('adminhome')">🛡️ Trang chủ Admin</button>
+      <button class="hub-only hidden" data-page="classes" onclick="adminHubGo('years')">🗓️ Quản lý năm học</button>
+      <button class="hub-only hidden" data-page="classes" onclick="adminHubGo('classes')">🏫 Quản lý lớp</button>
+      <button class="hub-only hidden" data-page="users" onclick="showPage('users')">🔐 Tài khoản & phân quyền</button>
       <div class="nav-title">Tổng quan</div>
+      <button class="sysadmin-only" onclick="goAdminHub()">🛡️ Về trang quản trị Admin</button>
       <button data-page="dashboard" onclick="showPage('dashboard')">🏠 Trang chủ</button>
       <button class="admin-only ai-nav-btn" data-page="ai" onclick="showPage('ai')">🤖 Trợ lý AI <span class="ai-nav-badge">AI</span></button>
        <button class="sysadmin-only" data-page="classes" onclick="showPage('classes')">🏫 Quản lý lớp & năm học</button>
@@ -833,23 +856,64 @@ select option{background:#fff!important;color:#202124!important}
     </header>
     <div class="content">
 
+      <section id="page-adminhome" class="page">
+        <div class="ah-hero">
+          <div><div class="ah-hello">Xin chào,</div><h2 id="ahName">Quản trị viên</h2><p>Trang quản trị hệ thống · <span id="ahDate"></span></p></div>
+          <button class="btn" type="button" onclick="adminHubOpenClassChooser()">🚪 Vào một lớp để làm việc</button>
+        </div>
+        <div id="ahBioOffer" class="notice" style="display:none;margin-bottom:14px"></div>
+        <div class="ah-stats">
+          <div class="ah-stat"><b id="ahYears">–</b><span>Năm học</span></div>
+          <div class="ah-stat"><b id="ahClasses">–</b><span>Tổng số lớp</span></div>
+          <div class="ah-stat"><b id="ahActive">–</b><span>Lớp đang hoạt động</span></div>
+          <div class="ah-stat"><b id="ahUsers">–</b><span>Tài khoản · <span id="ahUsersSub"></span></span></div>
+        </div>
+        <h3 style="margin:0 2px 10px">⚙️ Quản trị hệ thống</h3>
+        <div class="ah-tiles">
+          <button type="button" class="ah-tile" onclick="adminHubGo('years')"><span class="ic">🗓️</span><strong>Quản lý năm học</strong><small>Tạo, sửa tên, khóa/mở khóa và xóa năm học.</small></button>
+          <button type="button" class="ah-tile" onclick="adminHubGo('classes')"><span class="ic">🏫</span><strong>Quản lý lớp</strong><small>Tạo, sửa, khóa/mở khóa và xóa lớp trong từng năm học.</small></button>
+          <button type="button" class="ah-tile" onclick="showPage('users')"><span class="ic">🔐</span><strong>Tài khoản & phân quyền</strong><small>Tạo tài khoản GVCN, cấp quyền vào lớp, đặt lại mật khẩu, xóa tài khoản.</small></button>
+          <button type="button" class="ah-tile" onclick="adminHubOpenClassChooser()"><span class="ic">🚪</span><strong>Vào lớp làm việc</strong><small>Mở sổ chủ nhiệm của một lớp cụ thể (điểm danh, rèn luyện, báo cáo…).</small></button>
+        </div>
+        <div class="card"><h3>📚 Lớp gần đây</h3><div class="muted">Bấm "Vào lớp" để mở sổ chủ nhiệm của lớp. Muốn quay lại trang này, chọn "Về trang quản trị Admin" trong menu.</div><div id="ahRecent" class="multi-year-list"></div></div>
+      </section>
+
       <section id="page-classes" class="page">
-        <div class="page-head"><div><h2>🏫 Quản lý lớp & năm học</h2><div class="muted">Tài khoản Admin hệ thống tạo, khóa và quản lý nhiều lớp, nhiều năm học.</div></div></div>
-        <div class="grid two">
-          <div class="card"><h3>➕ Tạo lớp học mới</h3>
+        <div class="page-head"><div><h2>🏫 Quản lý lớp & năm học</h2><div class="muted">Chỉ Admin hệ thống. Tách riêng hai phần: Năm học và Lớp.</div></div><div class="actions"><button class="btn secondary" type="button" onclick="myRefreshClasses()">🔄 Làm mới</button></div></div>
+        <div class="mc-tabs">
+          <button id="mcTabYears" type="button" class="mc-tab active" onclick="mySetManageTab('years')">🗓️ Năm học</button>
+          <button id="mcTabClasses" type="button" class="mc-tab" onclick="mySetManageTab('classes')">🏫 Lớp</button>
+        </div>
+
+        <div id="mcPaneYears">
+          <div class="card" style="margin-bottom:16px">
+            <h3 id="myYearFormTitle">➕ Tạo năm học mới</h3>
+            <div class="form-grid"><div class="field"><label>Năm học *</label><input id="myYearName" placeholder="Ví dụ: 2027-2028" autocomplete="off"></div></div>
+            <div class="actions" style="margin-top:12px"><button id="myYearSaveBtn" class="btn" type="button" onclick="myYearSave()">➕ Tạo năm học</button><button id="myYearCancelBtn" class="btn secondary hidden" type="button" onclick="myYearCancelEdit()">Hủy sửa</button></div>
+            <div id="myYearStatus" class="notice" style="display:none;margin-top:12px"></div>
+          </div>
+          <div class="card"><h3>📋 Danh sách năm học</h3><div class="muted">Khóa năm học: mọi lớp trong năm đó chỉ còn tra cứu. Xóa năm học sẽ xóa <strong>toàn bộ lớp</strong> thuộc năm học và dữ liệu của các lớp (không thể hoàn tác).</div>
+            <div class="table-wrap"><table class="table" style="min-width:560px"><thead><tr><th>Năm học</th><th>Số lớp</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="myYearBody"></tbody></table></div>
+          </div>
+        </div>
+
+        <div id="mcPaneClasses" class="hidden">
+          <div class="card" style="margin-bottom:16px">
+            <h3 id="myClassFormTitle">➕ Tạo lớp mới</h3>
             <div class="form-grid">
-              <div class="field"><label>Tên lớp *</label><input id="myClassName" placeholder="Ví dụ: 10A3"></div>
-              <div class="field"><label>Năm học *</label><input id="myAcademicYear" placeholder="2027-2028"></div>
+              <div class="field"><label>Năm học *</label><select id="myClassYear"></select></div>
+              <div class="field"><label>Tên lớp *</label><input id="myClassName" placeholder="Ví dụ: 10A3" autocomplete="off"></div>
               <div class="field"><label>Khối</label><select id="myGrade"><option>10</option><option>11</option><option selected>12</option></select></div>
               <div class="field"><label>Số tổ</label><select id="myGroupCount"><option>3</option><option selected>4</option><option>5</option><option>6</option></select></div>
             </div>
-            <div class="actions"><button class="btn" type="button" onclick="myCreateClass()">➕ Tạo lớp mới</button><button class="btn secondary" type="button" onclick="myRefreshClasses()">🔄 Làm mới</button></div>
+            <div class="actions" style="margin-top:12px"><button id="myClassSaveBtn" class="btn" type="button" onclick="myClassSave()">➕ Tạo lớp</button><button id="myClassCancelBtn" class="btn secondary hidden" type="button" onclick="myClassCancelEdit()">Hủy sửa</button></div>
             <div id="myClassStatus" class="notice" style="display:none;margin-top:12px"></div>
           </div>
-          <div class="card"><h3>📌 Lớp đang quản lý</h3><div id="myCurrentClass" class="empty">Chưa chọn lớp.</div><div class="actions"><button class="btn warning" type="button" onclick="myArchiveCurrentClass()">🔒 Khóa lớp/năm học</button><button class="btn danger" type="button" onclick="myDeleteClass()">🗑️ Xóa lớp này</button></div></div>
+          <div class="card"><h3>📚 Danh sách lớp</h3><div class="muted">Lớp đã khóa chỉ dùng để tra cứu. Xóa lớp sẽ xóa toàn bộ dữ liệu của lớp (không thể hoàn tác).</div>
+            <div class="form-grid" style="margin:10px 0"><div class="field"><label>Lọc theo năm học</label><select id="myClassFilterYear" onchange="myClassFilterChange()"></select></div></div>
+            <div class="table-wrap"><table class="table" style="min-width:760px"><thead><tr><th>Lớp</th><th>Năm học</th><th>Khối</th><th>Số tổ</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody id="myClassBody"></tbody></table></div>
+          </div>
         </div>
-        <div class="card" style="margin-top:16px"><h3>📚 Danh sách lớp & năm học</h3><div class="muted">Chọn lớp đang hoạt động để quản lý. Lớp đã khóa chỉ dùng để tra cứu.</div><div id="myClassList" class="multi-year-list"></div></div>
-        <div class="card" style="margin-top:16px"><h3>🗓️ Danh sách năm học</h3><div class="muted">Xóa một năm học sẽ xóa <strong>toàn bộ các lớp</strong> thuộc năm học đó cùng dữ liệu của các lớp (không thể hoàn tác).</div><div id="myYearList" class="multi-year-list"></div></div>
       </section>
 
       <section id="page-dashboard" class="page active dashboard-home">
@@ -957,6 +1021,7 @@ select option{background:#fff!important;color:#202124!important}
         <div class="toolbar"><label style="display:flex;align-items:center;gap:6px">Ngày <input type="date" id="attDate" onchange="renderAttendance()"></label><label style="display:flex;align-items:center;gap:6px">Buổi <select id="attSession" onchange="renderAttendance()"><option value="sang">🌅 Học sáng</option><option value="chieu">🌇 Học chiều</option></select></label><select id="attStatusFilter" onchange="renderAttendance()"><option value="">Tất cả</option><option value="present">Đúng giờ</option><option value="late">Đi muộn</option><option value="excused">Nghỉ phép</option><option value="absent">Nghỉ không phép</option></select></div>
         <div id="attLockNotice" class="notice hidden"></div>
         <div id="attNoScheduleNotice" class="notice hidden" style="border-color:#f59e0b;background:#fffbeb"></div>
+        <div class="notice">Hệ thống tự động mặc định tất cả học sinh là <b>"Có mặt"</b>; thầy/cô chỉ cần chọn lại trạng thái với học sinh nghỉ/đi muộn. Điểm danh được tính riêng theo buổi Sáng/Chiều và dùng cho báo cáo tuần/tháng/HKI/HKII/cả năm. GVCN khóa điểm danh vào cuối mỗi buổi học để chốt số liệu. Buổi nào lớp không có lịch học (cấu hình ở Cài đặt) sẽ tự động không điểm danh.</div>
         <div class="table-wrap" id="attendanceTableWrap"><table class="table"><thead><tr><th>STT</th><th>Mã HS</th><th>Họ tên</th><th>Tổ</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead><tbody id="attendanceBody"></tbody></table></div>
       </section>
 
@@ -1098,6 +1163,7 @@ select option{background:#fff!important;color:#202124!important}
 
       <section id="page-users" class="page">
         <div class="page-head"><div><h2>Tài khoản & phân quyền</h2><div class="muted">Admin và GVCN tạo tài khoản cán bộ lớp, cấp quyền đúng theo lớp.</div></div></div>
+        <div class="notice hub-only hidden" style="margin-bottom:12px">Tại trang quản trị, Admin tạo tài khoản <b>GVCN</b> và cấp quyền vào lớp. Tài khoản Lớp trưởng/Lớp phó/Tổ trưởng được tạo khi vào lớp (cần chọn học sinh trong lớp) hoặc để GVCN tự tạo.</div>
         <div class="card" style="margin-bottom:16px">
            <div class="form-grid">
             <div class="field"><label>Vai trò *</label><select id="newRole" onchange="onNewRoleChange()"><option value="gvcn">GVCN (giáo viên chủ nhiệm)</option><option value="loptruong" selected>Lớp trưởng</option><option value="loppho">Lớp phó</option><option value="totruong">Tổ trưởng</option></select><div id="newRoleHint" class="footer-note"></div></div>
@@ -1229,6 +1295,7 @@ select option{background:#fff!important;color:#202124!important}
 
 <script>
 const DATA_PREFIX='QL12A8_DATA_';
+let adminHubMode=false; // true = Admin đang ở trang quản trị, chưa vào lớp nào
 const SUPABASE_URL = 'https://ewbrnzgmivkmddkkolwq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_BKIdnIoQQl4sovkFiWWMEQ_82Yp3Im-';
 const createClient = window.supabase?.createClient;
@@ -1253,7 +1320,7 @@ let state=seed(), currentUser=null, editingStudent=null, availableClasses=[];
 function seed(){return {settings:{teacher:'Nguyễn Văn Hoàng',className:'12A8',year:'2026-2027',groups:4,conductRules:{base:100,good:96,fair:90,pass:85},conductGuide:defaultConductGuide(),weekSchedule:{}},students:[],attendance:{},attendanceLocks:{},scores:{},conduct:[],activity:[],auditLog:[],notifications:[]}}
 function dataKey(){return DATA_PREFIX+(currentStateKey||'12A8-2026-2027')}
 function loadLocalFallback(){try{return JSON.parse(localStorage.getItem(dataKey()))||seed()}catch(e){return seed()}}
-function saveLocal(){localStorage.setItem(dataKey(),JSON.stringify(state))}
+function saveLocal(){if(adminHubMode)return;localStorage.setItem(dataKey(),JSON.stringify(state))}
 function saveData(){saveLocal()}
 function roleCanEdit(){return ['admin','gvcn','loptruong','loppho','to1','to2','to3','to4'].includes(currentUser?.role)}
 /* ===== PHÂN QUYỀN 2 CẤP =====
@@ -1337,8 +1404,7 @@ function setUserUi(){
         : `${getCurrentUserRoleDisplay()} · ${currentClass.class_name} · Năm học ${currentClass.year}`;
       ctx.classList.add('show');
     }else{
-      ctx.textContent='';
-      ctx.classList.remove('show');
+      if(adminHubMode){ctx.textContent='Quản trị viên: '+(currentUser?.name||'')+' · Trang quản trị hệ thống';ctx.classList.add('show');}else{ctx.textContent='';ctx.classList.remove('show');}
     }
   }
   // Sau khi đổi vai trò/lớp, bảo đảm không còn trang quản trị/AI bị mở.
@@ -1363,6 +1429,7 @@ async function login(){
     clearLoginGuard();
     await loadCloudUser(data.user);
     await loadAvailableClasses(data.user.id);
+    if(isSystemAdmin()){enterAdminHub();try{window.cmBioRefreshOffer?.(data.user)}catch(e){console.warn(e)}return}
     if(!availableClasses.length){await sb.auth.signOut({scope:'local'});throw new Error('Tài khoản chưa được cấp quyền vào lớp nào. Hãy liên hệ GVCN.')}
     showClassChooser();
     try{window.cmBioRefreshOffer?.(data.user)}catch(e){console.warn(e)}
@@ -1409,8 +1476,38 @@ function updateClassChooserInfo(){
   if(!x||!e)return;
   e.textContent=`${x.class_name} · ${x.year} · Khối ${x.grade||''} · ${x.group_count||4} tổ${x.is_archived||x.is_locked?' · Chế độ chỉ xem':''}`;
 }
-async function enterSelectedClass(){
-  const id=document.getElementById('loginClassSelect')?.value;const x=availableClasses.find(v=>v.id===id);if(!x)return;
+/* ===== Trang quản trị Admin (không cần vào lớp) ===== */
+function hubApplyUsersUi(on){
+  ['loptruong','loppho','totruong'].forEach(v=>{const o=document.querySelector('#newRole option[value="'+v+'"]');if(o){o.hidden=on;o.disabled=on}});
+  const nr=document.getElementById('newRole');
+  if(nr){if(on)nr.value='gvcn';else if(nr.value==='gvcn'&&!isSystemAdmin())nr.value='loptruong'}
+  try{onNewRoleChange()}catch(e){}
+}
+function enterAdminHub(){
+  adminHubMode=true;currentClass=null;
+  try{unsubscribeClassRealtime()}catch(e){}
+  try{state=seed()}catch(e){}
+  try{hideCloudUpdateBanner()}catch(e){}
+  try{localStorage.setItem('cm_admin_mode','hub')}catch(e){}
+  document.body.classList.add('cm-admin-hub');
+  document.querySelectorAll('.hub-only').forEach(x=>x.classList.remove('hidden'));
+  hubApplyUsersUi(true);
+  document.getElementById('classChooser')?.classList.remove('show');
+  document.getElementById('loginScreen')?.classList.add('hidden');
+  document.getElementById('app')?.classList.remove('hidden');
+  setUserUi();setSidebarHidden(true);
+  showPage('adminhome');
+}
+function goAdminHub(){if(isSystemAdmin())enterAdminHub()}
+function leaveHubMode(){
+  adminHubMode=false;
+  document.body.classList.remove('cm-admin-hub');
+  document.querySelectorAll('.hub-only').forEach(x=>x.classList.add('hidden'));
+  try{hubApplyUsersUi(false)}catch(e){}
+}
+async function enterSelectedClass(forcedId){
+  const id=forcedId||document.getElementById('loginClassSelect')?.value;const x=availableClasses.find(v=>v.id===id);if(!x)return;
+  leaveHubMode();try{localStorage.setItem('cm_admin_mode','class')}catch(e){}
   currentClass=x; currentStateKey=x.state_key;
   localStorage.setItem('bibi_current_class_db_id',x.id);localStorage.setItem('bibi_current_class_key',x.id);
   await loadCloudState();
@@ -1426,6 +1523,7 @@ async function enterSelectedClass(){
   setSidebarHidden(true);
 }
 function cancelClassEntry(){
+  if(adminHubMode&&isSystemAdmin()){document.getElementById('classChooser')?.classList.remove('show');return}
   document.getElementById('classChooser')?.classList.remove('show');
   sb?.auth.signOut({scope:'local'});currentUser=null;currentClass=null;availableClasses=[];
   setLoginStatus('Bạn đã hủy chọn lớp.');
@@ -1463,7 +1561,7 @@ async function resolveCloudConflict(serverVersion){
   }
 }
 async function pushCloud(){
-  if(!currentStateKey||!currentUser)return false;
+  if(adminHubMode||!currentStateKey||!currentUser)return false;
   // Xếp hàng các lượt ghi trong cùng trình duyệt để một bản ghi nhật ký không ghi đè lượt điểm danh vừa lưu.
   const stateSnapshot=JSON.parse(JSON.stringify(state)), stateKey=currentStateKey, classId=currentClass?.id, userId=currentUser.id;
   const write=async()=>{try{
@@ -1493,10 +1591,10 @@ async function pushCloud(){
 }
 async function logout(){
   unsubscribeClassRealtime();
-  const finish=()=>{currentUser=null;currentClass=null;availableClasses=[];currentStateKey='12A8-2026-2027';try{localStorage.removeItem('bibi_current_class_db_id');localStorage.removeItem('bibi_current_class_key')}catch(e){};document.getElementById('app')?.classList.add('hidden');document.getElementById('classChooser')?.classList.remove('show');document.getElementById('loginScreen')?.classList.remove('hidden');document.getElementById('appClassContext')?.classList.remove('show');const p=document.getElementById('loginPass');if(p)p.value='';try{setSidebarHidden(false)}catch(e){};setLoginStatus('✅ Đã đăng xuất. Vui lòng đăng nhập lại.','ok')};
+  const finish=()=>{try{leaveHubMode()}catch(e){}try{localStorage.removeItem('cm_admin_mode')}catch(e){}currentUser=null;currentClass=null;availableClasses=[];currentStateKey='12A8-2026-2027';try{localStorage.removeItem('bibi_current_class_db_id');localStorage.removeItem('bibi_current_class_key')}catch(e){};document.getElementById('app')?.classList.add('hidden');document.getElementById('classChooser')?.classList.remove('show');document.getElementById('loginScreen')?.classList.remove('hidden');document.getElementById('appClassContext')?.classList.remove('show');const p=document.getElementById('loginPass');if(p)p.value='';try{setSidebarHidden(false)}catch(e){};setLoginStatus('✅ Đã đăng xuất. Vui lòng đăng nhập lại.','ok')};
   try{if(sb?.auth)await Promise.race([sb.auth.signOut({scope:'local'}),new Promise(r=>setTimeout(r,2500))])}catch(e){console.warn(e)}finally{finish()}
 }
-if(sb)sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){currentUser=null;currentClass=null;availableClasses=[];document.getElementById('aiFloatingBtn')?.classList.add('hidden');document.getElementById('app')?.classList.add('hidden');document.getElementById('loginScreen')?.classList.remove('hidden');document.getElementById('appClassContext')?.classList.remove('show')}});
+if(sb)sb.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){try{leaveHubMode()}catch(e){}currentUser=null;currentClass=null;availableClasses=[];document.getElementById('aiFloatingBtn')?.classList.add('hidden');document.getElementById('app')?.classList.add('hidden');document.getElementById('loginScreen')?.classList.remove('hidden');document.getElementById('appClassContext')?.classList.remove('show')}});
 
 function today(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
@@ -1521,8 +1619,10 @@ function toggleSidebar(){
  const hidden=sidebar.classList.contains('menu-hidden');
  setSidebarHidden(!hidden);
 }
-const titles={dashboard:'Trang chủ',ai:'Trợ lý AI',classes:'Quản lý lớp & năm học',students:'Học sinh',attendance:'Chuyên cần',conduct:'Rèn luyện',competition:'Thi đua & Theo dõi',reports:'Báo cáo tổng hợp',parentmsg:'Soạn tin nhắn phụ huynh',smart:'Phân tích thông minh',digital:'Số hóa & Nhật ký',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
+const titles={adminhome:'Trang chủ Admin',dashboard:'Trang chủ',ai:'Trợ lý AI',classes:'Quản lý lớp & năm học',students:'Học sinh',attendance:'Chuyên cần',conduct:'Rèn luyện',competition:'Thi đua & Theo dõi',reports:'Báo cáo tổng hợp',parentmsg:'Soạn tin nhắn phụ huynh',smart:'Phân tích thông minh',digital:'Số hóa & Nhật ký',profile:'Hồ sơ học sinh',excel:'Excel / Sao lưu',users:'Tài khoản & phân quyền',settings:'Cài đặt'};
 function showPage(name){updateProfile360Access();
+ if(adminHubMode&&!['adminhome','classes','users'].includes(name))name='adminhome';
+ if(name==='adminhome'&&!adminHubMode)name='dashboard';
  if(name==='classes'&&!isSystemAdmin()){alert('🔒 Chức năng này chỉ dành cho Admin hệ thống.');return}
  if(['excel','ai','settings','smart','digital','parentmsg','users'].includes(name)&&!isAdmin()){alert('Chỉ GVCN/Admin được truy cập chức năng này.');return}
   if(name==='profile'&&!currentUser){alert('Vui lòng đăng nhập để xem Hồ sơ học sinh 360°.');return}
@@ -1543,6 +1643,7 @@ function showPage(name){updateProfile360Access();
    try{renderProfileSelectors();setTimeout(()=>{try{renderProfile()}catch(err){console.error('Lỗi Hồ sơ 360°:',err)}},0)}
    catch(err){console.error('Lỗi khởi tạo Hồ sơ 360°:',err);const box=document.getElementById('profileContent');if(box)box.innerHTML='<div class="empty">Không thể khởi tạo Hồ sơ 360°. Vui lòng chọn lại học sinh.</div>';}
 }if(name==='users')renderUsers(); if(name==='smart')renderSmartModule(); if(name==='digital')renderDigitalModule(); if(name==='parentmsg'){try{renderParentMsg()}catch(err){console.error('Lỗi Tin nhắn phụ huynh:',err)}} if(name==='settings'){try{renderConductRulesSettings();renderConductGuideSettings();populateScheduleWeekSelect()}catch(e){console.warn(e)}}
+ if(name==='adminhome'){try{adminHubRender()}catch(e){console.error(e)}} if(name==='classes'){try{myRefreshClasses()}catch(e){console.error(e)}}
 }
 function openTodayAttendance(){const dateInput=document.getElementById('attDate');if(dateInput)dateInput.value=today();showPage('attendance')}
 const CM_UTILITY_CATALOG={
@@ -1620,7 +1721,7 @@ function renderAll(){
 }
 
 async function refreshCloud(silent=false){
-  if(!currentUser||!currentStateKey)return;
+  if(adminHubMode||!currentUser||!currentStateKey)return;
   const {data,error}=await sb.from('class_state').select('data,updated_at,version').eq('class_id',currentStateKey).maybeSingle();
   if(error){if(!silent)alert('Không đồng bộ được: '+error.message);return}
   if(data?.data){
@@ -1639,7 +1740,7 @@ async function refreshCloud(silent=false){
 let classRealtimeChannel=null, lastOwnPushAt=0;
 function subscribeClassRealtime(){
   try{
-    if(typeof sb==='undefined'||!sb?.channel||!currentStateKey)return;
+    if(typeof sb==='undefined'||!sb?.channel||adminHubMode||!currentStateKey)return;
     unsubscribeClassRealtime();
     classRealtimeChannel=sb.channel('class_state_'+currentStateKey)
       .on('postgres_changes',{event:'UPDATE',schema:'public',table:'class_state',filter:'class_id=eq.'+currentStateKey},payload=>{
@@ -3523,62 +3624,251 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
 
 <script id="bibi-v4-class-module">
 (function(){
+ const $=id=>document.getElementById(id);
  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
- const notice=(msg,bad=false)=>{const e=document.getElementById('myClassStatus');if(e){e.style.display='block';e.className='notice'+(bad?' danger':'');e.textContent=msg}};
- window.myRefreshClasses=async function(){
-  try{await loadAvailableClasses(currentUser.id)}catch(e){notice('❌ Không tải được lớp: '+e.message,true);return}
-  const list=document.getElementById('myClassList');if(!list)return;
-  const id=currentClass?.id;
-  list.innerHTML=availableClasses.length?availableClasses.map(x=>`<div class="multi-year-item ${x.id===id?'active':''}"><div><strong>${esc(x.class_name)}</strong> – ${esc(x.year)}<div style="color:#64748b;font-size:12px">Khối ${esc(x.grade||'')} · ${x.group_count||4} tổ · ${x.is_archived||x.is_locked?'🔒 Đã khóa':'🟢 Đang hoạt động'}</div></div><button type="button" class="btn small ${x.id===id?'secondary':''}" onclick="mySwitchClass('${x.id}')">${x.id===id?'✓ Đang chọn':'Chọn lớp'}</button> <button type="button" class="btn small danger" onclick="myDeleteClass('${x.id}')">🗑️ Xóa</button></div>`).join(''):'<div class="empty">Chưa có lớp.</div>';
-  if(typeof myRenderYearList==='function')myRenderYearList();
-  const cc=document.getElementById('myCurrentClass');if(cc)cc.innerHTML=currentClass?`<strong style="font-size:20px">${esc(currentClass.class_name)}</strong> – ${esc(currentClass.year)}<div class="muted">Khối ${esc(currentClass.grade||'')} · ${currentClass.group_count||4} tổ · ${currentClass.is_archived||currentClass.is_locked?'🔒 Đã khóa':'🟢 Đang hoạt động'}</div>`:'<span class="muted">Chưa chọn lớp.</span>';
- };
- window.myCreateClass=async function(){
-  if(!isSystemAdmin()){alert('Chỉ Admin hệ thống mới được tạo lớp.');return}
-  const name=document.getElementById('myClassName')?.value.trim(),year=document.getElementById('myAcademicYear')?.value.trim(),grade=document.getElementById('myGrade')?.value||'',groups=Number(document.getElementById('myGroupCount')?.value||4);
-  if(!name||!year){notice('❌ Vui lòng nhập Tên lớp và Năm học.',true);return}
+ const BAD='background:#fef2f2;border:1px solid #fecaca;color:#991b1b;';
+ let mcYears=[],mcEditYearId=null,mcEditClassId=null,mcTab='years',mcProfiles=null;
+ function note(id,msg,bad){const e=$(id);if(!e)return;e.className='notice';e.style.cssText='display:block;margin-top:12px;'+(bad?BAD:'');e.textContent=msg}
+ function needAdmin(){if(typeof isSystemAdmin==='function'&&isSystemAdmin())return true;alert('Chỉ Admin hệ thống mới được thực hiện thao tác này.');return false}
+ const normYear=s=>{const m=String(s||'').trim().match(/^(\d{4})\s*[-–\/]\s*(\d{4})$/);return m&&Number(m[2])===Number(m[1])+1?m[1]+'-'+m[2]:null};
+ function friendlyErr(e){
+  const m=String(e?.message||e||'');
+  if(/Could not find the function|does not exist|PGRST202/i.test(m))return 'Chưa cài hàm xóa trên Supabase. Hãy chạy file supabase_xoa_lop_nam_hoc.sql trong SQL Editor rồi thử lại.';
+  if(/row-level security|permission denied/i.test(m))return 'Supabase từ chối quyền ghi (RLS). Hãy kiểm tra chính sách của Admin trên bảng liên quan.';
+  return m;
+ }
+ const classesOf=yid=>availableClasses.filter(c=>c.academic_years?.id===yid);
+ async function loadYears(){
   try{
-   const yr=await sb.from('academic_years').upsert({name:year,is_locked:false},{onConflict:'name'}).select('id,name').single();if(yr.error)throw yr.error;
-   const stateKey=name+'-'+year;
-   const cr=await sb.from('classes').insert({academic_year_id:yr.data.id,class_name:name,grade:Number(grade)||null,group_count:groups,state_key:stateKey,is_archived:false,homeroom_teacher_id:currentUser.id}).select('id,class_name,grade,group_count,is_archived,state_key,academic_years(name,is_locked)').single();
-   if(cr.error)throw cr.error;
-   const x={...cr.data,year:cr.data.academic_years?.name||year,is_locked:cr.data.academic_years?.is_locked||false};
-   await sb.from('class_user_roles').upsert({user_id:currentUser.id,class_id:x.id,role:'admin',scope:'Toàn lớp'},{onConflict:'user_id,class_id'});
-   await sb.from('class_state').upsert({class_id:stateKey,data:{settings:{teacher:currentUser.name,className:name,year,groups},students:[],attendance:{},scores:{},conduct:[],activity:[]},updated_by:currentUser.id,version:1},{onConflict:'class_id'});
-   availableClasses.unshift(x);currentClass=x;currentStateKey=stateKey;currentStateVersion=1;state=loadLocalFallback();state.settings={teacher:currentUser.name,className:name,year,groups};saveLocal();setUserUi();myRefreshClasses();renderAll();subscribeClassRealtime();notice(`✅ Đã tạo ${name} – ${year}.`);
-  }catch(e){console.error(e);notice('❌ Không tạo được lớp: '+(e.message||e),true)}
+   const {data,error}=await sb.from('academic_years').select('id,name,is_locked').order('name',{ascending:false});
+   if(error)throw error;mcYears=data||[];
+  }catch(e){
+   console.warn('Không tải được academic_years, dùng dữ liệu từ danh sách lớp:',e);
+   const m=new Map();availableClasses.forEach(c=>{const y=c.academic_years;if(y?.id&&!m.has(y.id))m.set(y.id,{id:y.id,name:y.name,is_locked:!!y.is_locked})});
+   mcYears=[...m.values()].sort((a,b)=>String(b.name).localeCompare(String(a.name)));
+  }
+ }
+ /* Đồng bộ thông tin lớp/năm học vào dữ liệu sổ (class_state.data.settings) để tên hiển thị luôn khớp */
+ async function syncSettings(cls,patch){
+  try{
+   const {data,error}=await sb.from('class_state').select('data,version').eq('class_id',cls.state_key).maybeSingle();
+   if(error||!data)return false;
+   const d=data.data||{};d.settings={...(d.settings||{}),...patch};
+   const {data:u,error:e2}=await sb.from('class_state').update({data:d,updated_by:currentUser.id,updated_at:new Date().toISOString(),version:(Number(data.version)||0)+1}).eq('class_id',cls.state_key).eq('version',data.version).select('version');
+   return !e2&&!!u&&u.length>0;
+  }catch(e){console.warn(e);return false}
+ }
+ /* Nếu đang mở đúng lớp bị sửa thì nạp lại để không lệch phiên bản dữ liệu */
+ async function reloadIfCurrent(ids){
+  if(!currentClass||!ids.includes(currentClass.id))return;
+  const fresh=availableClasses.find(c=>c.id===currentClass.id);
+  if(fresh){currentClass=fresh;currentStateKey=fresh.state_key}
+  try{await refreshCloud(true)}catch(e){console.warn(e)}
+  try{setUserUi()}catch(e){}
+ }
+ async function uniqueStateKey(base){
+  let key=base,n=1;
+  while(true){
+   const a=await sb.from('classes').select('id').eq('state_key',key).maybeSingle();
+   const b=await sb.from('class_state').select('class_id').eq('class_id',key).maybeSingle();
+   if(!a.data&&!b.data)return key;
+   n++;key=base+'-'+n;if(n>50)return base+'-'+Date.now().toString(36);
+  }
+ }
+
+ /* ================= TAB ================= */
+ window.mySetManageTab=function(tab){
+  mcTab=tab==='classes'?'classes':'years';
+  $('mcPaneYears')?.classList.toggle('hidden',mcTab!=='years');
+  $('mcPaneClasses')?.classList.toggle('hidden',mcTab!=='classes');
+  $('mcTabYears')?.classList.toggle('active',mcTab==='years');
+  $('mcTabClasses')?.classList.toggle('active',mcTab==='classes');
  };
- window.mySwitchClass=async function(id){
-  const x=availableClasses.find(v=>v.id===id);if(!x)return;
-  if((x.is_archived||x.is_locked)&&!confirm('Lớp này đã khóa. Vào chế độ chỉ xem?'))return;
-  currentClass=x;currentStateKey=x.state_key;localStorage.setItem('bibi_current_class_db_id',x.id);localStorage.setItem('bibi_current_class_key',x.id);
-  await loadCloudState();setUserUi();renderAll();myRefreshClasses();notice(`📌 Đang quản lý: ${x.class_name} – ${x.year}.`);showPage('dashboard');
+ window.adminHubGo=function(tab){showPage('classes');mySetManageTab(tab)};
+
+ /* ================= RENDER ================= */
+ function renderYears(){
+  const body=$('myYearBody');if(!body)return;
+  body.innerHTML=mcYears.length?mcYears.map(y=>{
+   const n=classesOf(y.id).length;
+   return `<tr><td><strong>Năm học ${esc(y.name)}</strong></td><td>${n} lớp</td><td>${y.is_locked?'🔒 Đã khóa':'🟢 Đang hoạt động'}</td><td><div class="actions" style="margin:0"><button type="button" class="btn small secondary" onclick="myYearEdit('${esc(y.id)}')">✏️ Sửa</button><button type="button" class="btn small warning" onclick="myYearToggleLock('${esc(y.id)}')">${y.is_locked?'🔓 Mở khóa':'🔒 Khóa'}</button><button type="button" class="btn small danger" onclick="myDeleteAcademicYear('${esc(y.id)}')">🗑️ Xóa</button></div></td></tr>`}).join(''):'<tr><td colspan="4"><div class="empty">Chưa có năm học nào. Hãy tạo năm học ở form phía trên.</div></td></tr>';
+ }
+ function renderClassForm(){
+  const sel=$('myClassYear');
+  if(sel){
+   const prev=sel.value;
+   const editing=mcEditClassId?availableClasses.find(c=>c.id===mcEditClassId):null;
+   const opts=mcYears.filter(y=>!y.is_locked||(editing&&editing.academic_years?.id===y.id));
+   sel.innerHTML=opts.length?opts.map(y=>`<option value="${esc(y.id)}">${esc(y.name)}${y.is_locked?' (đã khóa)':''}</option>`).join(''):'<option value="">— Chưa có năm học đang hoạt động —</option>';
+   if(prev&&opts.some(y=>y.id===prev))sel.value=prev;
+  }
+  const f=$('myClassFilterYear');
+  if(f){
+   const prev=f.value;
+   f.innerHTML='<option value="">Tất cả năm học</option>'+mcYears.map(y=>`<option value="${esc(y.id)}">${esc(y.name)}</option>`).join('');
+   if(prev&&mcYears.some(y=>y.id===prev))f.value=prev;
+  }
+ }
+ function renderClasses(){
+  const body=$('myClassBody');if(!body)return;
+  const fy=$('myClassFilterYear')?.value||'';
+  const list=availableClasses.filter(c=>!fy||c.academic_years?.id===fy);
+  body.innerHTML=list.length?list.map(x=>{
+   const cur=currentClass&&currentClass.id===x.id;
+   const status=x.is_archived?'🔒 Lớp đã khóa':x.is_locked?'🔒 Năm học đã khóa':'🟢 Đang hoạt động';
+   return `<tr${cur?' style="background:#eff6ff"':''}><td><strong>${esc(x.class_name)}</strong>${cur?' <span class="mini">· đang mở</span>':''}</td><td>${esc(x.year)}</td><td>${esc(x.grade||'')}</td><td>${esc(x.group_count||4)}</td><td>${status}</td><td><div class="actions" style="margin:0"><button type="button" class="btn small" onclick="adminEnterClass('${esc(x.id)}')">🚪 Vào lớp</button><button type="button" class="btn small secondary" onclick="myClassEdit('${esc(x.id)}')">✏️ Sửa</button><button type="button" class="btn small warning" onclick="myClassToggleLock('${esc(x.id)}')">${x.is_archived?'🔓 Mở khóa':'🔒 Khóa'}</button><button type="button" class="btn small danger" onclick="myDeleteClass('${esc(x.id)}')">🗑️ Xóa</button></div></td></tr>`}).join(''):'<tr><td colspan="6"><div class="empty">Chưa có lớp nào'+(fy?' trong năm học này':'')+'.</div></td></tr>';
+ }
+ window.myRefreshClasses=async function(){
+  if(!currentUser||!isSystemAdmin())return;
+  try{await loadAvailableClasses(currentUser.id)}catch(e){note('myClassStatus','❌ Không tải được danh sách lớp: '+friendlyErr(e),true);return}
+  await loadYears();
+  renderYears();renderClassForm();renderClasses();
+  mySetManageTab(mcTab);
+ };
+ window.myClassFilterChange=renderClasses;
+
+ /* ================= NĂM HỌC: TẠO / SỬA / KHÓA / XÓA ================= */
+ function resetYearForm(){
+  mcEditYearId=null;
+  const i=$('myYearName');if(i)i.value='';
+  const t=$('myYearFormTitle');if(t)t.textContent='➕ Tạo năm học mới';
+  const s=$('myYearSaveBtn');if(s)s.textContent='➕ Tạo năm học';
+  $('myYearCancelBtn')?.classList.add('hidden');
+ }
+ window.myYearCancelEdit=function(){resetYearForm();const e=$('myYearStatus');if(e)e.style.display='none'};
+ window.myYearEdit=function(id){
+  const y=mcYears.find(v=>v.id===id);if(!y)return;
+  mcEditYearId=id;
+  $('myYearName').value=y.name;
+  $('myYearFormTitle').textContent='✏️ Sửa năm học '+y.name;
+  $('myYearSaveBtn').textContent='💾 Lưu thay đổi';
+  $('myYearCancelBtn')?.classList.remove('hidden');
+  $('myYearName').focus();
+ };
+ window.myYearSave=async function(){
+  if(!needAdmin())return;
+  const raw=$('myYearName')?.value||'';
+  const name=normYear(raw);
+  if(!name){note('myYearStatus','❌ Năm học phải có dạng 2027-2028 (hai năm liên tiếp).',true);return}
+  const dup=mcYears.find(y=>y.name===name&&y.id!==mcEditYearId);
+  if(dup){note('myYearStatus','❌ Năm học '+name+' đã tồn tại.',true);return}
+  try{
+   if(!mcEditYearId){
+    const r=await sb.from('academic_years').insert({name,is_locked:false}).select('id,name,is_locked').single();
+    if(r.error)throw r.error;
+    resetYearForm();await myRefreshClasses();
+    note('myYearStatus','✅ Đã tạo năm học '+name+'. Bây giờ thầy có thể sang tab "Lớp" để tạo lớp cho năm học này.');
+   }else{
+    const y=mcYears.find(v=>v.id===mcEditYearId);
+    if(y.name===name){resetYearForm();return}
+    const r=await sb.from('academic_years').update({name}).eq('id',mcEditYearId);
+    if(r.error)throw r.error;
+    const cls=classesOf(mcEditYearId);let failed=0;
+    for(const c of cls){if(!(await syncSettings(c,{year:name})))failed++}
+    const ids=cls.map(c=>c.id);
+    resetYearForm();await myRefreshClasses();await reloadIfCurrent(ids);
+    note('myYearStatus','✅ Đã đổi tên năm học thành '+name+'.'+(failed?' ('+failed+' lớp chưa đồng bộ được tên năm học trong sổ, sẽ cập nhật ở lần lưu sau.)':''));
+   }
+  }catch(e){console.error(e);note('myYearStatus','❌ Không lưu được năm học: '+friendlyErr(e),true)}
+ };
+ window.myYearToggleLock=async function(id){
+  if(!needAdmin())return;
+  const y=mcYears.find(v=>v.id===id);if(!y)return;
+  const lock=!y.is_locked;
+  if(!confirm(lock?`Khóa năm học ${y.name}? Tất cả lớp trong năm học này chỉ còn dùng để tra cứu (dữ liệu vẫn được giữ).`:`Mở khóa năm học ${y.name}?`))return;
+  try{
+   const r=await sb.from('academic_years').update({is_locked:lock,locked_at:lock?new Date().toISOString():null}).eq('id',id);
+   if(r.error)throw r.error;
+   await myRefreshClasses();
+   note('myYearStatus',(lock?'🔒 Đã khóa':'🔓 Đã mở khóa')+' năm học '+y.name+'.');
+  }catch(e){note('myYearStatus','❌ Không đổi được trạng thái: '+friendlyErr(e),true)}
  };
 
- /* ===== XÓA LỚP / XÓA NĂM HỌC (chỉ Admin hệ thống) =====
-    Gọi hàm SQL admin_delete_class / admin_delete_academic_year (xem file supabase_xoa_lop_nam_hoc.sql).
-    Hàm SQL tự kiểm tra quyền Admin ở phía máy chủ, nên không thể bị lách bằng cách sửa code trình duyệt. */
- window.myRenderYearList=function(){
-  const box=document.getElementById('myYearList');if(!box)return;
-  const map=new Map();
-  availableClasses.forEach(c=>{const yid=c.academic_years?.id;if(!yid)return;if(!map.has(yid))map.set(yid,{id:yid,name:c.year,locked:c.is_locked,classes:[]});map.get(yid).classes.push(c.class_name)});
-  const years=[...map.values()].sort((a,b)=>String(b.name).localeCompare(String(a.name)));
-  box.innerHTML=years.length?years.map(y=>`<div class="multi-year-item"><div><strong>Năm học ${esc(y.name)}</strong><div style="color:#64748b;font-size:12px">${y.classes.length} lớp: ${esc(y.classes.join(', '))} · ${y.locked?'🔒 Đã khóa':'🟢 Đang hoạt động'}</div></div><button type="button" class="btn small danger" onclick="myDeleteAcademicYear('${esc(y.id)}')">🗑️ Xóa năm học</button></div>`).join(''):'<div class="empty">Chưa có năm học.</div>';
- };
- /* Sau khi xóa: chọn lại một lớp còn tồn tại để app không trỏ vào lớp đã bị xóa */
- async function afterDeleteReselect(deletedClassIds){
-  await loadAvailableClasses(currentUser.id);
-  if(currentClass&&deletedClassIds.includes(currentClass.id)){
-   const next=availableClasses.find(x=>!x.is_archived&&!x.is_locked)||availableClasses[0];
-   if(next){
-    currentClass=next;currentStateKey=next.state_key;
-    localStorage.setItem('bibi_current_class_db_id',next.id);localStorage.setItem('bibi_current_class_key',next.id);
-    await loadCloudState();setUserUi();renderAll();
-   }
-  }
-  myRefreshClasses();
+ /* ================= LỚP: TẠO / SỬA / KHÓA / XÓA ================= */
+ function resetClassForm(){
+  mcEditClassId=null;
+  const n=$('myClassName');if(n)n.value='';
+  const g=$('myGrade');if(g)g.value='12';
+  const c=$('myGroupCount');if(c)c.value='4';
+  const t=$('myClassFormTitle');if(t)t.textContent='➕ Tạo lớp mới';
+  const s=$('myClassSaveBtn');if(s)s.textContent='➕ Tạo lớp';
+  $('myClassCancelBtn')?.classList.add('hidden');
+  renderClassForm();
  }
- /* Tài khoản (GVCN/cán sự) chỉ thuộc các lớp vừa xóa sẽ không đăng nhập vào lớp nào được nữa -> hỏi Admin có xóa luôn không */
+ window.myClassCancelEdit=function(){resetClassForm();const e=$('myClassStatus');if(e)e.style.display='none'};
+ window.myClassEdit=function(id){
+  const x=availableClasses.find(v=>v.id===id);if(!x)return;
+  mcEditClassId=id;renderClassForm();
+  $('myClassName').value=x.class_name;
+  $('myClassYear').value=x.academic_years?.id||'';
+  $('myGrade').value=String(x.grade||12);
+  $('myGroupCount').value=String(x.group_count||4);
+  $('myClassFormTitle').textContent='✏️ Sửa lớp '+x.class_name+' – '+x.year;
+  $('myClassSaveBtn').textContent='💾 Lưu thay đổi';
+  $('myClassCancelBtn')?.classList.remove('hidden');
+  mySetManageTab('classes');
+  $('myClassName').scrollIntoView({behavior:'smooth',block:'center'});
+ };
+ window.myClassSave=async function(){
+  if(!needAdmin())return;
+  const name=($('myClassName')?.value||'').trim();
+  const yid=$('myClassYear')?.value||'';
+  const grade=Number($('myGrade')?.value)||null;
+  const groups=Number($('myGroupCount')?.value||4);
+  const y=mcYears.find(v=>v.id===yid);
+  if(!y){note('myClassStatus','❌ Hãy chọn năm học (nếu chưa có, tạo ở tab "Năm học").',true);return}
+  if(!name){note('myClassStatus','❌ Vui lòng nhập tên lớp.',true);return}
+  const dup=availableClasses.find(c=>c.academic_years?.id===yid&&String(c.class_name).trim().toLowerCase()===name.toLowerCase()&&c.id!==mcEditClassId);
+  if(dup){note('myClassStatus','❌ Lớp '+name+' đã có trong năm học '+y.name+'.',true);return}
+  try{
+   if(!mcEditClassId){
+    const stateKey=await uniqueStateKey(name+'-'+y.name);
+    const cr=await sb.from('classes').insert({academic_year_id:yid,class_name:name,grade,group_count:groups,state_key:stateKey,is_archived:false,homeroom_teacher_id:currentUser.id}).select('id').single();
+    if(cr.error)throw cr.error;
+    const ru=await sb.from('class_user_roles').upsert({user_id:currentUser.id,class_id:cr.data.id,role:'admin',scope:'Toàn lớp'},{onConflict:'user_id,class_id'});
+    if(ru.error)console.warn(ru.error);
+    const cs=await sb.from('class_state').insert({class_id:stateKey,data:{settings:{teacher:currentUser.name,className:name,year:y.name,groups},students:[],attendance:{},scores:{},conduct:[],activity:[]},updated_by:currentUser.id,version:1});
+    if(cs.error)console.warn(cs.error);
+    resetClassForm();await myRefreshClasses();
+    note('myClassStatus','✅ Đã tạo lớp '+name+' – '+y.name+'. Bấm "🚪 Vào lớp" để bắt đầu làm việc với lớp.');
+   }else{
+    const x=availableClasses.find(c=>c.id===mcEditClassId);if(!x)return;
+    const r=await sb.from('classes').update({class_name:name,grade,group_count:groups,academic_year_id:yid}).eq('id',mcEditClassId);
+    if(r.error)throw r.error;
+    const ok=await syncSettings(x,{className:name,year:y.name,groups});
+    const editedId=mcEditClassId;
+    resetClassForm();await myRefreshClasses();await reloadIfCurrent([editedId]);
+    note('myClassStatus','✅ Đã cập nhật lớp '+name+' – '+y.name+'.'+(ok?'':' (Chưa đồng bộ được thông tin vào sổ, sẽ cập nhật ở lần lưu sau.)'));
+   }
+  }catch(e){console.error(e);note('myClassStatus','❌ Không lưu được lớp: '+friendlyErr(e),true)}
+ };
+ window.myClassToggleLock=async function(id){
+  if(!needAdmin())return;
+  const x=availableClasses.find(v=>v.id===id);if(!x)return;
+  const lock=!x.is_archived;
+  if(!confirm(lock?`Khóa lớp ${x.class_name} – ${x.year}? Dữ liệu vẫn được giữ lại.`:`Mở khóa lớp ${x.class_name} – ${x.year}?`))return;
+  try{
+   const r=await sb.from('classes').update({is_archived:lock,archived_at:lock?new Date().toISOString():null}).eq('id',id);
+   if(r.error)throw r.error;
+   await myRefreshClasses();
+   note('myClassStatus',(lock?'🔒 Đã khóa lớp ':'🔓 Đã mở khóa lớp ')+x.class_name+'.'+(!lock&&x.is_locked?' Lưu ý: năm học đang khóa, hãy mở khóa năm học ở tab "Năm học".':''));
+  }catch(e){note('myClassStatus','❌ Không đổi được trạng thái: '+friendlyErr(e),true)}
+ };
+ window.adminEnterClass=async function(id){
+  const x=availableClasses.find(v=>v.id===id);if(!x)return;
+  if((x.is_archived||x.is_locked)&&!confirm('Lớp này đã khóa. Vào chế độ chỉ xem?'))return;
+  await enterSelectedClass(id);
+ };
+
+ /* ================= XÓA (gọi hàm SQL admin_delete_*) ================= */
+ async function afterDelete(deletedClassIds){
+  if(currentClass&&deletedClassIds.includes(currentClass.id)){
+   try{localStorage.removeItem('bibi_current_class_db_id');localStorage.removeItem('bibi_current_class_key')}catch(e){}
+   goAdminHub();
+  }
+  await myRefreshClasses();
+  if(adminHubMode&&$('page-adminhome')?.classList.contains('active'))adminHubRender();
+ }
  async function offerDeleteOrphanUsers(userIds){
   try{
    if(!userIds.length)return 0;
@@ -3595,21 +3885,15 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
    return ok;
   }catch(e){console.warn(e);return 0}
  }
- function friendlyDeleteError(e){
-  const m=String(e?.message||e||'');
-  if(/Could not find the function|does not exist|PGRST202/i.test(m))return 'Chưa cài hàm xóa trên Supabase. Hãy chạy file supabase_xoa_lop_nam_hoc.sql trong SQL Editor rồi thử lại.';
-  return m;
- }
  window.myDeleteClass=async function(classId){
-  if(!isSystemAdmin()){alert('Chỉ Admin hệ thống mới được xóa lớp.');return}
-  const x=classId?availableClasses.find(v=>v.id===classId):currentClass;
-  if(!x){notice('Chưa chọn lớp cần xóa.',true);return}
-  if(availableClasses.length<=1){alert('Không thể xóa lớp cuối cùng. Hãy tạo lớp mới trước rồi mới xóa lớp này.');return}
+  if(!needAdmin())return;
+  const x=availableClasses.find(v=>v.id===classId);
+  if(!x){note('myClassStatus','Không tìm thấy lớp cần xóa.',true);return}
   if(!confirm(`XÓA VĨNH VIỄN lớp ${x.class_name} – năm học ${x.year}?\n\nToàn bộ dữ liệu của lớp (học sinh, điểm danh, rèn luyện, thi đua, thông báo…) sẽ bị xóa khỏi Supabase và KHÔNG thể khôi phục.\nHãy sao lưu trước nếu cần.`))return;
   const typed=prompt(`Để xác nhận, gõ đúng tên lớp: ${x.class_name}`);
   if(typed===null)return;
-  if(typed.trim().toLowerCase()!==String(x.class_name).trim().toLowerCase()){notice('❌ Tên lớp nhập không khớp. Đã hủy xóa.',true);return}
-  notice('⏳ Đang xóa lớp...');
+  if(typed.trim().toLowerCase()!==String(x.class_name).trim().toLowerCase()){note('myClassStatus','❌ Tên lớp nhập không khớp. Đã hủy xóa.',true);return}
+  note('myClassStatus','⏳ Đang xóa lớp...');
   try{
    const {data:roles}=await sb.from('class_user_roles').select('user_id').eq('class_id',x.id);
    const userIds=[...new Set((roles||[]).map(r=>r.user_id).filter(Boolean))];
@@ -3617,40 +3901,76 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
    if(error)throw error;
    try{localStorage.removeItem(DATA_PREFIX+x.state_key)}catch(e){}
    const removed=await offerDeleteOrphanUsers(userIds);
-   await afterDeleteReselect([x.id]);
-   notice(`✅ Đã xóa lớp ${x.class_name} – ${x.year}.`+(removed?` Đã xóa thêm ${removed} tài khoản không còn lớp.`:''));
-  }catch(e){console.error(e);notice('❌ Không xóa được lớp: '+friendlyDeleteError(e),true)}
+   await afterDelete([x.id]);
+   note('myClassStatus',`✅ Đã xóa lớp ${x.class_name} – ${x.year}.`+(removed?` Đã xóa thêm ${removed} tài khoản không còn lớp.`:''));
+  }catch(e){console.error(e);note('myClassStatus','❌ Không xóa được lớp: '+friendlyErr(e),true)}
  };
  window.myDeleteAcademicYear=async function(yearId){
-  if(!isSystemAdmin()){alert('Chỉ Admin hệ thống mới được xóa năm học.');return}
-  const classes=availableClasses.filter(c=>c.academic_years?.id===yearId);
-  if(!classes.length){notice('Không tìm thấy năm học này.',true);return}
-  const yname=classes[0].year;
-  if(availableClasses.length-classes.length<1){alert('Không thể xóa năm học này vì hệ thống sẽ không còn lớp nào. Hãy tạo lớp ở năm học khác trước.');return}
-  if(!confirm(`XÓA VĨNH VIỄN năm học ${yname}?\n\nSẽ xóa ${classes.length} lớp: ${classes.map(c=>c.class_name).join(', ')} cùng toàn bộ dữ liệu của các lớp này.\nKhông thể khôi phục. Hãy sao lưu trước nếu cần.`))return;
-  const typed=prompt(`Để xác nhận, gõ đúng năm học: ${yname}`);
-  if(typed===null)return;
-  if(typed.trim()!==String(yname).trim()){notice('❌ Năm học nhập không khớp. Đã hủy xóa.',true);return}
-  notice('⏳ Đang xóa năm học...');
+  if(!needAdmin())return;
+  const y=mcYears.find(v=>v.id===yearId);
+  if(!y){note('myYearStatus','Không tìm thấy năm học cần xóa.',true);return}
+  const classes=classesOf(yearId);
+  const desc=classes.length?`Sẽ xóa ${classes.length} lớp: ${classes.map(c=>c.class_name).join(', ')} cùng toàn bộ dữ liệu của các lớp này.`:'Năm học này chưa có lớp nào.';
+  if(!confirm(`XÓA VĨNH VIỄN năm học ${y.name}?\n\n${desc}\nKhông thể khôi phục. Hãy sao lưu trước nếu cần.`))return;
+  if(classes.length){
+   const typed=prompt(`Để xác nhận, gõ đúng năm học: ${y.name}`);
+   if(typed===null)return;
+   if(typed.trim()!==String(y.name).trim()){note('myYearStatus','❌ Năm học nhập không khớp. Đã hủy xóa.',true);return}
+  }
+  note('myYearStatus','⏳ Đang xóa năm học...');
   try{
    const ids=classes.map(c=>c.id);
-   const {data:roles}=await sb.from('class_user_roles').select('user_id').in('class_id',ids);
-   const userIds=[...new Set((roles||[]).map(r=>r.user_id).filter(Boolean))];
+   let userIds=[];
+   if(ids.length){const {data:roles}=await sb.from('class_user_roles').select('user_id').in('class_id',ids);userIds=[...new Set((roles||[]).map(r=>r.user_id).filter(Boolean))]}
    const {error}=await sb.rpc('admin_delete_academic_year',{p_year_id:yearId});
    if(error)throw error;
    classes.forEach(c=>{try{localStorage.removeItem(DATA_PREFIX+c.state_key)}catch(e){}});
    const removed=await offerDeleteOrphanUsers(userIds);
-   await afterDeleteReselect(ids);
-   notice(`✅ Đã xóa năm học ${yname} (${classes.length} lớp).`+(removed?` Đã xóa thêm ${removed} tài khoản không còn lớp.`:''));
-  }catch(e){console.error(e);notice('❌ Không xóa được năm học: '+friendlyDeleteError(e),true)}
+   await afterDelete(ids);
+   note('myYearStatus',`✅ Đã xóa năm học ${y.name}`+(classes.length?` (${classes.length} lớp).`:'.')+(removed?` Đã xóa thêm ${removed} tài khoản không còn lớp.`:''));
+  }catch(e){console.error(e);note('myYearStatus','❌ Không xóa được năm học: '+friendlyErr(e),true)}
  };
- window.myArchiveCurrentClass=async function(){
-  if(!isSystemAdmin()){alert('Chỉ Admin hệ thống mới được khóa lớp.');return}
-  if(!currentClass){notice('Chưa chọn lớp.',true);return}
-  if(!confirm(`Khóa ${currentClass.class_name} – ${currentClass.year}? Dữ liệu vẫn được giữ lại.`))return;
-  try{const {error}=await sb.from('classes').update({is_archived:true,archived_at:new Date().toISOString()}).eq('id',currentClass.id);if(error)throw error;const yr=await sb.from('academic_years').update({is_locked:true,locked_at:new Date().toISOString()}).eq('id',currentClass.academic_years?.id);if(yr.error)console.warn(yr.error);currentClass.is_archived=true;currentClass.is_locked=true;myRefreshClasses();notice(`🔒 Đã khóa ${currentClass.class_name} – ${currentClass.year}.`)}catch(e){notice('❌ Không khóa được lớp: '+e.message,true)}
+
+ /* ================= TRANG CHỦ ADMIN ================= */
+ window.adminHubOpenClassChooser=async function(){
+  try{await loadAvailableClasses(currentUser.id)}catch(e){alert('Không tải được danh sách lớp: '+e.message);return}
+  if(!availableClasses.length){alert('Chưa có lớp nào. Hãy tạo năm học và lớp trước.');adminHubGo(mcYears.length?'classes':'years');return}
+  showClassChooser();
  };
+ window.adminHubRender=async function(){
+  if(!currentUser)return;
+  const set=(id,v)=>{const e=$(id);if(e)e.textContent=v};
+  set('ahName',currentUser.name||currentUser.username||'Quản trị viên');
+  const d=new Date();set('ahDate',d.toLocaleDateString('vi-VN',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'}));
+  try{await loadAvailableClasses(currentUser.id)}catch(e){console.warn(e)}
+  await loadYears();
+  set('ahYears',mcYears.length);
+  set('ahClasses',availableClasses.length);
+  set('ahActive',availableClasses.filter(c=>!c.is_archived&&!c.is_locked).length);
+  try{
+   const {data,error}=await sb.from('profiles').select('id,role');if(error)throw error;
+   const gv=(data||[]).filter(p=>p.role==='gvcn').length,cs=(data||[]).filter(p=>p.role!=='admin'&&p.role!=='gvcn').length;
+   set('ahUsers',(data||[]).length);set('ahUsersSub',`${gv} GVCN · ${cs} cán bộ lớp`);
+  }catch(e){set('ahUsers','–');set('ahUsersSub','Không tải được')}
+  const box=$('ahRecent');
+  if(box){
+   const list=availableClasses.slice(0,8);
+   box.innerHTML=list.length?list.map(x=>`<div class="multi-year-item"><div><strong>${esc(x.class_name)}</strong> – ${esc(x.year)}<div style="color:#64748b;font-size:12px">Khối ${esc(x.grade||'')} · ${esc(x.group_count||4)} tổ · ${(x.is_archived||x.is_locked)?'🔒 Đã khóa':'🟢 Đang hoạt động'}</div></div><button type="button" class="btn small" onclick="adminEnterClass('${esc(x.id)}')">🚪 Vào lớp</button></div>`).join(''):'<div class="empty">Chưa có lớp nào. Hãy tạo năm học rồi tạo lớp.</div>';
+  }
+ };
+
+ /* Hiện lời mời bật Face ID cả trên trang chủ Admin */
+ window.addEventListener('load',()=>{
+  const _bio=window.cmBioRefreshOffer;
+  if(typeof _bio!=='function')return;
+  window.cmBioRefreshOffer=async function(u){
+   await _bio(u);
+   const a=$('cmBioOffer'),b=$('ahBioOffer');
+   if(a&&b){b.style.display=a.style.display;b.innerHTML=a.innerHTML}
+  };
+ });
 })();
+
 </script>
 <!-- Sổ Chủ Nhiệm Số NVH · RBAC v5 -->
 
@@ -4336,7 +4656,9 @@ setInterval(function(){try{if(typeof processWeeklyAutoBonus==='function')process
   try{
    const {data}=await sb.auth.getSession(); const user=data?.session?.user; if(!user)return;
     if(window.cmBio&&cmBio.isEnabled(user.id)){const unlocked=await cmBio.lock(user);if(!unlocked)return;}
-   await loadCloudUser(user); await loadAvailableClasses(user.id); if(!availableClasses.length)return;
+   await loadCloudUser(user); await loadAvailableClasses(user.id);
+    if(isSystemAdmin()&&(localStorage.getItem('cm_admin_mode')!=='class'||!availableClasses.length)){enterAdminHub();try{window.cmBioRefreshOffer?.(user)}catch(e){}return}
+    if(!availableClasses.length)return;
    const savedId=localStorage.getItem('bibi_current_class_db_id'), savedKey=localStorage.getItem('bibi_current_class_key');
    const remembered=availableClasses.find(x=>x.id===savedId||x.state_key===savedKey)||availableClasses[0];
    currentClass=remembered; currentStateKey=remembered.state_key;
