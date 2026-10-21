@@ -1022,7 +1022,7 @@ body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!i
       </section>
 
       <section id="page-students" class="page">
-        <div class="page-head"><div><h2>👩‍🎓 Danh sách học sinh</h2><div class="muted">📚 Danh sách học sinh lớp đang chọn</div></div><div class="actions"><button class="btn admin-only" onclick="openStudent()">➕ Thêm học sinh</button><button class="btn secondary admin-only" onclick="showPage('excel')">📥 Nhập Excel</button></div></div><div id="studentRoleNote" class="rbac-lock-note hidden">🔒 Cán bộ lớp được xem danh sách và cập nhật nghiệp vụ lớp; chỉ GVCN được sửa/xóa hồ sơ học sinh.</div>
+        <div class="page-head"><div><h2>👩‍🎓 Danh sách học sinh</h2><div class="muted">📚 Danh sách học sinh lớp đang chọn</div></div><div class="actions"><button class="btn admin-only" onclick="openStudent()">➕ Thêm học sinh</button><button class="btn secondary admin-only" onclick="showPage('excel')">📥 Nhập Excel</button><button class="btn secondary admin-only" onclick="bcuOpenPicker()">🔄 Cập nhật mã HS</button></div></div><div id="studentRoleNote" class="rbac-lock-note hidden">🔒 Cán bộ lớp được xem danh sách và cập nhật nghiệp vụ lớp; chỉ GVCN được sửa/xóa hồ sơ học sinh.</div>
         <div class="toolbar"><input id="studentSearch" placeholder="🔎 Tìm theo mã, họ tên..." oninput="renderStudents()"><select id="studentGroup" onchange="renderStudents()"><option value="">Tất cả tổ</option><option>1</option><option>2</option><option>3</option><option>4</option></select><select id="studentGender" onchange="renderStudents()"><option value="">Tất cả giới tính</option><option>Nam</option><option>Nữ</option></select></div>
         <div class="table-wrap"><table class="table"><thead><tr><th>🔢 STT</th><th>🏷️ Mã HS</th><th>👩‍🎓 Họ và tên</th><th>🎂 Ngày sinh</th><th>⚧️ GT</th><th>👥 Tổ</th><th>🎓 Chức vụ</th><th>📞 SĐT HS</th><th>📞 SĐT PH</th><th>🛠️ Thao tác</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
       </section>
@@ -1169,7 +1169,8 @@ body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!i
           <div class="card"><h3>📥 Nhập danh sách từ Excel</h3><p class="muted">Hỗ trợ trực tiếp .xlsx/.xls/.csv. Có thể dùng file mẫu hoặc file hiện có; không bắt buộc phải có Mã HS, phần mềm sẽ tự tạo mã nếu thiếu.</p><button class="btn" onclick="downloadTemplate()">⬇ Tải Excel mẫu</button><label class="btn secondary" style="display:inline-block;margin-left:6px">📤 Chọn Excel <input id="excelFile" type="file" accept=".xlsx,.xls,.csv" hidden onchange="importExcel(event)"></label><div id="importResult" class="footer-note"></div></div>
           <div class="card"><h3>💾 Sao lưu / Khôi phục</h3><p class="muted">Nên sao lưu ít nhất mỗi tuần. File JSON chứa dữ liệu ứng dụng trên thiết bị này.</p><button class="btn" onclick="exportBackup()">⬇ Sao lưu dữ liệu</button><label class="btn secondary" style="display:inline-block;margin-left:6px">📂 Khôi phục <input id="backupFile" type="file" accept=".json" hidden onchange="importBackup(event)"></label><div class="footer-note">Khôi phục sẽ thay thế dữ liệu hiện tại trên trình duyệt.</div></div>
         </div>
-        <div class="card" style="margin-top:16px"><h3>📤 Xuất danh sách học sinh CSV</h3><button class="btn" onclick="exportStudentsCSV()">Xuất CSV</button></div>
+        <div class="card" id="bcuCard" style="margin-top:16px"><h3>🔄 Cập nhật Mã HS hàng loạt (cả lớp)</h3><p class="muted">Thay mã số học sinh đang có trên hệ thống bằng mã mới từ file Excel. Phần mềm tự khớp từng em theo <b>Mã HS cũ</b> (nếu file có cột này) hoặc theo <b>Họ tên + Ngày sinh</b>, cho xem trước, kiểm tra trùng mã rồi mới áp dụng. Điểm danh, điểm số, rèn luyện của học sinh được giữ nguyên.</p><div class="actions"><button class="btn" onclick="bcuDownloadTemplate()">⬇ Tải file mẫu (kèm danh sách lớp)</button><button class="btn secondary" onclick="bcuOpenPicker()">📤 Chọn Excel chứa mã mới</button><button class="btn warning" id="bcuUndoBtn" onclick="bcuUndo()">↩️ Hoàn tác lần cập nhật gần nhất</button><input id="bcuFile" type="file" accept=".xlsx,.xls,.csv" style="position:absolute;width:0;height:0;opacity:0;pointer-events:none" tabindex="-1" onchange="bcuHandleFile(event)"></div><div id="bcuLastInfo" class="footer-note"></div><div id="bcuResult" class="footer-note"></div></div>
+          <div class="card" style="margin-top:16px"><h3>📤 Xuất danh sách học sinh CSV</h3><button class="btn" onclick="exportStudentsCSV()">Xuất CSV</button></div>
       </section>
 
       <section id="page-users" class="page">
@@ -1279,6 +1280,16 @@ body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!i
     <div class="field"><label>Địa chỉ</label><input id="sAddress"></div><div class="field span2"><label>Ghi chú</label><textarea id="sNote" rows="3"></textarea></div>
   </div>
   <div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="btn secondary" onclick="closeModal('studentModal')">Hủy</button><button class="btn" onclick="saveStudent()">Lưu</button></div>
+</div></div>
+
+<div id="bcuModal" class="modal"><div class="modal-card" style="width:min(1080px,100%)">
+  <div class="modal-head"><h3>🔄 Xem trước cập nhật Mã HS hàng loạt</h3><button class="x" onclick="closeModal('bcuModal')">×</button></div>
+  <div id="bcuInfo" class="footer-note"></div>
+  <div id="bcuSummary" style="margin:10px 0 4px"></div>
+  <label style="display:flex;align-items:center;gap:6px;margin:6px 0 10px;font-size:13px"><input type="checkbox" id="bcuOnlyIssues" onchange="bcuToggleIssues(this.checked)"> Chỉ hiện các dòng cần chú ý</label>
+  <div class="table-wrap"><table class="table" style="min-width:860px"><thead><tr><th>Đổi</th><th>Dòng</th><th>Họ tên (Excel)</th><th>Ngày sinh</th><th>Học sinh trong hệ thống</th><th>Mã cũ → Mã mới</th><th>Trạng thái</th></tr></thead><tbody id="bcuBody"></tbody></table></div>
+  <div id="bcuMissing"></div>
+  <div class="actions" style="justify-content:flex-end;margin-top:14px"><button class="btn secondary" onclick="closeModal('bcuModal')">Hủy</button><button class="btn" id="bcuApplyBtn" onclick="bcuApply()">✅ Áp dụng đổi mã</button></div>
 </div></div>
 
 <div id="contactModal" class="modal"><div class="modal-card" style="max-width:440px">
@@ -5464,6 +5475,296 @@ window.vneduBuildXls=(function(){
     }
   };
 })();
+</script>
+<script id="bulk-code-update-v1">
+/* ===== CẬP NHẬT MÃ HS HÀNG LOẠT TỪ EXCEL (bcu = bulk code update) ===== */
+(function(){
+if(window.__bcuLoaded)return;window.__bcuLoaded=true;
+
+const clean=v=>String(v??'').replace(/\u00a0/g,' ').trim();
+const norm=s=>clean(s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/[^a-z0-9]+/g,' ').trim();
+const normCode=v=>clean(v).replace(/\s+/g,'').toUpperCase();
+const pad=n=>String(n).padStart(2,'0');
+
+/* Chuẩn hóa ngày sinh về yyyy-mm-dd (hệ thống đang lưu lẫn cả yyyy-mm-dd và dd/mm/yyyy) */
+function toISO(v){
+  if(v===null||v===undefined||v==='')return '';
+  if(v instanceof Date&&!isNaN(v)){const d=new Date(v.getTime()+12*3600*1000);return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`}
+  const s=clean(v);
+  let m;
+  if((m=s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/)))return `${m[1]}-${pad(m[2])}-${pad(m[3])}`;
+  if((m=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})$/)))return `${m[3]}-${pad(m[2])}-${pad(m[1])}`;
+  if(/^\d{5}$/.test(s)){const d=new Date(Math.round((Number(s)-25569)*864e5));return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`}
+  return '';
+}
+const showDob=iso=>{const m=String(iso||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);return m?`${m[3]}/${m[2]}/${m[1]}`:''};
+
+/* Tên cột (đã bỏ dấu, viết thường) */
+const NAME=['ho va ten','ho ten','ho ten hoc sinh','ho va ten hoc sinh','ten hoc sinh'];
+const HO=['ho dem','ho va ten dem','ho'];
+const TEN=['ten'];
+const DOB=['ngay sinh','ngay thang nam sinh'];
+const NEWC=['ma hs moi','ma moi','ma so moi','ma hoc sinh moi','ma so hoc sinh moi','ma dinh danh moi'];
+const OLDC=['ma hs cu','ma cu','ma so cu','ma hoc sinh cu','ma so hoc sinh cu','ma hs hien tai','ma hien tai'];
+const GEN=['ma hs','ma hoc sinh','ma so hoc sinh','ma so','ma dinh danh','ma dinh danh bo gddt','ma'];
+
+function detectHeader(aoa){
+  for(let r=0;r<Math.min(aoa.length,25);r++){
+    const h=(aoa[r]||[]).map(norm);
+    const idx=list=>{for(const n of list){const i=h.indexOf(n);if(i>=0)return i}return -1};
+    const cName=idx(NAME),cHo=idx(HO),cTen=idx(TEN);
+    if(cName<0&&!(cHo>=0&&cTen>=0))continue;
+    const cNewX=idx(NEWC),cOldX=idx(OLDC),cGen=idx(GEN);
+    const cNew=cNewX>=0?cNewX:cGen;
+    if(cNew<0)continue;
+    const cOld=cOldX>=0?cOldX:(cNewX>=0&&cGen>=0&&cGen!==cNewX?cGen:-1);
+    return {r,cName,cHo,cTen,cNew,cOld,cDob:idx(DOB)};
+  }
+  return null;
+}
+
+/* Lõi xử lý (thuần, không đụng DOM): đối chiếu file với danh sách học sinh hiện có */
+function buildPlan(aoa,students){
+  const hd=detectHeader(aoa);
+  if(!hd)return {error:'Không tìm thấy dòng tiêu đề hợp lệ. File cần có cột "Họ và tên" (hoặc "Họ đệm" + "Tên") và cột mã mới (ví dụ "Mã HS mới"). Hãy dùng file mẫu của phần mềm cho chắc chắn.'};
+  const byOld=new Map(),byName=new Map();
+  students.forEach(s=>{
+    const c=normCode(s.code);if(c){if(!byOld.has(c))byOld.set(c,[]);byOld.get(c).push(s)}
+    const n=norm(s.name);if(n){if(!byName.has(n))byName.set(n,[]);byName.get(n).push(s)}
+  });
+  const get=(row,c)=>c>=0?clean(row[c]):'';
+  const rows=[],usedBy=new Map();
+  for(let r=hd.r+1;r<aoa.length;r++){
+    const row=aoa[r]||[];
+    const name=hd.cName>=0?get(row,hd.cName):`${get(row,hd.cHo)} ${get(row,hd.cTen)}`.trim();
+    const oldRaw=normCode(get(row,hd.cOld));
+    const newCode=normCode(get(row,hd.cNew));
+    if(!name&&!oldRaw&&!newCode)continue;
+    const dob=hd.cDob>=0?toISO(row[hd.cDob]):'';
+    const o={idx:rows.length,rowNo:r+1,name,dob,old:oldRaw,newCode,studentId:'',how:'',notes:[],status:'',include:false,candidates:[]};
+    rows.push(o);
+    let found=null;
+    if(oldRaw){
+      const c=byOld.get(oldRaw)||[];
+      if(c.length===1){found=c[0];o.how='Mã HS cũ';if(name&&norm(found.name)!==norm(name))o.notes.push(`Tên trong hệ thống: ${found.name}`)}
+      else if(c.length>1)o.notes.push('Mã cũ trùng nhiều học sinh trong hệ thống');
+      else o.notes.push(`Không có mã cũ ${oldRaw} trong lớp, thử khớp theo tên`);
+    }
+    if(!found&&name){
+      let c=byName.get(norm(name))||[];
+      if(c.length>1&&dob){const d=c.filter(s=>toISO(s.dob)===dob);if(d.length)c=d}
+      if(c.length===1){found=c[0];o.how=dob&&toISO(found.dob)===dob?'Họ tên + ngày sinh':'Họ tên';
+        if(dob&&toISO(found.dob)&&toISO(found.dob)!==dob)o.notes.push('Ngày sinh lệch so với hệ thống')}
+      else if(c.length>1){o.candidates=c.map(s=>s.id);o.status='ambiguous';o.notes.push(`${c.length} học sinh cùng tên, cần chọn đúng em`)}
+    }
+    if(o.status==='ambiguous'){continue}
+    if(!found){o.status='notfound';if(!name&&!oldRaw)o.notes.push('Thiếu họ tên');continue}
+    if(usedBy.has(found.id)){o.status='dupfile';o.studentId=found.id;o.notes.push(`Học sinh này đã khớp với dòng ${usedBy.get(found.id)}`);continue}
+    usedBy.set(found.id,o.rowNo);
+    o.studentId=found.id;
+    if(!newCode){o.status='nonew';continue}
+    if(normCode(found.code)===newCode){o.status='same';continue}
+    o.status='update';o.include=true;
+  }
+  const matched=new Set(rows.filter(x=>x.studentId).map(x=>x.studentId));
+  const missing=students.filter(s=>!matched.has(s.id));
+  return {rows,missing,header:hd};
+}
+
+/* Kiểm tra trùng mã sau khi áp dụng (cho phép hoán đổi/dịch chuyển mã giữa các em) */
+function computeConflicts(rows,students){
+  const final=new Map(students.map(s=>[s.id,normCode(s.code)]));
+  rows.forEach(r=>{if(r.include&&r.studentId&&r.newCode)final.set(r.studentId,r.newCode)});
+  const cnt=new Map();final.forEach(c=>{if(c)cnt.set(c,(cnt.get(c)||0)+1)});
+  const perStudent=new Map();rows.forEach(r=>{if(r.include&&r.studentId)perStudent.set(r.studentId,(perStudent.get(r.studentId)||0)+1)});
+  const bad=new Set();
+  rows.forEach(r=>{if(r.include&&r.studentId&&((cnt.get(r.newCode)||0)>1||(perStudent.get(r.studentId)||0)>1))bad.add(r.idx)});
+  return bad;
+}
+window.bcuCore={buildPlan,computeConflicts,toISO,norm,normCode,detectHeader};
+
+/* ===================== PHẦN GIAO DIỆN ===================== */
+let bcu={rows:[],missing:[],fileName:'',onlyIssues:false};
+const $=id=>document.getElementById(id);
+
+function bcuOpenPicker(){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được cập nhật mã học sinh.');return}
+  const i=$('bcuFile');if(i){i.value='';i.click()}
+}
+
+function bcuDownloadTemplate(){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được tải mẫu.');return}
+  if(!window.XLSX){alert('Thư viện Excel chưa tải được. Hãy kiểm tra Internet và tải lại trang.');return}
+  const list=(state.students||[]).slice().sort((a,b)=>String(a.code||'').localeCompare(String(b.code||''),undefined,{numeric:true,sensitivity:'base'}));
+  const aoa=[['STT','Mã HS cũ','Họ và tên','Ngày sinh','Mã HS mới'],...list.map((s,i)=>[i+1,s.code||'',s.name||'',showDob(toISO(s.dob))||s.dob||'','' ])];
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[{wch:6},{wch:16},{wch:30},{wch:14},{wch:20}];
+  // Cột mã dạng văn bản để không mất số 0 đứng đầu
+  for(let r=1;r<aoa.length;r++){['B','E'].forEach(c=>{const cell=ws[c+(r+1)];if(cell){cell.t='s';cell.z='@'}else ws[c+(r+1)]={t:'s',v:'',z:'@'}})}
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'CapNhatMaHS');
+  XLSX.writeFile(wb,`Mau_Cap_Nhat_Ma_HS_${(state.settings?.className||'Lop').replace(/[^\w\-]+/g,'_')}.xlsx`);
+}
+
+async function bcuHandleFile(e){
+  const file=e.target.files&&e.target.files[0];
+  if(!file)return;
+  const res=$('bcuResult');
+  try{
+    if(!isAdmin())throw new Error('Chỉ GVCN/Admin được cập nhật mã học sinh.');
+    if(!window.XLSX)throw new Error('Thư viện Excel chưa tải được. Hãy kiểm tra Internet và tải lại trang.');
+    if(!(state.students||[]).length)throw new Error('Lớp hiện chưa có học sinh nào để cập nhật mã.');
+    if(res)res.textContent='Đang đọc file...';
+    const ext=(file.name.split('.').pop()||'').toLowerCase();
+    let sheets=[];
+    if(ext==='csv'){sheets=[{name:'CSV',rows:parseCSV((await file.text()).replace(/^\uFEFF/,''))}]}
+    else if(ext==='xlsx'||ext==='xls'){
+      const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});
+      sheets=wb.SheetNames.map(n=>{
+        // Ô ngày lấy giá trị Date thật (tránh nhầm tháng/ngày), ô còn lại lấy đúng chữ hiển thị (giữ số 0 đầu của mã)
+        const o={header:1,defval:'',blankrows:false};
+        const raw=XLSX.utils.sheet_to_json(wb.Sheets[n],{...o,raw:true}),fmt=XLSX.utils.sheet_to_json(wb.Sheets[n],{...o,raw:false});
+        return {name:n,rows:fmt.map((r,i)=>r.map((v,j)=>(raw[i]&&raw[i][j] instanceof Date)?raw[i][j]:v))};
+      });
+    }else throw new Error('Định dạng không hỗ trợ. Hãy chọn file .xlsx, .xls hoặc .csv.');
+    let plan=null,lastErr='';
+    for(const sh of sheets){const p=buildPlan(sh.rows,state.students);if(!p.error){plan=p;plan.sheet=sh.name;break}lastErr=p.error}
+    if(!plan)throw new Error(lastErr||'Không đọc được dữ liệu trong file.');
+    if(!plan.rows.length)throw new Error('File không có dòng dữ liệu học sinh nào.');
+    bcu={rows:plan.rows,missing:plan.missing,fileName:file.name,sheet:plan.sheet,header:plan.header,onlyIssues:false};
+    if(res)res.textContent='';
+    const oc=$('bcuOnlyIssues');if(oc)oc.checked=false;
+    bcuRender();openModal('bcuModal');
+  }catch(err){
+    console.error(err);
+    if(res)res.textContent='❌ '+(err.message||err);
+  }finally{e.target.value=''}
+}
+
+function bcuStatusBadge(r,conflict){
+  if(conflict)return '<span class="badge b-red">⛔ Trùng mã</span>';
+  switch(r.status){
+    case 'update':return r.include?'<span class="badge b-green">✔ Sẽ đổi mã</span>':'<span class="badge b-yellow">Bỏ qua</span>';
+    case 'same':return '<span class="badge b-blue">Không đổi</span>';
+    case 'ambiguous':return '<span class="badge b-yellow">⚠ Cần chọn em</span>';
+    case 'notfound':return '<span class="badge b-red">Không tìm thấy</span>';
+    case 'nonew':return '<span class="badge b-yellow">Thiếu mã mới</span>';
+    case 'dupfile':return '<span class="badge b-red">Dòng trùng</span>';
+  }
+  return '';
+}
+
+function bcuRender(){
+  const students=state.students||[];
+  const byId=new Map(students.map(s=>[s.id,s]));
+  const bad=computeConflicts(bcu.rows,students);
+  const cnt={update:0,same:0,ambiguous:0,notfound:0,nonew:0,dupfile:0};
+  bcu.rows.forEach(r=>{cnt[r.status]=(cnt[r.status]||0)+1});
+  const willChange=bcu.rows.filter(r=>r.include&&r.studentId).length;
+  const chip=(t,c)=>`<span class="badge ${c}" style="margin:0 6px 6px 0;display:inline-block">${t}</span>`;
+  $('bcuInfo').innerHTML=`📄 <b>${esc(bcu.fileName)}</b> · trang tính “${esc(bcu.sheet||'')}” · ${bcu.rows.length} dòng · khớp theo ${bcu.header&&bcu.header.cOld>=0?'<b>Mã HS cũ</b> (dự phòng: Họ tên + Ngày sinh)':'<b>Họ tên + Ngày sinh</b>'}`;
+  $('bcuSummary').innerHTML=
+    chip(`✔ Sẽ đổi mã: ${willChange}`,'b-green')+chip(`Không đổi: ${cnt.same}`,'b-blue')+
+    (cnt.ambiguous?chip(`⚠ Cần chọn em: ${cnt.ambiguous}`,'b-yellow'):'')+
+    (cnt.notfound?chip(`Không tìm thấy: ${cnt.notfound}`,'b-red'):'')+
+    (cnt.nonew?chip(`Thiếu mã mới: ${cnt.nonew}`,'b-yellow'):'')+
+    (cnt.dupfile?chip(`Dòng trùng: ${cnt.dupfile}`,'b-red'):'')+
+    (bad.size?chip(`⛔ Trùng mã: ${bad.size}`,'b-red'):'')+
+    chip(`Học sinh không có trong file: ${bcu.missing.length}`,bcu.missing.length?'b-yellow':'b-green');
+
+  const rows=bcu.rows.filter(r=>!bcu.onlyIssues||bad.has(r.idx)||!['update','same'].includes(r.status)||r.notes.length);
+  $('bcuBody').innerHTML=rows.length?rows.map(r=>{
+    const s=byId.get(r.studentId);
+    let match;
+    if(r.status==='ambiguous'||(r.candidates.length&&!r.studentId)){
+      match=`<select onchange="bcuPick(${r.idx},this.value)" style="max-width:260px"><option value="">— Chọn học sinh —</option>${r.candidates.map(id=>{const c=byId.get(id);return `<option value="${esc(id)}">${esc(c.name)} · ${esc(c.code)}${c.dob?' · '+esc(showDob(toISO(c.dob))):''}</option>`}).join('')}</select>`;
+    }else if(r.candidates.length&&s){
+      match=`<select onchange="bcuPick(${r.idx},this.value)" style="max-width:260px"><option value="">— Bỏ qua dòng này —</option>${r.candidates.map(id=>{const c=byId.get(id);return `<option value="${esc(id)}" ${id===r.studentId?'selected':''}>${esc(c.name)} · ${esc(c.code)}${c.dob?' · '+esc(showDob(toISO(c.dob))):''}</option>`}).join('')}</select>`;
+    }else match=s?`<b>${esc(s.name)}</b><div class="mini">khớp theo ${esc(r.how)}</div>`:'<span class="mini">—</span>';
+    const canTick=r.studentId&&r.newCode&&['update'].includes(r.status);
+    return `<tr><td>${canTick?`<input type="checkbox" ${r.include?'checked':''} onchange="bcuToggle(${r.idx},this.checked)">`:''}</td><td>${r.rowNo}</td><td>${esc(r.name)||'<span class="mini">—</span>'}</td><td>${esc(showDob(r.dob))}</td><td>${match}</td><td>${s?esc(s.code):esc(r.old)} → <b>${esc(r.newCode)||'—'}</b></td><td>${bcuStatusBadge(r,bad.has(r.idx))}${r.notes.length?`<div class="mini">${r.notes.map(esc).join('<br>')}</div>`:''}</td></tr>`;
+  }).join(''):'<tr><td colspan="7" class="empty">Không có dòng nào cần chú ý.</td></tr>';
+
+  $('bcuMissing').innerHTML=bcu.missing.length?`<div class="notice" style="margin-top:12px">⚠️ <b>${bcu.missing.length} học sinh trong lớp không có trong file</b> (giữ nguyên mã cũ): ${bcu.missing.slice(0,15).map(s=>esc(s.name)+' ('+esc(s.code)+')').join(', ')}${bcu.missing.length>15?' ...':''}</div>`:'';
+  const btn=$('bcuApplyBtn');
+  if(btn){btn.textContent=`✅ Áp dụng đổi mã (${willChange} học sinh)`;btn.disabled=!willChange||bad.size>0;btn.style.opacity=btn.disabled?'.5':'1'}
+}
+
+function bcuToggle(i,on){const r=bcu.rows[i];if(r){r.include=!!on;bcuRender()}}
+function bcuToggleIssues(on){bcu.onlyIssues=!!on;bcuRender()}
+function bcuPick(i,sid){
+  const r=bcu.rows[i];if(!r)return;
+  const s=(state.students||[]).find(x=>x.id===sid);
+  if(!s){r.studentId='';r.include=false;r.status='ambiguous';r.how='';bcuRender();return}
+  r.studentId=s.id;r.how='Chọn thủ công';
+  if(!r.newCode){r.status='nonew';r.include=false}
+  else if(normCode(s.code)===r.newCode){r.status='same';r.include=false}
+  else{r.status='update';r.include=true}
+  bcuRender();
+}
+
+async function bcuApply(){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được cập nhật mã học sinh.');return}
+  if(computeConflicts(bcu.rows,state.students).size){alert('Còn mã bị trùng. Hãy bỏ chọn hoặc sửa file Excel rồi nhập lại.');return}
+  const chosen=bcu.rows.filter(r=>r.include&&r.studentId&&r.newCode);
+  if(!chosen.length)return;
+  if(!confirm(`CẬP NHẬT MÃ HỌC SINH HÀNG LOẠT\n\nSố học sinh được đổi mã: ${chosen.length}\nFile: ${bcu.fileName}\n\nĐiểm danh, điểm số, rèn luyện, tài khoản của học sinh được giữ nguyên.\nCó thể hoàn tác lần cập nhật này sau đó.\n\nTiếp tục?`))return;
+  const changes=[];
+  chosen.forEach(r=>{
+    const s=state.students.find(x=>x.id===r.studentId);
+    if(!s||normCode(s.code)===r.newCode)return;
+    changes.push({id:s.id,name:s.name,oldCode:s.code||'',newCode:r.newCode});
+    s.code=r.newCode;
+  });
+  if(!changes.length){alert('Không có thay đổi nào cần áp dụng.');return}
+  state.codeUpdateHistory=Array.isArray(state.codeUpdateHistory)?state.codeUpdateHistory:[];
+  state.codeUpdateHistory.push({time:new Date().toISOString(),actor:currentUser?.name||currentUser?.username||'',file:bcu.fileName,changes});
+  if(state.codeUpdateHistory.length>5)state.codeUpdateHistory.shift();
+  saveData();
+  log(`Cập nhật hàng loạt Mã HS: ${changes.length} học sinh từ ${bcu.fileName}`);
+  const ok=await pushCloud();
+  closeModal('bcuModal');
+  renderAll();bcuRefreshInfo();
+  const res=$('bcuResult');
+  if(res)res.textContent=`✅ Đã cập nhật mã cho ${changes.length} học sinh.`+(ok===false?' ⚠️ Đã lưu trên trình duyệt nhưng chưa đồng bộ được Supabase — hãy bấm “Đồng bộ” hoặc thử lại khi có mạng.':'');
+  alert(`✅ Đã cập nhật mã cho ${changes.length} học sinh.`+(ok===false?'\n⚠️ Chưa đồng bộ được lên Supabase.':''));
+  bcu={rows:[],missing:[],fileName:'',onlyIssues:false};
+}
+
+async function bcuUndo(){
+  if(!isAdmin()){alert('🔒 Chỉ GVCN/Admin được hoàn tác.');return}
+  const h=state.codeUpdateHistory||[];const last=h[h.length-1];
+  if(!last){alert('Chưa có lần cập nhật mã nào để hoàn tác.');return}
+  const plan=[],skipped=[];
+  last.changes.forEach(c=>{
+    const s=state.students.find(x=>x.id===c.id);
+    if(!s||normCode(s.code)!==normCode(c.newCode))skipped.push(c.name);else plan.push([s,c.oldCode]);
+  });
+  if(!plan.length){alert('Không thể hoàn tác: mã của các học sinh đã được thay đổi sau lần cập nhật đó.');return}
+  const final=new Map(state.students.map(s=>[s.id,normCode(s.code)]));
+  plan.forEach(([s,o])=>final.set(s.id,normCode(o)));
+  const seen=new Set();let dup=false;final.forEach(c=>{if(!c)return;if(seen.has(c))dup=true;seen.add(c)});
+  if(dup){alert('Không thể hoàn tác vì sẽ gây trùng mã với học sinh khác.');return}
+  if(!confirm(`HOÀN TÁC lần cập nhật mã gần nhất\n\nThời gian: ${new Date(last.time).toLocaleString('vi-VN')}\nFile: ${last.file||''}\nSẽ khôi phục mã cũ cho ${plan.length} học sinh${skipped.length?`\n(Bỏ qua ${skipped.length} em đã đổi mã lại: ${skipped.slice(0,5).join(', ')})`:''}\n\nTiếp tục?`))return;
+  plan.forEach(([s,o])=>{s.code=o});
+  h.pop();
+  saveData();
+  log(`Hoàn tác cập nhật hàng loạt Mã HS: ${plan.length} học sinh`);
+  const ok=await pushCloud();
+  renderAll();bcuRefreshInfo();
+  const res=$('bcuResult');if(res)res.textContent=`↩️ Đã hoàn tác mã của ${plan.length} học sinh.`+(ok===false?' ⚠️ Chưa đồng bộ được Supabase.':'');
+}
+
+function bcuRefreshInfo(){
+  const el=$('bcuLastInfo'),btn=$('bcuUndoBtn');if(!el)return;
+  const h=(state&&state.codeUpdateHistory)||[];const last=h[h.length-1];
+  el.textContent=last?`Lần cập nhật gần nhất: ${new Date(last.time).toLocaleString('vi-VN')} · ${last.changes.length} học sinh${last.file?' · '+last.file:''}`:'Chưa có lần cập nhật mã hàng loạt nào.';
+  if(btn)btn.disabled=!last;
+}
+
+Object.assign(window,{bcuOpenPicker,bcuDownloadTemplate,bcuHandleFile,bcuToggle,bcuToggleIssues,bcuPick,bcuApply,bcuUndo,bcuRefreshInfo});
+try{const _sp=window.showPage;if(typeof _sp==='function')window.showPage=function(n){const r=_sp.apply(this,arguments);if(n==='excel')try{bcuRefreshInfo()}catch(e){}return r}}catch(e){}
+})();
+
 </script>
 </body>
 </html>
