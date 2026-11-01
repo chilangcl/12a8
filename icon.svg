@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f1e54"/>
+      <stop offset="38%" stop-color="#2563eb"/>
+      <stop offset="72%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#0d9488"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef9c3"/>
+      <stop offset="55%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="capInner" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e40af"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.06"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="12" width="488" height="488" rx="116" fill="url(#bgGrad)" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3"/>
+  <rect x="74" y="70" width="364" height="372" rx="80" fill="url(#glassGrad)" stroke="#ffffff" stroke-opacity="0.32" stroke-width="3"/>
+  <path d="M256 292 C210 272 150 276 118 290 L118 366 C155 352 210 350 256 372 Z" fill="#ffffff"/>
+  <path d="M256 292 C302 272 362 276 394 290 L394 366 C357 352 302 350 256 372 Z" fill="#e0f2fe"/>
+  <line x1="256" y1="290" x2="256" y2="372" stroke="#2563eb" stroke-width="4"/>
+  <polygon points="244,360 268,360 268,402 256,390 244,402" fill="url(#goldGrad)"/>
+  <polygon points="166,198 346,198 332,248 256,272 180,248" fill="url(#capInner)" stroke="#facc15" stroke-width="3.5"/>
+  <polygon points="256,104 416,172 256,236 96,172" fill="url(#goldGrad)"/>
+  <polygon points="256,116 392,172 256,224 120,172" fill="url(#capInner)"/>
+  <ellipse cx="256" cy="170" rx="12" ry="8" fill="url(#goldGrad)"/>
+  <path d="M256 170 C315 178 368 196 374 250" fill="none" stroke="#facc15" stroke-width="7" stroke-linecap="round"/>
+  <polygon points="364,245 384,245 390,276 358,276" fill="url(#goldGrad)"/>
+  <circle cx="382" cy="126" r="44" fill="url(#emeraldGrad)" stroke="#ffffff" stroke-width="5"/>
+  <polyline points="362,127 377,142 404,112" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="156" y="386" width="200" height="46" rx="23" fill="url(#goldGrad)"/>
+  <text x="256" y="417" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-weight="800" font-size="24" fill="#0f172a">CM PRO</text>
+</svg>

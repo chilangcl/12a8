@@ -2,9 +2,22 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- Browser-side defence in depth. Deploy the equivalent CSP as an HTTP header for full enforcement. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'; connect-src 'self' https://ewbrnzgmivkmddkkolwq.supabase.co; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data: https:; media-src 'self' data: https:; worker-src 'self' blob:; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'; connect-src 'self' https://ewbrnzgmivkmddkkolwq.supabase.co; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https:; media-src 'self' data: https:; manifest-src 'self' data: blob:; worker-src 'self' blob:; upgrade-insecure-requests">
+<meta name="theme-color" content="#1e3a8a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ClassManager Pro">
+<meta name="application-name" content="ClassManager Pro">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(), usb=()">
 <title>Sổ Chủ Nhiệm Số — ClassManager_Pro - Nguyễn Văn Hoàng_Trường THPT Chi Lăng</title>
@@ -4539,9 +4552,9 @@ async function loadGuestDashboard(){
   window.exportCurrentReportWord=function(){const title=document.getElementById('reportPrintTitle')?.textContent||'Báo cáo ClassManager Pro';const rows=reportRows();const html=`<!doctype html><html><head><meta charset="utf-8"><title>${title}</title></head><body><h1>${title}</h1><table border="1" cellspacing="0" cellpadding="6"><tr><th>Mã HS</th><th>Họ tên</th><th>Giới tính</th><th>Tổ</th><th>Có mặt</th><th>Nghỉ phép</th><th>Nghỉ KP</th><th>Đi muộn</th><th>Điểm RL</th><th>Hạnh kiểm</th></tr>${rows.map(r=>'<tr>'+r.map(v=>`<td>${esc(String(v))}</td>`).join('')+'</tr>').join('')}</table>
 </body></html>`;downloadBlob(html,'BaoCao_ClassManager_'+today()+'.doc','application/msword');log('Xuất báo cáo Word');};
   window.exportCurrentReportPDF=function(){renderReports();setTimeout(()=>{window.print();log('In/xuất báo cáo PDF');},100)};
-  let deferredPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;const st=document.getElementById('pwaStatus');if(st)st.textContent='Ứng dụng sẵn sàng để cài đặt.'});
-  function initPWA(){const st=document.getElementById('pwaStatus');if(location.protocol==='file:'){if(st)st.textContent='PWA cần chạy trên HTTPS hoặc localhost.';return}if(!document.querySelector('link[data-cm-pwa-manifest]')){const manifest={name:'ClassManager Pro',short_name:'ClassManager Pro',start_url:'./',display:'standalone',background_color:'#f1f5f9',theme_color:'#2563eb',description:'Sổ chủ nhiệm số ClassManager Pro',icons:[]};const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});const link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);link.dataset.cmPwaManifest='1';document.head.appendChild(link);}if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(()=>{if(st)st.textContent='PWA đã sẵn sàng.'}).catch(()=>{if(st)st.textContent='Đã có manifest; service worker chưa sẵn sàng trên máy chủ.'});}}
-  window.installClassManagerPWA=async function(){if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;return}alert('Nếu chưa thấy lời mời cài đặt, hãy mở ClassManager Pro bằng Chrome/Edge trên HTTPS rồi chọn “Cài đặt ứng dụng”.');};
+  let deferredPrompt=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;window.__cmDeferredPwaPrompt=e;const st=document.getElementById('pwaStatus');if(st)st.textContent='Ứng dụng độc lập (PWA) đã sẵn sàng cài đặt lên màn hình chính.'});
+  function initPWA(){const st=document.getElementById('pwaStatus');if(location.protocol==='file:'){if(st)st.textContent='PWA cần chạy trên HTTPS hoặc localhost.';return}if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(()=>{if(st)st.textContent='Ứng dụng độc lập (PWA) đã sẵn sàng cài đặt.'}).catch(()=>{if(st)st.textContent='Đã có manifest chuẩn; đang khởi tạo chế độ ứng dụng độc lập.'});}}
+  window.installClassManagerPWA=async function(){const p=deferredPrompt||window.__cmDeferredPwaPrompt;if(p){try{p.prompt();await p.userChoice;}catch(_){}deferredPrompt=null;window.__cmDeferredPwaPrompt=null;return}if(typeof window.openCmPwaSmartInstallModal==='function'){window.openCmPwaSmartInstallModal();return}alert('Hãy nhấn nút Cài đặt ứng dụng hoặc chọn Thêm vào màn hình chính trên trình duyệt.');};
 })();
 </script>
 <script id="bibi-rbac-v7">
@@ -4581,9 +4594,9 @@ setInterval(function(){try{if(typeof processWeeklyAutoBonus==='function')process
     cmInstallHideTimer=null;
   }
   function syncPwaButton(){if(standalone()){hidePwaButton();}else{showPwaButton();}}
-  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();cmDeferredPrompt=e;syncPwaButton();});
-  window.addEventListener('appinstalled',()=>{cmDeferredPrompt=null;hidePwaButton();});
-  document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('#cmPwaInstallButton');if(!b)return;if(cmDeferredPrompt){try{cmDeferredPrompt.prompt();await cmDeferredPrompt.userChoice;}catch(_){}cmDeferredPrompt=null;hidePwaButton();}else{hidePwaButton();alert('Để cài ứng dụng, hãy mở ClassManager Pro bằng Chrome/Edge trên HTTPS rồi chọn “Cài đặt ứng dụng” hoặc “Thêm vào màn hình chính”.');}});
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();cmDeferredPrompt=e;window.__cmDeferredPwaPrompt=e;syncPwaButton();});
+  window.addEventListener('appinstalled',()=>{cmDeferredPrompt=null;window.__cmDeferredPwaPrompt=null;hidePwaButton();});
+  document.addEventListener('click',async e=>{const b=e.target.closest&&e.target.closest('#cmPwaInstallButton');if(!b)return;const promptEvent=cmDeferredPrompt||window.__cmDeferredPwaPrompt;if(promptEvent){try{promptEvent.prompt();const choice=await promptEvent.userChoice;if(choice&&choice.outcome==='accepted'){hidePwaButton();}}catch(_){}cmDeferredPrompt=null;window.__cmDeferredPwaPrompt=null;}else if(typeof window.openCmPwaSmartInstallModal==='function'){window.openCmPwaSmartInstallModal();}else{hidePwaButton();alert('Để cài ứng dụng, hãy mở ClassManager Pro bằng Chrome/Edge trên HTTPS rồi chọn “Cài đặt ứng dụng” hoặc “Thêm vào màn hình chính”.');}});
   window.addEventListener('load',()=>{setTimeout(syncPwaButton,300);setTimeout(syncPwaButton,1200);});
   window.addEventListener('pageshow',syncPwaButton);
   window.addEventListener('resize',()=>{if(getPwaBtn()?.classList.contains('show'))return;syncPwaButton();});
@@ -5832,3 +5845,1347 @@ button.avatar{border:0!important;appearance:none!important;-webkit-appearance:no
 .cm-bottom-nav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;z-index:700!important;height:68px!important;background:rgba(255,255,255,.98)!important;border-top:1px solid #e4edf5!important;border-bottom:0!important;box-shadow:0 -6px 22px rgba(15,45,75,.10)!important;padding:6px max(8px,env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-right))!important}.cm-bottom-nav button{min-height:52px!important;border-radius:13px!important;color:#617084!important}.cm-bottom-nav button:hover{background:#eef7ff!important}.cm-bottom-nav button.active{color:#0879dc!important;background:#e9f5ff!important}.cm-bottom-nav button:last-child span{font-size:25px!important;font-weight:400!important}.content{padding-bottom:94px!important}.modal,.cm-account-panel,.cm-today-attendance-modal{z-index:1200!important}.competition-picker-menu{z-index:1300!important}.ai-floating-btn{bottom:86px!important;z-index:650!important}
 @media(max-width:680px){body{padding-top:0!important}.app-brand-banner{top:0!important}.topbar{top:62px!important}.content{padding-bottom:88px!important}.cm-bottom-nav{height:66px!important}.ai-floating-btn{bottom:78px!important}}
 </style>
+
+<!-- ==========================================================================
+     CLASSMANAGER PRO — ULTRA-MODERN EDTECH DESIGN SYSTEM (2026 EDITION)
+     Bento Glass · Be Vietnam Pro Typography · Light & Dark Mode · 100% Data Safe
+     ========================================================================== -->
+<style id="cm-ultra-modern-design-system-2026">
+@media screen {
+  :root,
+  html[data-cm-theme="light"] {
+    --cm-font: 'Be Vietnam Pro', 'Plus Jakarta Sans', Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --cm-bg-main: #f4f7fb;
+    --cm-bg-mesh: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.08) 0px, transparent 48%),
+                  radial-gradient(at 100% 0%, rgba(13, 148, 136, 0.08) 0px, transparent 45%),
+                  radial-gradient(at 50% 100%, rgba(99, 102, 241, 0.06) 0px, transparent 50%),
+                  #f4f7fb;
+    --cm-surface: #ffffff;
+    --cm-surface-glass: rgba(255, 255, 255, 0.88);
+    --cm-surface-soft: #f8fafc;
+    --cm-surface-hover: #f1f5f9;
+    --cm-text-primary: #0f172a;
+    --cm-text-secondary: #475569;
+    --cm-text-muted: #64748b;
+    --cm-border: #e2e8f0;
+    --cm-border-strong: #cbd5e1;
+    --cm-primary: #2563eb;
+    --cm-primary-hover: #1d4ed8;
+    --cm-primary-gradient: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    --cm-brand-gradient: linear-gradient(120deg, #0f172a 0%, #1e3a8a 48%, #0d9488 100%);
+    --cm-hero-gradient: linear-gradient(135deg, #1d4ed8 0%, #2563eb 45%, #0ea5e9 100%);
+    --cm-shadow-sm: 0 2px 8px -2px rgba(15, 23, 42, 0.05), 0 1px 3px -1px rgba(15, 23, 42, 0.03);
+    --cm-shadow-md: 0 10px 30px -6px rgba(15, 23, 42, 0.07), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+    --cm-shadow-lg: 0 20px 48px -12px rgba(15, 23, 42, 0.14), 0 8px 20px -4px rgba(15, 23, 42, 0.06);
+    --cm-shadow-btn: 0 6px 16px -3px rgba(37, 99, 235, 0.32);
+    --cm-radius-xl: 24px;
+    --cm-radius-lg: 20px;
+    --cm-radius-md: 14px;
+    --cm-radius-sm: 10px;
+  }
+
+  html[data-cm-theme="dark"] {
+    --cm-bg-main: #0b1120;
+    --cm-bg-mesh: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.14) 0px, transparent 48%),
+                  radial-gradient(at 100% 10%, rgba(99, 102, 241, 0.14) 0px, transparent 48%),
+                  radial-gradient(at 50% 100%, rgba(20, 184, 166, 0.10) 0px, transparent 50%),
+                  #0b1120;
+    --cm-surface: #111c33;
+    --cm-surface-glass: rgba(17, 28, 51, 0.86);
+    --cm-surface-soft: #16233f;
+    --cm-surface-hover: #1e2f52;
+    --cm-text-primary: #f1f5f9;
+    --cm-text-secondary: #cbd5e1;
+    --cm-text-muted: #94a3b8;
+    --cm-border: rgba(148, 163, 184, 0.18);
+    --cm-border-strong: rgba(148, 163, 184, 0.30);
+    --cm-primary: #3b82f6;
+    --cm-primary-hover: #2563eb;
+    --cm-primary-gradient: linear-gradient(135deg, #0284c7 0%, #4f46e5 100%);
+    --cm-brand-gradient: linear-gradient(120deg, #091224 0%, #1e3a8a 52%, #0f766e 100%);
+    --cm-hero-gradient: linear-gradient(135deg, #1e3a8a 0%, #3730a3 52%, #0f766e 100%);
+    --cm-shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.28);
+    --cm-shadow-md: 0 14px 36px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --cm-shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    --cm-shadow-btn: 0 6px 18px rgba(59, 130, 246, 0.38);
+  }
+
+  /* 1. GLOBAL TYPOGRAPHY & SURFACE */
+  html, body {
+    font-family: var(--cm-font) !important;
+    background: var(--cm-bg-mesh) !important;
+    background-attachment: fixed !important;
+    color: var(--cm-text-primary) !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+  }
+
+  body, .app, .main, .page, .content, .guest-screen, .guest-wrap {
+    background: transparent !important;
+    color: var(--cm-text-primary) !important;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--cm-font) !important;
+    letter-spacing: -0.025em;
+    color: var(--cm-text-primary) !important;
+  }
+
+  .muted, .guest-muted, .footer-note, .mini, .guest-honor-note {
+    color: var(--cm-text-muted) !important;
+  }
+
+  /* 2. BRAND BANNER & TOPBAR */
+  .app-brand-banner,
+  .login-brand-banner,
+  .guest-top {
+    background: var(--cm-brand-gradient) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+    box-shadow: 0 8px 28px -6px rgba(15, 23, 42, 0.28) !important;
+  }
+
+  .app-brand-title,
+  .login-brand-banner .inner,
+  .guest-brand {
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
+    color: #ffffff !important;
+  }
+
+  .app-class-context {
+    color: rgba(240, 253, 250, 0.92) !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+  }
+
+  .topbar {
+    background: var(--cm-surface-glass) !important;
+    backdrop-filter: blur(16px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+    border-bottom: 1px solid var(--cm-border) !important;
+    box-shadow: var(--cm-shadow-sm) !important;
+    height: 62px !important;
+  }
+
+  .topbar .title {
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    color: var(--cm-text-primary) !important;
+  }
+
+  .menu-toggle {
+    background: var(--cm-surface-soft) !important;
+    color: var(--cm-text-primary) !important;
+    border: 1px solid var(--cm-border) !important;
+    border-radius: 12px !important;
+    width: 40px !important;
+    height: 40px !important;
+    font-size: 18px !important;
+    transition: all 0.18s ease !important;
+  }
+  .menu-toggle:hover {
+    background: var(--cm-surface-hover) !important;
+    transform: translateY(-1px);
+  }
+
+  button.avatar, .avatar {
+    background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%) !important;
+    color: #1e40af !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.22) !important;
+    width: 38px !important;
+    height: 38px !important;
+    font-weight: 800 !important;
+    transition: transform 0.18s ease, box-shadow 0.18s ease !important;
+  }
+  button.avatar:hover, .avatar:hover {
+    transform: scale(1.06);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.32) !important;
+  }
+
+  /* Theme Toggle Pill in Topbar / Login */
+  .cm-theme-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid var(--cm-border);
+    background: var(--cm-surface-soft);
+    color: var(--cm-text-primary);
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+  }
+  .cm-theme-toggle-btn:hover {
+    background: var(--cm-surface-hover);
+    border-color: var(--cm-primary);
+    transform: translateY(-1px);
+  }
+  .cm-brand-theme-switch {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    border: 1px solid rgba(255, 255, 255, 0.26) !important;
+    background: rgba(255, 255, 255, 0.14) !important;
+    backdrop-filter: blur(10px);
+    color: #ffffff !important;
+    height: 36px;
+    padding: 0 13px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .cm-brand-theme-switch:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(calc(-50% - 1px));
+  }
+
+  /* 3. LOGIN SCREEN — FLOATING GLASS CARD */
+  #loginScreen.login {
+    background: radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.16) 0%, transparent 42%),
+                radial-gradient(circle at 85% 80%, rgba(13, 148, 136, 0.16) 0%, transparent 42%),
+                radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 60%),
+                var(--cm-bg-main) !important;
+  }
+
+  #loginScreen .login-card {
+    width: min(450px, 100%) !important;
+    background: var(--cm-surface-glass) !important;
+    backdrop-filter: blur(22px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(180%) !important;
+    border: 1px solid var(--cm-border) !important;
+    border-radius: 28px !important;
+    padding: 34px 30px 26px !important;
+    box-shadow: var(--cm-shadow-lg) !important;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #loginScreen .login-card::before {
+    content: "✨ Chào mừng đến với Sổ Chủ Nhiệm Số";
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--cm-primary);
+    background: rgba(37, 99, 235, 0.10);
+    border: 1px solid rgba(37, 99, 235, 0.20);
+    padding: 7px 14px;
+    border-radius: 999px;
+    width: max-content;
+    max-width: 100%;
+    margin: 0 auto 20px;
+    text-align: center;
+  }
+
+  .guest-btn {
+    background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+    color: #ffffff !important;
+    border-radius: 14px !important;
+    padding: 13px 16px !important;
+    font-weight: 800 !important;
+    box-shadow: 0 8px 20px -4px rgba(13, 148, 136, 0.38) !important;
+    transition: all 0.2s ease !important;
+  }
+  .guest-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px -4px rgba(13, 148, 136, 0.48) !important;
+    filter: brightness(1.05);
+  }
+
+  /* 4. SIDEBAR & NAVIGATION */
+  .sidebar {
+    background: var(--cm-surface-glass) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-right: 1px solid var(--cm-border) !important;
+    box-shadow: 10px 0 36px rgba(15, 23, 42, 0.08) !important;
+    padding: 18px 14px !important;
+  }
+
+  .sidebar .nav-title {
+    color: var(--cm-text-muted) !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    margin: 18px 10px 8px !important;
+  }
+
+  .sidebar .nav button {
+    color: var(--cm-text-secondary) !important;
+    font-weight: 600 !important;
+    font-size: 13.5px !important;
+    padding: 11px 14px !important;
+    border-radius: 12px !important;
+    margin: 3px 0 !important;
+    transition: all 0.16s ease !important;
+  }
+
+  .sidebar .nav button:hover {
+    background: var(--cm-surface-hover) !important;
+    color: var(--cm-primary) !important;
+    transform: translateX(2px);
+  }
+
+  .sidebar .nav button.active {
+    background: rgba(37, 99, 235, 0.12) !important;
+    color: var(--cm-primary) !important;
+    font-weight: 800 !important;
+    box-shadow: inset 3px 0 0 var(--cm-primary) !important;
+  }
+
+  /* 5. CARDS, STAT BOXES & CONTAINERS */
+  .card,
+  .guest-card,
+  .guest-stat,
+  .guest-honor-card,
+  .ah-stat,
+  .ah-tile,
+  .multi-year-card {
+    background: var(--cm-surface) !important;
+    color: var(--cm-text-primary) !important;
+    border: 1px solid var(--cm-border) !important;
+    border-radius: var(--cm-radius-lg) !important;
+    box-shadow: var(--cm-shadow-md) !important;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, border-color 0.2s ease !important;
+  }
+
+  .card::before {
+    height: 3px !important;
+    background: linear-gradient(90deg, #2563eb, #0ea5e9, #10b981) !important;
+    opacity: 0.85 !important;
+  }
+
+  .card.stat, .guest-stat, .ah-stat {
+    padding: 18px 20px !important;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat .label {
+    font-size: 12.5px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--cm-text-muted) !important;
+  }
+
+  .stat .value, .guest-stat .n, .ah-stat b {
+    font-size: 30px !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.03em;
+    color: var(--cm-text-primary) !important;
+    margin-top: 8px !important;
+  }
+
+  /* 6. DASHBOARD HERO & FLOATING BENTO UTILITY GRID */
+  .dashboard-home .cm-home-hero {
+    background: var(--cm-hero-gradient) !important;
+    border-radius: 28px !important;
+    padding: 28px 30px 22px !important;
+    box-shadow: 0 20px 44px -12px rgba(29, 78, 216, 0.38) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  }
+
+  .cm-home-avatar {
+    border: 3px solid rgba(255, 255, 255, 0.90) !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.25) !important;
+  }
+
+  .cm-home-class {
+    background: rgba(255, 255, 255, 0.13);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.24) !important;
+    border-radius: 16px;
+    padding: 11px 16px !important;
+    margin-top: 6px;
+  }
+
+  .cm-home-year {
+    background: rgba(255, 255, 255, 0.20);
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 12.5px !important;
+    font-weight: 800 !important;
+  }
+
+  .cm-section-title h2 {
+    font-size: 20px !important;
+    font-weight: 800 !important;
+    color: var(--cm-text-primary) !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Bento Grid for Utility Cards */
+  .cm-utility-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)) !important;
+    gap: 14px !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .cm-utility-card {
+    min-height: 138px !important;
+    padding: 20px 12px 16px !important;
+    border: 1px solid var(--cm-border) !important;
+    border-radius: 22px !important;
+    background: var(--cm-surface) !important;
+    color: var(--cm-text-primary) !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    box-shadow: var(--cm-shadow-sm) !important;
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.22s ease !important;
+  }
+
+  .cm-utility-card:hover {
+    transform: translateY(-4px) !important;
+    box-shadow: var(--cm-shadow-md) !important;
+    border-color: rgba(37, 99, 235, 0.38) !important;
+    background: var(--cm-surface) !important;
+  }
+
+  .cm-utility-icon {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 18px !important;
+    font-size: 29px !important;
+    transition: transform 0.22s ease !important;
+  }
+
+  .cm-utility-card:hover .cm-utility-icon {
+    transform: scale(1.08) rotate(-3deg);
+  }
+
+  .cm-utility-card.pink .cm-utility-icon { background: linear-gradient(135deg, #fce7f3, #fbcfe8) !important; }
+  .cm-utility-card.mint .cm-utility-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0) !important; }
+  .cm-utility-card.orange .cm-utility-icon { background: linear-gradient(135deg, #ffedd5, #fed7aa) !important; }
+  .cm-utility-card.blue .cm-utility-icon { background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important; }
+  .cm-utility-card.purple .cm-utility-icon { background: linear-gradient(135deg, #ede9fe, #ddd6fe) !important; }
+  .cm-utility-card.cyan .cm-utility-icon { background: linear-gradient(135deg, #cffafe, #a5f3fc) !important; }
+  .cm-utility-card.lavender .cm-utility-icon { background: linear-gradient(135deg, #f3e8ff, #e9d5ff) !important; }
+
+  /* 7. BUTTONS, INPUTS & SELECTS */
+  .btn {
+    background: var(--cm-primary-gradient) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.16) !important;
+    border-radius: 12px !important;
+    padding: 10px 16px !important;
+    font-weight: 700 !important;
+    font-size: 13.5px !important;
+    box-shadow: var(--cm-shadow-btn) !important;
+    transition: all 0.18s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  }
+
+  .btn:hover:not(:disabled) {
+    transform: translateY(-1.5px) !important;
+    filter: brightness(1.06);
+    box-shadow: 0 10px 22px -4px rgba(37, 99, 235, 0.42) !important;
+  }
+
+  .btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98) !important;
+  }
+
+  .btn.secondary {
+    background: var(--cm-surface-soft) !important;
+    color: var(--cm-text-primary) !important;
+    border: 1px solid var(--cm-border-strong) !important;
+    box-shadow: var(--cm-shadow-sm) !important;
+  }
+  .btn.secondary:hover:not(:disabled) {
+    background: var(--cm-surface-hover) !important;
+    border-color: var(--cm-primary) !important;
+    color: var(--cm-primary) !important;
+    box-shadow: var(--cm-shadow-sm) !important;
+  }
+
+  .btn.success {
+    background: linear-gradient(135deg, #16a34a 0%, #059669 100%) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    box-shadow: 0 6px 16px -3px rgba(22, 163, 74, 0.32) !important;
+  }
+
+  .btn.warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 16px -3px rgba(217, 119, 6, 0.32) !important;
+  }
+
+  .btn.danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    border-color: rgba(255, 255, 255, 0.18) !important;
+    color: #ffffff !important;
+    box-shadow: 0 6px 16px -3px rgba(220, 38, 38, 0.32) !important;
+  }
+
+  .btn.small {
+    padding: 7px 11px !important;
+    font-size: 12px !important;
+    border-radius: 9px !important;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea,
+  .field input:not([type="checkbox"]):not([type="radio"]),
+  .field select,
+  .field textarea,
+  .toolbar input,
+  .toolbar select,
+  .guest-controls select {
+    background: var(--cm-surface) !important;
+    color: var(--cm-text-primary) !important;
+    border: 1.5px solid var(--cm-border-strong) !important;
+    border-radius: 12px !important;
+    padding: 10px 13px !important;
+    font-size: 14px !important;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease !important;
+  }
+
+  input:focus:not([type="checkbox"]):not([type="radio"]),
+  select:focus,
+  textarea:focus {
+    border-color: var(--cm-primary) !important;
+    box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.15) !important;
+    outline: none !important;
+  }
+
+  select option {
+    background: var(--cm-surface) !important;
+    color: var(--cm-text-primary) !important;
+  }
+
+  .toolbar {
+    background: var(--cm-surface) !important;
+    border: 1px solid var(--cm-border) !important;
+    border-radius: 16px !important;
+    padding: 12px 14px !important;
+    box-shadow: var(--cm-shadow-sm) !important;
+  }
+
+  /* 8. TABLES & DATA GRIDS */
+  .table-wrap {
+    background: var(--cm-surface) !important;
+    border: 1px solid var(--cm-border) !important;
+    border-radius: 18px !important;
+    box-shadow: var(--cm-shadow-sm) !important;
+  }
+
+  .table, .guest-table {
+    color: var(--cm-text-primary) !important;
+  }
+
+  .table th, .guest-table th {
+    background: var(--cm-surface-soft) !important;
+    color: var(--cm-text-secondary) !important;
+    font-weight: 800 !important;
+    font-size: 12px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 13px 14px !important;
+    border-bottom: 1.5px solid var(--cm-border) !important;
+  }
+
+  .table td, .guest-table td {
+    background: var(--cm-surface) !important;
+    color: var(--cm-text-primary) !important;
+    border-bottom: 1px solid var(--cm-border) !important;
+    padding: 12px 14px !important;
+    font-size: 13.5px !important;
+    vertical-align: middle;
+  }
+
+  .table tr:nth-child(even) td,
+  .guest-table tr:nth-child(even) td {
+    background: var(--cm-surface) !important;
+  }
+
+  .table tbody tr:hover td,
+  .guest-table tbody tr:hover td {
+    background: var(--cm-surface-hover) !important;
+  }
+
+  /* 9. BADGES, NOTICES & KPI ROWS */
+  .badge {
+    padding: 5px 10px !important;
+    border-radius: 999px !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.01em;
+  }
+  .badge.b-green { background: #dcfce7 !important; color: #15803d !important; border: 1px solid #86efac; }
+  .badge.b-blue  { background: #dbeafe !important; color: #1d4ed8 !important; border: 1px solid #93c5fd; }
+  .badge.b-yellow{ background: #fef3c7 !important; color: #b45309 !important; border: 1px solid #fcd34d; }
+  .badge.b-red   { background: #fee2e2 !important; color: #b91c1c !important; border: 1px solid #fca5a5; }
+  .badge.b-gray  { background: #f1f5f9 !important; color: #475569 !important; border: 1px solid #cbd5e1; }
+
+  .notice {
+    background: #fffbeb !important;
+    color: #92400e !important;
+    border: 1px solid #fde68a !important;
+    border-radius: 14px !important;
+    padding: 13px 16px !important;
+    font-size: 13.5px !important;
+    line-height: 1.55;
+  }
+  .notice.ok {
+    background: #ecfdf5 !important;
+    color: #065f46 !important;
+    border-color: #a7f3d0 !important;
+  }
+  .notice.danger {
+    background: #fef2f2 !important;
+    color: #991b1b !important;
+    border-color: #fecaca !important;
+  }
+
+  .kpi-row {
+    background: var(--cm-surface-soft) !important;
+    color: var(--cm-text-primary) !important;
+    border: 1px solid var(--cm-border) !important;
+    border-radius: 12px !important;
+    padding: 10px 14px !important;
+  }
+
+  /* 10. TODAY ATTENDANCE PANEL & HONOR PANELS */
+  .today-attendance-panel {
+    background: var(--cm-surface) !important;
+    border: 1.5px solid rgba(37, 99, 235, 0.28) !important;
+    border-radius: 22px !important;
+    box-shadow: var(--cm-shadow-md) !important;
+  }
+  .today-attendance-head h3 {
+    color: var(--cm-text-primary) !important;
+    font-weight: 800 !important;
+  }
+  .today-attendance-item {
+    border-radius: 16px !important;
+    transition: transform 0.18s ease !important;
+  }
+  .today-attendance-item:hover {
+    transform: translateY(-2px);
+  }
+
+  .guest-honor-panel.good {
+    background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%) !important;
+    border: 1px solid #a7f3d0 !important;
+    color: #0f172a !important;
+  }
+  .guest-honor-panel.warn {
+    background: linear-gradient(180deg, #fff1f2 0%, #ffffff 100%) !important;
+    border: 1px solid #fecdd3 !important;
+    color: #0f172a !important;
+  }
+  .guest-honor-item {
+    border-radius: 14px !important;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    color: #0f172a !important;
+  }
+
+  .dashboard-notification-item,
+  .guest-notification-card {
+    background: var(--cm-surface) !important;
+    color: var(--cm-text-primary) !important;
+    border: 1px solid var(--cm-border) !important;
+    border-left: 4px solid var(--cm-primary) !important;
+    border-radius: 14px !important;
+    box-shadow: var(--cm-shadow-sm) !important;
+  }
+  .dashboard-notification-item strong,
+  .guest-notification-card strong {
+    color: var(--cm-text-primary) !important;
+  }
+
+  /* 11. MODALS, SHEETS & FLOATING BOTTOM DOCK */
+  .modal {
+    background: rgba(15, 23, 42, 0.55) !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+  }
+
+  .modal-card,
+  .cm-account-sheet,
+  .cm-today-attendance-sheet,
+  #competitionHistoryModal .competition-history-card {
+    background: var(--cm-surface) !important;
+    color: var(--cm-text-primary) !important;
+    border: 1px solid var(--cm-border) !important;
+    border-radius: 24px !important;
+    box-shadow: var(--cm-shadow-lg) !important;
+  }
+
+  #competitionHistoryModal .modal-head {
+    background: var(--cm-surface) !important;
+  }
+
+  .cm-bottom-nav {
+    background: var(--cm-surface-glass) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border-top: 1px solid var(--cm-border) !important;
+    box-shadow: 0 -8px 30px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  .cm-bottom-nav button {
+    color: var(--cm-text-muted) !important;
+    font-weight: 600 !important;
+  }
+  .cm-bottom-nav button:hover {
+    background: var(--cm-surface-hover) !important;
+    color: var(--cm-primary) !important;
+  }
+  .cm-bottom-nav button.active {
+    color: var(--cm-primary) !important;
+    background: rgba(37, 99, 235, 0.12) !important;
+    font-weight: 800 !important;
+  }
+
+  .lai-module-overlay {
+    background: var(--cm-bg-main) !important;
+    color: var(--cm-text-primary) !important;
+  }
+  .lai-module-appbar, .lai-tabs {
+    background: var(--cm-surface) !important;
+    border-color: var(--cm-border) !important;
+  }
+  .lai-module-card {
+    background: var(--cm-surface) !important;
+    color: var(--cm-text-primary) !important;
+    border-color: var(--cm-border) !important;
+    border-radius: 20px !important;
+  }
+
+  /* Mobile Responsive Refinements */
+  @media (max-width: 680px) {
+    .cm-utility-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      gap: 10px !important;
+      padding: 0 12px !important;
+    }
+    .cm-utility-card {
+      min-height: 118px !important;
+      padding: 14px 6px 12px !important;
+      border-radius: 18px !important;
+      font-size: 12.5px !important;
+    }
+    .cm-utility-icon {
+      width: 50px !important;
+      height: 50px !important;
+      border-radius: 15px !important;
+      font-size: 25px !important;
+    }
+    .dashboard-home .cm-home-hero {
+      margin: 10px 12px 0 !important;
+      border-radius: 24px !important;
+      padding: 20px 18px 16px !important;
+    }
+    .cm-brand-theme-switch {
+      right: 12px;
+      height: 32px;
+      padding: 0 10px;
+      font-size: 11.5px;
+    }
+    #page-students .table-wrap>.table tr,
+    #page-attendance .table-wrap>.table tr,
+    #page-conduct .table-wrap>.table:not(.guide-table) tr,
+    #page-competition .table-wrap>.table tr,
+    #page-reports .table-wrap>.table tr,
+    .guest-student-conduct .table-wrap>.table tr {
+      background: var(--cm-surface) !important;
+      border: 1px solid var(--cm-border) !important;
+      border-radius: 16px !important;
+      box-shadow: var(--cm-shadow-sm) !important;
+    }
+    #page-students .table-wrap>.table td,
+    #page-attendance .table-wrap>.table td,
+    #page-conduct .table-wrap>.table:not(.guide-table) td,
+    #page-competition .table-wrap>.table td,
+    #page-reports .table-wrap>.table td,
+    .guest-student-conduct .table-wrap>.table td {
+      background: var(--cm-surface) !important;
+      color: var(--cm-text-primary) !important;
+      border-bottom-color: var(--cm-border) !important;
+    }
+  }
+}
+</style>
+<script id="cm-ultra-modern-theme-js">
+(function(){
+  const THEME_KEY = 'cm_ui_theme_2026';
+  function getTheme(){
+    try { return localStorage.getItem(THEME_KEY) === 'dark' ? 'dark' : 'light'; } catch(e){ return 'light'; }
+  }
+  function applyTheme(theme){
+    document.documentElement.setAttribute('data-cm-theme', theme);
+    try { localStorage.setItem(THEME_KEY, theme); } catch(e){}
+    const label = theme === 'dark' ? '☀️ Giao diện Sáng' : '🌙 Giao diện Tối';
+    const shortLabel = theme === 'dark' ? '☀️ Sáng' : '🌙 Tối';
+    document.querySelectorAll('.cm-theme-toggle-btn').forEach(b => { b.textContent = label; });
+    document.querySelectorAll('.cm-brand-theme-switch').forEach(b => { b.textContent = shortLabel; });
+  }
+  window.toggleCmTheme = function(){
+    applyTheme(getTheme() === 'dark' ? 'light' : 'dark');
+  };
+  function mountThemeSwitches(){
+    applyTheme(getTheme());
+    const userbox = document.querySelector('.topbar .userbox');
+    if (userbox && !userbox.querySelector('.cm-theme-toggle-btn')) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cm-theme-toggle-btn';
+      btn.title = 'Chuyển đổi giao diện Sáng / Tối';
+      btn.onclick = window.toggleCmTheme;
+      userbox.insertBefore(btn, userbox.firstChild);
+    }
+    ['.app-brand-banner', '.login-brand-banner'].forEach(sel => {
+      const banner = document.querySelector(sel);
+      if (banner && !banner.querySelector('.cm-brand-theme-switch')) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'cm-brand-theme-switch';
+        b.title = 'Chuyển đổi giao diện Sáng / Tối';
+        b.onclick = window.toggleCmTheme;
+        banner.appendChild(b);
+      }
+    });
+    applyTheme(getTheme());
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', mountThemeSwitches, { once: true });
+  } else {
+    mountThemeSwitches();
+  }
+})();
+</script>
+<style id="cm-standalone-pwa-engine-css">
+  /* Standalone PWA App Mode Enhancements & Smart Install Modal */
+  @media all and (display-mode: standalone) {
+    body {
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+    input, textarea, select, .table, td, th {
+      user-select: text;
+      -webkit-user-select: text;
+    }
+    #cmPwaInstallButton {
+      display: none !important;
+    }
+  }
+
+  /* Vibrant Floating Install App Button Upgrade */
+  #cmPwaInstallButton.cm-pwa-install {
+    width: 78px !important;
+    height: 78px !important;
+    filter: drop-shadow(0 12px 24px rgba(37, 99, 235, 0.38));
+  }
+  #cmPwaInstallButton .cm-install-badge {
+    width: 26px !important;
+    height: 26px !important;
+    background: linear-gradient(135deg, #facc15 0%, #ea580c 100%) !important;
+    border: 2px solid #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.45) !important;
+  }
+  #cmPwaInstallButton .cm-install-label {
+    background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%) !important;
+    color: #ffffff !important;
+    font-family: var(--cm-font, 'Be Vietnam Pro', sans-serif) !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    padding: 8px 14px !important;
+    border: 1px solid rgba(255, 255, 255, 0.28) !important;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.28) !important;
+  }
+
+  /* Smart Standalone Install Modal */
+  .cm-pwa-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.68);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+  }
+  .cm-pwa-modal-backdrop.show {
+    display: flex;
+    animation: cmPwaFadeIn 0.22s ease-out;
+  }
+  @keyframes cmPwaFadeIn {
+    from { opacity: 0; transform: scale(0.96); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .cm-pwa-modal-card {
+    width: min(460px, 100%);
+    background: var(--cm-surface, #ffffff);
+    color: var(--cm-text-primary, #0f172a);
+    border-radius: 28px;
+    border: 1px solid var(--cm-border, rgba(148, 163, 184, 0.25));
+    box-shadow: 0 28px 68px rgba(15, 23, 42, 0.42);
+    overflow: hidden;
+    font-family: var(--cm-font, 'Be Vietnam Pro', sans-serif);
+  }
+  .cm-pwa-modal-hero {
+    background: linear-gradient(135deg, #0f1e54 0%, #2563eb 45%, #0d9488 100%);
+    padding: 24px 22px 20px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+  }
+  .cm-pwa-modal-icon {
+    width: 76px;
+    height: 76px;
+    border-radius: 20px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), 0 0 0 2px rgba(255, 255, 255, 0.35);
+    flex-shrink: 0;
+    background: #1e3a8a;
+    object-fit: cover;
+  }
+  .cm-pwa-modal-title h3 {
+    margin: 0 0 4px;
+    font-size: 19px;
+    font-weight: 800;
+    color: #ffffff !important;
+    letter-spacing: -0.02em;
+  }
+  .cm-pwa-modal-title p {
+    margin: 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.88) !important;
+    line-height: 1.4;
+  }
+  .cm-pwa-modal-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 7px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(250, 204, 21, 0.22);
+    border: 1px solid rgba(250, 204, 21, 0.55);
+    color: #fef08a;
+    font-size: 11.5px;
+    font-weight: 800;
+  }
+  .cm-pwa-modal-close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255, 255, 255, 0.18);
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+  }
+  .cm-pwa-modal-body {
+    padding: 20px 22px 22px;
+  }
+  .cm-pwa-step-list {
+    display: grid;
+    gap: 12px;
+    margin: 12px 0 18px;
+  }
+  .cm-pwa-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: var(--cm-surface-soft, #f8fafc);
+    border: 1px solid var(--cm-border, #e2e8f0);
+  }
+  .cm-pwa-step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2563eb, #4f46e5);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 13px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .cm-pwa-step-text {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--cm-text-primary, #0f172a);
+  }
+  .cm-pwa-step-text strong {
+    color: var(--cm-primary, #2563eb);
+    font-weight: 800;
+  }
+  .cm-pwa-primary-btn {
+    width: 100%;
+    border: 0;
+    border-radius: 14px;
+    padding: 13px 18px;
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 55%, #0d9488 100%);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(37, 99, 235, 0.32);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .cm-pwa-note {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--cm-text-muted, #64748b);
+    text-align: center;
+    line-height: 1.45;
+  }
+</style>
+
+<script id="cm-standalone-pwa-engine-js">
+(function(){
+  /* 1. High-DPI Canvas Icon Generator (Fallback & Instant Preview)
+     Đảm bảo biểu tượng 3D Mũ Cử Nhân Vàng + Sổ Số Hóa + Huy Hiệu Tích Xanh
+     luôn hiển thị sắc nét kể cả khi chỉ upload duy nhất file index.html */
+  function renderCmProIconDataUrl(size, fullBleed) {
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      const s = size / 512;
+
+      function roundRect(x, y, w, h, r) {
+        ctx.beginPath();
+        if (r <= 0) { ctx.rect(x, y, w, h); ctx.closePath(); return; }
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      }
+
+      const pad = fullBleed ? 0 : 12 * s;
+      const bgSize = size - pad * 2;
+      const radius = fullBleed ? 0 : 116 * s;
+
+      roundRect(pad, pad, bgSize, bgSize, radius);
+      const bgGrad = ctx.createLinearGradient(0, 0, size, size);
+      bgGrad.addColorStop(0, '#0f1e54');
+      bgGrad.addColorStop(0.38, '#2563eb');
+      bgGrad.addColorStop(0.72, '#4f46e5');
+      bgGrad.addColorStop(1, '#0d9488');
+      ctx.fillStyle = bgGrad;
+      ctx.fill();
+      ctx.save();
+      ctx.clip();
+
+      // Inner glass shield
+      roundRect(74 * s, 70 * s, 364 * s, 372 * s, 80 * s);
+      const glassGrad = ctx.createLinearGradient(74 * s, 70 * s, 438 * s, 442 * s);
+      glassGrad.addColorStop(0, 'rgba(255,255,255,0.22)');
+      glassGrad.addColorStop(1, 'rgba(255,255,255,0.06)');
+      ctx.fillStyle = glassGrad;
+      ctx.fill();
+      ctx.lineWidth = 3 * s;
+      ctx.strokeStyle = 'rgba(255,255,255,0.34)';
+      ctx.stroke();
+
+      // Open Digital Book
+      ctx.beginPath();
+      ctx.moveTo(256 * s, 292 * s);
+      ctx.bezierCurveTo(210 * s, 272 * s, 150 * s, 276 * s, 118 * s, 290 * s);
+      ctx.lineTo(118 * s, 366 * s);
+      ctx.bezierCurveTo(155 * s, 352 * s, 210 * s, 350 * s, 256 * s, 372 * s);
+      ctx.closePath();
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(256 * s, 292 * s);
+      ctx.bezierCurveTo(302 * s, 272 * s, 362 * s, 276 * s, 394 * s, 290 * s);
+      ctx.lineTo(394 * s, 366 * s);
+      ctx.bezierCurveTo(357 * s, 352 * s, 302 * s, 350 * s, 256 * s, 372 * s);
+      ctx.closePath();
+      ctx.fillStyle = '#e0f2fe';
+      ctx.fill();
+
+      // Gold grad
+      const goldGrad = ctx.createLinearGradient(96 * s, 104 * s, 416 * s, 420 * s);
+      goldGrad.addColorStop(0, '#fef08a');
+      goldGrad.addColorStop(0.5, '#facc15');
+      goldGrad.addColorStop(1, '#d97706');
+
+      // Cap skull
+      ctx.beginPath();
+      ctx.moveTo(166 * s, 198 * s);
+      ctx.lineTo(346 * s, 198 * s);
+      ctx.lineTo(332 * s, 248 * s);
+      ctx.lineTo(256 * s, 272 * s);
+      ctx.lineTo(180 * s, 248 * s);
+      ctx.closePath();
+      ctx.fillStyle = '#0f172a';
+      ctx.fill();
+      ctx.lineWidth = 3.5 * s;
+      ctx.strokeStyle = '#facc15';
+      ctx.stroke();
+
+      // Cap diamond
+      ctx.beginPath();
+      ctx.moveTo(256 * s, 104 * s);
+      ctx.lineTo(416 * s, 172 * s);
+      ctx.lineTo(256 * s, 236 * s);
+      ctx.lineTo(96 * s, 172 * s);
+      ctx.closePath();
+      ctx.fillStyle = goldGrad;
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(256 * s, 116 * s);
+      ctx.lineTo(392 * s, 172 * s);
+      ctx.lineTo(256 * s, 224 * s);
+      ctx.lineTo(120 * s, 172 * s);
+      ctx.closePath();
+      ctx.fillStyle = '#1e3a8a';
+      ctx.fill();
+
+      // Tassel
+      ctx.beginPath();
+      ctx.moveTo(256 * s, 170 * s);
+      ctx.bezierCurveTo(315 * s, 178 * s, 368 * s, 196 * s, 374 * s, 250 * s);
+      ctx.lineWidth = 7 * s;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#facc15';
+      ctx.stroke();
+
+      // Emerald checkmark badge
+      ctx.beginPath();
+      ctx.arc(382 * s, 126 * s, 44 * s, 0, Math.PI * 2);
+      ctx.fillStyle = '#10b981';
+      ctx.fill();
+      ctx.lineWidth = 5 * s;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(362 * s, 127 * s);
+      ctx.lineTo(377 * s, 142 * s);
+      ctx.lineTo(404 * s, 112 * s);
+      ctx.lineWidth = 9 * s;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+
+      // CM PRO pill
+      roundRect(156 * s, 386 * s, 200 * s, 46 * s, 23 * s);
+      ctx.fillStyle = goldGrad;
+      ctx.fill();
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '900 ' + Math.round(23 * s) + 'px "Be Vietnam Pro", "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('CM PRO', 256 * s, 410 * s);
+
+      ctx.restore();
+      return canvas.toDataURL('image/png');
+    } catch (e) {
+      return '';
+    }
+  }
+
+  const icon192DataUrl = renderCmProIconDataUrl(192, false);
+  const icon180DataUrl = renderCmProIconDataUrl(180, true);
+
+  /* 2. Tự động đăng ký Service Worker ngay khi tải trang (kể cả màn hình Khách / Đăng nhập)
+     để điện thoại kích hoạt cài đặt Ứng dụng độc lập (WebAPK) thay vì lối tắt trình duyệt */
+  function bootstrapStandalonePWA() {
+    if (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(function(){});
+      }
+      // Kiểm tra nếu file apple-touch-icon.png chưa được upload lên host thì tự động gắn DataURL nét cao
+      fetch('./apple-touch-icon.png', { method: 'HEAD' }).then(function(r){
+        if (!r.ok && icon180DataUrl) {
+          const appleLink = document.querySelector('link[rel="apple-touch-icon"]');
+          if (appleLink) appleLink.href = icon180DataUrl;
+        }
+      }).catch(function(){
+        if (icon180DataUrl) {
+          const appleLink = document.querySelector('link[rel="apple-touch-icon"]');
+          if (appleLink) appleLink.href = icon180DataUrl;
+        }
+      });
+
+      // Nếu manifest.webmanifest chưa được upload (404), tự động tạo manifest dự phòng có đầy đủ icon 192 & 512
+      fetch('./manifest.webmanifest', { method: 'HEAD' }).then(function(r){
+        if (!r.ok) injectFallbackManifest();
+      }).catch(injectFallbackManifest);
+    }
+  }
+
+  function injectFallbackManifest() {
+    const icon512DataUrl = renderCmProIconDataUrl(512, false);
+    if (!icon192DataUrl || !icon512DataUrl) return;
+    const fallbackManifest = {
+      name: 'Sổ Chủ Nhiệm Số — ClassManager Pro',
+      short_name: 'ClassManager Pro',
+      start_url: location.href.split('#')[0],
+      scope: './',
+      display: 'standalone',
+      orientation: 'portrait-primary',
+      background_color: '#0f172a',
+      theme_color: '#1e3a8a',
+      icons: [
+        { src: icon192DataUrl, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+        { src: icon512DataUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+      ]
+    };
+    const blob = new Blob([JSON.stringify(fallbackManifest)], { type: 'application/manifest+json' });
+    const link = document.querySelector('link[rel="manifest"]');
+    if (link) link.href = URL.createObjectURL(blob);
+  }
+
+  /* 3. Hộp thoại hướng dẫn cài đặt Ứng Dụng Độc Lập thông minh (Android & iOS) */
+  function ensureSmartInstallModal() {
+    let modal = document.getElementById('cmPwaSmartModal');
+    if (modal) return modal;
+
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    modal = document.createElement('div');
+    modal.id = 'cmPwaSmartModal';
+    modal.className = 'cm-pwa-modal-backdrop';
+    modal.innerHTML = `
+      <div class="cm-pwa-modal-card" role="dialog" aria-modal="true" aria-labelledby="cmPwaModalTitle">
+        <div class="cm-pwa-modal-hero">
+          <button type="button" class="cm-pwa-modal-close" id="cmPwaModalCloseBtn" aria-label="Đóng">✕</button>
+          <img class="cm-pwa-modal-icon" id="cmPwaModalPreviewIcon" src="./icon-192.png" alt="ClassManager Pro Icon">
+          <div class="cm-pwa-modal-title">
+            <h3 id="cmPwaModalTitle">ClassManager Pro</h3>
+            <p>Sổ Chủ Nhiệm Số — THPT Chi Lăng</p>
+            <span class="cm-pwa-modal-badge">✨ Ứng dụng độc lập (Toàn màn hình)</span>
+          </div>
+        </div>
+        <div class="cm-pwa-modal-body">
+          <div id="cmPwaModalDynamicSteps" class="cm-pwa-step-list">
+            ${isIOS ? `
+              <div class="cm-pwa-step">
+                <div class="cm-pwa-step-num">1</div>
+                <div class="cm-pwa-step-text">Mở trang này bằng trình duyệt <strong>Safari</strong> trên iPhone/iPad, nhấn nút <strong>Chia sẻ (Share ⬆️)</strong> ở thanh công cụ phía dưới.</div>
+              </div>
+              <div class="cm-pwa-step">
+                <div class="cm-pwa-step-num">2</div>
+                <div class="cm-pwa-step-text">Cuộn xuống và chọn <strong>“Thêm vào MH chính” (Add to Home Screen ➕)</strong>.</div>
+              </div>
+              <div class="cm-pwa-step">
+                <div class="cm-pwa-step-num">3</div>
+                <div class="cm-pwa-step-text">Nhấn <strong>Thêm (Add)</strong> ở góc phải trên cùng. Ứng dụng <strong>ClassManager Pro</strong> sẽ xuất hiện trên màn hình chính với icon riêng và chạy độc lập toàn màn hình!</div>
+              </div>
+            ` : `
+              <div class="cm-pwa-step">
+                <div class="cm-pwa-step-num">1</div>
+                <div class="cm-pwa-step-text">Nhấn vào biểu tượng menu <strong>⋮ (3 chấm)</strong> ở góc trên bên phải trình duyệt <strong>Chrome / Edge</strong>.</div>
+              </div>
+              <div class="cm-pwa-step">
+                <div class="cm-pwa-step-num">2</div>
+                <div class="cm-pwa-step-text">Chọn <strong>“Cài đặt ứng dụng” (Install app)</strong> hoặc <strong>“Thêm vào màn hình chính”</strong> → chọn <strong>Cài đặt</strong>.</div>
+              </div>
+              <div class="cm-pwa-step">
+                <div class="cm-pwa-step-num">3</div>
+                <div class="cm-pwa-step-text">Hệ thống sẽ cài đặt <strong>ClassManager Pro</strong> thành ứng dụng độc lập ngoài màn hình chính (không còn thanh địa chỉ trình duyệt).</div>
+              </div>
+            `}
+          </div>
+          <button type="button" class="cm-pwa-primary-btn" id="cmPwaModalActionBtn">
+            <span>🚀 Đã hiểu — Đóng hướng dẫn</span>
+          </button>
+          <div class="cm-pwa-note">
+            💡 Mẹo: Nếu trước đây thầy đã tạo “Lối tắt” cũ ngoài màn hình chính, hãy <strong>nhấn giữ và xóa lối tắt cũ</strong> đi trước khi cài đặt bản Ứng dụng mới này để nhận biểu tượng CM PRO 3D mới nhé!
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const previewImg = modal.querySelector('#cmPwaModalPreviewIcon');
+    if (previewImg && icon192DataUrl) {
+      previewImg.onerror = function() { previewImg.src = icon192DataUrl; };
+    }
+
+    const close = function() { modal.classList.remove('show'); };
+    modal.querySelector('#cmPwaModalCloseBtn').onclick = close;
+    modal.querySelector('#cmPwaModalActionBtn').onclick = async function() {
+      const p = window.__cmDeferredPwaPrompt;
+      if (p) {
+        try {
+          p.prompt();
+          await p.userChoice;
+        } catch (_) {}
+        window.__cmDeferredPwaPrompt = null;
+      }
+      close();
+    };
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) close();
+    });
+
+    return modal;
+  }
+
+  window.openCmPwaSmartInstallModal = function() {
+    const modal = ensureSmartInstallModal();
+    const actionBtn = modal.querySelector('#cmPwaModalActionBtn');
+    if (actionBtn) {
+      if (window.__cmDeferredPwaPrompt) {
+        actionBtn.innerHTML = '<span>⬇️ Cài đặt Ứng dụng ngay (1 chạm)</span>';
+      } else {
+        actionBtn.innerHTML = '<span>🚀 Đã hiểu — Đóng hướng dẫn</span>';
+      }
+    }
+    modal.classList.add('show');
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bootstrapStandalonePWA, { once: true });
+  } else {
+    bootstrapStandalonePWA();
+  }
+})();
+</script>
