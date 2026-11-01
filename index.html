@@ -942,8 +942,8 @@ body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!i
 
       <section id="page-dashboard" class="page active dashboard-home">
         <section class="cm-home-hero" aria-label="Thông tin giáo viên">
-          <div class="cm-home-profile"><button class="cm-home-avatar cm-home-account-button" id="cmHomeInitial" type="button" onclick="openAccountPanel()" aria-label="Mở hồ sơ tài khoản và đăng xuất" title="Tài khoản">GV</button><div><div class="cm-home-greeting">Xin chào,</div><h2 id="cmHomeName">Nguyễn Văn Hoàng</h2><p id="cmHomeAccount">Giáo viên chủ nhiệm</p></div></div>
-          <div class="cm-home-illustration" aria-hidden="true">👨‍🏫<span>📚</span></div>
+          <div class="cm-home-profile"><button class="cm-home-avatar cm-home-account-button" id="cmHomeInitial" type="button" onclick="openAccountPanel()" aria-label="Mở hồ sơ tài khoản và đăng xuất" title="Tài khoản"><span class="cm-av-char">👨‍🏫</span><span class="cm-av-badge">📚</span></button><div><div class="cm-home-greeting">Xin chào,</div><h2 id="cmHomeName">Nguyễn Văn Hoàng</h2><p id="cmHomeAccount">Giáo viên chủ nhiệm</p></div></div>
+          <div class="cm-home-illustration" aria-hidden="true" style="display:none!important"></div>
           <div class="cm-home-class"><span>🏫</span><div><small id="cmHomeScopeLabel">Lớp đang quản lý</small><strong id="cmHomeClass">12A8</strong></div><span class="cm-home-year" id="cmHomeYear">2026–2027</span></div>
         </section>
 
@@ -1414,6 +1414,7 @@ function setUserUi(){
   const scopeText=currentUser?.scope||currentClass?.class_name||'';
   document.getElementById('userRole').textContent=roleText+' · '+scopeText;
   document.getElementById('avatar').textContent=(currentUser?.name||currentUser?.username||'N').charAt(0).toUpperCase();
+  if(typeof window.syncCmUserAvatars==='function'){try{window.syncCmUserAvatars();}catch(e){}}
   document.querySelectorAll('.admin-only').forEach(x=>x.classList.toggle('hidden',!isAdmin()));
   // Mục quản trị hệ thống: chỉ Admin nhìn thấy; tài khoản GVCN không thấy.
   document.querySelectorAll('.sysadmin-only').forEach(x=>x.classList.toggle('hidden',!isSystemAdmin()));
@@ -1967,7 +1968,7 @@ function renderDashboard(){
   const displayName=currentUser?.name||currentUser?.username||'Giáo viên chủ nhiệm',className=state?.settings?.className||'Lớp đang quản lý',schoolYear=state?.settings?.year||'Năm học hiện tại',roleCode=String(currentUser?.role||'').toLowerCase();
   let roleTitle='Thành viên lớp',scopeLabel='Lớp đang quản lý',scopeValue=className;
   if(roleCode==='gvcn'){roleTitle='Giáo viên chủ nhiệm'}else if(roleCode==='admin'){roleTitle='Quản trị viên hệ thống'}else if(roleCode==='loptruong'){roleTitle='Lớp trưởng'}else if(roleCode==='loppho'){roleTitle='Lớp phó'}else if(/^to[1-4]$/.test(roleCode)){roleTitle='Tổ trưởng';scopeLabel='Tổ đang quản lý';scopeValue=currentUser?.scope||('Tổ '+roleCode.slice(2))}
-  if(heroName)heroName.textContent=displayName;if(heroAccount)heroAccount.textContent=roleTitle;if(heroInitial)heroInitial.textContent=displayName.split(/\s+/).filter(Boolean).slice(-2).map(x=>x[0]).join('').toUpperCase()||'GV';if(heroScopeLabel)heroScopeLabel.textContent=scopeLabel;if(heroClass)heroClass.textContent=scopeValue;if(heroYear)heroYear.textContent=roleCode==='admin'||roleCode==='gvcn'||roleCode==='loptruong'||roleCode==='loppho'?schoolYear:'';
+  if(heroName)heroName.textContent=displayName;if(heroAccount)heroAccount.textContent=roleTitle;if(heroInitial){if(typeof window.syncCmUserAvatars==='function'){window.syncCmUserAvatars();}else{heroInitial.textContent=displayName.split(/\s+/).filter(Boolean).slice(-2).map(x=>x[0]).join('').toUpperCase()||'GV';}}if(heroScopeLabel)heroScopeLabel.textContent=scopeLabel;if(heroClass)heroClass.textContent=scopeValue;if(heroYear)heroYear.textContent=roleCode==='admin'||roleCode==='gvcn'||roleCode==='loptruong'||roleCode==='loppho'?schoolYear:'';
   const recentCard=document.getElementById('recentActivityCard');
   if(recentCard)recentCard.style.display=currentUser&&!isAdmin()?'none':'';
   renderRecentUtilities();
@@ -5813,7 +5814,7 @@ try{const _sp=window.showPage;if(typeof _sp==='function')window.showPage=functio
 <div id="cmAccountPanel" class="cm-account-panel" role="dialog" aria-modal="true" aria-label="Thông tin tài khoản" onclick="if(event.target===this)closeAccountPanel()">
   <section class="cm-account-sheet">
     <div class="cm-sheet-handle"></div>
-    <div class="cm-account-heading"><div class="cm-account-avatar" id="cmAccountInitial">GV</div><div><small>Tài khoản đang đăng nhập</small><h3 id="cmAccountName">Giáo viên</h3><p id="cmAccountRole">Giáo viên chủ nhiệm</p></div><button class="cm-sheet-close" type="button" onclick="closeAccountPanel()" aria-label="Đóng">×</button></div>
+    <div class="cm-account-heading"><div class="cm-account-avatar" id="cmAccountInitial"><span class="cm-av-char">👨‍🏫</span><span class="cm-av-badge">📚</span></div><div><small>Tài khoản đang đăng nhập</small><h3 id="cmAccountName">Giáo viên</h3><p id="cmAccountRole">Giáo viên chủ nhiệm</p></div><button class="cm-sheet-close" type="button" onclick="closeAccountPanel()" aria-label="Đóng">×</button></div>
     <div class="cm-account-info"><div><span>👤 Tên đăng nhập</span><b id="cmAccountUsername">—</b></div><div><span>🏫 Lớp đang quản lý</span><b id="cmAccountClass">—</b></div></div>
     <button class="cm-account-logout" type="button" onclick="closeAccountPanel();logout()">↪️ Thoát tài khoản</button>
   </section>
@@ -5832,7 +5833,7 @@ try{const _sp=window.showPage;if(typeof _sp==='function')window.showPage=functio
 </style>
 <style id="cm-auth-navigation-visibility-v1">#app.hidden~.cm-bottom-nav{display:none!important}</style>
 <script id="cm-account-panel-js-v1">
-window.openAccountPanel=function(){const p=document.getElementById('cmAccountPanel');if(!p)return;const u=typeof currentUser!=='undefined'?currentUser:null,c=typeof currentClass!=='undefined'?currentClass:null;const name=u?.name||u?.username||'Giáo viên',role=u?.role==='gvcn'?'Giáo viên chủ nhiệm':u?.role==='admin'?'Quản trị viên hệ thống':(u?.roleLabel||u?.role||'Thành viên lớp');document.getElementById('cmAccountName').textContent=name;document.getElementById('cmAccountRole').textContent=role;document.getElementById('cmAccountUsername').textContent=u?.username||u?.email||'—';document.getElementById('cmAccountClass').textContent=c?.class_name?(c.class_name+(c.year?' · '+c.year:'')):'—';document.getElementById('cmAccountInitial').textContent=name.split(/\s+/).filter(Boolean).slice(-2).map(x=>x[0]).join('').toUpperCase()||'GV';openModal('cmAccountPanel')};
+window.openAccountPanel=function(){const p=document.getElementById('cmAccountPanel');if(!p)return;const u=typeof currentUser!=='undefined'?currentUser:null,c=typeof currentClass!=='undefined'?currentClass:null;const name=u?.name||u?.username||'Giáo viên',role=u?.role==='gvcn'?'Giáo viên chủ nhiệm':u?.role==='admin'?'Quản trị viên hệ thống':(u?.roleLabel||u?.role||'Thành viên lớp');document.getElementById('cmAccountName').textContent=name;document.getElementById('cmAccountRole').textContent=role;document.getElementById('cmAccountUsername').textContent=u?.username||u?.email||'—';document.getElementById('cmAccountClass').textContent=c?.class_name?(c.class_name+(c.year?' · '+c.year:'')):'—';if(typeof window.syncCmUserAvatars==='function'){window.syncCmUserAvatars();}else{document.getElementById('cmAccountInitial').textContent=name.split(/\s+/).filter(Boolean).slice(-2).map(x=>x[0]).join('').toUpperCase()||'GV';}openModal('cmAccountPanel')};
 window.closeAccountPanel=function(){document.getElementById('cmAccountPanel')?.classList.remove('show')};
 window.openTodayAttendanceSummary=function(){const panel=document.getElementById('cmTodayAttendancePanel'),content=document.getElementById('cmTodayAttendanceContent'),title=document.getElementById('cmTodayAttendanceTitle');if(!panel||!content)return;const date=typeof today==='function'?today():new Date().toISOString().slice(0,10),students=Array.isArray(state?.students)?state.students:[],attendance=state?.attendance||{};if(title)title.textContent='🗓️ Điểm danh hôm nay ('+(typeof fmtDate==='function'?fmtDate(date):date.split('-').reverse().join('/'))+')';if(typeof attendanceTodaySummary==='function'&&typeof attendanceTodayPanelMarkup==='function'){content.innerHTML=attendanceTodayPanelMarkup(attendanceTodaySummary(students,attendance,date));}else{content.innerHTML='<div class="empty">Không thể tải dữ liệu điểm danh hôm nay.</div>';}openModal('cmTodayAttendancePanel');};
 window.closeTodayAttendanceSummary=function(){document.getElementById('cmTodayAttendancePanel')?.classList.remove('show')};
@@ -6191,16 +6192,125 @@ button.avatar{border:0!important;appearance:none!important;-webkit-appearance:no
 
   /* 6. DASHBOARD HERO & FLOATING BENTO UTILITY GRID */
   .dashboard-home .cm-home-hero {
+    grid-template-columns: minmax(0, 1fr) !important;
     background: var(--cm-hero-gradient) !important;
     border-radius: 28px !important;
-    padding: 28px 30px 22px !important;
+    padding: 26px 26px 20px !important;
     box-shadow: 0 20px 44px -12px rgba(29, 78, 216, 0.38) !important;
     border: 1px solid rgba(255, 255, 255, 0.22) !important;
   }
 
+  .cm-home-illustration {
+    display: none !important;
+  }
+
+  .cm-home-profile {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 15px !important;
+  }
+
+  .cm-home-profile > div {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .cm-home-profile h2 {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    word-break: break-word;
+    line-height: 1.22 !important;
+  }
+
+  .cm-home-avatar,
+  .cm-account-avatar {
+    position: relative !important;
+    overflow: visible !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    border: 3px solid rgba(255, 255, 255, 0.92) !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.28), inset 0 2px 6px rgba(255, 255, 255, 0.65) !important;
+    background: radial-gradient(circle at 30% 25%, #ffffff 0%, #bae6fd 48%, #38bdf8 100%) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
   .cm-home-avatar {
-    border: 3px solid rgba(255, 255, 255, 0.90) !important;
-    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.25) !important;
+    flex: 0 0 68px !important;
+    width: 68px !important;
+    height: 68px !important;
+  }
+
+  .cm-home-avatar[data-avatar-role="student-male"],
+  .cm-account-avatar[data-avatar-role="student-male"] {
+    background: radial-gradient(circle at 30% 25%, #ffffff 0%, #bfdbfe 48%, #60a5fa 100%) !important;
+  }
+
+  .cm-home-avatar[data-avatar-role="student-female"],
+  .cm-account-avatar[data-avatar-role="student-female"] {
+    background: radial-gradient(circle at 30% 25%, #fff1f2 0%, #fbcfe8 50%, #f472b6 100%) !important;
+  }
+
+  .cm-home-avatar .cm-av-char,
+  .cm-account-avatar .cm-av-char {
+    font-size: 40px !important;
+    line-height: 1 !important;
+    display: block !important;
+    transform: translateY(1px);
+    filter: drop-shadow(0 4px 6px rgba(15, 23, 42, 0.20));
+    user-select: none;
+  }
+
+  .cm-account-avatar .cm-av-char {
+    font-size: 34px !important;
+  }
+
+  .cm-home-avatar .cm-av-badge,
+  .cm-account-avatar .cm-av-badge {
+    position: absolute !important;
+    right: -4px !important;
+    bottom: -3px !important;
+    width: 24px !important;
+    height: 24px !important;
+    border-radius: 50% !important;
+    background: #ffffff !important;
+    border: 2px solid #2563eb !important;
+    box-shadow: 0 3px 8px rgba(15, 23, 42, 0.25) !important;
+    display: grid !important;
+    place-items: center !important;
+    font-size: 13px !important;
+    line-height: 1 !important;
+    pointer-events: none;
+  }
+
+  .topbar .avatar {
+    font-size: 21px !important;
+    background: radial-gradient(circle at 30% 25%, #ffffff 0%, #dbeafe 65%, #93c5fd 100%) !important;
+    border: 2px solid #bfdbfe !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15) !important;
+  }
+
+  @media (max-width: 680px) {
+    .cm-home-avatar {
+      flex: 0 0 62px !important;
+      width: 62px !important;
+      height: 62px !important;
+    }
+    .cm-home-avatar .cm-av-char {
+      font-size: 36px !important;
+    }
+    .cm-home-avatar .cm-av-badge {
+      width: 22px !important;
+      height: 22px !important;
+      font-size: 12px !important;
+    }
+    .cm-home-profile h2 {
+      font-size: clamp(20px, 5.4vw, 24px) !important;
+    }
   }
 
   .cm-home-class {
@@ -6668,12 +6778,106 @@ button.avatar{border:0!important;appearance:none!important;-webkit-appearance:no
       }
     });
     applyTheme(getTheme());
+    syncCmUserAvatars();
   }
+
+  /* Tự động nhận diện Giáo viên / Học sinh Nam / Học sinh Nữ để hiển thị hình mô phỏng trong khung Avatar tròn */
+  function normText(s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+  function slugText(s) {
+    return normText(s).replace(/\s+/g, '');
+  }
+  function detectFemaleByName(name) {
+    const words = (' ' + normText(name) + ' ');
+    if (words.includes(' thi ') || words.includes(' nu ')) return true;
+    const parts = normText(name).split(/\s+/).filter(Boolean);
+    const given = parts[parts.length - 1] || '';
+    const femaleGiven = ['ngoc','linh','huong','trang','lan','mai','vy','nhi','thao','ha','huyen','yen','quynh','tram','chau','diep','chi','my','nga','nhung','oanh','phuong','quyen','thu','thuy','tien','trinh','tuyet','van','xuan','anh','hoa','ly','lien','dung','hanh','loan','lua','미'];
+    return femaleGiven.includes(given);
+  }
+  function resolveLoggedUserAvatarInfo() {
+    const u = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : null;
+    const role = String(u?.role || '').toLowerCase();
+    const isTeacherRole = !u || role === 'gvcn' || role === 'admin' || (typeof isAdmin === 'function' && isAdmin());
+
+    if (isTeacherRole) {
+      const tName = u?.name || (typeof state !== 'undefined' && state?.settings?.teacher) || '';
+      const rawGender = normText(u?.gender || '');
+      const isFemaleTeacher = rawGender === 'nu' || rawGender === 'female' || /^co\s/.test(normText(tName)) || normText(tName).includes(' thi ');
+      return {
+        roleKey: 'teacher',
+        char: isFemaleTeacher ? '👩‍🏫' : '👨‍🏫',
+        badge: '📚',
+        label: isFemaleTeacher ? 'Cô giáo' : 'Thầy giáo'
+      };
+    }
+
+    // Học sinh / Cán bộ lớp: đối chiếu danh sách học sinh trong lớp để lấy giới tính chính xác
+    const students = (typeof state !== 'undefined' && Array.isArray(state?.students)) ? state.students : [];
+    const uNameNorm = normText(u?.name || '');
+    const uSlugPrefix = String(u?.username || '').toLowerCase().split('.')[0].replace(/[^a-z0-9]/g, '');
+    let matchedStudent = null;
+
+    if (u?.student_id || u?.studentId) {
+      const sid = String(u.student_id || u.studentId);
+      matchedStudent = students.find(s => String(s?.id) === sid);
+    }
+    if (!matchedStudent && uNameNorm) {
+      matchedStudent = students.find(s => normText(s?.name) === uNameNorm);
+    }
+    if (!matchedStudent && uSlugPrefix) {
+      matchedStudent = students.find(s => slugText(s?.name) === uSlugPrefix);
+    }
+    if (!matchedStudent && role === 'loptruong') {
+      matchedStudent = students.find(s => normText(s?.role).includes('lop truong'));
+    }
+    if (!matchedStudent && /^to[1-4]$/.test(role)) {
+      const grp = role.slice(2);
+      matchedStudent = students.find(s => String(s?.group) === grp && normText(s?.role).includes('to truong'));
+    }
+
+    let isFemaleStudent = false;
+    if (matchedStudent && matchedStudent.gender) {
+      const g = normText(matchedStudent.gender);
+      isFemaleStudent = (g === 'nu' || g === 'female' || g === 'f');
+    } else if (u?.gender) {
+      const g = normText(u.gender);
+      isFemaleStudent = (g === 'nu' || g === 'female' || g === 'f');
+    } else {
+      isFemaleStudent = detectFemaleByName(u?.name || '');
+    }
+
+    return isFemaleStudent
+      ? { roleKey: 'student-female', char: '👩‍🎓', badge: '🌸', label: 'Học sinh nữ' }
+      : { roleKey: 'student-male', char: '👨‍🎓', badge: '⭐', label: 'Học sinh nam' };
+  }
+
+  window.syncCmUserAvatars = function() {
+    const info = resolveLoggedUserAvatarInfo();
+    const html = '<span class="cm-av-char" aria-hidden="true">' + info.char + '</span><span class="cm-av-badge" aria-hidden="true">' + info.badge + '</span>';
+
+    ['cmHomeInitial', 'cmAccountInitial'].forEach(function(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.setAttribute('data-avatar-role', info.roleKey);
+      if (el.innerHTML !== html) {
+        el.innerHTML = html;
+      }
+    });
+
+    const topAv = document.getElementById('avatar');
+    if (topAv && topAv.textContent !== info.char) {
+      topAv.textContent = info.char;
+    }
+  };
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mountThemeSwitches, { once: true });
   } else {
     mountThemeSwitches();
   }
+  window.addEventListener('load', function(){ setTimeout(window.syncCmUserAvatars, 150); });
 })();
 </script>
 <style id="cm-standalone-pwa-engine-css">
