@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
@@ -996,33 +996,6 @@ body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!i
         <div class="page-head"><div><h2>🤖 Trợ lý AI</h2><div class="muted">Phân tích dữ liệu lớp và trả lời câu hỏi dựa trên dữ liệu thực tế của lớp đang chọn.</div></div><span class="ai-badge">🔐 Chỉ GVCN</span></div>
         <div class="notice ok">AI chỉ hỗ trợ phân tích và gợi ý. Điểm danh, điểm rèn luyện, hạnh kiểm và các quyết định giáo dục vẫn do GVCN thực hiện.</div>
         
-        <!-- Hộp cấu hình API Key cá nhân của GVCN -->
-        <div class="card" id="aiApiKeyConfigCard" style="margin-bottom:14px;border:1px solid #93c5fd;background:linear-gradient(135deg,#eff6ff 0%,#f8fafc 100%)">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
-            <h3 style="margin:0;font-size:16px;color:#1e40af;display:flex;align-items:center;gap:6px">🔑 Cấu hình API Key của GVCN <span id="aiKeyBadge" class="badge b-gray">Mặc định trường</span></h3>
-            <button class="btn secondary small" type="button" onclick="toggleAiKeyConfigHelp()" style="padding:4px 8px;font-size:11px">❓ Hướng dẫn lấy Key miễn phí</button>
-          </div>
-          <p class="muted" style="margin:6px 0 10px;font-size:12.5px;line-height:1.45">
-            Mỗi GVCN có thể nhập và lưu <b>API Key Google Gemini</b> riêng của mình vào máy/điện thoại này để không dùng chung lượt gọi với các lớp khác. Hệ thống sẽ <b>tự động nhận diện mô hình mới nhất</b> và <b>tự động kết nối lại liên tục nếu bị gián đoạn mạng</b>.
-          </p>
-          <div id="aiKeyHelpBox" style="display:none;margin-bottom:10px;padding:10px 12px;background:#fff;border:1px dashed #60a5fa;border-radius:10px;font-size:12px;color:#1e3a8a;line-height:1.5">
-            💡 <b>Cách lấy Google Gemini API Key miễn phí (chỉ mất 1 phút):</b><br>
-            1. Truy cập trang: <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:#2563eb;font-weight:700">aistudio.google.com/app/apikey</a><br>
-            2. Đăng nhập bằng tài khoản Gmail của thầy/cô → Bấm <b>Create API Key</b> (Tạo khóa API) → Sao chép (Copy).<br>
-            3. Dán vào ô bên dưới rồi nhấn <b>Lưu &amp; Kiểm tra</b> là xong!
-          </div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <div style="position:relative;flex:1;min-width:240px">
-              <input id="gvcnGeminiApiKey" type="password" placeholder="Dán Gemini API Key (AIzaSy...)" style="width:100%;padding:9px 40px 9px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-family:monospace;font-size:13px">
-              <button type="button" onclick="toggleGvcnApiKeyVis()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;font-size:16px;padding:4px" title="Ẩn/Hiện khóa">👁️</button>
-            </div>
-            <button class="btn small" type="button" onclick="saveGvcnApiKey()" style="white-space:nowrap">💾 Lưu Key</button>
-            <button class="btn secondary small" type="button" onclick="testGvcnApiKey()" style="white-space:nowrap">⚡ Kiểm tra kết nối</button>
-            <button class="btn secondary small" type="button" onclick="clearGvcnApiKey()" style="white-space:nowrap;color:#dc2626">🗑️ Dùng mặc định</button>
-          </div>
-          <div id="gvcnApiKeyStatus" class="mini" style="margin-top:7px;font-weight:600"></div>
-        </div>
-
         <div class="card ai-page">
           <div id="aiEarlyBox" style="border:1px solid #fecaca;background:#fff7f7;border-radius:14px;padding:14px;display:grid;gap:10px">
             <h3 style="margin:0">🚨 Cảnh báo sớm &amp; phân tích học sinh</h3>
@@ -7096,6 +7069,65 @@ button.avatar{border:0!important;appearance:none!important;-webkit-appearance:no
     color: var(--cm-text-primary) !important;
     border-color: var(--cm-border) !important;
     border-radius: 20px !important;
+  }
+
+  /* 12. AI ASSISTANT & SMART MODULE CARDS & CONTRAST FIX */
+  .ai-answer,
+  .smart-ai-result {
+    background: var(--cm-surface-soft, #f8fafc) !important;
+    color: var(--cm-text-primary, #0f172a) !important;
+    border: 1px solid var(--cm-border, #cbd5e1) !important;
+    border-radius: 18px !important;
+    padding: 18px 20px !important;
+    font-size: 15.5px !important;
+    line-height: 1.75 !important;
+    box-shadow: var(--cm-shadow-sm) !important;
+  }
+  .ai-chat textarea {
+    background: var(--cm-surface, #ffffff) !important;
+    color: var(--cm-text-primary, #0f172a) !important;
+    border: 1px solid var(--cm-border, #cbd5e1) !important;
+    border-radius: 14px !important;
+  }
+  .ai-quick button {
+    background: var(--cm-surface-soft, #eff6ff) !important;
+    color: var(--cm-primary, #1e40af) !important;
+    border: 1px solid var(--cm-border, #bfdbfe) !important;
+    border-radius: 12px !important;
+  }
+  .ai-quick button:hover {
+    background: var(--cm-surface-hover, #dbeafe) !important;
+  }
+  .ai-data-note {
+    background: rgba(37, 99, 235, 0.08) !important;
+    border: 1px solid rgba(37, 99, 235, 0.25) !important;
+    color: var(--cm-text-primary, #1e40af) !important;
+    border-radius: 14px !important;
+  }
+  .ai-meta {
+    color: var(--cm-text-muted, #64748b) !important;
+    font-weight: 600 !important;
+  }
+  #aiEarlyBox {
+    background: rgba(239, 68, 68, 0.06) !important;
+    border: 1px solid rgba(239, 68, 68, 0.28) !important;
+    color: var(--cm-text-primary) !important;
+  }
+  #aiEarlyBox h3 {
+    color: #ef4444 !important;
+  }
+  #aiEarlyBox .mini {
+    color: var(--cm-text-muted) !important;
+  }
+  #aiApiKeyConfigCard {
+    background: var(--cm-surface-soft, #f8fafc) !important;
+    border: 1px solid var(--cm-border, #93c5fd) !important;
+    color: var(--cm-text-primary) !important;
+  }
+  #aiApiKeyConfigCard input {
+    background: var(--cm-surface, #ffffff) !important;
+    color: var(--cm-text-primary) !important;
+    border: 1px solid var(--cm-border, #cbd5e1) !important;
   }
 
   /* Mobile Responsive Refinements */
