@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <!-- Browser-side defence in depth. Deploy the equivalent CSP as an HTTP header for full enforcement. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'; connect-src 'self' https://ewbrnzgmivkmddkkolwq.supabase.co; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https:; media-src 'self' data: https:; manifest-src 'self' data: blob:; worker-src 'self' blob:; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'; form-action 'self'; connect-src 'self' https://ewbrnzgmivkmddkkolwq.supabase.co https://generativelanguage.googleapis.com; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https:; media-src 'self' data: https:; manifest-src 'self' data: blob:; worker-src 'self' blob:; upgrade-insecure-requests">
 <meta name="theme-color" content="#1e3a8a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -995,6 +995,34 @@ body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!i
       <section id="page-ai" class="page">
         <div class="page-head"><div><h2>🤖 Trợ lý AI</h2><div class="muted">Phân tích dữ liệu lớp và trả lời câu hỏi dựa trên dữ liệu thực tế của lớp đang chọn.</div></div><span class="ai-badge">🔐 Chỉ GVCN</span></div>
         <div class="notice ok">AI chỉ hỗ trợ phân tích và gợi ý. Điểm danh, điểm rèn luyện, hạnh kiểm và các quyết định giáo dục vẫn do GVCN thực hiện.</div>
+        
+        <!-- Hộp cấu hình API Key cá nhân của GVCN -->
+        <div class="card" id="aiApiKeyConfigCard" style="margin-bottom:14px;border:1px solid #93c5fd;background:linear-gradient(135deg,#eff6ff 0%,#f8fafc 100%)">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <h3 style="margin:0;font-size:16px;color:#1e40af;display:flex;align-items:center;gap:6px">🔑 Cấu hình API Key của GVCN <span id="aiKeyBadge" class="badge b-gray">Mặc định trường</span></h3>
+            <button class="btn secondary small" type="button" onclick="toggleAiKeyConfigHelp()" style="padding:4px 8px;font-size:11px">❓ Hướng dẫn lấy Key miễn phí</button>
+          </div>
+          <p class="muted" style="margin:6px 0 10px;font-size:12.5px;line-height:1.45">
+            Mỗi GVCN có thể nhập và lưu <b>API Key Google Gemini</b> riêng của mình vào máy/điện thoại này để không dùng chung lượt gọi với các lớp khác. Hệ thống sẽ <b>tự động nhận diện mô hình mới nhất</b> và <b>tự động kết nối lại liên tục nếu bị gián đoạn mạng</b>.
+          </p>
+          <div id="aiKeyHelpBox" style="display:none;margin-bottom:10px;padding:10px 12px;background:#fff;border:1px dashed #60a5fa;border-radius:10px;font-size:12px;color:#1e3a8a;line-height:1.5">
+            💡 <b>Cách lấy Google Gemini API Key miễn phí (chỉ mất 1 phút):</b><br>
+            1. Truy cập trang: <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:#2563eb;font-weight:700">aistudio.google.com/app/apikey</a><br>
+            2. Đăng nhập bằng tài khoản Gmail của thầy/cô → Bấm <b>Create API Key</b> (Tạo khóa API) → Sao chép (Copy).<br>
+            3. Dán vào ô bên dưới rồi nhấn <b>Lưu &amp; Kiểm tra</b> là xong!
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <div style="position:relative;flex:1;min-width:240px">
+              <input id="gvcnGeminiApiKey" type="password" placeholder="Dán Gemini API Key (AIzaSy...)" style="width:100%;padding:9px 40px 9px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-family:monospace;font-size:13px">
+              <button type="button" onclick="toggleGvcnApiKeyVis()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;font-size:16px;padding:4px" title="Ẩn/Hiện khóa">👁️</button>
+            </div>
+            <button class="btn small" type="button" onclick="saveGvcnApiKey()" style="white-space:nowrap">💾 Lưu Key</button>
+            <button class="btn secondary small" type="button" onclick="testGvcnApiKey()" style="white-space:nowrap">⚡ Kiểm tra kết nối</button>
+            <button class="btn secondary small" type="button" onclick="clearGvcnApiKey()" style="white-space:nowrap;color:#dc2626">🗑️ Dùng mặc định</button>
+          </div>
+          <div id="gvcnApiKeyStatus" class="mini" style="margin-top:7px;font-weight:600"></div>
+        </div>
+
         <div class="card ai-page">
           <div id="aiEarlyBox" style="border:1px solid #fecaca;background:#fff7f7;border-radius:14px;padding:14px;display:grid;gap:10px">
             <h3 style="margin:0">🚨 Cảnh báo sớm &amp; phân tích học sinh</h3>
@@ -1219,6 +1247,23 @@ body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!i
             <div class="field"><label>Số tổ</label><input id="setGroups" type="number" value="4" min="1" max="8"></div>
           </div>
           <button class="btn" onclick="saveSettings()">💾 Lưu cài đặt</button>
+        </div>
+
+        <div class="card" id="settingsAiConfigCard" style="margin-top:16px;border:1px solid #bfdbfe;background:#f8fbff">
+          <h3>🤖 Cấu hình Trợ lý AI (Google Gemini)</h3>
+          <p class="muted">
+            Mỗi GVCN có thể nhập và lưu <b>API Key riêng</b> của mình tại đây để không lo bị hết lượt gọi khi nhiều GVCN cùng sử dụng hệ thống. Hệ thống sẽ <b>tự động kết nối lại khi gặp sự cố mạng</b> và <b>tự động dò tìm mô hình mới nhất của Google Gemini</b>.
+          </p>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px">
+            <div style="position:relative;flex:1;min-width:260px">
+              <input id="setGvcnApiKey" type="password" placeholder="Dán Gemini API Key (AIzaSy...)" style="width:100%;padding:9px 40px 9px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;font-family:monospace;font-size:13px">
+              <button type="button" onclick="toggleSetGvcnApiKeyVis()" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);border:0;background:transparent;cursor:pointer;font-size:16px;padding:4px" title="Ẩn/Hiện khóa">👁️</button>
+            </div>
+            <button class="btn small" type="button" onclick="saveSetGvcnApiKey()">💾 Lưu API Key</button>
+            <button class="btn secondary small" type="button" onclick="testSetGvcnApiKey()">⚡ Kiểm tra</button>
+            <button class="btn secondary small" type="button" onclick="clearSetGvcnApiKey()" style="color:#dc2626">🗑️ Dùng mặc định</button>
+          </div>
+          <div id="setGvcnApiKeyStatus" class="mini" style="margin-top:8px;font-weight:600"></div>
         </div>
         <div class="card conduct-rules-settings" style="margin-top:16px"><h3>⚙️ Nguyên tắc xếp hạnh kiểm / rèn luyện</h3><p class="muted">GVCN/Admin có thể thay đổi ngưỡng điểm và điểm khởi đầu. Thi đua, Báo cáo tổng hợp và các phần xếp loại sẽ dùng chung các chỉ số này.</p><div class="form-grid"><div class="field"><label>Điểm từ mức Tốt</label><input id="setGoodScore" type="number" step="0.1" value="96"></div><div class="field"><label>Điểm từ mức Khá</label><input id="setFairScore" type="number" step="0.1" value="90"></div><div class="field"><label>Điểm từ mức Đạt</label><input id="setPassScore" type="number" step="0.1" value="85"></div><div class="field"><label>Điểm khởi đầu mỗi tuần</label><input id="setConductBase" type="number" step="0.1" value="100"></div></div><div class="actions" style="margin-top:12px"><button class="btn" type="button" onclick="saveConductRules()">💾 Lưu nguyên tắc</button><button class="btn secondary" type="button" onclick="resetConductRules()">↩ Khôi phục mặc định</button></div><div id="conductRulesStatus" class="notice" style="display:none;margin-top:12px"></div></div>
         <div class="card conduct-rules-settings" id="conductGuideSettingsCard" style="margin-top:16px">
@@ -3499,47 +3544,337 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
 </script>
 
 <script id="ai-reliability-client-v2">
-/* Client Trợ lý AI (v3).
-   - Client CHỈ gửi câu hỏi thô + gợi ý (mode/studentId). Server tự dựng dữ liệu từ DB, tự tính tín hiệu cảnh báo
-     sớm và gọi Gemini (giữ API key). Không còn gửi prompt dài/ngữ cảnh lớn (trước đây bị cắt ở 1200 ký tự).
-   - Rule-based chỉ trả lời câu thống kê đơn giản; cảnh báo sớm & phân tích học sinh luôn đi qua Gemini.
-   - Không retry theo mã HTTP (server đã tự retry Gemini); chỉ retry khi lỗi mạng, hoặc khi server báo chờ vài giây. */
+/* Client Trợ lý AI (v4 - Hỗ trợ API Key cá nhân của GVCN + Tự động kết nối lại khi gián đoạn + Tự nhận diện mô hình tối ưu).
+   - Nếu GVCN đã lưu Gemini API Key riêng trong Cài đặt: Trình duyệt kết nối trực tiếp đến Google Gemini API (độc lập, không lo hết quota do dùng chung).
+   - Tự động nhận diện mô hình: thử từ mô hình nhanh nhất và ổn định nhất của Gemini (gemini-2.5-flash, gemini-2.0-flash, gemini-1.5-flash).
+   - Tự động kết nối lại (Auto-Retry Resilience): khi gặp sự cố mạng hoặc nghẽn tạm thời, tự động retry nhiều lần kèm Exponential Backoff cho đến khi hoàn thành nhiệm vụ.
+   - Nếu chưa nhập Key riêng: Tự động fallback về Supabase Edge Function chung của trường. */
 (()=>{
   let activeRequest=0,cooldownUntil=0;
-  const COOLDOWN_MS=6000,TIMEOUT_MS=60000;
+  const COOLDOWN_MS=4000,TIMEOUT_MS=60000;
   const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   const readBody=async res=>{const raw=await res.text();try{return raw?JSON.parse(raw):{}}catch(e){return {error:raw?String(raw).slice(0,300):`Phản hồi AI không đúng định dạng (HTTP ${res.status}).`}}};
   const textOf=body=>typeof body?.answer==='string'?body.answer:(body?.answer?.text||body?.answer?.content||body?.text||'');
   const MODE_LABEL={early_warning:'Cảnh báo sớm',student:'Phân tích học sinh',period:'Phân tích giai đoạn',ask:'Hỏi đáp'};
   async function getToken(){let s=null;try{const r=await sb.auth.getSession();s=r?.data?.session||null;}catch(e){s=null;}return s?.access_token||'';}
 
-  // Gọi Edge Function. Trả về body khi thành công; ném Error có .code/.status/.retryAfter khi lỗi.
-  async function requestAI(extra){
+  // --- QUẢN LÝ API KEY GVCN THEO TÀI KHOẢN ---
+  function getAiKeyStorageKey(){
+    const uid = currentUser?.id || currentUser?.username || 'default_gvcn';
+    return `cm_gemini_api_key_${uid}`;
+  }
+  function getGvcnApiKey(){
+    try {
+      const k = localStorage.getItem(getAiKeyStorageKey()) || localStorage.getItem('cm_gemini_api_key_global') || '';
+      return k.trim();
+    } catch(e){ return ''; }
+  }
+  function setGvcnApiKey(key){
+    try {
+      const trimmed = (key||'').trim();
+      if(trimmed) {
+        localStorage.setItem(getAiKeyStorageKey(), trimmed);
+        localStorage.setItem('cm_gemini_api_key_global', trimmed);
+      } else {
+        localStorage.removeItem(getAiKeyStorageKey());
+        localStorage.removeItem('cm_gemini_api_key_global');
+      }
+      syncAiApiKeyUi();
+      return true;
+    } catch(e){ return false; }
+  }
+
+  function syncAiApiKeyUi(){
+    const key = getGvcnApiKey();
+    const hasKey = !!key;
+    const badge = document.getElementById('aiKeyBadge');
+    if(badge){
+      badge.textContent = hasKey ? '🔑 Key riêng GVCN' : 'Mặc định trường';
+      badge.className = hasKey ? 'badge b-green' : 'badge b-gray';
+    }
+    ['gvcnGeminiApiKey', 'setGvcnApiKey'].forEach(id=>{
+      const el = document.getElementById(id);
+      if(el && el.value !== key && document.activeElement !== el){
+        el.value = key ? key : '';
+      }
+    });
+    const st1 = document.getElementById('gvcnApiKeyStatus');
+    if(st1 && !st1.dataset.locked){
+      st1.textContent = hasKey ? '✅ Đang dùng API Key riêng của GVCN (gọi trực tiếp Google Gemini, không sợ hết lượt).' : 'ℹ️ Chưa nhập Key riêng — đang dùng Key chung của trường qua Supabase.';
+      st1.style.color = hasKey ? '#16a34a' : '#64748b';
+    }
+    const st2 = document.getElementById('setGvcnApiKeyStatus');
+    if(st2 && !st2.dataset.locked){
+      st2.textContent = hasKey ? '✅ Đã lưu API Key riêng của GVCN.' : 'ℹ️ Chưa lưu Key riêng.';
+      st2.style.color = hasKey ? '#16a34a' : '#64748b';
+    }
+  }
+
+  // UI Handlers
+  window.toggleAiKeyConfigHelp = function(){
+    const b = document.getElementById('aiKeyHelpBox');
+    if(b) b.style.display = (b.style.display==='none'||!b.style.display)?'block':'none';
+  };
+  window.toggleGvcnApiKeyVis = function(){
+    const inp = document.getElementById('gvcnGeminiApiKey');
+    if(inp) inp.type = inp.type==='password'?'text':'password';
+  };
+  window.toggleSetGvcnApiKeyVis = function(){
+    const inp = document.getElementById('setGvcnApiKey');
+    if(inp) inp.type = inp.type==='password'?'text':'password';
+  };
+  window.saveGvcnApiKey = function(){
+    const inp = document.getElementById('gvcnGeminiApiKey');
+    const val = (inp?.value||'').trim();
+    if(!val){ alert('Thầy/cô vui lòng dán Gemini API Key vào ô trước khi lưu.'); return; }
+    setGvcnApiKey(val);
+    const st = document.getElementById('gvcnApiKeyStatus');
+    if(st){ st.textContent = '✅ Đã lưu API Key thành công!'; st.style.color='#16a34a'; }
+    alert('✅ Đã lưu API Key thành công! Từ bây giờ Trợ lý AI sẽ dùng Key riêng của thầy/cô và tự động nhận diện mô hình mới nhất.');
+  };
+  window.saveSetGvcnApiKey = function(){
+    const inp = document.getElementById('setGvcnApiKey');
+    const val = (inp?.value||'').trim();
+    if(!val){ alert('Thầy/cô vui lòng dán Gemini API Key vào ô trước khi lưu.'); return; }
+    setGvcnApiKey(val);
+    const st = document.getElementById('setGvcnApiKeyStatus');
+    if(st){ st.textContent = '✅ Đã lưu API Key thành công!'; st.style.color='#16a34a'; }
+    alert('✅ Đã lưu API Key thành công!');
+  };
+  window.clearGvcnApiKey = function(){
+    if(!confirm('Thầy/cô có chắc muốn xóa Key riêng và quay lại dùng Key mặc định của trường?')) return;
+    setGvcnApiKey('');
+    alert('Đã xóa Key riêng. Hệ thống quay về dùng Key chung mặc định.');
+  };
+  window.clearSetGvcnApiKey = function(){
+    if(!confirm('Thầy/cô có chắc muốn xóa Key riêng và quay lại dùng Key mặc định của trường?')) return;
+    setGvcnApiKey('');
+    alert('Đã xóa Key riêng. Hệ thống quay về dùng Key chung mặc định.');
+  };
+
+  // --- TỰ ĐỘNG DÒ TÌM & NHẬN DIỆN MÔ HÌNH GEMINI TỐI ƯU ---
+  // Danh sách các mô hình ứng cử viên từ mới nhất & tốt nhất hiện nay
+  const GEMINI_CANDIDATE_MODELS = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-lite',
+    'gemini-1.5-flash',
+    'gemini-1.5-pro'
+  ];
+  let cachedWorkingModel = null;
+
+  async function resolveBestGeminiModel(apiKey){
+    if(cachedWorkingModel) return cachedWorkingModel;
+    // Thử lấy danh sách models hỗ trợ từ API nếu có thể
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`, { method: 'GET' });
+      if(res.ok){
+        const data = await res.json();
+        const available = (data?.models || []).map(m => m.name.replace(/^models\//, ''));
+        // Tìm mô hình ưu tiên khớp với ứng cử viên
+        for(const cand of GEMINI_CANDIDATE_MODELS){
+          if(available.includes(cand)){
+            cachedWorkingModel = cand;
+            return cand;
+          }
+        }
+        // Nếu có mô hình flash nào mới hơn trong danh sách trả về
+        const anyFlash = available.find(m => m.includes('flash') && !m.includes('exp') && !m.includes('thinking'));
+        if(anyFlash){
+          cachedWorkingModel = anyFlash;
+          return anyFlash;
+        }
+      }
+    } catch(e){
+      // Không gọi được list models thì dùng mặc định thông minh
+    }
+    // Mặc định chọn 2.5-flash hoặc 2.0-flash
+    cachedWorkingModel = 'gemini-2.0-flash';
+    return cachedWorkingModel;
+  }
+
+  // Kiểm tra test key
+  window.testGvcnApiKey = async function(){
+    const key = (document.getElementById('gvcnGeminiApiKey')?.value || getGvcnApiKey()).trim();
+    if(!key){ alert('Vui lòng nhập API Key trước khi kiểm tra.'); return; }
+    const st = document.getElementById('gvcnApiKeyStatus');
+    if(st){ st.textContent = '⏳ Đang kiểm tra kết nối với Google Gemini API...'; st.style.color='#2563eb'; st.dataset.locked='1'; }
+    try {
+      const model = await resolveBestGeminiModel(key);
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: 'Trả lời đúng 1 chữ: OK' }] }],
+          generationConfig: { maxOutputTokens: 10 }
+        })
+      });
+      const data = await res.json();
+      if(!res.ok){
+        throw new Error(data?.error?.message || `HTTP ${res.status}`);
+      }
+      if(st){
+        st.textContent = `✅ Kết nối thành công! Đã tự động chọn mô hình: ${model}.`;
+        st.style.color = '#16a34a';
+      }
+      alert(`✅ Kết nối thành công! API Key hoạt động hoàn hảo.\nHệ thống đã tự động chọn mô hình tối ưu: ${model}.`);
+    } catch(err){
+      if(st){
+        st.textContent = `❌ Lỗi kết nối: ${err.message}`;
+        st.style.color = '#dc2626';
+      }
+      alert(`❌ Lỗi kết nối API Key:\n${err.message}\nThầy/cô vui lòng kiểm tra lại Key đã copy đủ ký tự chưa nhé.`);
+    } finally {
+      if(st) delete st.dataset.locked;
+    }
+  };
+  window.testSetGvcnApiKey = window.testGvcnApiKey;
+
+  // --- GỌI TRỰC TIẾP GEMINI API VỚI CƠ CHẾ AUTO-RETRY (TỰ KẾT NỐI LẠI LIÊN TỤC) ---
+  async function callDirectGeminiWithAutoRetry(apiKey, promptText, onProgress){
+    const MAX_RETRIES = 6;
+    let attempt = 0;
+    let model = await resolveBestGeminiModel(apiKey);
+
+    while(attempt < MAX_RETRIES){
+      attempt++;
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+      try {
+        if(attempt > 1 && typeof onProgress === 'function'){
+          onProgress(`🔄 Đang tự động kết nối lại lần ${attempt}/${MAX_RETRIES} với mô hình ${model}...`);
+        }
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }] }],
+            generationConfig: {
+              temperature: 0.3,
+              maxOutputTokens: 2500
+            }
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+
+        const data = await readBody(res);
+        if(res.ok){
+          const candidate = data?.candidates?.[0];
+          const text = candidate?.content?.parts?.[0]?.text || '';
+          if(text){
+            return {
+              answer: text,
+              model: model,
+              mode: 'ask',
+              complete: candidate?.finishReason !== 'MAX_TOKENS',
+              directKey: true
+            };
+          }
+        }
+
+        // Xử lý các mã lỗi cần retry
+        const errMsg = data?.error?.message || `HTTP ${res.status}`;
+        const isQuotaOrRate = res.status === 429 || /quota|rate limit/i.test(errMsg);
+        const isOverloadedOrServer = res.status === 503 || res.status === 500 || /overloaded/i.test(errMsg);
+        const isModelNotFound = res.status === 404 || /model not found|is not supported/i.test(errMsg);
+
+        // Nếu mô hình hiện tại báo 404 không tìm thấy, tự đổi sang mô hình flash khác
+        if(isModelNotFound){
+          cachedWorkingModel = null;
+          const nextModel = GEMINI_CANDIDATE_MODELS.find(m => m !== model) || 'gemini-1.5-flash';
+          model = nextModel;
+          if(typeof onProgress === 'function'){
+            onProgress(`🔄 Đang tự động chuyển sang mô hình tương thích: ${model}...`);
+          }
+          await wait(1200);
+          continue;
+        }
+
+        if(isQuotaOrRate || isOverloadedOrServer){
+          const backoffMs = Math.min(2000 * Math.pow(1.5, attempt), 10000);
+          if(typeof onProgress === 'function'){
+            onProgress(`⏳ ${isQuotaOrRate ? 'Hạn mức đang phục hồi' : 'Đường truyền đang bận'}, tự động thử lại sau ${Math.round(backoffMs/1000)}s (lần ${attempt}/${MAX_RETRIES})...`);
+          }
+          await wait(backoffMs);
+          continue;
+        }
+
+        // Lỗi 400 hoặc 403 (sai key)
+        throw new Error(errMsg);
+      } catch(err){
+        clearTimeout(timer);
+        if(err.name === 'AbortError' || /failed to fetch|network|timeout/i.test(err.message)){
+          const backoffMs = 1500 * attempt;
+          if(typeof onProgress === 'function'){
+            onProgress(`📶 Mạng gián đoạn, đang tự động kết nối lại lần ${attempt}/${MAX_RETRIES}...`);
+          }
+          await wait(backoffMs);
+          continue;
+        }
+        if(attempt >= MAX_RETRIES) throw err;
+        await wait(2000);
+      }
+    }
+    throw new Error('Đã thử kết nối lại nhiều lần nhưng chưa nhận được phản hồi. Thầy hãy kiểm tra kết nối mạng hoặc thử lại sau ít giây.');
+  }
+
+  // Gọi Edge Function khi không có Key riêng (giữ nguyên cơ chế bảo mật cũ)
+  async function requestAiViaEdgeFunction(extra, onProgress){
     const token=await getToken();
     if(!token){const e=new Error('Phiên đăng nhập với backend AI đã hết hoặc chưa đăng nhập.');e.code='NO_SESSION';throw e;}
     const payload={stateKey:currentStateKey,clientRequestId:`ai_${Date.now()}_${Math.random().toString(36).slice(2)}`,...extra};
     const url=SUPABASE_URL+'/functions/v1/ai-class-assistant';
-    let netRetried=false,intervalRetried=false;
-    for(;;){
+    let netRetried=0;
+    while(netRetried < 4){
       const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),TIMEOUT_MS);
-      let res;
       try{
-        res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(payload),signal:controller.signal});
+        if(netRetried > 0 && typeof onProgress === 'function'){
+          onProgress(`🔄 Đang kết nối lại với máy chủ lần ${netRetried}/3...`);
+        }
+        const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify(payload),signal:controller.signal});
+        clearTimeout(timer);
+        const body=await readBody(res);
+        if(res.ok)return body;
+        const err=new Error(body?.error||body?.message||`AI trả về lỗi HTTP ${res.status}`);
+        err.status=res.status;err.code=body?.code||'';err.retryAfter=Number(body?.retryAfterSeconds)||0;
+        if(err.code==='RATE_LIMIT_INTERVAL'&&err.retryAfter>0&&err.retryAfter<=8){
+          if(typeof onProgress === 'function') onProgress(`⏳ Đang đợi hạn mức sẵn sàng trong ${err.retryAfter} giây...`);
+          await wait(err.retryAfter*1000+500);
+          netRetried++;
+          continue;
+        }
+        throw err;
       }catch(e){
         clearTimeout(timer);
-        if(e?.name==='AbortError'){const err=new Error('Yêu cầu AI quá thời gian chờ.');err.code='CLIENT_TIMEOUT';throw err;}
-        if(!netRetried){netRetried=true;await wait(1200);continue;}
-        throw new Error(e?.message||'Không kết nối được Trợ lý AI.');
+        netRetried++;
+        if(netRetried < 4){
+          await wait(1500 * netRetried);
+          continue;
+        }
+        throw e;
       }
-      clearTimeout(timer);
-      const body=await readBody(res);
-      if(res.ok)return body;
-      const err=new Error(body?.error||body?.message||`AI trả về lỗi HTTP ${res.status}`);
-      err.status=res.status;err.code=body?.code||'';err.retryAfter=Number(body?.retryAfterSeconds)||0;
-      if(err.code==='RATE_LIMIT_INTERVAL'&&!intervalRetried&&err.retryAfter>0&&err.retryAfter<=8){intervalRetried=true;await wait(err.retryAfter*1000+300);continue;}
-      throw err;
     }
   }
+
+  // Gọi AI: Ưu tiên dùng Key riêng của GVCN (gọi thẳng Gemini), nếu không có mới qua Edge Function
+  async function requestAI(extra, context, onProgress){
+    const userKey = getGvcnApiKey();
+    if(userKey){
+      // Chế độ Key riêng của GVCN: tự dựng prompt đầy đủ và gọi trực tiếp Google Gemini với Auto-Retry
+      const question = extra.question || '';
+      const prompt = buildAIPrompt(question, context || buildAIContext());
+      return await callDirectGeminiWithAutoRetry(userKey, prompt, onProgress);
+    } else {
+      // Chế độ mặc định trường: gọi qua Supabase Edge Function
+      return await requestAiViaEdgeFunction(extra, onProgress);
+    }
+  }
+
   window.requestAssistantAI=requestAI;
   window.assistantAnswerText=textOf;
 
@@ -3567,8 +3902,8 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
     renderAIAnswer('⏳ Đang xử lý câu hỏi...');
     let context=null;
     try{
-      context=buildAIContext(); // chỉ dùng cho rule-based/dự phòng tại trình duyệt — KHÔNG gửi lên server
-      // Bước 1 — câu thống kê đơn giản: rule-based (miễn phí, tức thì). Cảnh báo sớm/phân tích học sinh không đi đường này.
+      context=buildAIContext(); // dữ liệu lớp để phân tích
+      // Bước 1 — câu thống kê đơn giản: rule-based (miễn phí, tức thì)
       if(!o.mode){
         if(isGenderCountQuestion(question)){renderAIAnswer(buildGenderCountAnswer(context));if(meta)meta.textContent=`⚡ Thống kê trực tiếp (rule-based) · ${new Date().toLocaleString('vi-VN')} · Lớp ${context.class.name}`;return;}
         const rb=(typeof window.ruleBasedAnswer==='function')?window.ruleBasedAnswer(question,context):null;
@@ -3582,21 +3917,35 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
         if(meta)meta.textContent='Đang trong thời gian chờ giữa hai lượt gọi AI.';
         return;
       }
-      if(meta)meta.textContent=o.mode==='early_warning'?'Đang tổng hợp tín hiệu cảnh báo sớm và gửi cho AI (Gemini)...':'Đang chuyển sang AI thật (Gemini) để phân tích dữ liệu lớp...';
+
+      const hasPersonalKey = !!getGvcnApiKey();
+      if(meta)meta.textContent=hasPersonalKey 
+        ? 'Đang gửi câu hỏi đến Google Gemini (sử dụng Key riêng của GVCN, tự động kết nối lại nếu gián đoạn)...'
+        : (o.mode==='early_warning'?'Đang tổng hợp tín hiệu cảnh báo sớm và gửi cho AI (Gemini)...':'Đang chuyển sang AI thật (Gemini) để phân tích dữ liệu lớp...');
       renderAIAnswer('⏳ AI đang phân tích dữ liệu lớp...');
+
       const named=(!o.mode&&typeof window.findStudentInQuestion==='function')?window.findStudentInQuestion(question):null;
       const extra={question};
-      if(o.mode)extra.mode=o.mode;                                  // chỉ gửi mode khi chỉ định rõ; còn lại để server tự nhận diện
+      if(o.mode)extra.mode=o.mode;
       const sid=o.studentId||(named&&named.id)||'';
       if(sid)extra.studentId=String(sid);
-      const body=await requestAI(extra);
+
+      // Gọi với callback cập nhật trạng thái tự kết nối lại
+      const body=await requestAI(extra, context, (statusMsg)=>{
+        if(requestNo===activeRequest){
+          renderAIAnswer(statusMsg);
+          if(meta) meta.textContent = statusMsg;
+        }
+      });
+
       if(requestNo!==activeRequest)return;
       cooldownUntil=Date.now()+COOLDOWN_MS;
       let answer=textOf(body);
       if(body.complete===false&&answer)answer=answer.trim()+'\n\n⚠️ Câu trả lời có thể chưa đầy đủ do đạt giới hạn độ dài. Thầy hỏi cụ thể hơn (ví dụ theo từng tổ) hoặc bấm Hỏi AI lại.';
       renderAIAnswer(answer||'AI chưa trả về nội dung.');
       const stamp=new Date().toLocaleString('vi-VN');
-      const parts=[`🤖 ${body.model||'Gemini'}`,MODE_LABEL[body.mode]||'',body.focusStudent||'',stamp,`Lớp ${body.className||context.class.name}`,body.dataAsOf?`dữ liệu đến ${body.dataAsOf}`:''].filter(Boolean);
+      const keyLabel = body.directKey ? '🔑 Key riêng GVCN' : 'Mặc định trường';
+      const parts=[`🤖 ${body.model||'Gemini'}`,keyLabel,MODE_LABEL[body.mode]||'',body.focusStudent||'',stamp,`Lớp ${body.className||context.class.name}`,body.dataAsOf?`dữ liệu đến ${body.dataAsOf}`:''].filter(Boolean);
       if(meta)meta.textContent=parts.join(' · ');
     }catch(e){
       if(requestNo!==activeRequest)return;
@@ -3605,6 +3954,52 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
       renderErrorWithFallback(ans,meta,e,question,context,'⚠️ Trợ lý AI thật tạm thời chưa trả lời được — đã hiển thị số liệu dự phòng bằng rule-based.');
     }finally{if(requestNo===activeRequest){btn.classList.remove('ai-busy');btn.disabled=false;}}
   };
+  window.askAIQuick=async q=>{const input=document.getElementById('aiQuestion');if(input)input.value=q;return window.askAI();};
+
+  // Nút "Cảnh báo sớm cho cả lớp"
+  window.askAIEarlyWarning=function(){
+    const input=document.getElementById('aiQuestion');
+    if(input)input.value='Lập báo cáo cảnh báo sớm cho lớp: những học sinh đã vượt ngưỡng hoặc có dấu hiệu sớm về chuyên cần, rèn luyện, học tập; nêu căn cứ số liệu và việc GVCN nên làm trong tuần này.';
+    return window.askAI({mode:'early_warning'});
+  };
+  // Nút "Phân tích học sinh"
+  window.askAIStudent=function(){
+    const sel=document.getElementById('aiStudentSelect'),sid=sel?.value||'';
+    if(!sid){alert('Thầy hãy chọn một học sinh cần phân tích.');return;}
+    const st=(state.students||[]).find(x=>String(x.id)===String(sid));
+    const input=document.getElementById('aiQuestion');
+    if(input)input.value=`Phân tích học sinh ${st?.name||''}${st?.code?` (${st.code})`:''}: chuyên cần, rèn luyện, học tập, xu hướng gần đây và các dấu hiệu cần GVCN quan tâm sớm.`;
+    return window.askAI({mode:'student',studentId:sid});
+  };
+  window.populateAIStudentSelect=function(){
+    const sel=document.getElementById('aiStudentSelect');if(!sel)return;
+    const prev=sel.value,list=(typeof visibleStudents==='function')?visibleStudents():(state.students||[]);
+    sel.innerHTML='<option value="">— Chọn học sinh —</option>'+list.map(s=>`<option value="${esc(s.id)}">${esc(s.code||'')} · ${esc(s.name||'')}</option>`).join('');
+    if(prev&&list.some(s=>String(s.id)===prev))sel.value=prev;
+  };
+
+  // Nạp danh sách học sinh và đồng bộ UI API Key mỗi khi mở trang
+  const originalShowPage=window.showPage;
+  if(typeof originalShowPage==='function'&&!originalShowPage.__aiWrapped){
+    const wrapped=function(name){
+      const r=originalShowPage.apply(this,arguments);
+      if(name==='ai'){
+        try{window.populateAIStudentSelect();}catch(e){}
+        try{syncAiApiKeyUi();}catch(e){}
+      }
+      if(name==='settings'){
+        try{syncAiApiKeyUi();}catch(e){}
+      }
+      return r;
+    };
+    wrapped.__aiWrapped=true;window.showPage=wrapped;
+  }
+
+  // Khởi tạo trạng thái khi trang vừa nạp xong
+  window.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncAiApiKeyUi, 300); });
+  window.addEventListener('load', ()=>{ setTimeout(syncAiApiKeyUi, 500); });
+})();
+</script>
   window.askAIQuick=async q=>{const input=document.getElementById('aiQuestion');if(input)input.value=q;return window.askAI();};
 
   // Nút "Cảnh báo sớm cho cả lớp"
