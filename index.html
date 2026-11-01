@@ -3652,109 +3652,118 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
     alert('Đã xóa Key riêng. Hệ thống quay về dùng Key chung mặc định.');
   };
 
-  // --- TỰ ĐỘNG DÒ TÌM & NHẬN DIỆN MÔ HÌNH GEMINI TỐI ƯU ---
-  // Danh sách các mô hình ứng cử viên từ mới nhất & tốt nhất hiện nay
+  // --- TỰ ĐỘNG DÒ TÌM & KẾT NỐI MÔ HÌNH GEMINI TỐI ƯU ---
+  // Thử trực tiếp qua API v1beta và v1 với các mô hình chuẩn quốc tế hiện nay
   const GEMINI_CANDIDATE_MODELS = [
-    'gemini-3.8-flash',
-    'gemini-2.0-flash',
-    'gemini-2.0-flash-lite',
+    'gemini-1.5-flash-latest',
     'gemini-1.5-flash',
+    'gemini-1.5-flash-8b',
+    'gemini-2.0-flash',
+    'gemini-2.0-flash-exp',
+    'gemini-1.5-pro-latest',
     'gemini-1.5-pro'
   ];
   let cachedWorkingModel = null;
+  let cachedApiVersion = 'v1beta';
 
-  async function resolveBestGeminiModel(apiKey){
-    if(cachedWorkingModel) return cachedWorkingModel;
-    try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`, { method: 'GET' });
-      if(res.ok){
-        const data = await res.json();
-        const available = (data?.models || []).filter(m => Array.isArray(m.supportedGenerationMethods) && m.supportedGenerationMethods.includes('generateContent')).map(m => m.name.replace(/^models\//, ''));
-        for(const cand of GEMINI_CANDIDATE_MODELS){
-          if(available.includes(cand)){
-            cachedWorkingModel = cand;
-            return cand;
+  // Lấy danh sách mô hình mà chính API Key này được cấp quyền từ Google
+  async function fetchAvailableModelsFromKey(apiKey){
+    const versions = ['v1beta', 'v1'];
+    for(const ver of versions){
+      try {
+        const res = await fetch(`https://generativelanguage.googleapis.com/${ver}/models?key=${apiKey}`, { method: 'GET' });
+        if(res.ok){
+          const data = await res.json();
+          const models = (data?.models || [])
+            .filter(m => !m.supportedGenerationMethods || m.supportedGenerationMethods.includes('generateContent'))
+            .map(m => m.name.replace(/^models\//, ''));
+          if(models.length > 0){
+            return { ver, models };
           }
         }
-        const anyFlash = available.find(m => m.includes('flash') && !m.includes('exp') && !m.includes('thinking'));
-        if(anyFlash){
-          cachedWorkingModel = anyFlash;
-          return anyFlash;
-        }
-        if(available.length > 0){
-          cachedWorkingModel = available[0];
-          return available[0];
-        }
-      }
-    } catch(e){}
-    cachedWorkingModel = 'gemini-2.0-flash';
-    return cachedWorkingModel;
+      } catch(e){}
+    }
+    return null;
   }
 
-  // Thử gọi 1 mô hình với câu chào đơn giản để xác nhận mô hình hoạt động
-  async function testModelGenerate(apiKey, modelName){
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+  // Thử gửi 1 câu chào ngắn để xác nhận mô hình và API version hoạt động thật
+  async function tryGeneratePing(apiKey, modelName, ver = 'v1beta'){
+    const url = `https://generativelanguage.googleapis.com/${ver}/models/${modelName}:generateContent?key=${apiKey}`;
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: 'Xin chào' }] }],
-        generationConfig: { maxOutputTokens: 10 }
+        contents: [{ parts: [{ text: 'Hi' }] }],
+        generationConfig: { maxOutputTokens: 5 }
       })
     });
     const data = await res.json();
     if(!res.ok){
-      const err = new Error(data?.error?.message || `HTTP ${res.status}`);
+      const msg = data?.error?.message || `HTTP ${res.status}`;
+      const err = new Error(msg);
       err.status = res.status;
       err.data = data;
       throw err;
     }
-    return data;
+    return true;
   }
 
-  // Kiểm tra test key (tự động thử lần lượt các mô hình nếu mô hình đầu tiên bị deprecate)
+  // Tự động tìm mô hình đang chạy được 100%
+  async function resolveBestGeminiModel(apiKey){
+    if(cachedWorkingModel) return { model: cachedWorkingModel, ver: cachedApiVersion };
+
+    // 1. Thử lấy danh sách models được cấp quyền thực tế của Key
+    const remote = await fetchAvailableModelsFromKey(apiKey);
+    const toTest = [];
+    if(remote && remote.models.length > 0){
+      // Ưu tiên các dòng flash trước
+      const flashModels = remote.models.filter(m => m.includes('flash') && !m.includes('thinking'));
+      const otherModels = remote.models.filter(m => !m.includes('flash'));
+      toTest.push(...flashModels.map(m => ({ model: m, ver: remote.ver })));
+      toTest.push(...otherModels.map(m => ({ model: m, ver: remote.ver })));
+    }
+
+    // Bổ sung danh sách fallback ứng cử viên
+    for(const m of GEMINI_CANDIDATE_MODELS){
+      if(!toTest.some(t => t.model === m)){
+        toTest.push({ model: m, ver: 'v1beta' });
+        toTest.push({ model: m, ver: 'v1' });
+      }
+    }
+
+    let lastError = null;
+    for(const item of toTest){
+      try {
+        await tryGeneratePing(apiKey, item.model, item.ver);
+        cachedWorkingModel = item.model;
+        cachedApiVersion = item.ver;
+        return { model: item.model, ver: item.ver };
+      } catch(err){
+        lastError = err;
+        // Nếu lỗi 400 hoặc 403 API_KEY_INVALID do Key sai thì ngắt luôn
+        if(/API_KEY_INVALID|key not valid|forbidden/i.test(err.message) || (err.status === 400 && /key/i.test(err.message))){
+          throw err;
+        }
+      }
+    }
+
+    throw lastError || new Error('Không tìm thấy mô hình Gemini nào khả dụng cho API Key này.');
+  }
+
+  // Kiểm tra test key (Kiểm tra thực tế và tự chọn mô hình sống)
   window.testGvcnApiKey = async function(){
     const key = (document.getElementById('gvcnGeminiApiKey')?.value || getGvcnApiKey()).trim();
     if(!key){ alert('Vui lòng nhập API Key trước khi kiểm tra.'); return; }
     const st = document.getElementById('gvcnApiKeyStatus');
-    if(st){ st.textContent = '⏳ Đang kiểm tra kết nối với Google Gemini API...'; st.style.color='#2563eb'; st.dataset.locked='1'; }
+    if(st){ st.textContent = '⏳ Đang kết nối và tự động dò mô hình Gemini khả dụng...'; st.style.color='#2563eb'; st.dataset.locked='1'; }
     try {
-      let chosenModel = await resolveBestGeminiModel(key);
-      let success = false;
-      let lastErrMsg = '';
-
-      // Danh sách các mô hình sẽ thử: mô hình được chọn trước, sau đó là các ứng cử viên còn lại
-      const modelsToTry = [chosenModel, ...GEMINI_CANDIDATE_MODELS.filter(m => m !== chosenModel)];
-      for(const m of modelsToTry){
-        try {
-          if(st) st.textContent = `⏳ Đang kiểm tra với mô hình ${m}...`;
-          await testModelGenerate(key, m);
-          chosenModel = m;
-          cachedWorkingModel = m;
-          success = true;
-          break;
-        } catch(err){
-          lastErrMsg = err.message;
-          // Nếu lỗi do mô hình bị ngưng hỗ trợ / không có quyền / 404, thử mô hình tiếp theo
-          if(/no longer available|not found|not supported|deprecated/i.test(err.message) || err.status === 404){
-            continue;
-          }
-          // Nếu lỗi sai Key (400, 403 API_KEY_INVALID), dừng lại báo lỗi ngay
-          if(/API_KEY_INVALID|key not valid|forbidden/i.test(err.message) || err.status === 400 || err.status === 403){
-            throw err;
-          }
-        }
-      }
-
-      if(!success){
-        throw new Error(lastErrMsg || 'Không có mô hình nào tương thích với API Key này.');
-      }
-
+      cachedWorkingModel = null;
+      const res = await resolveBestGeminiModel(key);
       if(st){
-        st.textContent = `✅ Kết nối thành công! Đã tự động chọn mô hình: ${chosenModel}.`;
+        st.textContent = `✅ Kết nối thành công! Đã tự động kích hoạt mô hình: ${res.model} (${res.ver}).`;
         st.style.color = '#16a34a';
       }
-      alert(`✅ Kết nối thành công! API Key hoạt động hoàn hảo.\nHệ thống đã tự động kích hoạt mô hình tối ưu: ${chosenModel}.`);
+      alert(`✅ Kết nối thành công! API Key hoạt động hoàn hảo.\nHệ thống đã tự động kết nối thành công với mô hình: ${res.model}.`);
     } catch(err){
       if(st){
         st.textContent = `❌ Lỗi kết nối: ${err.message}`;
@@ -3771,7 +3780,9 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   async function callDirectGeminiWithAutoRetry(apiKey, promptText, onProgress){
     const MAX_RETRIES = 6;
     let attempt = 0;
-    let model = await resolveBestGeminiModel(apiKey);
+    const resolved = await resolveBestGeminiModel(apiKey);
+    let model = resolved.model;
+    let ver = resolved.ver || 'v1beta';
 
     while(attempt < MAX_RETRIES){
       attempt++;
@@ -3783,7 +3794,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
           onProgress(`🔄 Đang tự động kết nối lại lần ${attempt}/${MAX_RETRIES} với mô hình ${model}...`);
         }
 
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const url = `https://generativelanguage.googleapis.com/${ver}/models/${model}:generateContent?key=${apiKey}`;
         const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -3817,12 +3828,12 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
         const errMsg = data?.error?.message || `HTTP ${res.status}`;
         const isQuotaOrRate = res.status === 429 || /quota|rate limit/i.test(errMsg);
         const isOverloadedOrServer = res.status === 503 || res.status === 500 || /overloaded/i.test(errMsg);
-        const isModelNotFound = res.status === 404 || /model not found|is not supported/i.test(errMsg);
+        const isModelNotFound = res.status === 404 || /not found|not supported|is no longer available|deprecated/i.test(errMsg);
 
-        // Nếu mô hình hiện tại báo 404 không tìm thấy hoặc bị ngưng, tự đổi sang mô hình flash khác
-        if(isModelNotFound || /no longer available|deprecated/i.test(errMsg)){
+        // Nếu mô hình hiện tại báo 404 hoặc không tìm thấy, tự đổi sang mô hình flash khác
+        if(isModelNotFound){
           cachedWorkingModel = null;
-          const nextModel = GEMINI_CANDIDATE_MODELS.find(m => m !== model) || 'gemini-1.5-flash';
+          const nextModel = GEMINI_CANDIDATE_MODELS.find(m => m !== model) || 'gemini-1.5-flash-latest';
           model = nextModel;
           if(typeof onProgress === 'function'){
             onProgress(`🔄 Đang tự động chuyển sang mô hình tương thích: ${model}...`);
@@ -3840,7 +3851,6 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
           continue;
         }
 
-        // Lỗi 400 hoặc 403 (sai key)
         throw new Error(errMsg);
       } catch(err){
         clearTimeout(timer);
