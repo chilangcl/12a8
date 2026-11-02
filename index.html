@@ -1006,6 +1006,15 @@ body.cm-admin-hub .cm-bottom-nav,body.cm-admin-hub #aiFloatingBtn{display:none!i
               <button class="btn secondary" type="button" onclick="askAIStudent()">🔎 Phân tích học sinh</button>
             </div>
           </div>
+          <div id="aiPlanBox" style="border:1px solid #bfdbfe;background:#eff6ff;border-radius:14px;padding:14px;display:grid;gap:10px;margin-top:10px">
+            <h3 style="margin:0;color:#1d4ed8;display:flex;align-items:center;gap:6px">📋 Soạn Kế hoạch Chủ nhiệm Lớp</h3>
+            <div class="mini" style="color:#1e40af">AI tự động phân tích chuyên cần, rèn luyện, thi đua và hồ sơ học sinh thực tế để soạn bản kế hoạch công tác chủ nhiệm chuẩn mực sư phạm.</div>
+            <div class="actions" style="display:flex;flex-wrap:wrap;gap:8px">
+              <button class="btn" style="background:#2563eb;color:#fff" type="button" onclick="askAIPlanNextWeek()">📅 Kế hoạch tuần tiếp theo</button>
+              <button class="btn secondary" type="button" onclick="askAIPlanMonth()">📆 Kế hoạch tháng</button>
+              <button class="btn secondary" type="button" onclick="askAIPlanSemester2()">🎯 Kế hoạch Học kỳ 2</button>
+            </div>
+          </div>
           <div><h3 style="margin:0 0 8px">⚡ Gợi ý nhanh</h3><div class="ai-quick">
             <button onclick="askAIQuick('Phân tích tình hình chung của lớp hiện tại và nêu 5 điểm đáng chú ý nhất.')">📊 Phân tích lớp</button>
             <button onclick="askAIQuick('Phân tích chuyên cần của lớp: có mặt, đi muộn, nghỉ có phép, nghỉ không phép và những học sinh cần lưu ý.')">📅 Phân tích chuyên cần</button>
@@ -3090,33 +3099,162 @@ function buildAIGenderSummary(context){
   const g=context?.summary?.gender||{};
   return `TÓM TẮT GIỚI TÍNH: Nam=${Number(g.nam||0)}, Nữ=${Number(g.nu||0)}, Khác=${Number(g.khac||0)}, Chưa có dữ liệu=${Number(g.chuaCo||0)}.`;
 }
-function buildAIPrompt(question,context){
-  return `Bạn là Trợ lý AI chuyên nghiệp của GVCN trong hệ thống ClassManager Pro.
+function buildAIPrompt(question,context,extra={}){
+  const clsName=context?.class?.name||state.settings?.className||currentClass?.class_name||'Lớp';
+  const year=context?.class?.year||state.settings?.year||currentClass?.year||'2026-2027';
+  const teacher=state.settings?.teacher||currentUser?.name||'Giáo viên chủ nhiệm';
+  const students=Array.isArray(context?.students)&&context.students.length?context.students:(Array.isArray(state.students)?state.students:[]);
+  const studentStats=Array.isArray(context?.studentStats)?context.studentStats:[];
+  const mode=extra?.mode||'';
 
-PHẠM VI DỮ LIỆU:
-Bạn hỗ trợ duy nhất GVCN đang đăng nhập và chỉ phân tích lớp đang được chọn. Context chuẩn hóa có danh sách học sinh, thống kê từng học sinh, chuyên cần, rèn luyện/thi đua, hoạt động, điểm học tập, thông báo và cấu hình lớp. Không có dữ liệu nào ngoài context.
+  // 1. Danh sách học sinh hợp lệ duy nhất của lớp
+  let rosterLines=[];
+  if(!students.length){
+    rosterLines.push('(Lớp hiện chưa có danh sách học sinh được cập nhật trên hệ thống)');
+  }else{
+    students.forEach((s,idx)=>{
+      const stat=studentStats.find(x=>String(x.id)===String(s.id));
+      const att=stat?.attendance||{};
+      const pts=stat?.conductPoints!=null?stat.conductPoints:0;
+      const roleStr=s.role?(' [Chức vụ: '+s.role+']'):'';
+      const groupStr=s.group?('Tổ '+s.group):'Chưa chia tổ';
+      const genderStr=s.gender||'Chưa rõ';
+      rosterLines.push((idx+1)+'. [Mã: '+(s.code||'N/A')+'] '+s.name+' ('+genderStr+', '+groupStr+roleStr+') | Điểm RL: '+(pts>0?'+':'')+pts+' | Chuyên cần: Có mặt: '+(att.present||0)+', Muộn: '+(att.late||0)+', Nghỉ phép: '+(att.excused||0)+', Nghỉ KP: '+(att.absent||0));
+    });
+  }
+  const rosterText=rosterLines.join('\n');
 
-NGUYÊN TẮC BẮT BUỘC:
-- Không tự giới hạn quyền đọc dữ liệu khi dữ liệu đã có trong context.
-- Không bịa tên, số liệu, ngày tháng, sự kiện, điểm hoặc nguyên nhân.
-- Thống kê phải tính từ dữ liệu thực tế; nêu con số chính xác trước.
-- Hỏi về học sinh phải đối chiếu đúng họ tên/mã học sinh.
-- Hỏi về tổ phải tính từ danh sách học sinh thực tế và nêu căn cứ.
-- Hỏi về hoạt động, chuyên cần, rèn luyện, thi đua hoặc học tập phải khai thác toàn bộ bản ghi liên quan, không chỉ vài bản ghi gần nhất.
-- Câu hỏi nhiều ý phải trả lời ĐỦ TẤT CẢ các ý theo đúng thứ tự.
-- Không tự ý rút gọn danh sách thành vài ví dụ nếu GVCN yêu cầu danh sách đầy đủ.
-- Không được dừng giữa câu, giữa mục, bằng dấu “...” hoặc tiêu đề chưa hoàn chỉnh.
-- Kết thúc phải là một câu hoàn chỉnh.
-- Nếu dữ liệu thật sự thiếu, chỉ rõ chính xác phần thiếu nhưng vẫn trả lời đầy đủ phần xác định được.
+  // 2. Tín hiệu cảnh báo sớm thực tế của hệ thống
+  let attentionSummaryText='';
+  try{
+    const board=(typeof getAttentionBoard==='function')?getAttentionBoard():null;
+    if(board){
+      const highList=(board.high||[]).map(x=>'• '+x.s.name+' (Mã: '+(x.s.code||'N/A')+', Tổ '+(x.s.group||'?')+'): '+x.reasons.join('; ')+' [Điểm RL: '+x.score+']');
+      const watchList=(board.watch||[]).map(x=>'• '+x.s.name+' (Mã: '+(x.s.code||'N/A')+', Tổ '+(x.s.group||'?')+'): '+x.reasons.join('; ')+' [Điểm RL: '+x.score+']');
+      const posList=(board.positive||[]).slice(0,10).map(x=>'• '+x.s.name+' (Mã: '+(x.s.code||'N/A')+', Tổ '+(x.s.group||'?')+'): '+x.positives.join('; ')+' [Điểm RL: '+x.score+']');
+      attentionSummaryText='TÍN HIỆU CẢNH BÁO SỚM HỆ THỐNG ĐÃ TÍNH TOÁN DỰA TRÊN DỮ LIỆU THẬT:\n'+
+        '- Học sinh mức CẢNH BÁO CAO ('+highList.length+' học sinh):\n'+
+        (highList.length?highList.join('\n'):'(Không có học sinh nào vượt ngưỡng cảnh báo cao)')+'\n\n'+
+        '- Học sinh mức CẦN THEO DÕI ('+watchList.length+' học sinh):\n'+
+        (watchList.length?watchList.join('\n'):'(Không có học sinh nào ở mức theo dõi)')+'\n\n'+
+        '- Học sinh TÍCH CỰC / TIÊU BIỂU ('+posList.length+' học sinh):\n'+
+        (posList.length?posList.join('\n'):'(Chưa có ghi nhận nổi bật)');
+    }
+  }catch(e){console.warn('Lỗi lấy attention board:',e);}
 
-BẢO MẬT:
-Chỉ dùng context để trả lời GVCN. Không tiết lộ token, khóa API, thông tin xác thực hoặc dữ liệu kỹ thuật nội bộ. Không chủ động nêu dữ liệu nhạy cảm nếu câu hỏi không cần.
+  // 3. Ghi nhận rèn luyện / vi phạm gần đây
+  const conductList=Array.isArray(context?.conduct)?context.conduct:[];
+  let recentConductText='';
+  if(conductList.length>0){
+    const recentSlice=conductList.slice(-25).map(c=>{
+      const st=students.find(x=>String(x.id)===String(c.studentId));
+      const stName=st?st.name:('Học sinh ID '+c.studentId);
+      const ptsStr=Number(c.points||0)>0?('+'+c.points):(''+c.points);
+      return '• Ngày '+(c.date||'N/A')+': '+stName+' ('+ptsStr+'đ) - Nội dung: '+(c.reason||c.note||'Rèn luyện');
+    });
+    recentConductText='GHI NHẬN RÈN LUYỆN / VI PHẠM GẦN ĐÂY ('+recentSlice.length+' bản ghi gần nhất):\n'+recentSlice.join('\n');
+  }else{
+    recentConductText='GHI NHẬN RÈN LUYỆN: Chưa có ghi nhận vi phạm hay khen thưởng nào trong hệ thống.';
+  }
 
-PHONG CÁCH:
-Trả lời bằng tiếng Việt, tự nhiên, đi thẳng vào kết quả. Không Markdown, không bảng Markdown, không dấu * hoặc #. Có thể xuống dòng giữa các ý. Câu hỏi đơn giản trả lời ngắn gọn; câu hỏi phân tích/tổng hợp phải đầy đủ, có số liệu và căn cứ.
+  // 4. Nếu hỏi về 1 học sinh cụ thể (student mode)
+  let studentFocusText='';
+  if(extra?.studentId){
+    const sid=String(extra.studentId);
+    const target=students.find(x=>String(x.id)===sid);
+    if(target){
+      const stat=studentStats.find(x=>String(x.id)===sid);
+      const att=stat?.attendance||{};
+      const pts=stat?.conductPoints!=null?stat.conductPoints:0;
+      const stRecords=conductList.filter(x=>String(x.studentId)===sid);
+      studentFocusText='\n\nHỌC SINH ĐƯỢC GVCN YÊU CẦU PHÂN TÍCH TRỌNG TÂM:\n'+
+        '- Họ tên: '+target.name+' | Mã HS: '+(target.code||'N/A')+' | Giới tính: '+(target.gender||'Chưa rõ')+' | Tổ: '+(target.group||'Chưa xếp')+' | Chức vụ: '+(target.role||'Học sinh')+'\n'+
+        '- Chuyên cần: '+(att.present||0)+' có mặt, '+(att.late||0)+' đi muộn, '+(att.excused||0)+' nghỉ có phép, '+(att.absent||0)+' nghỉ không phép\n'+
+        '- Điểm rèn luyện tích lũy: '+pts+'\n'+
+        '- Lịch sử rèn luyện chi tiết ('+stRecords.length+' lần ghi nhận):\n'+
+        (stRecords.length?stRecords.map(r=>'  + Ngày '+r.date+': '+(Number(r.points)>0?'+':'')+r.points+'đ ('+(r.reason||r.note||'Rèn luyện')+')').join('\n'):'  + Không có vi phạm hay khen thưởng nào');
+    }
+  }
 
-CÂU HỎI CỦA GVCN:
-${question}`;
+  // 5. Hướng dẫn nghiệp vụ chuyên biệt theo mode
+  let modeInstruction='';
+  if(mode==='early_warning'){
+    modeInstruction='\n\nHƯỚNG DẪN ĐẶC BIỆT CHO BÁO CẢNH BÁO SỚM:\n'+
+      '- Bạn HÃY PHÂN TÍCH CHÍNH XÁC DỰA TRÊN "TÍN HIỆU CẢNH BÁO SỚM HỆ THỐNG ĐÃ TÍNH TOÁN" Ở TRÊN.\n'+
+      '- NẾU KHÔNG CÓ HỌC SINH NÀO ở mức CẢNH BÁO CAO hoặc CẦN THEO DÕI: Bạn BẮT BUỘC phải thông báo rõ ràng cho thầy: "Toàn bộ học sinh trong lớp đang thực hiện tốt nền nếp, không có học sinh nào vượt ngưỡng cảnh báo sớm." TUYỆT ĐỐI KHÔNG BỊA TÊN HỌC SINH ĐỂ ĐIỀN VÀO MỤC CẢNH BÁO!\n'+
+      '- Nếu có học sinh trong danh sách cảnh báo: Hãy chỉ rõ họ tên, mã học sinh, tổ, nguyên nhân cụ thể (nghỉ học, đi muộn, điểm trừ) và đề xuất 3-4 biện pháp cụ thể, chuẩn mực sư phạm để GVCN trao đổi với học sinh và phối hợp với phụ huynh trong tuần.';
+  }else if(mode==='plan_week'){
+    modeInstruction='\n\nHƯỚNG DẪN ĐẶC BIỆT CHO SOẠN KẾ HOẠCH CHỦ NHIỆM TUẦN TIẾP THEO:\n'+
+      'Hãy soạn thảo một Bản Kế hoạch Công tác Chủ nhiệm Tuần tiếp theo chi tiết, chuẩn mực sư phạm cho lớp '+clsName+' gồm các phần:\n'+
+      'I. ĐÁNH GIÁ TÌNH HÌNH TUẦN HIỆN TẠI:\n'+
+      '   - Ưu điểm: Nền nếp, chuyên cần, các học sinh tích cực, tổ thi đua tốt.\n'+
+      '   - Tồn tại: Các lỗi vi phạm thực tế (nếu có từ số liệu trên), học sinh cần lưu ý (chỉ nêu tên học sinh thật từ dữ liệu).\n'+
+      'II. MỤC TIÊU TRỌNG TÂM TUẦN TỚI:\n'+
+      '   - Nề nếp kỷ cương (15 phút đầu giờ, đồng phục, vệ sinh lớp học, không đi muộn).\n'+
+      '   - Nâng cao chất lượng giờ học, chuẩn bị bài và đồ dùng học tập.\n'+
+      'III. KẾ HOẠCH HOẠT ĐỘNG VÀ BIỆN PHÁP CỤ THỂ:\n'+
+      '   1. Công tác nề nếp và chuyên cần.\n'+
+      '   2. Công tác học tập và phong trào thi đua.\n'+
+      '   3. Biện pháp kèm cặp, uốn nắn các học sinh cần quan tâm (dựa trên dữ liệu thực tế).\n'+
+      '   4. Công tác phối hợp với Phụ huynh học sinh và Giáo viên bộ môn.\n'+
+      'IV. PHÂN CÔNG NHIỆM VỤ:\n'+
+      '   - Phân công rõ cho Lớp trưởng, Lớp phó, 4 Tổ trưởng (sử dụng đúng tên cán bộ lớp từ danh sách trên nếu có).';
+  }else if(mode==='plan_month'){
+    modeInstruction='\n\nHƯỚNG DẪN ĐẶC BIỆT CHO SOẠN KẾ HOẠCH CHỦ NHIỆM THÁNG TIẾP THEO:\n'+
+      'Hãy soạn thảo Kế hoạch Chủ nhiệm Tháng toàn diện, mang tính định hướng sư phạm cao cho lớp '+clsName+':\n'+
+      'I. MỤC TIÊU & CHỦ ĐIỂM THÁNG (Gắn liền với phong trào thi đua trường THPT).\n'+
+      'II. CHỈ TIÊU PHẤN ĐẤU (Tỷ lệ chuyên cần, xếp loại rèn luyện Tốt/Khá, phong trào học tập, không có vi phạm nặng).\n'+
+      'III. KẾ HOẠCH CÔNG TÁC THEO TỪNG TUẦN (Tuần 1, Tuần 2, Tuần 3, Tuần 4).\n'+
+      'IV. BIỆN PHÁP TỔ CHỨC THỰC HIỆN VÀ PHỐI HỢP LIÊN TỤC (GVCN - CMHS - GVBM - Đoàn trường).\n'+
+      'V. KẾ HOẠCH THEO DÕI, ĐỘNG VIÊN VÀ HỖ TRỢ HỌC SINH CÁ BIỆT/CẦN LƯU Ý.';
+  }else if(mode==='plan_semester2'){
+    modeInstruction='\n\nHƯỚNG DẪN ĐẶC BIỆT CHO SOẠN KẾ HOẠCH CHỦ NHIỆM HỌC KỲ 2:\n'+
+      'Hãy soạn thảo Kế hoạch Chủ nhiệm Học kỳ 2 chiến lược và hoàn chỉnh cho lớp '+clsName+' (Năm học '+year+'):\n'+
+      'I. ĐẶC ĐIỂM TÌNH HÌNH LỚP (Đánh giá khách quan dựa trên dữ liệu sĩ số, cơ cấu tổ, tình hình nề nếp thực tế của lớp).\n'+
+      'II. MỤC TIÊU VÀ CHỈ TIÊU PHẤN ĐẤU HỌC KỲ 2:\n'+
+      '   - Về rèn luyện / hạnh kiểm (chỉ tiêu Tốt, Khá).\n'+
+      '   - Về học tập và chuyên cần (giảm thiểu tối đa đi muộn, nghỉ học).\n'+
+      '   - Về phong trào thi đua tập thể.\n'+
+      'III. NHIỆM VỤ VÀ CÁC GIẢI PHÁP TRỌNG TÂM:\n'+
+      '   1. Tăng cường kỷ cương nề nếp, văn hóa học đường, phòng chống bạo lực và vi phạm quy định.\n'+
+      '   2. Đẩy mạnh phong trào học tập, thành lập nhóm đôi bạn cùng tiến, chuẩn bị tốt cho các kỳ thi học kỳ và cuối cấp.\n'+
+      '   3. Đổi mới sinh hoạt lớp, giáo dục kỹ năng sống và hoạt động trải nghiệm hướng nghiệp.\n'+
+      '   4. Cơ chế phối hợp chặt chẽ, đa chiều với Ban đại diện Cha mẹ học sinh.\n'+
+      'IV. LỘ TRÌNH THỰC HIỆN THEO CÁC THÁNG TRONG HỌC KỲ 2.\n'+
+      'V. PHÂN CÔNG TRÁCH NHIỆM VÀ KHEN THƯỞNG - KỶ LUẬT.';
+  }
+
+  const genderSummary=(typeof buildAIGenderSummary==='function')?buildAIGenderSummary(context):'';
+
+  return 'BẠN LÀ TRỢ LÝ AI CHUYÊN NGHIỆP CỦA GIÁO VIÊN CHỦ NHIỆM ('+teacher+') TRONG HỆ THỐNG CLASSMANAGER PRO.\n'+
+    'LỚP ĐANG QUẢN LÝ: '+clsName+' · Năm học: '+year+' · Sĩ số thực tế: '+students.length+' học sinh.\n\n'+
+    '══════════════════════════════════════════════════════════════════════════\n'+
+    'QUY TẮC BẤT DI BẤT DỊCH VỀ DỮ LIỆU (GROUNDING & TUYỆT ĐỐI CHỐNG BỊA ĐẶT):\n'+
+    '1. DANH SÁCH BẢO MẬT & DUY NHẤT:\n'+
+    'Lớp học CHỈ CÓ DUY NHẤT các học sinh có tên trong danh sách dưới đây. KHÔNG ĐƯỢC PHÉP có bất kỳ học sinh nào ngoài danh sách này.\n\n'+
+    '2. NGHIÊM CẤM BỊA ĐẶT TÊN HỌC SINH:\n'+
+    '- TUYỆT ĐỐI KHÔNG ĐƯỢC phép tự sáng tác, tự đặt tên hoặc sử dụng các tên học sinh mẫu/ngoài đời (như "Nguyễn Văn A", "Trần Thị B", "Lê Văn C",...) không có trong danh sách lớp.\n'+
+    '- Việc xuất hiện bất kỳ tên học sinh lạ nào không có trong danh sách lớp là lỗi sai nghiêm trọng làm hỏng uy tín của GVCN.\n\n'+
+    '3. KHI KHÔNG CÓ HỌC SINH NÀO VI PHẠM HOẶC CÓ VẤN ĐỀ:\n'+
+    '- Bạn PHẢI khẳng định trung thực: "Lớp hiện tại không có học sinh nào vượt ngưỡng cảnh báo hay vi phạm nề nếp."\n'+
+    '- TUYỆT ĐỐI KHÔNG TỰ BỊA RA HỌC SINH HOẶC TỰ BỊA RA LỖI để điền vào báo cáo!\n\n'+
+    '4. TOÀN BỘ SỐ LIỆU PHẢI CHÍNH XÁC:\n'+
+    '- Dựa đúng vào số lần có mặt, đi muộn, nghỉ học và điểm rèn luyện trong dữ liệu bên dưới.\n'+
+    '══════════════════════════════════════════════════════════════════════════\n\n'+
+    'DANH SÁCH TOÀN BỘ HỌC SINH THỰC TẾ CỦA LỚP '+clsName+' ('+students.length+' học sinh):\n'+
+    rosterText+'\n\n'+
+    attentionSummaryText+'\n\n'+
+    recentConductText+
+    studentFocusText+'\n\n'+
+    (genderSummary?genderSummary+'\n\n':'')+
+    modeInstruction+'\n\n'+
+    '══════════════════════════════════════════════════════════════════════════\n'+
+    'PHONG CÁCH TRẢ LỜI:\n'+
+    '- Trả lời bằng tiếng Việt trang trọng, chuẩn mực sư phạm, tự nhiên, rành mạch.\n'+
+    '- Không dùng bảng biểu phức tạp hay dấu #, có thể dùng dấu gạch đầu dòng (•), các chữ số La Mã (I, II, III...) và xuống dòng rõ ràng để dễ đọc và dễ đọc bằng giọng nói.\n'+
+    '- Trả lời đầy đủ, chi tiết, không ngắt quãng giữa chừng.\n\n'+
+    'CÂU HỎI / YÊU CẦU CỦA GVCN:\n'+
+    question;
 }
 function clearAIAnswer(){
   stopAISpeech();
@@ -3528,7 +3666,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   const readBody=async res=>{const raw=await res.text();try{return raw?JSON.parse(raw):{}}catch(e){return {error:raw?String(raw).slice(0,300):`Phản hồi AI không đúng định dạng (HTTP ${res.status}).`}}};
   const textOf=body=>typeof body?.answer==='string'?body.answer:(body?.answer?.text||body?.answer?.content||body?.text||'');
-  const MODE_LABEL={early_warning:'Cảnh báo sớm',student:'Phân tích học sinh',period:'Phân tích giai đoạn',ask:'Hỏi đáp'};
+  const MODE_LABEL={early_warning:'Cảnh báo sớm',student:'Phân tích học sinh',period:'Phân tích giai đoạn',ask:'Hỏi đáp',plan_week:'Kế hoạch tuần',plan_month:'Kế hoạch tháng',plan_semester2:'Kế hoạch HK2'};
   async function getToken(){let s=null;try{const r=await sb.auth.getSession();s=r?.data?.session||null;}catch(e){s=null;}return s?.access_token||'';}
 
   // --- QUẢN LÝ API KEY GVCN THEO TÀI KHOẢN ---
@@ -3750,7 +3888,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
   window.testSetGvcnApiKey = window.testGvcnApiKey;
 
   // --- GỌI TRỰC TIẾP GEMINI API VỚI CƠ CHẾ AUTO-RETRY (TỰ KẾT NỐI LẠI LIÊN TỤC) ---
-  async function callDirectGeminiWithAutoRetry(apiKey, promptText, onProgress){
+  async function callDirectGeminiWithAutoRetry(apiKey, promptText, onProgress, extra = {}){
     const MAX_RETRIES = 6;
     let attempt = 0;
     const resolved = await resolveBestGeminiModel(apiKey);
@@ -3774,8 +3912,8 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
           body: JSON.stringify({
             contents: [{ parts: [{ text: promptText }] }],
             generationConfig: {
-              temperature: 0.3,
-              maxOutputTokens: 2500
+              temperature: 0.2,
+              maxOutputTokens: 4000
             }
           }),
           signal: controller.signal
@@ -3790,7 +3928,7 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
             return {
               answer: text,
               model: model,
-              mode: 'ask',
+              mode: extra?.mode || 'ask',
               complete: candidate?.finishReason !== 'MAX_TOKENS',
               directKey: true
             };
@@ -3886,8 +4024,8 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
     if(userKey){
       // Chế độ Key riêng của GVCN: tự dựng prompt đầy đủ và gọi trực tiếp Google Gemini với Auto-Retry
       const question = extra.question || '';
-      const prompt = buildAIPrompt(question, context || buildAIContext());
-      return await callDirectGeminiWithAutoRetry(userKey, prompt, onProgress);
+      const prompt = buildAIPrompt(question, context || buildAIContext(), extra);
+      return await callDirectGeminiWithAutoRetry(userKey, prompt, onProgress, extra);
     } else {
       // Chế độ mặc định trường: gọi qua Supabase Edge Function
       return await requestAiViaEdgeFunction(extra, onProgress);
@@ -3980,6 +4118,31 @@ window.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelecto
     const input=document.getElementById('aiQuestion');
     if(input)input.value='Lập báo cáo cảnh báo sớm cho lớp: những học sinh đã vượt ngưỡng hoặc có dấu hiệu sớm về chuyên cần, rèn luyện, học tập; nêu căn cứ số liệu và việc GVCN nên làm trong tuần này.';
     return window.askAI({mode:'early_warning'});
+  };
+
+  // Nút "Soạn kế hoạch chủ nhiệm tuần tiếp theo"
+  window.askAIPlanNextWeek=function(){
+    const input=document.getElementById('aiQuestion');
+    const cls=state.settings?.className||currentClass?.class_name||'lớp';
+    if(input)input.value=`Soạn bản Kế hoạch Chủ nhiệm chi tiết cho ${cls} trong TUẦN HỌC TIẾP THEO dựa trên phân tích tình hình thực tế của tuần học hiện tại (nền nếp chuyên cần, rèn luyện thi đua, học tập, các vấn đề cần khắc phục và phân công cán sự).`;
+    return window.askAI({mode:'plan_week'});
+  };
+
+  // Nút "Soạn kế hoạch chủ nhiệm tháng"
+  window.askAIPlanMonth=function(){
+    const input=document.getElementById('aiQuestion');
+    const cls=state.settings?.className||currentClass?.class_name||'lớp';
+    if(input)input.value=`Soạn Kế hoạch Công tác Chủ nhiệm THÁNG TIẾP THEO cho ${cls} với chủ điểm thi đua, mục tiêu chỉ tiêu cụ thể, kế hoạch chi tiết từng tuần và biện pháp kèm cặp học sinh.`;
+    return window.askAI({mode:'plan_month'});
+  };
+
+  // Nút "Soạn kế hoạch chủ nhiệm Học kỳ 2"
+  window.askAIPlanSemester2=function(){
+    const input=document.getElementById('aiQuestion');
+    const cls=state.settings?.className||currentClass?.class_name||'lớp';
+    const yr=state.settings?.year||currentClass?.year||'2026-2027';
+    if(input)input.value=`Soạn Kế hoạch Công tác Chủ nhiệm HỌC KỲ 2 toàn diện cho ${cls} (Năm học ${yr}): đánh giá bối cảnh, xác định chỉ tiêu rèn luyện & học tập, các giải pháp trọng tâm, lộ trình từng tháng và phối hợp cha mẹ học sinh.`;
+    return window.askAI({mode:'plan_semester2'});
   };
   // Nút "Phân tích học sinh"
   window.askAIStudent=function(){
@@ -7117,6 +7280,17 @@ button.avatar{border:0!important;appearance:none!important;-webkit-appearance:no
     color: #ef4444 !important;
   }
   #aiEarlyBox .mini {
+    color: var(--cm-text-muted) !important;
+  }
+  #aiPlanBox {
+    background: rgba(37, 99, 235, 0.08) !important;
+    border: 1px solid rgba(37, 99, 235, 0.3) !important;
+    color: var(--cm-text-primary) !important;
+  }
+  #aiPlanBox h3 {
+    color: #60a5fa !important;
+  }
+  #aiPlanBox .mini {
     color: var(--cm-text-muted) !important;
   }
   #aiApiKeyConfigCard {
